@@ -22,6 +22,12 @@ $(document).ready(function()
     $('ul#product_list').addClass('product_list');
     cancelFilter();
     openCloseFilter();
+    if (typeof doofinderQuerySelector !== "undefined") {
+        $('#doofinder_facets_search_query').val($(doofinderQuerySelector).val()); 
+    }
+    if($('form#productsSortForm').length>0){
+        $('form#productsSortForm').remove();
+    }
     // Click on color
     $(document).on('click', '#layered_form input[type=button], #layered_form label.layered_color', function(e) {
         if (!$('input[name=' + $(this).attr('name') + '][type=hidden]').length)

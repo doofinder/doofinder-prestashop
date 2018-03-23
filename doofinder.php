@@ -1033,16 +1033,20 @@ class Doofinder extends Module
         $script = Configuration::get("DOOFINDER_SCRIPT_" . $lang);
         $extra_css = Configuration::get('DF_EXTRA_CSS');
         $script_debug = Configuration::get('DF_SUPPRT_CODE');
-
+        $df_querySelector = Configuration::get('DF_SEARCH_SELECTOR');
+        if (empty($df_querySelector)) {
+            $df_querySelector = '#search_query_top';
+        }
         $this->smarty->assign(array(
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => Tools::strtolower($lang),
-            'script' => dfTools::fixScriptTag($script),
-            'script_debug' => dfTools::fixScriptTag($script_debug),
-            'extra_css' => dfTools::fixStyleTag($extra_css),
+            'script_html' => dfTools::fixScriptTag($script),
+            'script_debug_html' => dfTools::fixScriptTag($script_debug),
+            'extra_css_html' => dfTools::fixStyleTag($extra_css),
             'productLinks' => $this->productLinks,
             'self' => dirname(__FILE__),
-            'df_another_params' => $params
+            'df_another_params' => $params,
+            'doofinder_search_selector' => $df_querySelector
         ));
         $appendTo = Configuration::get('DF_APPEND_BANNER');
         if (empty($appendTo)) {
@@ -1137,14 +1141,6 @@ class Doofinder extends Module
                     'doofinder_banner_link' => $this->searchBanner['link'],
                 ));
             }
-            $df_querySelector = Configuration::get('DF_SEARCH_SELECTOR');
-            if (empty($df_querySelector)) {
-                $df_querySelector = '#search_query_top';
-            }
-            $this->context->smarty->assign(array(
-                'doofinder_search_selector' => $df_querySelector
-            ));
-
             return $this->display(__FILE__, 'views/templates/hook/footer.tpl');
         }
         return false;

@@ -19,13 +19,6 @@
         display:none;
     }
 </style>
-<script type="text/javascript">
-    $(document).ready(function(){
-        if($('#doofinder_facets_search_query').length > 0){
-            $('#doofinder_facets_search_query').val($('{$doofinder_search_selector|escape:'htmlall':'UTF-8'}').val()); 
-        }
-    });
-</script>
 {if isset($doofinder_banner_image) && $doofinder_banner_image}
 <div class="doofinder_dinamic_banner" style="display:none" data-doofinder_banner_id="{$doofinder_banner_id|escape:'htmlall':'UTF-8'}">
     <a href="{$doofinder_banner_link|escape:'htmlall':'UTF-8'}" {if $doofinder_banner_blank}target="_blank"{/if}><img src="{$doofinder_banner_image|escape:'htmlall':'UTF-8'}" /></a>

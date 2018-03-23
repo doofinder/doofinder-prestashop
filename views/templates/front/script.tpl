@@ -11,29 +11,32 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}
-{if isset($script)}
+{if isset($script_html)}
   <!-- START OF DOOFINDER SCRIPT -->
-  {($script|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8')}
+  {($script_html|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8') nofilter}
   <!-- END OF DOOFINDER SCRIPT -->
 {/if}
 
-{if isset($extra_css)}
+{if isset($extra_css_html)}
   <!-- START OF DOOFINDER CSS -->
-  {$extra_css|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8'}
+  {$extra_css_html|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8' nofilter}
   <!-- END OF DOOFINDER CSS -->
 {/if}
   <!-- TO REGISTER CLICKS -->
-{if isset($productLinks)}
 <script>
+{if isset($productLinks)}
   var dfProductLinks = {html_entity_decode(json_encode($productLinks)|escape:'htmlall':'UTF-8')};
   var dfLinks = Object.keys(dfProductLinks);
-  var doofinderAppendAfterBanner = "{$doofinder_banner_append|escape:'htmlall':'UTF-8'}";
-</script>  
 {/if}
+{if isset($doofinder_banner_append)}
+  var doofinderAppendAfterBanner = "{$doofinder_banner_append|escape:'htmlall':'UTF-8'}";
+{/if}
+  var doofinderQuerySelector = "{$doofinder_search_selector|escape:'htmlall':'UTF-8'}";
+</script>  
   <!-- END OF TO REGISTER CLICKS -->
   
-{if isset($script_debug)}
+{if isset($script_debug_html)}
   <!-- START OF DOOFINDER SCRIPT DEBUG -->
-  {($script_debug|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8')}
+  {($script_debug_html|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8') nofilter}
   <!-- END OF DOOFINDER SCRIPT DEBUG -->
 {/if}
