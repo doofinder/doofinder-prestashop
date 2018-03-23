@@ -1,3 +1,16 @@
+/**
+ * NOTICE OF LICENSE
+ *
+ * This file is licenced under the Software License Agreement.
+ * With the purchase or the installation of the software in your application
+ * you accept the licence agreement.
+ *
+ * You must not modify, adapt or create derivative works of this source code
+ *
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   GPLv3
+ */
 function paginationButton(nbProductsIn, nbProductOut) {
     if (typeof (current_friendly_url) === 'undefined')
         current_friendly_url = '#';
@@ -25,9 +38,9 @@ function paginationButton(nbProductsIn, nbProductOut) {
             e.preventDefault();
             if (nbPage == 0)
                 p = parseInt($(this).html()) + parseInt(nbPage);
-                if(isNaN(p)){
+                if(typeof p == 'undefined' || isNaN(p)){
                     p = parseInt($(this).find('span').html()) + parseInt(nbPage);
-                    if(isNaN(p)){
+                    if(typeof p == 'undefined' || isNaN(p)){
                         console.log('Doofinder pagination problem! Please check that you not use a custom theme. Or modify the "find" declaration below to know where is the page number');
                     }
                 }

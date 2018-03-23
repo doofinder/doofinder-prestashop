@@ -15,6 +15,7 @@
 
 class DoofinderRangeAggregator
 {
+
     private function makeNode(array $range, $minColumnIndex, $maxColumnIndex)
     {
         $min = $range[$minColumnIndex];
@@ -24,13 +25,13 @@ class DoofinderRangeAggregator
             $max = $max + 1;
         }
 
-        return [
+        return array(
             'min' => $min,
             'max' => $max,
             'count' => 1,
             'left' => null,
             'right' => null,
-        ];
+        );
     }
 
     private function addNode(array &$target, array $node)
@@ -96,11 +97,12 @@ class DoofinderRangeAggregator
         $min = $node['min'];
         $max = $node['max'];
 
-        $ranges = [[
-            'min' => $min,
-            'max' => $max,
-            'count' => $node['count'],
-        ]];
+        $ranges = array(
+            array(
+                'min' => $min,
+                'max' => $max,
+                'count' => $node['count'],
+            ));
 
         if ($node['left']) {
             $flatLeft = $this->flatten($node['left']);
@@ -114,11 +116,11 @@ class DoofinderRangeAggregator
             $ranges = array_merge($ranges, $flatRight['ranges']);
         }
 
-        return [
+        return array(
             'min' => $min,
             'max' => $max,
             'ranges' => $ranges,
-        ];
+        );
     }
 
     public function getRangesFromList(array $list, $valueColumnIndex)
@@ -126,7 +128,7 @@ class DoofinderRangeAggregator
         $min = null;
         $max = null;
 
-        $byValue = [];
+        $byValue = array();
         foreach ($list as $item) {
             $n = $item[$valueColumnIndex];
             if ($min === null || $n < $min) {
@@ -138,15 +140,15 @@ class DoofinderRangeAggregator
 
             $key = "n$n";
             if (!array_key_exists($key, $byValue)) {
-                $byValue[$key] = [
+                $byValue[$key] = array(
                     'count' => 0,
                     'value' => $n,
-                ];
+                );
             }
             ++$byValue[$key]['count'];
         }
 
-        $ranges = [];
+        $ranges = array();
         $lastValue = null;
         $lastCount = 0;
 
@@ -158,11 +160,11 @@ class DoofinderRangeAggregator
             $value = $countAndValue['value'];
             $count = $countAndValue['count'];
             if ($lastValue !== null) {
-                $ranges[] = [
+                $ranges[] = array(
                     'min' => $lastValue,
                     'max' => $value,
                     'count' => $count + $lastCount,
-                ];
+                );
             } else {
                 $lastCount = $count;
             }
@@ -170,11 +172,11 @@ class DoofinderRangeAggregator
             $lastCount = $count;
         }
 
-        return [
+        return array(
             'min' => $min,
             'max' => $max,
             'ranges' => $ranges,
-        ];
+        );
     }
 
     public function mergeRanges(array $ranges, $outputLength)
@@ -188,13 +190,13 @@ class DoofinderRangeAggregator
                 $min = $ranges[0]['min'];
                 $max = $ranges[count($ranges) - 1]['max'];
 
-                return [
+                return array(
                     'min' => $min,
                     'max' => $max,
                     'count' => array_reduce($ranges, function ($count, array $range) {
                         return $count + $range['count'];
                     }, 0),
-                ];
+                );
             }, $parts);
         }
 

@@ -1,26 +1,15 @@
-/*
- * 2007-2014 PrestaShop
- *
+/**
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License (AFL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/afl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
+ * This file is licenced under the Software License Agreement.
+ * With the purchase or the installation of the software in your application
+ * you accept the licence agreement.
  *
- * DISCLAIMER
+ * You must not modify, adapt or create derivative works of this source code
  *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
- *
- *  @author PrestaShop SA <contact@prestashop.com>
- *  @copyright  2007-2014 PrestaShop SA
- *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- *  International Registred Trademark & Property of PrestaShop SA
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   GPLv3
  */
 
 var ajaxQueries = new Array();
@@ -33,7 +22,6 @@ $(document).ready(function()
     $('ul#product_list').addClass('product_list');
     cancelFilter();
     openCloseFilter();
-    $('#doofinder_facets_search_query').val($('#search_query_top').val());
     // Click on color
     $(document).on('click', '#layered_form input[type=button], #layered_form label.layered_color', function(e) {
         if (!$('input[name=' + $(this).attr('name') + '][type=hidden]').length)
@@ -400,7 +388,7 @@ function reloadContent(params_plus)
     }
 
     var slideUp = false;
-    if (params_plus == undefined)
+    if (typeof params_plus == 'undefined')
     {
         params_plus = '';
         slideUp = false;
@@ -415,8 +403,10 @@ function reloadContent(params_plus)
                 n = '&n=' + option.value;
         });
     }
-    if(typeof df_query_name != undefined){
+    if(typeof df_query_name != 'undefined'){
         data+= '&df_query_name='+df_query_name;
+    }else{
+        data+= '&df_query_name=match_and';
     }
     ajaxQuery = $.ajax(
             {

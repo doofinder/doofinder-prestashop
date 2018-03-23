@@ -18,20 +18,23 @@ use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 
 class DoofinderFacetsURLSerializer
 {
-    public function addFilterToFacetFilters(array $facetFilters, Filter $facetFilter, $facet) {
+
+    public function addFilterToFacetFilters(array $facetFilters, Filter $facetFilter, $facet)
+    {
         if ($facet->getProperty('range')) {
-            $facetFilters[$facet->getLabel()] = [
+            $facetFilters[$facet->getLabel()] = array(
                 $facetFilter->getProperty('symbol'),
                 $facetFilter->getValue()['from'],
                 $facetFilter->getValue()['to'],
-            ];
+            );
         } else {
             $facetFilters[$facet->getLabel()][$facetFilter->getLabel()] = $facetFilter->getLabel();
         }
         return $facetFilters;
     }
 
-    public function removeFilterFromFacetFilters(array $facetFilters, Filter $facetFilter, $facet) {
+    public function removeFilterFromFacetFilters(array $facetFilters, Filter $facetFilter, $facet)
+    {
         if ($facet->getProperty('range')) {
             unset($facetFilters[$facet->getLabel()]);
         } else {
@@ -43,17 +46,18 @@ class DoofinderFacetsURLSerializer
         return $facetFilters;
     }
 
-    public function getActiveFacetFiltersFromFacets(array $facets) {
-        $facetFilters = [];
+    public function getActiveFacetFiltersFromFacets(array $facets)
+    {
+        $facetFilters = array();
         foreach ($facets as $facet) {
             if ($facet->getProperty('range')) {
                 foreach ($facet->getFilters() as $facetFilter) {
                     if ($facetFilter->isActive()) {
-                        $facetFilters[$facet->getLabel()] = [
+                        $facetFilters[$facet->getLabel()] = array(
                             $facetFilter->getProperty('symbol'),
                             $facetFilter->getValue()['from'],
                             $facetFilter->getValue()['to'],
-                        ];
+                        );
                     }
                 }
             } else {
@@ -98,10 +102,10 @@ class DoofinderFacetsURLSerializer
 
                         if (!$found) {
                             $filter = new Filter();
-                            $filter->setValue([
+                            $filter->setValue(array(
                                 'from' => $from,
                                 'to' => $to,
-                            ])->setProperty('symbol', $symbol);
+                            ))->setProperty('symbol', $symbol);
                             $filter->setActive(true);
                             $facet->addFilter($filter);
                         }

@@ -13,27 +13,27 @@
 *}
 {if isset($script)}
   <!-- START OF DOOFINDER SCRIPT -->
-  {$script|html_entity_decode:2:"UTF-8" nofilter}
+  {($script|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8')}
   <!-- END OF DOOFINDER SCRIPT -->
 {/if}
 
 {if isset($extra_css)}
   <!-- START OF DOOFINDER CSS -->
-  {$extra_css}
+  {$extra_css|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8'}
   <!-- END OF DOOFINDER CSS -->
 {/if}
   <!-- TO REGISTER CLICKS -->
 {if isset($productLinks)}
 <script>
-  var dfProductLinks = {$productLinks|json_encode nofilter};
+  var dfProductLinks = {html_entity_decode(json_encode($productLinks)|escape:'htmlall':'UTF-8')};
   var dfLinks = Object.keys(dfProductLinks);
-  var doofinderAppendAfterBanner = "{$doofinder_banner_append}";
+  var doofinderAppendAfterBanner = "{$doofinder_banner_append|escape:'htmlall':'UTF-8'}";
 </script>  
 {/if}
   <!-- END OF TO REGISTER CLICKS -->
   
 {if isset($script_debug)}
   <!-- START OF DOOFINDER SCRIPT DEBUG -->
-  {$script_debug|html_entity_decode:2:"UTF-8" nofilter}
+  {($script_debug|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8')}
   <!-- END OF DOOFINDER SCRIPT DEBUG -->
 {/if}
