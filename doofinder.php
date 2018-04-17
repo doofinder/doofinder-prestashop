@@ -851,7 +851,7 @@ class Doofinder extends Module
         return $fields;
     }
 
-    protected function getConfigFormValuesInternalSearch($update = false)
+    protected function getConfigFormValuesInternalSearch()
     {
         $fields = array(
             'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
@@ -897,7 +897,7 @@ class Doofinder extends Module
             $formUpdated = 'search_layer_tab';
         }
         if (((bool) Tools::isSubmit('submitDoofinderModuleInternalSearch')) == true) {
-            $form_values = array_merge($form_values, $this->getConfigFormValuesInternalSearch(true));
+            $form_values = array_merge($form_values, $this->getConfigFormValuesInternalSearch());
             $formUpdated = 'internal_search_tab';
         }
         if (((bool) Tools::isSubmit('submitDoofinderModuleCustomCSS')) == true) {
@@ -952,7 +952,7 @@ class Doofinder extends Module
             }
         }
         
-        if($formUpdated == 'custom_css_tab'){
+        if ($formUpdated == 'custom_css_tab') {
             try {
                 $extraCSS = Configuration::get('DF_EXTRA_CSS');
                 $cssVS = (int)Configuration::get('DF_CSS_VS');
@@ -960,7 +960,7 @@ class Doofinder extends Module
                 Configuration::updateValue('DF_CSS_VS', $cssVS);
                 $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
                 file_put_contents(dirname(__FILE__).'/views/css/'.$file, $extraCSS);
-            } catch (Exception $e){
+            } catch (Exception $e) {
                 trigger_error('Doofinder Captured exception:'.$e->getMessage(), E_USER_WARNING);
             }
         }
@@ -1073,7 +1073,7 @@ class Doofinder extends Module
         }
         $cssVS = (int)Configuration::get('DF_CSS_VS');
         $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
-        if (file_exists(dirname(__FILE__).'/views/css/'.$file)){
+        if (file_exists(dirname(__FILE__).'/views/css/'.$file)) {
             $this->context->controller->addCSS(
                 ($this->_path) . 'views/css/'.$file,
                 'all'
