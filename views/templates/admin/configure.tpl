@@ -11,7 +11,22 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}
-
+{if $oldPS}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#content").addClass("bootstrap");
+        $(".defaultForm").addClass("panel");
+        $("input[type='submit']").addClass("btn-lg");
+    });
+</script>
+{/if}
+{if isset($formUpdatedToClick)}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.nav-tabs a[href="#{$formUpdatedToClick|escape:'htmlall':'UTF-8'}"]').trigger('click');
+    });
+</script>
+{/if}
 <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist">
 	<li class="active"><a href="#data_feed_tab" role="tab" data-toggle="tab">{l s='Data Feed' mod='doofinder'}</a></li>

@@ -11,16 +11,10 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}
-{if isset($script_html)}
+{if isset($search_engine_id) && $search_engine_id}
   <!-- START OF DOOFINDER SCRIPT -->
-  {($script_html|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8') nofilter}
+  <script async="" src="https://eu1-search.doofinder.com/5/script/{$search_engine_id|escape:'htmlall':'UTF-8'}.js"></script>
   <!-- END OF DOOFINDER SCRIPT -->
-{/if}
-
-{if isset($extra_css_html)}
-  <!-- START OF DOOFINDER CSS -->
-  {$extra_css_html|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8' nofilter}
-  <!-- END OF DOOFINDER CSS -->
 {/if}
   <!-- TO REGISTER CLICKS -->
 <script>
@@ -34,9 +28,3 @@
   var doofinderQuerySelector = "{$doofinder_search_selector|escape:'htmlall':'UTF-8'}";
 </script>  
   <!-- END OF TO REGISTER CLICKS -->
-  
-{if isset($script_debug_html)}
-  <!-- START OF DOOFINDER SCRIPT DEBUG -->
-  {($script_debug_html|escape:'html':'UTF-8'|html_entity_decode:$smarty.const.ENT_QUOTES:'utf-8') nofilter}
-  <!-- END OF DOOFINDER SCRIPT DEBUG -->
-{/if}

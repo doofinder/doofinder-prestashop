@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.0';
+    const VERSION = '3.0.1';
     const YES = 1;
     const NO = 0;
 
@@ -159,21 +159,13 @@ class Doofinder extends Module
         $msg = $this->postProcess();
 
         $output = $msg;
-        $style15 = '<style>
-                
-                </style>
-                <script type="text/javascript">
-                    $(document).ready(function(){
-                        $("#content").addClass("bootstrap");
-                        $(".defaultForm").addClass("panel");
-                        $("input[type=\'submit\']").addClass("btn-lg");
-                    });
-                </script>';
+        $oldPS = false;
         if (_PS_VERSION_ < 1.6) {
-            $output .= $style15;
+            $oldPS = true;
             $this->context->controller->addJS($this->_path . 'views/js/plugins/bootstrap.min.js');
             $this->context->controller->addCSS($this->_path . 'views/css/admin-theme_15.css');
         }
+        $this->context->smarty->assign('oldPS', $oldPS);
         $this->context->smarty->assign('module_dir', $this->_path);
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         $output.= $this->renderFormDataFeed();
@@ -478,6 +470,8 @@ class Doofinder extends Module
 
     protected function getConfigFormSearchLayer()
     {
+        $descHashid = 'Search Engine ID. If you need customize your JS, you must do it on your Doofinder account. '
+                . 'Also you must fill this field to have Internal Search';
         return array(
             'form' => array(
                 'legend' => array(
@@ -486,16 +480,11 @@ class Doofinder extends Module
                 ),
                 'input' => array(
                     array(
-                        'type' => 'textarea',
-                        'label' => $this->l('JS Script Layer Widget per language'),
-                        'name' => 'DOOFINDER_SCRIPT',
-                        'col' => 9,
-                        'prefix' => '<i class="icon icon-code"></i>',
-                        'row' => 10,
-                        'desc' => $this->l('Paste the script as you got it from Doofinder'),
+                        'type' => 'text',
+                        'label' => $this->l('Doofinder Search Engine ID'),
+                        'name' => 'DF_HASHID',
+                        'desc' => $this->l($descHashid),
                         'lang' => true,
-                        'cols' => 100,
-                        'rows' => 10,
                     ),
                 ),
                 'submit' => array(
@@ -536,13 +525,6 @@ class Doofinder extends Module
                         'label' => $this->l('Doofinder Api Key'),
                         'name' => 'DF_API_KEY',
                         'desc' => $this->l('Api Key, needed to overwrite Search page'),
-                    ),
-                    array(
-                        'type' => 'text',
-                        'label' => $this->l('Doofinder Search Engine ID'),
-                        'name' => 'DF_HASHID',
-                        'desc' => $this->l('Search Engine ID, needed to overwrite Search page'),
-                        'lang' => true,
                     ),
                     array(
                         'col' => 9,
@@ -736,26 +718,6 @@ class Doofinder extends Module
 
     protected function getConfigFormAdvanced()
     {
-        $example_code = "
-            <script type='text/javascript'>
-            $(document).ready(function(){
-            if( $('body#search section#center_column span.lighter').length > 0){
-                setInterval(function(){
-                    var searchTermDoof = $('body#search section#center_column span.lighter').html().trim();
-                    $('#doofinder_facets_search_query').val(searchTermDoof.substring(1,searchTermDoof.length-1));
-                },200);
-            }});
-
-
-            var df_query_name = 'match_and';
-            var current_friendly_url = '#';
-            var param_product_url = '';
-            </script>
-            <form action='#' style='display:none' id='layered_form'>
-            <input type='hidden' name='search_query' id='doofinder_facets_search_query'>
-            </form>";
-        $example_code = Tools::htmlentitiesUTF8($example_code);
-        $example_code = Tools::nl2br($example_code);
         $descHttpsCurl = 'If your server have an untrusted certificate and you have '
             . 'connection problems with the API, please enable this';
         return array(
@@ -824,16 +786,6 @@ class Doofinder extends Module
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ),
-                    array(
-                        'col' => 9,
-                        'cols' => 100,
-                        'rows' => 10,
-                        'type' => 'textarea',
-                        'prefix' => '<i class="icon icon-code"></i>',
-                        'desc' => $this->l('Example support code:') . $example_code,
-                        'name' => 'DF_SUPPRT_CODE',
-                        'label' => $this->l('Write support code'),
-                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save Internal Search Options'),
@@ -854,7 +806,6 @@ class Doofinder extends Module
             'DF_DSBL_HTTPS_CURL' => Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => Configuration::get('DF_DEBUG_CURL'),
             'DF_DSBL_FAC_CACHE' => Configuration::get('DF_DSBL_FAC_CACHE'),
-            'DF_SUPPRT_CODE' => Configuration::get('DF_SUPPRT_CODE'),
         );
     }
 
@@ -886,15 +837,15 @@ class Doofinder extends Module
     {
         $fields = array();
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            $field_name = 'DOOFINDER_SCRIPT_' . $lang['id_lang'];
-            $field_name_iso = 'DOOFINDER_SCRIPT_' . Tools::strtoupper($lang['iso_code']);
+            $field_name = 'DF_HASHID_' . $lang['id_lang'];
+            $field_name_iso = 'DF_HASHID_' . Tools::strtoupper($lang['iso_code']);
             if ($update) {
                 $fields[$field_name] = array(
                     'real_config' => $field_name_iso,
                     'value' => Configuration::get($field_name)
                 );
             } else {
-                $fields['DOOFINDER_SCRIPT'][$lang['id_lang']] = Configuration::get($field_name_iso);
+                $fields['DF_HASHID'][$lang['id_lang']] = Configuration::get($field_name_iso);
             }
         }
         return $fields;
@@ -911,18 +862,6 @@ class Doofinder extends Module
             'DF_CUSTOMEXPLODEATTR' => Configuration::get('DF_CUSTOMEXPLODEATTR'),
         );
 
-        foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            $field_name = 'DF_HASHID_' . $lang['id_lang'];
-            $field_name_iso = 'DF_HASHID_' . Tools::strtoupper($lang['iso_code']);
-            if ($update) {
-                $fields[$field_name] = array(
-                    'real_config' => $field_name_iso,
-                    'value' => Configuration::get($field_name)
-                );
-            } else {
-                $fields['DF_HASHID'][$lang['id_lang']] = Configuration::get($field_name_iso);
-            }
-        }
         return $fields;
     }
 
@@ -983,8 +922,7 @@ class Doofinder extends Module
             }
             $value = trim($value);
             $html = false;
-            if (strpos($postKey, 'DOOFINDER_SCRIPT_') !== false ||
-                    strpos($postKey, 'DF_SUPPRT_CODE') !== false) {
+            if (strpos($postKey, 'DOOFINDER_SCRIPT_') !== false) {
                 $html = true;
                 $value = str_replace('type="text/javascript"', '', $value);
             }
@@ -1013,14 +951,23 @@ class Doofinder extends Module
                 $messages .= $this->displayWarning($msg);
             }
         }
+        
+        if($formUpdated == 'custom_css_tab'){
+            try {
+                $extraCSS = Configuration::get('DF_EXTRA_CSS');
+                $cssVS = (int)Configuration::get('DF_CSS_VS');
+                $cssVS++;
+                Configuration::updateValue('DF_CSS_VS', $cssVS);
+                $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
+                file_put_contents(dirname(__FILE__).'/views/css/'.$file, $extraCSS);
+            } catch (Exception $e){
+                trigger_error('Doofinder Captured exception:'.$e->getMessage(), E_USER_WARNING);
+            }
+        }
 
         if (!empty($formUpdated)) {
             $messages .= $this->displayConfirmation($this->l('Settings updated!'));
-            $messages .= '<script type="text/javascript">'
-                    . "$(document).ready(function(){"
-                    . "$('.nav-tabs a[href=\"#" . $formUpdated . "\"]').trigger('click');"
-                    . "});"
-                    . '</script>';
+            $this->context->smarty->assign('formUpdatedToClick', $formUpdated);
         }
 
 
@@ -1030,9 +977,9 @@ class Doofinder extends Module
     private function configureHookCommon($params = false)
     {
         $lang = Tools::strtoupper($this->context->language->iso_code);
+        $search_engine_id = Configuration::get('DF_HASHID_'.$lang);
         $script = Configuration::get("DOOFINDER_SCRIPT_" . $lang);
         $extra_css = Configuration::get('DF_EXTRA_CSS');
-        $script_debug = Configuration::get('DF_SUPPRT_CODE');
         $df_querySelector = Configuration::get('DF_SEARCH_SELECTOR');
         if (empty($df_querySelector)) {
             $df_querySelector = '#search_query_top';
@@ -1041,9 +988,9 @@ class Doofinder extends Module
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => Tools::strtolower($lang),
             'script_html' => dfTools::fixScriptTag($script),
-            'script_debug_html' => dfTools::fixScriptTag($script_debug),
             'extra_css_html' => dfTools::fixStyleTag($extra_css),
             'productLinks' => $this->productLinks,
+            'search_engine_id' => $search_engine_id,
             'self' => dirname(__FILE__),
             'df_another_params' => $params,
             'doofinder_search_selector' => $df_querySelector
@@ -1124,7 +1071,14 @@ class Doofinder extends Module
                 $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-banner.js');
             }
         }
-
+        $cssVS = (int)Configuration::get('DF_CSS_VS');
+        $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
+        if (file_exists(dirname(__FILE__).'/views/css/'.$file)){
+            $this->context->controller->addCSS(
+                ($this->_path) . 'views/css/'.$file,
+                'all'
+            );
+        }
         return $this->display(__FILE__, 'views/templates/front/script.tpl');
     }
 
