@@ -130,6 +130,9 @@ class DoofinderRangeAggregator
 
         $byValue = array();
         foreach ($list as $item) {
+            if (!array_key_exists($valueColumnIndex, $item)) {
+                continue;
+            }
             $n = $item[$valueColumnIndex];
             if ($min === null || $n < $min) {
                 $min = $n;
