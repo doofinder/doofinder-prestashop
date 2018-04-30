@@ -70,7 +70,7 @@ class Doofinder extends Module
 
     public function manualOverride()
     {
-        $msg = $this->displayConfirmation($this->l('Override installed sucessfully!'));
+        $msg = $this->displayConfirmationCtm($this->l('Override installed sucessfully!'));
         $originFile = dirname(__FILE__) . '/lib/SearchController.php';
         $destFile = dirname(__FILE__) . '/override/controllers/front/SearchController.php';
 
@@ -81,10 +81,10 @@ class Doofinder extends Module
                 try {
                     $this->installOverrides();
                 } catch (Exception $e) {
-                    $msg = sprintf($this->displayError('Unable to install override: %s'), $e->getMessage());
+                    $msg = sprintf($this->displayErrorCtm('Unable to install override: %s'), $e->getMessage());
                 }
             } else {
-                $msg = $this->displayWarning($this->l('We think that you must already yet search overrided.'));
+                $msg = $this->displayWarningCtm($this->l('We think that you must already yet search overrided.'));
             }
         }
         return $msg;
@@ -103,12 +103,10 @@ class Doofinder extends Module
             $theme = new Theme(Context::getContext()->shop->id_theme);
             if ((!$theme->default_left_column || !$this->registerHook('displayLeftColumn')) &&
                     (!$theme->default_right_column || !$this->registerHook('displayRightColumn'))) {
-                // If there are no colums implemented by the template, throw an error and uninstall the module
                 $this->_errors[] = $this->l($msgErrorColumn);
             }
         } elseif (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
             if ((!$this->registerHook('displayLeftColumn')) && (!$this->registerHook('displayRightColumn'))) {
-                // If there are no colums implemented by the template, throw an error and uninstall the module
                 $this->_errors[] = $this->l($msgErrorColumn);
             }
             $this->registerHook('productSearchProvider');
@@ -318,16 +316,16 @@ class Doofinder extends Module
             if ($facets_enabled) {
                 if (!$this->isRegisteredInHookInShop('displayLeftColumn', $id_shop) &&
                         !$this->isRegisteredInHookInShop('displayRightColumn', $id_shop)) {
-                    $link = '<a href="' . $this->context->link->getAdminLink('AdminModulesPositions') . '">' .
-                            $this->l('You must hook Doofinder on displayLeftColumn or displayRightColumn') . '</a>';
-                    $errorsMsg .= $this->displayError($link);
+                    $link = $this->context->link->getAdminLink('AdminModulesPositions');
+                    $msg = $this->l('You must hook Doofinder on displayLeftColumn or displayRightColumn');
+                    $errorsMsg .= $this->displayErrorCtm($msg,$link);
                 }
             }
         } else {
             if (!$this->isRegisteredInHookInShop('productSearchProvider', $id_shop)) {
-                $link = '<a href="' . $this->context->link->getAdminLink('AdminModulesPositions') . '">' .
-                        $this->l('You must hook your module on productSearchProvider') . '</a>';
-                $errorsMsg .= $this->displayError($link);
+                $link = $this->context->link->getAdminLink('AdminModulesPositions');
+                $msg = $this->l('You must hook your module on productSearchProvider');
+                $errorsMsg .= $this->displayErrorCtm($msg,$link);
             }
         }
 
@@ -945,10 +943,10 @@ class Doofinder extends Module
 
         if ($formUpdated == 'data_feed_tab') {
             $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
-            $messages .= $this->displayWarning($msg);
+            $messages .= $this->displayWarningCtm($msg);
             if (!empty($doofinder_hash) && $enable_hash) {
                 $msg = $this->l('Be sure to update your feed URL on Doofinder with the new params');
-                $messages .= $this->displayWarning($msg);
+                $messages .= $this->displayWarningCtm($msg);
             }
         }
         
@@ -966,7 +964,7 @@ class Doofinder extends Module
         }
 
         if (!empty($formUpdated)) {
-            $messages .= $this->displayConfirmation($this->l('Settings updated!'));
+            $messages .= $this->displayConfirmationCtm($this->l('Settings updated!'));
             $this->context->smarty->assign('formUpdatedToClick', $formUpdated);
         }
 
@@ -1564,20 +1562,20 @@ class Doofinder extends Module
                     $dfOptions = $df->getOptions();
                     if ($dfOptions) {
                         $msg = 'Connection succesful for Search Engine - ';
-                        $messages.= $this->displayConfirmation($this->l($msg) . $lang_iso);
+                        $messages.= $this->displayConfirmationCtm($this->l($msg) . $lang_iso);
                     } else {
                         $msg = 'Error: no connection for Search Engine - ';
-                        $messages.= $this->displayError($this->l($msg) . $lang_iso);
+                        $messages.= $this->displayErrorCtm($this->l($msg) . $lang_iso);
                     }
                 } catch (DoofinderException $e) {
-                    $messages.= $this->displayError($e->getMessage() . ' - Search Engine ' . $lang_iso);
+                    $messages.= $this->displayErrorCtm($e->getMessage() . ' - Search Engine ' . $lang_iso);
                 } catch (Exception $e) {
                     $msg = $e->getMessage() . ' - Search Engine ';
-                    $messages.= $this->displayError($msg . $lang_iso);
+                    $messages.= $this->displayErrorCtm($msg . $lang_iso);
                 }
             } else {
                 $msg = 'Empty Api Key or empty Search Engine - ';
-                $messages.= $this->displayWarning($this->l($msg) . $lang_iso);
+                $messages.= $this->displayWarningCtm($this->l($msg) . $lang_iso);
             }
         }
         return $messages;
@@ -1854,72 +1852,32 @@ class Doofinder extends Module
         }
     }
 
-    /**
-     * Helper displaying error message(s)
-     * @param string|array $error
-     * @return string
-     */
-    public function displayError($error)
+    public function displayErrorCtm($error,$link=false)
     {
-        $output = '
-		<div class="bootstrap">
-		<div class="module_error alert alert-danger" >
-			<button type="button" class="close" data-dismiss="alert">&times;</button>';
-
-        if (is_array($error)) {
-            $output .= '<ul>';
-            foreach ($error as $msg) {
-                $output .= '<li>' . $msg . '</li>';
-            }
-            $output .= '</ul>';
-        } else {
-            $output .= $error;
-        }
-
-        // Close div openned previously
-        $output .= '</div></div>';
-
-        $this->error = true;
-        return $output;
+        return $this->displayGeneralMsg($error, 'error', 'danger', $link);
     }
 
-    /**
-     * Helper displaying warning message(s)
-     * @param string|array $error
-     * @return string
-     */
-    public function displayWarning($warning)
+    public function displayWarningCtm($warning,$link=false)
     {
-        $output = '
-		<div class="bootstrap">
-		<div class="module_warning alert alert-warning" >
-			<button type="button" class="close" data-dismiss="alert">&times;</button>';
-
-        if (is_array($warning)) {
-            $output .= '<ul>';
-            foreach ($warning as $msg) {
-                $output .= '<li>' . $msg . '</li>';
-            }
-            $output .= '</ul>';
-        } else {
-            $output .= $warning;
-        }
-
-        // Close div openned previously
-        $output .= '</div></div>';
-
-        return $output;
+        return $this->displayGeneralMsg($warning, 'warning', 'warning', $link);
     }
 
-    public function displayConfirmation($string)
+    public function displayConfirmationCtm($string,$link=false)
     {
-        $output = '
-		<div class="bootstrap">
-		<div class="module_confirmation conf confirm alert alert-success">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			' . $string . '
-		</div>
-		</div>';
-        return $output;
+        return $this->displayGeneralMsg($string, 'confirmation', 'success', $link);
     }
+    
+    public function displayGeneralMsg($string,$type,$alert,$link=false)
+    {
+        $this->context->smarty->assign(
+            array(
+                'type_message' => $type,
+                'type_alert' => $alert,
+                'message' => $string,
+                'link' => $link
+            )
+        );
+        return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
+    }
+    
 }
