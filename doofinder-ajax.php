@@ -20,7 +20,6 @@ Context::getContext()->controller->php_self = 'search';
 
 $doofinder = Module::getInstanceByName('doofinder');
 
-if ($doofinder->canAjax()){
+if ($doofinder->canAjax()) {
     echo $doofinder->ajaxCall();
 }
-
