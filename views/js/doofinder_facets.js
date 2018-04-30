@@ -414,6 +414,14 @@ function reloadContent(params_plus)
     }else{
         data+= '&df_query_name=match_and';
     }
+    
+    if(typeof doofinder_token !== undefined
+            && typeof doofinder_token != 'undefined'
+            && doofinder_token.length !== undefined
+            && doofinder_token.length > 0){
+        data+= '&token='+doofinder_token;
+    }
+    
     ajaxQuery = $.ajax(
             {
                 type: 'POST',

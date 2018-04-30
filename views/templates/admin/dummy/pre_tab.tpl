@@ -11,15 +11,4 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}
-<div class="bootstrap">
-    <div class="module_{$type_message|escape:'htmlall':'UTF-8'} alert alert-{$type_alert|escape:'htmlall':'UTF-8'}" >
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {if isset($link) && $link}
-            <a href="{$link|escape:'htmlall':'UTF-8'}">
-            {$message|escape:'htmlall':'UTF-8'}
-            </a>
-        {else}
-            {$message|escape:'htmlall':'UTF-8'}
-        {/if}
-    </div>
-</div>
+<div class="tab-pane {if $id_tab == 'data_feed_tab'}active{/if}" id="{$id_tab|escape:'htmlall':'UTF-8'}">

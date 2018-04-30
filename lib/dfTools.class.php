@@ -179,8 +179,8 @@ class dfTools
         fs.id_shop = _ID_SHOP_ 
     ";
 
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => $id_lang,
-                    '_ID_SHOP_' => $id_shop));
+        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
+                    '_ID_SHOP_' => (int)pSQL($id_shop)));
 
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -211,8 +211,8 @@ class dfTools
         ags.id_shop = _ID_SHOP_ 
     ";
 
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => $id_lang,
-                    '_ID_SHOP_' => $id_shop));
+        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
+                    '_ID_SHOP_' => (int)pSQL($id_shop)));
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = array();
@@ -242,7 +242,7 @@ class dfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image   
-            where pa.id_product = $id_product and pa.id_product_attribute = $id_product_attribute      
+            where pa.id_product = ".(int)pSQL($id_product)." and pa.id_product_attribute = ".(int)pSQL($id_product_attribute)."      
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -321,7 +321,7 @@ class dfTools
           pc.id_product_attribute = _VARIATION_ID
       ";
 
-            $sql = self::prepareSQL($sql, array('_ID_LANG_' => $id_lang,
+            $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
                         '_VARIATION_ID' => $variation_id));
 
             $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -477,7 +477,7 @@ class dfTools
         $sql = self::limitSQL($sql, $limit, $offset);
         $sql = self::prepareSQL($sql, array('_ID_LANG_' => $id_lang,
                     '_ID_SHOP_' => $id_shop,
-                    '__MPN__' => $mpn_field,
+                    '__MPN__' => (string)pSQL($mpn_field),
                     '_IMS_COVER_' => $ims_cover,
                     '__ID_CATEGORY_DEFAULT__' => $id_category_default,
                     '__IS_ACTIVE__' => $is_active,
@@ -549,8 +549,8 @@ class dfTools
       ;";
 
         $sql = self::prepareSQL($sql, array('_ID_CATEGORY_' => $id_category,
-                    '_ID_SHOP_' => $id_shop,
-                    '_ID_LANG_' => $id_lang,
+                    '_ID_SHOP_' => (int)pSQL($id_shop),
+                    '_ID_LANG_' => (int)pSQL($id_lang),
                     '_EXCLUDED_IDS_' => $excluded_ids));
 
         $path = array();
@@ -598,8 +598,8 @@ class dfTools
         c.nleft DESC,
         c.nright ASC;
     ";
-        $sql = self::prepareSQL($sql, array('_ID_PRODUCT_' => $id_product,
-                    '_ID_SHOP_' => $id_shop));
+        $sql = self::prepareSQL($sql, array('_ID_PRODUCT_' => (int)pSQL($id_product),
+                    '_ID_SHOP_' => (int)pSQL($id_shop)));
 
         $categories = array();
         $last_saved = 0;

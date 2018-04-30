@@ -11,6 +11,9 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}
+<script type="text/javascript">
+    var doofinder_token = '{$doofinder_token|escape:'htmlall':'UTF-8'}';
+</script>
 <style type="text/css">
     .doofinder_dinamic_banner img{
         width:100%;

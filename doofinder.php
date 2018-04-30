@@ -223,9 +223,10 @@ class Doofinder extends Module
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
-        $html = '<div class="tab-pane" id="custom_css_tab">';
+        $this->context->smarty->assign('id_tab', 'custom_css_tab');
+        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $helper->generateForm(array($this->getConfigFormCustomCSS()));
-        $html.= '</div>';
+        $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
     }
 
@@ -250,9 +251,10 @@ class Doofinder extends Module
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
-        $html = '<div class="tab-pane" id="advanced_tab">';
+        $this->context->smarty->assign('id_tab', 'advanced_tab');
+        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $helper->generateForm(array($this->getConfigFormAdvanced()));
-        $html.= '</div>';
+        $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
     }
 
@@ -277,9 +279,10 @@ class Doofinder extends Module
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
-        $html = '<div class="tab-pane" id="search_layer_tab">';
+        $this->context->smarty->assign('id_tab', 'search_layer_tab');
+        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $helper->generateForm(array($this->getConfigFormSearchLayer()));
-        $html.= '</div>';
+        $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
     }
 
@@ -329,10 +332,11 @@ class Doofinder extends Module
             }
         }
 
-        $html = '<div class="tab-pane" id="internal_search_tab">';
+        $this->context->smarty->assign('id_tab', 'internal_search_tab');
+        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $errorsMsg;
         $html.= $helper->generateForm(array($this->getConfigFormInternalSearch()));
-        $html.= '</div>';
+        $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
     }
 
@@ -357,11 +361,12 @@ class Doofinder extends Module
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
-        $html = '<div class="tab-pane active" id="data_feed_tab">';
+        $this->context->smarty->assign('id_tab', 'data_feed_tab');
+        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $this->renderFeedURLs();
         $html.= $helper->generateForm(array($this->getConfigFormDataFeed()));
         $html.= $this->renderFormDataFeedCurrency();
-        $html.= '</div>';
+        $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
     }
 
@@ -940,6 +945,13 @@ class Doofinder extends Module
                 version_compare(_PS_VERSION_, '1.7', '<') === true) {
             $messages.= $this->manualOverride();
         }
+        
+        $ovrSearchFac = Configuration::get('DF_OWSEARCHFAC');
+        if ($ovrSearchFac && $formUpdated == 'internal_search_tab') {
+            $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_Facets' . date('YmdHis'));
+            Configuration::updateValue('DF_FACETS_TOKEN', $doofinder_hash);
+        }
+        
 
         if ($formUpdated == 'data_feed_tab') {
             $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
@@ -1085,6 +1097,10 @@ class Doofinder extends Module
         if (isset($this->context->controller->php_self) &&
                 $this->context->controller->php_self == 'search') {
             $appendTo = Configuration::get('DF_APPEND_BANNER');
+            $savedToken = Configuration::get('DF_FACETS_TOKEN');
+            $this->context->smarty->assign(array(
+                'doofinder_token' => $savedToken,
+            ));
             if (!empty($this->searchBanner) && !empty($appendTo)) {
                 $this->context->smarty->assign(array(
                     'doofinder_banner_image' => $this->searchBanner['image'],
@@ -1432,8 +1448,8 @@ class Doofinder extends Module
                     !in_array($a_group['id_attribute_group'], $cfg_group_attributes_shown)) {
                 continue;
             }
-            $a_group_name = str_replace('-', '_', Tools::str2url($a_group['name']));
-            $id_atg = (int)$a_group['id_attribute_group'];
+            $a_group_name = (string)pSQL(str_replace('-', '_', Tools::str2url($a_group['name'])));
+            $id_atg = (int)pSQL($a_group['id_attribute_group']);
             $sql_select_attributes[] = ' GROUP_CONCAT(DISTINCT REPLACE(pal_' . $id_atg
                     . '.name,\'/\',\'\/\/\') SEPARATOR \'/\') as attributes_' . $a_group_name;
             $sql_from_attributes[] = ' LEFT JOIN _DB_PREFIX_attribute pat_' . $id_atg
@@ -1541,8 +1557,8 @@ class Doofinder extends Module
 			FROM `' . _DB_PREFIX_ . 'hook_module` hm
 			LEFT JOIN `' . _DB_PREFIX_ . 'hook` h ON
                             (h.`id_hook` = hm.`id_hook`)
-			WHERE h.`name` = \'' . pSQL($hook) . '\''
-                . ' AND hm.id_shop = ' . $id_shop . ' AND hm.`id_module` = ' . (int) $this->id;
+			WHERE h.`name` = \'' . (string)pSQL($hook) . '\''
+                . ' AND hm.id_shop = ' . (int)pSQL($id_shop) . ' AND hm.`id_module` = ' . (int) pSQL($this->id);
         return Db::getInstance()->getValue($sql);
     }
 
@@ -1701,20 +1717,20 @@ class Doofinder extends Module
                     if (!empty($customexplodeattr) && strpos($entry['id'], $customexplodeattr) !== false) {
                         $id_products = explode($customexplodeattr, $entry['id']);
                         $product_pool_attributes[] = $id_products[1];
-                        $product_pool_ids[] = $id_products[0];
+                        $product_pool_ids[] = (int)pSQL($id_products[0]);
                     }
                     if (strpos($entry['id'], 'VAR-') === false) {
-                        $product_pool_ids[] = $entry['id'];
+                        $product_pool_ids[] = (int)pSQL($entry['id']);
                     } else {
                         $id_product_attribute = str_replace('VAR-', '', $entry['id']);
                         if (!in_array($id_product_attribute, $product_pool_attributes)) {
-                            $product_pool_attributes[] = $id_product_attribute;
+                            $product_pool_attributes[] = (int)pSQL($id_product_attribute);
                         }
                         $id_product = Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
                             'SELECT id_product FROM ' . _DB_PREFIX_ . 'product_attribute'
-                            . ' WHERE id_product_attribute = ' . $id_product_attribute
+                            . ' WHERE id_product_attribute = ' . (int)pSQL($id_product_attribute)
                         );
-                        $product_pool_ids[] = ((!empty($id_product)) ? $id_product : 0 );
+                        $product_pool_ids[] = ((!empty($id_product)) ? (int)pSQL($id_product) : 0 );
                     }
                 }
             }
@@ -1766,7 +1782,7 @@ class Doofinder extends Module
                 ' . Shop::addSqlAssociation('product', 'p') . '
                 INNER JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (
                     p.`id_product` = pl.`id_product`
-                    AND pl.`id_lang` = ' . (int) $id_lang . Shop::addSqlRestrictionOnLang('pl') . ') '
+                    AND pl.`id_lang` = ' . (int) pSQL($id_lang) . Shop::addSqlRestrictionOnLang('pl') . ') '
                 . (Combination::isFeatureActive() ? ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa
                     ON (p.`id_product` = pa.`id_product`)
                     ' . Shop::addSqlAssociation('product_attribute', 'pa', false, (($show_variations) ? '' :
@@ -1781,7 +1797,7 @@ class Doofinder extends Module
                     . ' ON (pai.`id_product_attribute` = product_attribute_shop.`id_product_attribute`) ' : ' ')
                 . Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . ' 
                 LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il'
-                    . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) $id_lang . ') '
+                    . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) pSQL($id_lang) . ') '
                     . ' WHERE p.`id_product` IN (' . $product_pool . ') ' .
                     (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
                         . ' OR product_attribute_shop.`id_product_attribute`'
@@ -1878,5 +1894,42 @@ class Doofinder extends Module
             )
         );
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
+    }
+    
+    public function canAjax()
+    {
+        $id_shop = 1;
+        if (method_exists($this->context->shop, 'getContextShopID')) {
+            $id_shop = $this->context->shop->getContextShopID();
+        }
+        $facets_enabled = Configuration::get('DF_OWSEARCHFAC');
+        $response = array();
+        if ($facets_enabled) {
+            $savedToken = Configuration::get('DF_FACETS_TOKEN');
+            $token = Tools::getValue('token');
+            if ($savedToken == $token) {
+                if (!$this->isRegisteredInHookInShop('displayLeftColumn', $id_shop) &&
+                    !$this->isRegisteredInHookInShop('displayRightColumn', $id_shop)) {
+                    $response = array(
+                        'msg' => 'You must hook Doofinder on displayLeftColumn or displayRightColumn'
+                    );
+                }
+            } else {
+                $response = array(
+                    'error' => 'Token is invalid'
+                );
+            }
+        } else {
+            $response = array(
+                'error' => 'Doofinder facets not enabled'
+            );
+        }
+        
+        if (empty($response)) {
+            return true;
+        } else {
+            echo json_encode($response);
+            return false;
+        }
     }
 }
