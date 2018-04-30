@@ -1852,22 +1852,22 @@ class Doofinder extends Module
         }
     }
 
-    public function displayErrorCtm($error, $link=false)
+    public function displayErrorCtm($error, $link = false)
     {
         return $this->displayGeneralMsg($error, 'error', 'danger', $link);
     }
 
-    public function displayWarningCtm($warning, $link=false)
+    public function displayWarningCtm($warning, $link = false)
     {
         return $this->displayGeneralMsg($warning, 'warning', 'warning', $link);
     }
 
-    public function displayConfirmationCtm($string, $link=false)
+    public function displayConfirmationCtm($string, $link = false)
     {
         return $this->displayGeneralMsg($string, 'confirmation', 'success', $link);
     }
     
-    public function displayGeneralMsg($string, $type, $alert, $link=false)
+    public function displayGeneralMsg($string, $type, $alert, $link = false)
     {
         $this->context->smarty->assign(
             array(
