@@ -1798,13 +1798,13 @@ class Doofinder extends Module
                 . Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . ' 
                 LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il'
                     . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) pSQL($id_lang) . ') '
-                    . ' WHERE p.`id_product` IN (' . $product_pool . ') ' .
+                    . ' WHERE p.`id_product` IN (' . pSQL($product_pool) . ') ' .
                     (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
                         . ' OR product_attribute_shop.`id_product_attribute`'
                         . ' IN (' . pSQL($product_pool_attributes) . ')) ' : '') .
                     ' GROUP BY product_shop.id_product '
                     . (($show_variations) ? ' ,  product_attribute_shop.`id_product_attribute` ' : '') .
-                    ' ORDER BY FIELD (p.`id_product`,' . $product_pool . ') '
+                    ' ORDER BY FIELD (p.`id_product`,' . pSQL($product_pool) . ') '
                     . (($show_variations) ? ' , FIELD (product_attribute_shop.`id_product_attribute`,'
                         . pSQL($product_pool_attributes) . ')' : '');
             if (isset($debug) && $debug) {
