@@ -1801,12 +1801,12 @@ class Doofinder extends Module
                     . ' WHERE p.`id_product` IN (' . $product_pool . ') ' .
                     (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
                         . ' OR product_attribute_shop.`id_product_attribute`'
-                        . ' IN (' . $product_pool_attributes . ')) ' : '') .
+                        . ' IN (' . pSQL($product_pool_attributes) . ')) ' : '') .
                     ' GROUP BY product_shop.id_product '
                     . (($show_variations) ? ' ,  product_attribute_shop.`id_product_attribute` ' : '') .
                     ' ORDER BY FIELD (p.`id_product`,' . $product_pool . ') '
                     . (($show_variations) ? ' , FIELD (product_attribute_shop.`id_product_attribute`,'
-                        . $product_pool_attributes . ')' : '');
+                        . pSQL($product_pool_attributes) . ')' : '');
             if (isset($debug) && $debug) {
                 $this->debug("SQL: $sql");
             }
