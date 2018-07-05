@@ -354,6 +354,7 @@ class dfTools
         $sql = "
       SELECT
         ps.id_product,
+        ps.show_price,
         __ID_CATEGORY_DEFAULT__,
 
         m.name AS manufacturer,
@@ -401,6 +402,7 @@ class dfTools
         $sql_variations = "
       SELECT
         ps.id_product,
+        ps.show_price,
         pa.id_product_attribute,
         pa.reference AS variation_reference,
         pa_im.id_image AS variation_image_id,

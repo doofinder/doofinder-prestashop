@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.0';
+        $this->version = '3.0.1';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -127,8 +127,6 @@ class Doofinder extends Module
 
     public function uninstall()
     {
-        Configuration::deleteByName('DOOFINDER_LIVE_MODE');
-
         return parent::uninstall();
     }
 
@@ -489,6 +487,25 @@ class Doofinder extends Module
                         'desc' => $this->l($descHashid),
                         'lang' => true,
                     ),
+                    array(
+                        'type' => 'select',
+                        'label' => $this->l('Doofinder Region'),
+                        'name' => 'DF_REGION',
+                        'options' => array(
+                            'query' => array(
+                                array(
+                                    'id' => 'eu1',
+                                    'name' => $this->l('eu1')
+                                ),
+                                array(
+                                    'id' => 'us1',
+                                    'name' => $this->l('us1')
+                                ),
+                            ),
+                            'id' => 'id',
+                            'name' => 'name'
+                        ),
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save Layer Widget Options'),
@@ -789,6 +806,14 @@ class Doofinder extends Module
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ),
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Disable Ajax Token'),
+                        'name' => 'DF_DSBL_AJAX_TKN',
+                        'desc' => $this->l('Caution. Using this mean that you have a problem on hookFooter'),
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save Internal Search Options'),
@@ -809,6 +834,7 @@ class Doofinder extends Module
             'DF_DSBL_HTTPS_CURL' => Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => Configuration::get('DF_DEBUG_CURL'),
             'DF_DSBL_FAC_CACHE' => Configuration::get('DF_DSBL_FAC_CACHE'),
+            'DF_DSBL_AJAX_TKN' => Configuration::get('DF_DSBL_AJAX_TKN')
         );
     }
 
@@ -838,7 +864,9 @@ class Doofinder extends Module
 
     protected function getConfigFormValuesSearchLayer($update = false)
     {
-        $fields = array();
+        $fields = array(
+            'DF_REGION' => Configuration::get('DF_REGION')
+        );
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
             $field_name = 'DF_HASHID_' . $lang['id_lang'];
             $field_name_iso = 'DF_HASHID_' . Tools::strtoupper($lang['iso_code']);
@@ -966,10 +994,21 @@ class Doofinder extends Module
             try {
                 $extraCSS = Configuration::get('DF_EXTRA_CSS');
                 $cssVS = (int)Configuration::get('DF_CSS_VS');
+                $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
+                if (file_exists(dirname(__FILE__).'/views/css/'.$file)) {
+                    unlink(dirname(__FILE__).'/views/css/'.$file);
+                }
                 $cssVS++;
                 Configuration::updateValue('DF_CSS_VS', $cssVS);
                 $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
-                file_put_contents(dirname(__FILE__).'/views/css/'.$file, $extraCSS);
+                $result_write = file_put_contents(dirname(__FILE__).'/views/css/'.$file, $extraCSS);
+                $is_writable = is_writable(dirname(__FILE__).'/views/css/');
+                if ($result_write === false || !$is_writable) {
+                    $msg = 'Cannot save css file on '.dirname(__FILE__).'/views/css/ folder. '
+                            . 'Please be sure this folder have writing permissions. '
+                            . 'Folder Writable? '.(($is_writable)?'Yes!':'Nope :(');
+                    $messages .= $this->displayErrorCtm($this->l($msg));
+                }
             } catch (Exception $e) {
                 trigger_error('Doofinder Captured exception:'.$e->getMessage(), E_USER_WARNING);
             }
@@ -988,6 +1027,7 @@ class Doofinder extends Module
     {
         $lang = Tools::strtoupper($this->context->language->iso_code);
         $search_engine_id = Configuration::get('DF_HASHID_'.$lang);
+        $df_region = Configuration::get('DF_REGION');
         $script = Configuration::get("DOOFINDER_SCRIPT_" . $lang);
         $extra_css = Configuration::get('DF_EXTRA_CSS');
         $df_querySelector = Configuration::get('DF_SEARCH_SELECTOR');
@@ -1001,6 +1041,7 @@ class Doofinder extends Module
             'extra_css_html' => dfTools::fixStyleTag($extra_css),
             'productLinks' => $this->productLinks,
             'search_engine_id' => $search_engine_id,
+            'df_region' => $df_region,
             'self' => dirname(__FILE__),
             'df_another_params' => $params,
             'doofinder_search_selector' => $df_querySelector
@@ -1463,6 +1504,7 @@ class Doofinder extends Module
         $sql = "
             SELECT
               ps.id_product,
+              ps.show_price,
               __ID_CATEGORY_DEFAULT__,
 
               m.name AS manufacturer,
@@ -1906,12 +1948,13 @@ class Doofinder extends Module
         $response = array();
         if ($facets_enabled) {
             $savedToken = Configuration::get('DF_FACETS_TOKEN');
+            $dsblToken = Configuration::get('DF_DSBL_AJAX_TKN');
             $token = Tools::getValue('token');
-            if ($savedToken == $token) {
+            if (($savedToken == $token) || !$dsblToken) {
                 if (!$this->isRegisteredInHookInShop('displayLeftColumn', $id_shop) &&
                     !$this->isRegisteredInHookInShop('displayRightColumn', $id_shop)) {
                     $response = array(
-                        'msg' => 'You must hook Doofinder on displayLeftColumn or displayRightColumn'
+                        'error' => 'You must hook Doofinder on displayLeftColumn or displayRightColumn'
                     );
                 }
             } else {
@@ -1921,7 +1964,7 @@ class Doofinder extends Module
             }
         } else {
             $response = array(
-                'error' => 'Doofinder facets not enabled'
+                'error' => 'Doofinder facets not enabled but executing ajax request??'
             );
         }
         

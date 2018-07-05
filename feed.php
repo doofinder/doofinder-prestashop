@@ -381,7 +381,10 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 null,
                 6
             );
-
+            if (!$row['show_price']) {
+                $product_price = false;
+                $onsale_price = false;
+            }
             echo ($product_price ? Tools::convertPrice(
                 $product_price,
                 $currency
@@ -405,6 +408,10 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 $row['id_product_attribute'],
                 6
             );
+            if (!$row['show_price']) {
+                $product_price = false;
+                $onsale_price = false;
+            }
             echo ($product_price ? Tools::convertPrice($product_price, $currency) : "") . TXT_SEPARATOR;
             echo (($product_price && $onsale_price && $product_price != $onsale_price) ?
                 Tools::convertPrice($onsale_price, $currency) : "");
