@@ -431,6 +431,11 @@ function reloadContent(params_plus)
                 cache: false, // @todo see a way to use cache and to add a timestamps parameter to refresh cache each 10 minutes for example
                 success: function(result)
                 {
+                    if (result.error){
+                        $('.product_list').replaceWith(utf8_decode(result.error));
+                        return false;
+                    }
+                    
                     if (result.meta_description != '')
                         $('meta[name="description"]').attr('content', result.meta_description);
 
