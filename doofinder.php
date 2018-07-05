@@ -1004,7 +1004,6 @@ class Doofinder extends Module
                 $result_write = file_put_contents(dirname(__FILE__).'/views/css/'.$file, $extraCSS);
                 $is_writable = is_writable(dirname(__FILE__).'/views/css/');
                 if ($result_write === false || !$is_writable) {
-                    
                     $msg = 'Cannot save css file on '.dirname(__FILE__).'/views/css/ folder. '
                             . 'Please be sure this folder have writing permissions. '
                             . 'Folder Writable? '.(($is_writable)?'Yes!':'Nope :(');
