@@ -1975,4 +1975,11 @@ class Doofinder extends Module
             return false;
         }
     }
+    
+    private function debug($message){
+        $debug = Configuration::get('DF_DEBUG', null);
+        if (isset($debug) && $debug) {
+            error_log("$message\n", 3, dirname(__FILE__).'/doofinder.log');
+        }
+    }
 }
