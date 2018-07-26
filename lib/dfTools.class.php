@@ -168,7 +168,7 @@ class dfTools
     public static function getFeatureKeysForShopAndLang($id_shop, $id_lang)
     {
         $sql = "
-      SELECT fl.name
+      SELECT fl.name, fl.id_feature
 
       FROM
         _DB_PREFIX_feature_shop fs
@@ -186,7 +186,7 @@ class dfTools
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = array();
         foreach ($result as $elem) {
-            $names[] = $elem["name"];
+            $names[$elem["id_feature"]] = $elem["name"];
         }
         return $names;
     }

@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.2';
+    const VERSION = '3.0.3';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.2';
+        $this->version = '3.0.3';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -867,7 +867,12 @@ class Doofinder extends Module
         $fields = array(
             'DF_REGION' => Configuration::get('DF_REGION')
         );
-        foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
+        
+        //Language on this must be "false" to get inactive also and can save. The problem is that the default
+        //multilang selector on PrestaShop inputs get disabled langs on the shop and rear to the admin to think
+        //cannot save correctly on submit, when really not save the langs that are not enable on that shop :/
+        //The same problem trying to filter with the shop :/ So false,null on this case
+        foreach (Language::getLanguages(false, null) as $lang) {
             $field_name = 'DF_HASHID_' . $lang['id_lang'];
             $field_name_iso = 'DF_HASHID_' . Tools::strtoupper($lang['iso_code']);
             if ($update) {
