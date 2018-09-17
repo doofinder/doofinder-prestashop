@@ -533,13 +533,15 @@ class dfTools
         cl.name
       FROM
         _DB_PREFIX_category_lang cl INNER JOIN _DB_PREFIX_category parent
-          ON (parent.id_category = cl.id_category),
+          ON (parent.id_category = cl.id_category) 
+        INNER JOIN _DB_PREFIX_category_shop cs ON (cs.id_category = parent.id_category),
         _DB_PREFIX_category node
       WHERE
         node.nleft BETWEEN parent.nleft AND parent.nright
         AND node.id_category = _ID_CATEGORY_
         AND cl.id_shop = _ID_SHOP_
         AND cl.id_lang = _ID_LANG_
+        AND cs.id_shop = _ID_SHOP_
         AND parent.level_depth <> 0
         AND parent.active = 1 ";
 
