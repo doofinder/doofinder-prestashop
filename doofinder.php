@@ -1470,6 +1470,9 @@ class Doofinder extends Module
         return $array;
     }
 
+    /**
+     * @deprecated since 3.0.5
+     */
     public function getSQLOnlyProductsWithAttributes()
     {
         $attr_groups = AttributeGroup::getAttributesGroups((int) Configuration::get('PS_LANG_DEFAULT'));
@@ -1510,8 +1513,10 @@ class Doofinder extends Module
 
               m.name AS manufacturer,
               
-              IF(isnull(pa.id_product), p.__MPN__ , CONCAT(p.__MPN__,'/',GROUP_CONCAT(DISTINCT pa.__MPN__ SEPARATOR '/'))) AS mpn,
-              IF(isnull(pa.id_product), p.ean13 , CONCAT(p.ean13,'/',GROUP_CONCAT(DISTINCT pa.ean13 SEPARATOR '/'))) AS ean13,
+              IF(isnull(pa.id_product), p.__MPN__ , CONCAT(p.__MPN__,'/',
+              GROUP_CONCAT(DISTINCT pa.__MPN__ SEPARATOR '/'))) AS mpn,
+              IF(isnull(pa.id_product), p.ean13 , CONCAT(p.ean13,'/',
+              GROUP_CONCAT(DISTINCT pa.ean13 SEPARATOR '/'))) AS ean13,
               p.ean13 AS simple_ean13,
               p.__MPN__ AS simple_mpn,
               pl.name,
@@ -1977,7 +1982,8 @@ class Doofinder extends Module
         }
     }
     
-    private function debug($message){
+    private function debug($message)
+    {
         $debug = Configuration::get('DF_DEBUG', null);
         if (isset($debug) && $debug) {
             error_log("$message\n", 3, dirname(__FILE__).'/doofinder.log');
