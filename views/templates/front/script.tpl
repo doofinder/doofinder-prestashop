@@ -13,7 +13,7 @@
 *}
 {if isset($search_engine_id) && $search_engine_id}
   <!-- START OF DOOFINDER SCRIPT -->
-  <script async="" src="https://{$df_region|escape:'htmlall':'UTF-8'}-search.doofinder.com/5/script/{$search_engine_id|escape:'htmlall':'UTF-8'}.js"></script>
+  <script type="text/javascript" async="" src="https://{$df_region|escape:'htmlall':'UTF-8'}-search.doofinder.com/5/script/{$search_engine_id|escape:'htmlall':'UTF-8'}.js"></script>
   <!-- END OF DOOFINDER SCRIPT -->
 {/if}
   <!-- TO REGISTER CLICKS -->
