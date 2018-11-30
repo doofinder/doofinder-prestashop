@@ -374,7 +374,8 @@ class dfTools
 
         im.id_image,
 
-        p.available_for_order
+        p.available_for_order,
+        sa.out_of_stock
       FROM
         _DB_PREFIX_product p
         INNER JOIN _DB_PREFIX_product_shop ps
@@ -389,7 +390,8 @@ class dfTools
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
-
+        LEFT JOIN _DB_PREFIX_stock_available sa
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0)
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
@@ -426,7 +428,8 @@ class dfTools
 
         im.id_image,
 
-        p.available_for_order
+        p.available_for_order,
+        sa.out_of_stock
       FROM
         _DB_PREFIX_product p
         INNER JOIN _DB_PREFIX_product_shop ps
@@ -444,7 +447,9 @@ class dfTools
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im 
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
         LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-          ON (pt.id_product = p.id_product)  
+          ON (pt.id_product = p.id_product)
+        LEFT JOIN _DB_PREFIX_stock_available sa
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute))
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__

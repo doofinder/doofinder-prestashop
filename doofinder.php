@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.4';
+    const VERSION = '3.0.5';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.4';
+        $this->version = '3.0.5';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -629,11 +629,7 @@ class Doofinder extends Module
                                 array(
                                     'id' => '1',
                                     'name' => $this->l('Yes, Include each variations')
-                                ),
-                                array(
-                                    'id' => '2',
-                                    'name' => $this->l('Only product but all possible attribute for them')
-                                ),
+                                )
                             ),
                             'id' => 'id',
                             'name' => 'name'
@@ -1474,6 +1470,9 @@ class Doofinder extends Module
         return $array;
     }
 
+    /**
+     * @deprecated since 3.0.5
+     */
     public function getSQLOnlyProductsWithAttributes()
     {
         $attr_groups = AttributeGroup::getAttributesGroups((int) Configuration::get('PS_LANG_DEFAULT'));
@@ -1514,8 +1513,10 @@ class Doofinder extends Module
 
               m.name AS manufacturer,
               
-              IF(isnull(pa.id_product), p.__MPN__ , CONCAT(p.__MPN__,'/',GROUP_CONCAT(DISTINCT pa.__MPN__ SEPARATOR '/'))) AS mpn,
-              IF(isnull(pa.id_product), p.ean13 , CONCAT(p.ean13,'/',GROUP_CONCAT(DISTINCT pa.ean13 SEPARATOR '/'))) AS ean13,
+              IF(isnull(pa.id_product), p.__MPN__ , CONCAT(p.__MPN__,'/',
+              GROUP_CONCAT(DISTINCT pa.__MPN__ SEPARATOR '/'))) AS mpn,
+              IF(isnull(pa.id_product), p.ean13 , CONCAT(p.ean13,'/',
+              GROUP_CONCAT(DISTINCT pa.ean13 SEPARATOR '/'))) AS ean13,
               p.ean13 AS simple_ean13,
               p.__MPN__ AS simple_mpn,
               pl.name,
@@ -1981,7 +1982,8 @@ class Doofinder extends Module
         }
     }
     
-    private function debug($message){
+    private function debug($message)
+    {
         $debug = Configuration::get('DF_DEBUG', null);
         if (isset($debug) && $debug) {
             error_log("$message\n", 3, dirname(__FILE__).'/doofinder.log');

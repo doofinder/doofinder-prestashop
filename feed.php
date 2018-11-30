@@ -143,10 +143,16 @@ if (isset($_SERVER['HTTPS'])) {
 header("Content-Type:text/plain; charset=utf-8");
 
 // HEADER
-$header = array('id', 'title', 'link', 'description', 'alternate_description',
+$header = array('id');
+if ($cfg_product_variations == 1) {
+    $header[] = 'item_group_id';
+}
+$header = array_merge($header, array('title', 'link', 'description', 'alternate_description',
     'meta_keywords', 'meta_title', 'meta_description', 'image_link',
     'categories', 'availability', 'brand', 'mpn',
-    'extra_title_1', 'extra_title_2', 'tags');
+    'extra_title_1', 'extra_title_2', 'tags'));
+
+
 
 
 if ($cfg_display_prices) {
@@ -213,6 +219,9 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 (int)$row['id_product_attribute'] > 0) {
             // ID
             echo "VAR-" . $row['id_product_attribute'] . TXT_SEPARATOR;
+            
+            //ITEM-GROUP-ID
+            echo $row['id_product'] . TXT_SEPARATOR;
             // TITLE
             $product_title = dfTools::cleanString($row['name']);
             echo $product_title . TXT_SEPARATOR;
@@ -235,6 +244,13 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
             }
             // ID
             echo $row['id_product'] . TXT_SEPARATOR;
+            
+            if ($cfg_product_variations == 1) {
+                //ITEM-GROUP-ID
+                echo "0" . TXT_SEPARATOR;
+            }
+            
+            
             // TITLE
             $product_title = dfTools::cleanString($row['name']);
             echo $product_title . TXT_SEPARATOR;
@@ -338,10 +354,11 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
         if ((int)dfTools::cfg($shop->id, 'PS_STOCK_MANAGEMENT')) {
             $stock = StockAvailable::getQuantityAvailableByProduct(
                 $row['id_product'],
-                null,
+                (isset($row['id_product_attribute'])?$row['id_product_attribute']:null),
                 $shop->id
             );
-            echo ($available && ($stock > 0) ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
+            $allow_oosp = Product::isAvailableWhenOutOfStock($row['out_of_stock']);
+            echo ($available && ($stock > 0 || $allow_oosp) ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
         } else {
             echo ($available ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
         }
