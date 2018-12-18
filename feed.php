@@ -247,7 +247,7 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
             
             if ($cfg_product_variations == 1) {
                 //ITEM-GROUP-ID
-                echo "0" . TXT_SEPARATOR;
+                echo "" . TXT_SEPARATOR;
             }
             
             

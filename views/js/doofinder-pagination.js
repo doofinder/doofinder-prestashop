@@ -36,7 +36,7 @@ function paginationButton(nbProductsIn, nbProductOut) {
         $(this).children().on('click', function(e)
         {
             e.preventDefault();
-            if (nbPage == 0)
+            if (nbPage == 0) {
                 p = parseInt($(this).html()) + parseInt(nbPage);
                 if(typeof p == 'undefined' || isNaN(p)){
                     p = parseInt($(this).find('span').html()) + parseInt(nbPage);
@@ -44,8 +44,9 @@ function paginationButton(nbProductsIn, nbProductOut) {
                         console.log('Doofinder pagination problem! Please check that you not use a custom theme. Or modify the "find" declaration below to know where is the page number');
                     }
                 }
-            else
+            } else {
                 p = nbPage;
+            }
             p = '&p=' + p;
             reloadContent(p);
             nbPage = 0;
