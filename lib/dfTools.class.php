@@ -608,9 +608,10 @@ class dfTools
         $mainCategoryWhere = '';
         
         if($use_main_category){
-            $mainInnerSql = 'INNER JOIN ps_product_shop ps ON (cp.id_product = _ID_PRODUCT_)';
+            $mainInnerSql = 'INNER JOIN _DB_PREFIX_product_shop ps '
+                    . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
             $mainCategoryInner = self::prepareSQL($mainInnerSql,
-                    array('_ID_PRODUCT_' => (int)pSQL($id_product)));
+                    array('_ID_PRODUCT_' => (int)pSQL($id_product), '_ID_SHOP_' => (int)pSQL($id_shop)));
             $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
         }
         
