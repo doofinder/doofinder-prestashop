@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.6';
+    const VERSION = '3.0.7';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.6';
+        $this->version = '3.0.7';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -164,10 +164,10 @@ class Doofinder extends Module
         $this->context->smarty->assign('oldPS', $oldPS);
         $this->context->smarty->assign('module_dir', $this->_path);
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
-        $output.= $this->renderFormDataFeed();
-        $output.= $this->renderFormSearchLayer();
-        $output.= $this->renderFormInternalSearch();
-        $output.= $this->renderFormCustomCSS();
+        $output.= $this->renderFormDataFeed($adv);
+        $output.= $this->renderFormSearchLayer($adv);
+        $output.= $this->renderFormInternalSearch($adv);
+        $output.= $this->renderFormCustomCSS($adv);
         if ($adv) {
             $output.= $this->renderFormAdvanced();
         }
@@ -200,7 +200,7 @@ class Doofinder extends Module
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/feed_url_partial_tab.tpl');
     }
 
-    protected function renderFormCustomCSS()
+    protected function renderFormCustomCSS($adv = false)
     {
         $helper = new HelperForm();
 
@@ -213,6 +213,7 @@ class Doofinder extends Module
         $helper->identifier = $this->identifier;
         //$helper->submit_action = 'submitDoofinderModuleCustomCSS';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
@@ -256,7 +257,7 @@ class Doofinder extends Module
         return $html;
     }
 
-    protected function renderFormSearchLayer()
+    protected function renderFormSearchLayer($adv = false)
     {
         $helper = new HelperForm();
 
@@ -269,6 +270,7 @@ class Doofinder extends Module
         $helper->identifier = $this->identifier;
         //$helper->submit_action = 'submitDoofinderModuleSearchLayer';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
@@ -284,7 +286,7 @@ class Doofinder extends Module
         return $html;
     }
 
-    protected function renderFormInternalSearch()
+    protected function renderFormInternalSearch($adv = false)
     {
         $helper = new HelperForm();
 
@@ -297,6 +299,7 @@ class Doofinder extends Module
         $helper->identifier = $this->identifier;
         //$helper->submit_action = 'submitDoofinderModuleInternalSearch';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
@@ -338,7 +341,7 @@ class Doofinder extends Module
         return $html;
     }
 
-    protected function renderFormDataFeed()
+    protected function renderFormDataFeed($adv = false)
     {
         $helper = new HelperForm();
 
@@ -351,6 +354,7 @@ class Doofinder extends Module
         $helper->identifier = $this->identifier;
         //$helper->submit_action = 'submitDoofinderModuleDataFeed';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
@@ -412,7 +416,7 @@ class Doofinder extends Module
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
             $realoptname = $optname . Tools::strtoupper($lang['iso_code']);
             $form['form']['input'][] = array(
-                'label' => sprintf($this->l("Currency for %s"), $lang['name']),
+                'label' => sprintf($this->l('Currency for %s'), $lang['name']),
                 'type' => 'select',
                 'options' => array(
                     'query' => $currencies,
@@ -471,8 +475,6 @@ class Doofinder extends Module
 
     protected function getConfigFormSearchLayer()
     {
-        $descHashid = 'Search Engine ID. If you need customize your JS, you must do it on your Doofinder account. '
-                . 'Also you must fill this field to have Internal Search';
         return array(
             'form' => array(
                 'legend' => array(
@@ -484,7 +486,7 @@ class Doofinder extends Module
                         'type' => 'text',
                         'label' => $this->l('Doofinder Search Engine ID'),
                         'name' => 'DF_HASHID',
-                        'desc' => $this->l($descHashid),
+                        'desc' => $this->l('SEARCH_ENGINE_ID_EXPLANATION'),
                         'lang' => true,
                     ),
                     array(
@@ -517,8 +519,6 @@ class Doofinder extends Module
 
     protected function getConfigFormInternalSearch()
     {
-        $descAppendBanner = 'Need to write "jQuery" identifier where to append after the banner.'
-            . ' If empty or not valid, not banner will show. Example: "#content-wrapper #main h2"';
         return array(
             'form' => array(
                 'legend' => array(
@@ -550,7 +550,7 @@ class Doofinder extends Module
                         'col' => 9,
                         'type' => 'text',
                         'prefix' => '<i class="icon icon-code"></i>',
-                        'desc' => $this->l($descAppendBanner),
+                        'desc' => $this->l('BANNER_CSS_SELECTOR_EXPLAINING').': "#content-wrapper #main h2"',
                         'name' => 'DF_APPEND_BANNER',
                         'label' => $this->l('"Append after" banner on Overwrite Search Page'),
                     ),
@@ -579,7 +579,6 @@ class Doofinder extends Module
 
     protected function getConfigFormDataFeed()
     {
-        $descEnableHash = 'If you use this, please be sure to update your feed URL on doofinder panel';
         return array(
             'form' => array(
                 'legend' => array(
@@ -592,7 +591,7 @@ class Doofinder extends Module
                         'label' => $this->l('Enable security hash on feed URL'),
                         'name' => 'DF_ENABLE_HASH',
                         'is_bool' => true,
-                        'desc' => $this->l($descEnableHash),
+                        'desc' => $this->l('HASH_FEED_EXPLANATION'),
                         'values' => $this->getBooleanFormValue(),
                     ),
                     array(
@@ -613,6 +612,13 @@ class Doofinder extends Module
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('Export full categories path in the feed'),
                         'name' => 'DF_FEED_FULL_PATH',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ),
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Export only main category of product in the feed'),
+                        'name' => 'DF_FEED_MAINCATEGORY_PATH',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ),
@@ -734,8 +740,6 @@ class Doofinder extends Module
 
     protected function getConfigFormAdvanced()
     {
-        $descHttpsCurl = 'If your server have an untrusted certificate and you have '
-            . 'connection problems with the API, please enable this';
         return array(
             'form' => array(
                 'legend' => array(
@@ -782,7 +786,7 @@ class Doofinder extends Module
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('CURL disable HTTPS check'),
                         'name' => 'DF_DSBL_HTTPS_CURL',
-                        'desc' => $this->l($descHttpsCurl),
+                        'desc' => $this->l('CURL_DISABLE_HTTPS_EXPLANATION'),
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ),
@@ -848,6 +852,7 @@ class Doofinder extends Module
             'DF_GS_DISPLAY_PRICES' => Configuration::get('DF_GS_DISPLAY_PRICES'),
             'DF_GS_PRICES_USE_TAX' => Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => Configuration::get('DF_FEED_FULL_PATH'),
+            'DF_FEED_MAINCATEGORY_PATH' => Configuration::get('DF_FEED_MAINCATEGORY_PATH'),
             'DF_SHOW_PRODUCT_VARIATIONS' => Configuration::get('DF_SHOW_PRODUCT_VARIATIONS'),
             'DF_GROUP_ATTRIBUTES_SHOWN[]' => explode(',', Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN')),
             'DF_SHOW_PRODUCT_FEATURES' => Configuration::get('DF_SHOW_PRODUCT_FEATURES'),

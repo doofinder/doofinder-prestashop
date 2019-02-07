@@ -279,8 +279,8 @@ class dfTools
         fp.id_product = _ID_PRODUCT
     ";
 
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => $id_lang,
-                    '_ID_PRODUCT' => $id_product));
+        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
+                    '_ID_PRODUCT' => (int)pSQL($id_product)));
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
 
@@ -322,7 +322,7 @@ class dfTools
       ";
 
             $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
-                        '_VARIATION_ID' => $variation_id));
+                        '_VARIATION_ID' => (int)pSQL($variation_id)));
 
             $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         } else {
@@ -356,12 +356,9 @@ class dfTools
         ps.id_product,
         ps.show_price,
         __ID_CATEGORY_DEFAULT__,
-
         m.name AS manufacturer,
-
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
-
         pl.name,
         pl.description,
         pl.description_short,
@@ -371,9 +368,7 @@ class dfTools
         GROUP_CONCAT(tag.name SEPARATOR '/') AS tags,
         pl.link_rewrite,
         cl.link_rewrite AS cat_link_rew,
-
         im.id_image,
-
         p.available_for_order,
         sa.out_of_stock
       FROM
@@ -410,12 +405,9 @@ class dfTools
         pa_im.id_image AS variation_image_id,
         p.reference,
         __ID_CATEGORY_DEFAULT__,
-
         m.name AS manufacturer,
-
         IF(isnull(pa.id_product), p.__MPN__ , pa.__MPN__) AS mpn,
         IF(isnull(pa.id_product), p.ean13 , pa.ean13) AS ean13,
-
         pl.name,
         pl.description,
         pl.description_short,
@@ -425,9 +417,7 @@ class dfTools
         GROUP_CONCAT(tag.name SEPARATOR '/') AS tags,
         pl.link_rewrite,
         cl.link_rewrite AS cat_link_rew,
-
         im.id_image,
-
         p.available_for_order,
         sa.out_of_stock
       FROM
@@ -482,15 +472,15 @@ class dfTools
         }
 
         $sql = self::limitSQL($sql, $limit, $offset);
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => $id_lang,
-                    '_ID_SHOP_' => $id_shop,
+        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
+                    '_ID_SHOP_' => (int)pSQL($id_shop),
                     '__MPN__' => (string)pSQL($mpn_field),
-                    '_IMS_COVER_' => $ims_cover,
-                    '__ID_CATEGORY_DEFAULT__' => $id_category_default,
-                    '__IS_ACTIVE__' => $is_active,
-                    '__VISIBILITY__' => $visibility));
+                    '_IMS_COVER_' => (string)pSQL($ims_cover),
+                    '__ID_CATEGORY_DEFAULT__' => (int)pSQL($id_category_default),
+                    '__IS_ACTIVE__' => (string)pSQL($is_active),
+                    '__VISIBILITY__' => (string)pSQL($visibility)));
 
-
+        $sql = str_replace("\'","'",$sql);
 
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
@@ -557,10 +547,12 @@ class dfTools
         parent.nleft
       ;";
 
-        $sql = self::prepareSQL($sql, array('_ID_CATEGORY_' => $id_category,
+        $sql = self::prepareSQL($sql, array('_ID_CATEGORY_' => (int)pSQL($id_category),
                     '_ID_SHOP_' => (int)pSQL($id_shop),
                     '_ID_LANG_' => (int)pSQL($id_lang),
-                    '_EXCLUDED_IDS_' => $excluded_ids));
+                    '_EXCLUDED_IDS_' => (string)pSQL($excluded_ids)));
+        
+        $sql = str_replace("\'","'",$sql);
 
         $path = array();
         foreach (Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $row)
@@ -588,8 +580,11 @@ class dfTools
      */
     public static function getCategoriesForProductIdAndLanguage($id_product, $id_lang, $id_shop, $flat = true)
     {
+        
+        $use_main_category = (bool) dfTools::cfg($id_shop, 'DF_FEED_MAINCATEGORY_PATH', Doofinder::YES);
+        
         $sql = "
-      SELECT
+      SELECT DISTINCT
         c.id_category,
         c.id_parent,
         c.level_depth,
@@ -601,14 +596,31 @@ class dfTools
           ON (c.id_category = cp.id_category AND cp.id_product = _ID_PRODUCT_)
         INNER JOIN _DB_PREFIX_category_shop cs
           ON (c.id_category = cs.id_category AND cs.id_shop = _ID_SHOP_)
+          _MAIN_CATEGORY_INNER_
       WHERE
         c.active = 1
+        _MAIN_CATEGORY_WHERE_
       ORDER BY
         c.nleft DESC,
         c.nright ASC;
     ";
+        $mainCategoryInner = '';
+        $mainCategoryWhere = '';
+        
+        if($use_main_category){
+            $mainInnerSql = 'INNER JOIN _DB_PREFIX_product_shop ps '
+                    . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
+            $mainCategoryInner = self::prepareSQL($mainInnerSql,
+                    array('_ID_PRODUCT_' => (int)pSQL($id_product), '_ID_SHOP_' => (int)pSQL($id_shop)));
+            $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
+        }
+        
         $sql = self::prepareSQL($sql, array('_ID_PRODUCT_' => (int)pSQL($id_product),
+                    '_MAIN_CATEGORY_INNER_' => (string)pSQL($mainCategoryInner),
+                    '_MAIN_CATEGORY_WHERE_' => (string)pSQL($mainCategoryWhere),
                     '_ID_SHOP_' => (int)pSQL($id_shop)));
+        
+        $sql = str_replace("\'","'",$sql);
 
         $categories = array();
         $last_saved = 0;

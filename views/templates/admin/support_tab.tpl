@@ -20,8 +20,8 @@
 			<h4>{l s='Doofinder increases sales because your customers search and find the most relevant results' mod='doofinder'}</h4>
 		</div>
 		<div class="col-xs-12 col-md-4 text-center">
-			<a href="https://www.doofinder.com/signup" target="_blank" class="btn btn-primary" id="create-account-btn">{l s='Create an account now!' mod='doofinder'}</a><br />
-			{l s='Already have an account?' mod='doofinder'}<a href="https://www.doofinder.com/admin/login" target="_blank"> {l s='Log in' mod='doofinder'}</a>
+			<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=support_tab&utm_content=prestashop_module_support_tab" target="_blank" class="btn btn-primary" id="create-account-btn">{l s='Create an account now!' mod='doofinder'}</a><br />
+			{l s='Already have an account?' mod='doofinder'}<a href="https://www.doofinder.com/admin/login&utm_source=prestashop_module&utm_campaing=support_tab&utm_content=prestashop_module_login" target="_blank"> {l s='Log in' mod='doofinder'}</a>
 		</div>
 	</div>
 
@@ -59,5 +59,10 @@
 				</dl>
 			</div>
 		</div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=support_tab&utm_content=prestashop_module_free_trial_link" target="_blank" class="btn btn-primary btn-lg" style="font-size:27px;background-color: #27c356" id="create-account-btn">{l s='Create a free acount!' mod='doofinder'}</a>
+                    </div>
+                </div>
 	</div>
 </div>
