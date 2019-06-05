@@ -234,7 +234,9 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                     $lang->id,
                     $shop->id,
                     (int)$row['id_product_attribute'],
-                    $cfg_mod_rewrite
+                    $cfg_mod_rewrite,
+                    false,
+                    true
                 )
             ) . TXT_SEPARATOR;
         } else {
@@ -462,7 +464,7 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
         if ($cfg_product_features) {
             echo TXT_SEPARATOR;
             foreach (dfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $value) {
-                echo slugify($key) . "=" . dfTools::cleanString($value) . "/";
+                echo slugify($key) . "=" . str_replace('/','\/',dfTools::cleanString($value)) . "/";
             }
         }
 

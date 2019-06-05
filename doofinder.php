@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.7';
+    const VERSION = '3.0.9';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.7';
+        $this->version = '3.0.9';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1721,6 +1721,14 @@ class Doofinder extends Module
         $filters = null,
         $return_facets = false
     ) {
+        $page_size = (int)$page_size;
+		if (!$page_size) {
+			$page_size = Configuration::get('PS_PRODUCTS_PER_PAGE');
+        }
+        $page = (int)$page;
+        if (!$page) {
+            $page = 1;
+        }
         $query_name = Tools::getValue('df_query_name', false);
         $debug = Configuration::get('DF_DEBUG');
         if (isset($debug) && $debug) {
