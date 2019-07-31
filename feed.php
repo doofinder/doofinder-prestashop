@@ -445,7 +445,7 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 $attribute_keys
             );
             foreach ($variation_attributes as $attribute) {
-                echo TXT_SEPARATOR . dfTools::cleanString($attribute);
+                echo TXT_SEPARATOR . str_replace('/','//',dfTools::cleanString($attribute));
             }
         } elseif ($cfg_product_variations == 2) {
             foreach ($attr_groups as $a_group) {
@@ -454,7 +454,7 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 }
                 $a_group_name = str_replace('-', '_', Tools::str2url($a_group['name']));
                 if (isset($row['attributes_' . $a_group_name])) {
-                    echo TXT_SEPARATOR . dfTools::cleanString($row['attributes_' . $a_group_name]);
+                    echo TXT_SEPARATOR .  str_replace('/','//',dfTools::cleanString($row['attributes_' . $a_group_name]));
                 } else {
                     echo TXT_SEPARATOR;
                 }
