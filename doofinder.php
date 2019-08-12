@@ -1722,8 +1722,8 @@ class Doofinder extends Module
         $return_facets = false
     ) {
         $page_size = (int)$page_size;
-		if (!$page_size) {
-			$page_size = Configuration::get('PS_PRODUCTS_PER_PAGE');
+        if (!$page_size) {
+            $page_size = Configuration::get('PS_PRODUCTS_PER_PAGE');
         }
         $page = (int)$page;
         if (!$page) {

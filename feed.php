@@ -249,7 +249,7 @@ if ($cfg_product_features) {
  * As each module can extend $extra_header and $extra_rows don't forget to merge them
  */
 $extra_header = array();
-$extra_row = array();
+$extra_rows = array();
 Hook::exec('actionDoofinderExtendFeed', array(
     'extra_header'   => &$extra_header,
     'extra_rows' => &$extra_rows,
