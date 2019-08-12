@@ -89,8 +89,8 @@ function array_merge_by_id_product($array1 = array(), $array2 = array())
     foreach ($array1 as $item1) {
         $result_row = array();
         //Merge data
-        foreach ($array2 as $key => $item2) {
-            if($item1[$sub_key] == $item2[$sub_key]) {
+        foreach ($array2 as $item2) {
+            if ($item1[$sub_key] == $item2[$sub_key]) {
                 $result_row = array_merge($item1, $item2);
                 break;
             }
@@ -233,7 +233,7 @@ if ($cfg_product_features) {
 }
 
 
-/** 
+/**
  * @author calamfit <https://github.com/camlafit>
  * Extend doofinder feed
  *
@@ -249,7 +249,7 @@ if ($cfg_product_features) {
  * As each module can extend $extra_header and $extra_rows don't forget to merge them
  */
 $extra_header = array();
-$extra_row = array();
+$extra_rows = array();
 Hook::exec('actionDoofinderExtendFeed', array(
     'extra_header'   => &$extra_header,
     'extra_rows' => &$extra_rows,
@@ -507,7 +507,7 @@ foreach ($rows as $row) {
                 $attribute_keys
             );
             foreach ($variation_attributes as $attribute) {
-                echo TXT_SEPARATOR . str_replace('/','//',dfTools::cleanString($attribute));
+                echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
             }
         } elseif ($cfg_product_variations == 2) {
             foreach ($attr_groups as $a_group) {
@@ -516,7 +516,11 @@ foreach ($rows as $row) {
                 }
                 $a_group_name = str_replace('-', '_', Tools::str2url($a_group['name']));
                 if (isset($row['attributes_' . $a_group_name])) {
-                    echo TXT_SEPARATOR .  str_replace('/','//',dfTools::cleanString($row['attributes_' . $a_group_name]));
+                    echo TXT_SEPARATOR .  str_replace(
+                        '/',
+                        '//',
+                        dfTools::cleanString($row['attributes_' . $a_group_name])
+                    );
                 } else {
                     echo TXT_SEPARATOR;
                 }
@@ -527,8 +531,8 @@ foreach ($rows as $row) {
             echo TXT_SEPARATOR;
             foreach (dfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $values) {
                 echo slugify($key) . "=";
-                foreach($values as $index => $value) {
-                    echo str_replace('/','\/',dfTools::cleanString($value)) . "/";
+                foreach ($values as $index => $value) {
+                    echo str_replace('/', '\/', dfTools::cleanString($value)) . "/";
                 }
             }
         }
