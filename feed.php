@@ -518,7 +518,7 @@ foreach ($rows as $row) {
                 if (isset($row['attributes_' . $a_group_name])) {
                     echo TXT_SEPARATOR .  str_replace(
                         '/',
-                        '//', 
+                        '//',
                         dfTools::cleanString($row['attributes_' . $a_group_name])
                     );
                 } else {
