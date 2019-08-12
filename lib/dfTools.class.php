@@ -289,7 +289,7 @@ class dfTools
 
         foreach ($result as $elem) {
             if (in_array($elem['name'], $feature_keys))
-                $features[$elem['name']] = $elem['value'];
+                $features[$elem['name']][] = $elem['value'];
         }
 
         return $features;
