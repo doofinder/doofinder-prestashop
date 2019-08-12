@@ -70,6 +70,40 @@ function slugify($text)
     return $text;
 }
 
+/**
+*  @author canmlafit <https://github.com/camlafit>
+*  Merge multidemensionnal array by value on each row
+*  https://stackoverflow.com/questions/7973915/php-merge-arrays-by-value
+*/
+function array_merge_by_id_product($array1 = array(), $array2 = array())
+{
+    $sub_key = 'id_product';
+    $result = array();
+    $result_row = array();
+    if (empty($array1)) {
+        return $array2;
+    }
+    if (empty($array2)) {
+        return $array1;
+    }
+    foreach ($array1 as $item1) {
+        $result_row = array();
+        //Merge data
+        foreach ($array2 as $item2) {
+            if ($item1[$sub_key] == $item2[$sub_key]) {
+                $result_row = array_merge($item1, $item2);
+                break;
+            }
+        }
+        //If no array merged
+        if (empty($result_row)) {
+            $result_row = $item1;
+        }
+        $result[] = $result_row;
+    }
+    return $result;
+}
+
 $context = Context::getContext();
 
 $shop = new Shop((int) $context->shop->id);
@@ -195,14 +229,38 @@ if ($cfg_product_features) {
     } else {
         $feature_keys = $all_feature_keys;
     }
-
-    /* foreach($feature_keys as $key){
-      $header[] = slugify($key);
-      } */
     $header[] = "attributes";
 }
 
 
+/**
+ * @author calamfit <https://github.com/camlafit>
+ * Extend doofinder feed
+ *
+ * To add an new header, module can do an array_merge on $extra_header
+ * To add an new data to a product, module must create a multidemensionnal array as this :
+ * array(
+ *   index => array(
+ *    'id_product' => value,
+ *    'new_header_column_name' => 'value related to the new column'
+ *   ),
+ *   [...]
+ * )
+ * As each module can extend $extra_header and $extra_rows don't forget to merge them
+ */
+$extra_header = array();
+$extra_rows = array();
+Hook::exec('actionDoofinderExtendFeed', array(
+    'extra_header'   => &$extra_header,
+    'extra_rows' => &$extra_rows,
+    'id_lang' => $lang->id,
+    'id_shop' => $shop->id,
+    'limit' => $limit,
+    'offset' => $offset,
+));
+if (!empty($extra_header)) {
+    $header = array_merge($header, $extra_header);
+}
 
 if (!$limit || ($offset !== false && (int)$offset === 0)) {
     echo implode(TXT_SEPARATOR, $header) . PHP_EOL;
@@ -210,7 +268,11 @@ if (!$limit || ($offset !== false && (int)$offset === 0)) {
 }
 
 // PRODUCTS
-foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset) as $row) {
+$rows = dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
+if (!empty($extra_rows)) {
+    $rows = array_merge_by_id_product($rows, $extra_rows);
+}
+foreach ($rows as $row) {
     if ((int)$row['id_product'] > 0) {
         // ID, TITLE, LINK
 
@@ -445,7 +507,7 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 $attribute_keys
             );
             foreach ($variation_attributes as $attribute) {
-                echo TXT_SEPARATOR . str_replace('/','//',dfTools::cleanString($attribute));
+                echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
             }
         } elseif ($cfg_product_variations == 2) {
             foreach ($attr_groups as $a_group) {
@@ -454,7 +516,11 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
                 }
                 $a_group_name = str_replace('-', '_', Tools::str2url($a_group['name']));
                 if (isset($row['attributes_' . $a_group_name])) {
-                    echo TXT_SEPARATOR .  str_replace('/','//',dfTools::cleanString($row['attributes_' . $a_group_name]));
+                    echo TXT_SEPARATOR .  str_replace(
+                        '/',
+                        '//',
+                        dfTools::cleanString($row['attributes_' . $a_group_name])
+                    );
                 } else {
                     echo TXT_SEPARATOR;
                 }
@@ -463,9 +529,20 @@ foreach (dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, 
 
         if ($cfg_product_features) {
             echo TXT_SEPARATOR;
-            foreach (dfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $value) {
-                echo slugify($key) . "=" . str_replace('/','\/',dfTools::cleanString($value)) . "/";
+            foreach (dfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $values) {
+                echo slugify($key) . "=";
+                foreach ($values as $index => $value) {
+                    echo str_replace('/', '\/', dfTools::cleanString($value)) . "/";
+                }
             }
+        }
+
+        /**
+         * @author calamfit <https://github.com/camlafit>
+         */
+        foreach ($extra_header as $extra) {
+            echo TXT_SEPARATOR;
+            echo isset($row[$extra]) ? $row[$extra] : "";
         }
 
         echo PHP_EOL;
