@@ -188,7 +188,7 @@ $header = array_merge($header, array('title', 'link', 'description', 'alternate_
     'supplier_reference','extra_title_1', 'extra_title_2', 'tags'));
 
 if (dfTools::versionGte('1.7.0.0')) {
-    $header = array_merge($header,array('isbn'));
+    $header = array_merge($header, array('isbn'));
 }
 
 if ($cfg_display_stock_qty) {
