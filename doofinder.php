@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.11';
+    const VERSION = '3.0.12';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.11';
+        $this->version = '3.0.12';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -596,6 +596,13 @@ class Doofinder extends Module
                     ),
                     array(
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Display Stock in Data Feed'),
+                        'name' => 'DF_GS_STOCK',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ),
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('Display Prices in Data Feed'),
                         'name' => 'DF_GS_DISPLAY_PRICES',
                         'is_bool' => true,
@@ -849,6 +856,7 @@ class Doofinder extends Module
     {
         return array(
             'DF_ENABLE_HASH' => Configuration::get('DF_ENABLE_HASH'),
+            'DF_GS_STOCK' => Configuration::get('DF_GS_STOCK'),
             'DF_GS_DISPLAY_PRICES' => Configuration::get('DF_GS_DISPLAY_PRICES'),
             'DF_GS_PRICES_USE_TAX' => Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => Configuration::get('DF_FEED_FULL_PATH'),
@@ -1473,97 +1481,6 @@ class Doofinder extends Module
             }
         }
         return $array;
-    }
-
-    /**
-     * @deprecated since 3.0.5
-     */
-    public function getSQLOnlyProductsWithAttributes()
-    {
-        $attr_groups = AttributeGroup::getAttributesGroups((int) Configuration::get('PS_LANG_DEFAULT'));
-        $cfg_group_attributes_shown = explode(
-            ',',
-            dfTools::cfg(Context::getContext()->shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN')
-        );
-
-        $sql_select_attributes = array();
-        $sql_from_attributes = array();
-        $sql_from_only = ' LEFT JOIN _DB_PREFIX_product_attribute pa ON'
-                . ' (p.id_product = pa.id_product) LEFT JOIN _DB_PREFIX_product_attribute_combination pac'
-                . ' ON (pa.id_product_attribute = pac.id_product_attribute) ';
-        foreach ($attr_groups as $a_group) {
-            if (isset($cfg_group_attributes_shown) &&
-                    count($cfg_group_attributes_shown) > 0 &&
-                    $cfg_group_attributes_shown[0] !== "" &&
-                    !in_array($a_group['id_attribute_group'], $cfg_group_attributes_shown)) {
-                continue;
-            }
-            $a_group_name = (string)pSQL(str_replace('-', '_', Tools::str2url($a_group['name'])));
-            $id_atg = (int)pSQL($a_group['id_attribute_group']);
-            $sql_select_attributes[] = ' GROUP_CONCAT(DISTINCT REPLACE(pal_' . $id_atg
-                    . '.name,\'/\',\'\/\/\') SEPARATOR \'/\') as attributes_' . $a_group_name;
-            $sql_from_attributes[] = ' LEFT JOIN _DB_PREFIX_attribute pat_' . $id_atg
-                    . ' ON (pat_' . $id_atg . '.id_attribute = pac.id_attribute'
-                    . ' AND pat_' . $id_atg . '.id_attribute_group = ' . $id_atg . ' )'
-                    . ' LEFT JOIN _DB_PREFIX_attribute_lang pal_' . $id_atg
-                    . ' ON (pal_' . $id_atg . '.id_attribute = pat_' . $id_atg . '.id_attribute'
-                    . ' AND pal_' . $id_atg . '.id_lang = ' . (int) Configuration::get('PS_LANG_DEFAULT') . ') ';
-        }
-
-        $sql = "
-            SELECT
-              ps.id_product,
-              ps.show_price,
-              __ID_CATEGORY_DEFAULT__,
-
-              m.name AS manufacturer,
-              
-              IF(isnull(pa.id_product), p.__MPN__ , CONCAT(p.__MPN__,'/',
-              GROUP_CONCAT(DISTINCT pa.__MPN__ SEPARATOR '/'))) AS mpn,
-              IF(isnull(pa.id_product), p.ean13 , CONCAT(p.ean13,'/',
-              GROUP_CONCAT(DISTINCT pa.ean13 SEPARATOR '/'))) AS ean13,
-              p.ean13 AS simple_ean13,
-              p.__MPN__ AS simple_mpn,
-              pl.name,
-              pl.description,
-              pl.description_short,
-              pl.meta_title,
-              pl.meta_keywords,
-              pl.meta_description,
-              GROUP_CONCAT(DISTINCT tag.name SEPARATOR '/') AS tags,
-              pl.link_rewrite,
-              cl.link_rewrite AS cat_link_rew,
-
-              im.id_image,
-
-              p.available_for_order "
-              . (count($sql_select_attributes) ? ',' . implode(',', $sql_select_attributes) : '') . "
-            FROM
-              _DB_PREFIX_product p
-              INNER JOIN _DB_PREFIX_product_shop ps
-                ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-              LEFT JOIN _DB_PREFIX_product_lang pl
-                ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-              LEFT JOIN _DB_PREFIX_manufacturer m
-                ON (p.id_manufacturer = m.id_manufacturer)
-              LEFT JOIN _DB_PREFIX_category_lang cl
-                ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-              LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-                ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-              LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt 
-                ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-                ON (pt.id_product = p.id_product)
-                " . (count($sql_from_attributes) ? $sql_from_only . implode(' ', $sql_from_attributes) : '') . "
-            WHERE
-              __IS_ACTIVE__
-              __VISIBILITY__
-            GROUP BY
-              p.id_product
-            ORDER BY
-              p.id_product
-          ";
-
-        return $sql;
     }
 
     public function hookProductSearchProvider($params)

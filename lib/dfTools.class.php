@@ -351,6 +351,16 @@ class dfTools
      */
     public static function getAvailableProductsForLanguage($id_lang, $id_shop, $limit = false, $offset = false)
     {
+        $Shop = new Shop($id_shop);
+
+        $isbn = '';
+        if (dfTools::versionGte('1.7.0.0')) {
+          $isbn = 'p.isbn,';
+          if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+            $isbn = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
+          }
+        }
+
         $sql = "
       SELECT
         ps.id_product,
@@ -359,6 +369,10 @@ class dfTools
         m.name AS manufacturer,
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
+        ".$isbn."
+        p.upc,
+        p.reference,
+        p.supplier_reference,
         pl.name,
         pl.description,
         pl.description_short,
@@ -369,8 +383,9 @@ class dfTools
         pl.link_rewrite,
         cl.link_rewrite AS cat_link_rew,
         im.id_image,
-        p.available_for_order,
-        sa.out_of_stock
+        ps.available_for_order,
+        sa.out_of_stock,
+        sa.quantity as stock_quantity
       FROM
         _DB_PREFIX_product p
         INNER JOIN _DB_PREFIX_product_shop ps
@@ -386,7 +401,9 @@ class dfTools
         LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0)
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 
+            AND (sa.id_shop = _ID_SHOP_ OR 
+            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
@@ -408,6 +425,10 @@ class dfTools
         m.name AS manufacturer,
         IF(isnull(pa.id_product), p.__MPN__ , pa.__MPN__) AS mpn,
         IF(isnull(pa.id_product), p.ean13 , pa.ean13) AS ean13,
+        ".$isbn."
+        IF(isnull(pa.id_product), p.upc , pa.upc) AS upc,
+        IF(isnull(pa.id_product), p.reference , pa.reference) AS reference,
+        IF(isnull(pa.id_product), p.supplier_reference , pa.supplier_reference) AS supplier_reference,
         pl.name,
         pl.description,
         pl.description_short,
@@ -418,8 +439,9 @@ class dfTools
         pl.link_rewrite,
         cl.link_rewrite AS cat_link_rew,
         im.id_image,
-        p.available_for_order,
-        sa.out_of_stock
+        ps.available_for_order,
+        sa.out_of_stock,
+        sa.quantity as stock_quantity
       FROM
         _DB_PREFIX_product p
         INNER JOIN _DB_PREFIX_product_shop ps
@@ -439,7 +461,9 @@ class dfTools
         LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute))
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute) 
+            AND (sa.id_shop = _ID_SHOP_ OR 
+            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
@@ -450,9 +474,6 @@ class dfTools
 
         if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
             $sql = $sql_variations;
-        } else if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 2) {
-            $m = Module::getInstanceByName('doofinder');
-            $sql = $m->getSQLOnlyProductsWithAttributes();
         }
 
         $mpn_field = dfTools::cfg($id_shop, 'DF_GS_MPN_FIELD', 'reference');
@@ -471,9 +492,12 @@ class dfTools
             $visibility = "";
         }
 
+        
+
         $sql = self::limitSQL($sql, $limit, $offset);
         $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
                     '_ID_SHOP_' => (int)pSQL($id_shop),
+                    '_ID_SHOPGROUP_' => (int)pSQL($Shop->id_shop_group),
                     '__MPN__' => (string)pSQL($mpn_field),
                     '_IMS_COVER_' => (string)pSQL($ims_cover),
                     '__ID_CATEGORY_DEFAULT__' => (int)pSQL($id_category_default),
