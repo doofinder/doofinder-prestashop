@@ -40,6 +40,7 @@ $_MODULE['<{doofinder}prestashop>doofinder_48c07cbd1f0f4b03d59befc3e72e9b87'] = 
 $_MODULE['<{doofinder}prestashop>doofinder_daae36229556815de2395abf51714337'] = 'Feed de datos';
 $_MODULE['<{doofinder}prestashop>doofinder_477fd78ed81741789a970e7b5ef55bed'] = 'Activar hash de seguridad en la URL del feed';
 $_MODULE['<{doofinder}prestashop>doofinder_1993a31294ff235671a62b76f140587d'] = 'Si usas esto, asegúrate de actualizar la URL del feed en el dashboard de Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinder_f4e616dad799cc3168db2c1069d6c623'] = 'Mostrar cantidades en el fichero de datos';
 $_MODULE['<{doofinder}prestashop>doofinder_50d7dd6ed46e8bb16e51ebdc26b80a92'] = 'Mostrar precios en el fichero de datos';
 $_MODULE['<{doofinder}prestashop>doofinder_23069339d1b6433c0aee2a062ec8ae86'] = 'Mostrar precios con impuestos';
 $_MODULE['<{doofinder}prestashop>doofinder_67b5d1ab9314fcb5d37e78b6266ebfb1'] = 'Exportar rutas completas de categorías';
