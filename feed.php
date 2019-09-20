@@ -71,7 +71,7 @@ function slugify($text)
 }
 
 /**
-*  @author canmlafit <https://github.com/camlafit>
+*  @author camlafit <https://github.com/camlafit>
 *  Merge multidemensionnal array by value on each row
 *  https://stackoverflow.com/questions/7973915/php-merge-arrays-by-value
 */
@@ -130,6 +130,7 @@ $cfg_prices_w_taxes = dfTools::getBooleanFromRequest(
     'taxes',
     (bool) dfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', Doofinder::YES)
 );
+$cfg_display_stock_qty = dfTools::cfg($shop->id, 'DF_GS_STOCK');
 $cfg_image_size = dfTools::cfg($shop->id, 'DF_GS_IMAGE_SIZE');
 $cfg_mod_rewrite = dfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', Doofinder::YES);
 $cfg_product_variations = (int) dfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
@@ -183,11 +184,16 @@ if ($cfg_product_variations == 1) {
 }
 $header = array_merge($header, array('title', 'link', 'description', 'alternate_description',
     'meta_keywords', 'meta_title', 'meta_description', 'image_link',
-    'categories', 'availability', 'brand', 'mpn',
-    'extra_title_1', 'extra_title_2', 'tags'));
+    'categories', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
+    'supplier_reference','extra_title_1', 'extra_title_2', 'tags'));
 
+if (dfTools::versionGte('1.7.0.0')) {
+    $header = array_merge($header, array('isbn'));
+}
 
-
+if ($cfg_display_stock_qty) {
+    $header[] = 'stock_quantity';
+}
 
 if ($cfg_display_prices) {
     $header[] = 'price';
@@ -207,16 +213,6 @@ if ($cfg_product_variations == 1) {
         $header[] = $header_value;
     }
     $attribute_keys = $alt_attribute_keys;
-} elseif ($cfg_product_variations == 2) {
-    $attr_groups = AttributeGroup::getAttributesGroups((int) Configuration::get('PS_LANG_DEFAULT'));
-    foreach ($attr_groups as $a_group) {
-        if ($limit_group_attributes &&
-                !in_array($a_group['id_attribute_group'], $cfg_group_attributes_shown)) {
-            continue;
-        }
-        $a_group_name = str_replace('-', '_', Tools::str2url($a_group['name']));
-        $header[] = 'attributes_' . $a_group_name;
-    }
 }
 
 if ($cfg_product_features) {
@@ -234,7 +230,7 @@ if ($cfg_product_features) {
 
 
 /**
- * @author calamfit <https://github.com/camlafit>
+ * @author camlafit <https://github.com/camlafit>
  * Extend doofinder feed
  *
  * To add an new header, module can do an array_merge on $extra_header
@@ -303,9 +299,6 @@ foreach ($rows as $row) {
             ) . TXT_SEPARATOR;
         } else {
             $eanLink = $row['ean13'];
-            if ($cfg_product_variations == 2) {
-                $eanLink = $row['simple_ean13'];
-            }
             // ID
             echo $row['id_product'] . TXT_SEPARATOR;
             
@@ -434,6 +427,18 @@ foreach ($rows as $row) {
         // MPN
         echo dfTools::cleanString($row['mpn']) . TXT_SEPARATOR;
 
+        //EAN13
+        echo dfTools::cleanString($row['ean13']) . TXT_SEPARATOR;
+
+        //UPC
+        echo dfTools::cleanString($row['upc']) . TXT_SEPARATOR;
+
+        //REFERENCE
+        echo dfTools::cleanString($row['reference']) . TXT_SEPARATOR;
+
+        //SUPPLIER_REFERENCE
+        echo dfTools::cleanString($row['supplier_reference']) . TXT_SEPARATOR;
+
         // EXTRA_TITLE_1
         echo dfTools::cleanReferences($product_title) . TXT_SEPARATOR;
 
@@ -442,6 +447,18 @@ foreach ($rows as $row) {
 
         // TAGS
         echo dfTools::cleanString($row['tags']);
+
+        //ISBN
+        if (dfTools::versionGte('1.7.0.0')) {
+            echo TXT_SEPARATOR;
+            echo dfTools::cleanString($row['isbn']);
+        }
+
+        //STOCK_QUANTITY
+        if ($cfg_display_stock_qty) {
+            echo TXT_SEPARATOR;
+            echo dfTools::cleanString($row['stock_quantity']);
+        }
 
         // PRODUCT PRICE & ON SALE PRICE
         if ($cfg_display_prices && $cfg_product_variations !== 1) {
@@ -509,22 +526,6 @@ foreach ($rows as $row) {
             foreach ($variation_attributes as $attribute) {
                 echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
             }
-        } elseif ($cfg_product_variations == 2) {
-            foreach ($attr_groups as $a_group) {
-                if ($limit_group_attributes && !in_array($a_group['id_attribute_group'], $cfg_group_attributes_shown)) {
-                    continue;
-                }
-                $a_group_name = str_replace('-', '_', Tools::str2url($a_group['name']));
-                if (isset($row['attributes_' . $a_group_name])) {
-                    echo TXT_SEPARATOR .  str_replace(
-                        '/',
-                        '//',
-                        dfTools::cleanString($row['attributes_' . $a_group_name])
-                    );
-                } else {
-                    echo TXT_SEPARATOR;
-                }
-            }
         }
 
         if ($cfg_product_features) {
@@ -538,7 +539,7 @@ foreach ($rows as $row) {
         }
 
         /**
-         * @author calamfit <https://github.com/camlafit>
+         * @author camlafit <https://github.com/camlafit>
          */
         foreach ($extra_header as $extra) {
             echo TXT_SEPARATOR;
