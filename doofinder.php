@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.12';
+    const VERSION = '3.0.13';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.12';
+        $this->version = '3.0.13';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -541,6 +541,14 @@ class Doofinder extends Module
                         'values' => $this->getBooleanFormValue(),
                     ),
                     array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Enable embedded layer on Overwrite Search Page'),
+                        'name' => 'DF_OWSEARCHEB',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                        'desc' => $this->l('It will enable a empty div to print your embedded layer')
+                    ),
+                    array(
                         'type' => 'text',
                         'label' => $this->l('Doofinder Api Key'),
                         'name' => 'DF_API_KEY',
@@ -901,6 +909,7 @@ class Doofinder extends Module
         $fields = array(
             'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
             'DF_OWSEARCHFAC' => Configuration::get('DF_OWSEARCHFAC'),
+            'DF_OWSEARCHEB' => Configuration::get('DF_OWSEARCHEB'),
             'DF_API_KEY' => Configuration::get('DF_API_KEY'),
             'DF_APPEND_BANNER' => Configuration::get('DF_APPEND_BANNER'),
             'DF_SEARCH_SELECTOR' => Configuration::get('DF_SEARCH_SELECTOR'),
@@ -1082,40 +1091,42 @@ class Doofinder extends Module
             $overwrite_search = Configuration::get('DF_OWSEARCH', null);
             $overwrite_facets = Configuration::get('DF_OWSEARCHFAC', null);
             if (version_compare(_PS_VERSION_, '1.7', '<')) {
-                if ($overwrite_search && $overwrite_facets) {
-                    $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
-                    if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
-                        if (!$noPaginaJS) {
-                            $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-pagination.js');
-                        }
-                        if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
-                            $this->context->controller->addCSS(
-                                $css_path . 'blocklayered.css',
-                                'all'
-                            );
+                if ($overwrite_search) {
+                    if($overwrite_facets){
+                        $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
+                        if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
+                            if (!$noPaginaJS) {
+                                $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-pagination.js');
+                            }
+                            if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
+                                $this->context->controller->addCSS(
+                                    $css_path . 'blocklayered.css',
+                                    'all'
+                                );
+                            } else {
+                                $this->context->controller->addCSS(
+                                    ($this->_path) . 'views/css/doofinder-filters.css',
+                                    'all'
+                                );
+                            }
                         } else {
-                            $this->context->controller->addCSS(
-                                ($this->_path) . 'views/css/doofinder-filters.css',
-                                'all'
-                            );
+                            if (!$noPaginaJS) {
+                                $this->context->controller->addJS(
+                                    ($this->_path) . 'views/js/doofinder-pagination_15.js'
+                                );
+                            }
+                            if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
+                                $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
+                            } else {
+                                $this->context->controller->addCSS(
+                                    ($this->_path) . 'views/css/doofinder-filters-15.css',
+                                    'all'
+                                );
+                            }
                         }
-                    } else {
-                        if (!$noPaginaJS) {
-                            $this->context->controller->addJS(
-                                ($this->_path) . 'views/js/doofinder-pagination_15.js'
-                            );
+                        if (!$noFacetsJS) {
+                            $this->context->controller->addJS(($this->_path) . 'views/js/doofinder_facets.js');
                         }
-                        if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
-                            $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
-                        } else {
-                            $this->context->controller->addCSS(
-                                ($this->_path) . 'views/css/doofinder-filters-15.css',
-                                'all'
-                            );
-                        }
-                    }
-                    if (!$noFacetsJS) {
-                        $this->context->controller->addJS(($this->_path) . 'views/js/doofinder_facets.js');
                     }
                 }
                 if (!$noCookieJS) {

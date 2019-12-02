@@ -112,3 +112,5 @@ $_MODULE['<{doofinder}prestashop>support_tab_dfc465ee578939c8760c4aa00d2c7234'] 
 $_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'Ou contacter directement notre support, nous serons ravis de vous guider';
 $_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] = 'Mail de notre support';
 $_MODULE['<{doofinder}prestashop>support_tab_79061f39882168064500dc7decfd3d13'] = 'Créer gratuitement un compte!';
+$_MODULE['<{doofinder}prestashop>doofinder_62bdcf38d89dd700e09e4b71d8ed936e'] = 'Activer la couche incorporée lors du remplacement de page';
+$_MODULE['<{doofinder}prestashop>doofinder_06983604974b80704149d696e572559a'] = 'Vous allez ajouter un \ "div \" vide pour incorporer la couche Doofinder';
