@@ -31,6 +31,6 @@
 </div>
 {/if}
 {if isset($search_query) && $search_query}
-<input id="doofinder_original_search_query" value="{$search_query}" />
+<input type="text" id="doofinder_original_search_query" value="{$search_query|escape:'htmlall':'UTF-8'}" />
 {/if}
 

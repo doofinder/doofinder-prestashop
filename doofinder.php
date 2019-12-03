@@ -1092,7 +1092,7 @@ class Doofinder extends Module
             $overwrite_facets = Configuration::get('DF_OWSEARCHFAC', null);
             if (version_compare(_PS_VERSION_, '1.7', '<')) {
                 if ($overwrite_search) {
-                    if($overwrite_facets){
+                    if ($overwrite_facets) {
                         $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
                         if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
                             if (!$noPaginaJS) {
