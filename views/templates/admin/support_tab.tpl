@@ -43,6 +43,12 @@
 					
 					<dt>&middot; {l s='All documentation in one place!' mod='doofinder'}</dt>
 					<dd><a href="https://www.doofinder.com/support/" target="_blank">https://www.doofinder.com/support/</a></dd>
+
+					<dt>&middot; {l s='Code example to paste on your Doofinder dashboard to use Embedded layer instead of API on your PrestaShop native search results page' mod='doofinder'}</dt>
+					<dd><a href="https://gist.github.com/danidomen/71f03ad80ac58e22af94bf479675f521" target="_blank">GitHub</a></dd>
+
+					<dt>&middot; {l s='You can debug or disable some options on the hidden advanced tab of the module. Caution: Use only if you are a experienced user!!' mod='doofinder'}</dt>
+					<dd><a href="{$adv_url}">{l s='Enable advanced module tab options' mod='doofinder'}</a></dd>
 				</dl>
 			</div>
 		</div>

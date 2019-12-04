@@ -19,7 +19,7 @@
                                 <img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" />
                                 <img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_mac.png" />
 								<div class="col-md-12">
-				<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=prestashop_module_free_trial_link" target="_blank" class="btn btn-primary btn-lg" style="font-size:27px;background-color: #27c356" id="create-account-btn">{l s='Use your free trial now!' mod='doofinder'}</a>
+				<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=prestashop_module_free_trial_link" target="_blank" class="btn btn-primary btn-lg" style="font-size:27px;background-color: #27c356;white-space: normal;" id="create-account-btn">{l s='Use your free trial now!' mod='doofinder'}</a>
 				</div>
 			</div>
 			<div class="col-md-6">
