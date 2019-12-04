@@ -48,7 +48,7 @@
 					<dd><a href="https://gist.github.com/danidomen/71f03ad80ac58e22af94bf479675f521" target="_blank">GitHub</a></dd>
 
 					<dt>&middot; {l s='You can debug or disable some options on the hidden advanced tab of the module. Caution: Use only if you are a experienced user!!' mod='doofinder'}</dt>
-					<dd><a href="{$adv_url}">{l s='Enable advanced module tab options' mod='doofinder'}</a></dd>
+					<dd><a href="{html_entity_decode($adv_url|escape:'htmlall':'UTF-8')}">{l s='Enable advanced module tab options' mod='doofinder'}</a></dd>
 				</dl>
 			</div>
 		</div>

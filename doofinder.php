@@ -68,14 +68,14 @@ class Doofinder extends Module
         $this->confirmUninstall = $this->l('Are you sure? This will not cancel your account in Doofinder service');
 
         $olderPS17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
-        $this->ovFile =  '/override/controllers/front/'.(!$olderPS17 ? 'listing/': '').'SearchController.php'; 
+        $this->ovFile =  '/override/controllers/front/'.(!$olderPS17 ? 'listing/': '').'SearchController.php';
     }
 
     public function manualOverride($restart = false)
     {
         
         if ($restart) {
-            if (file_exists(dirname(__FILE__) . $this->ovFile )) {
+            if (file_exists(dirname(__FILE__) . $this->ovFile)) {
                 unlink(dirname(__FILE__) . $this->ovFile);
             }
         }
@@ -84,9 +84,9 @@ class Doofinder extends Module
         $destFile = dirname(__FILE__) . $this->ovFile;
 
         $olderPS17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
-        if (!$olderPS17 
+        if (!$olderPS17
             && !file_exists(_PS_ROOT_DIR_ . '/override/controllers/front/listing')) {
-            mkdir(_PS_ROOT_DIR_ . '/override/controllers/front/listing', 0755, true);   
+            mkdir(_PS_ROOT_DIR_ . '/override/controllers/front/listing', 0755, true);
         }
 
         if (file_exists($originFile)) {
@@ -108,7 +108,7 @@ class Doofinder extends Module
 
     public function install()
     {
-        if (file_exists(dirname(__FILE__) . $this->ovFile )) {
+        if (file_exists(dirname(__FILE__) . $this->ovFile)) {
             unlink(dirname(__FILE__) . $this->ovFile);
         }
         
@@ -993,7 +993,7 @@ class Doofinder extends Module
         return $fields;
     }
 
-    protected function getConfigFormValuesEmbeddedSearch() 
+    protected function getConfigFormValuesEmbeddedSearch()
     {
         $fields = array(
             'DF_OWSEARCHEB' => Configuration::get('DF_OWSEARCHEB'),
@@ -2014,7 +2014,8 @@ class Doofinder extends Module
         }
     }
 
-    public function getEmbeddedTemplateLocation(){
+    public function getEmbeddedTemplateLocation()
+    {
         return _PS_MODULE_DIR_ . $this->name . '/views/templates/front/doofinder-embedded.tpl';
     }
     
