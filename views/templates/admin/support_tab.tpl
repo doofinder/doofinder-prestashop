@@ -33,7 +33,7 @@
 				<h3>{l s='Need help configuring your search engine?' mod='doofinder'}</h3>
 				<dl>
 					<dt>&middot; {l s='How to install Doofinder in PrestaShop 1.4+' mod='doofinder'}</dt>
-                                        <dd><a href="https://www.doofinder.com/support/plugins/prestashop-14" target="_blank">https://www.doofinder.com/support/plugins/prestashop-14</a></dd>
+					<dd><a href="https://www.doofinder.com/support/plugins/prestashop-14" target="_blank">https://www.doofinder.com/support/plugins/prestashop-14</a></dd>
 					
 					<dt>&middot; {l s='Products are displayed without VAT in PrestaShop' mod='doofinder'}</dt>
 					<dd><a href="https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop" target="_blank">https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop</a></dd>
@@ -43,26 +43,31 @@
 					
 					<dt>&middot; {l s='All documentation in one place!' mod='doofinder'}</dt>
 					<dd><a href="https://www.doofinder.com/support/" target="_blank">https://www.doofinder.com/support/</a></dd>
+
+					<dt>&middot; {l s='Code example to paste on your Doofinder dashboard to use Embedded layer instead of API on your PrestaShop native search results page' mod='doofinder'}</dt>
+					<dd><a href="https://gist.github.com/danidomen/71f03ad80ac58e22af94bf479675f521" target="_blank">GitHub</a></dd>
+
+					<dt>&middot; {l s='You can debug or disable some options on the hidden advanced tab of the module. Caution: Use only if you are a experienced user!!' mod='doofinder'}</dt>
+					<dd><a href="{html_entity_decode($adv_url|escape:'htmlall':'UTF-8')}">{l s='Enable advanced module tab options' mod='doofinder'}</a></dd>
 				</dl>
 			</div>
 		</div>
 
 		<hr />
-		
+
 		<div class="row">
 			<div class="col-md-12">
 				<h4>{l s='Or contact directly with us. We will be glad to help you' mod='doofinder'}</h4>
-				
 				<dl>
 					<dt>&middot; {l s='Support email' mod='doofinder'}</dt>
-                                        <dd><a href="mailto:support@doofinder.com" target="_blank">support@doofinder.com</a></dd>
+					<dd><a href="mailto:support@doofinder.com" target="_blank">support@doofinder.com</a></dd>
 				</dl>
 			</div>
 		</div>
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaign=support_tab&utm_content=prestashop_module_free_trial_link" target="_blank" class="btn btn-primary btn-lg" style="font-size:27px;background-color: #27c356" id="create-account-btn">{l s='Create a free acount!' mod='doofinder'}</a>
-                    </div>
-                </div>
+		<div class="row">
+			<div class="col-md-12 text-center">
+				<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaign=support_tab&utm_content=prestashop_module_free_trial_link" target="_blank" class="btn btn-primary btn-lg" style="font-size:27px;background-color: #27c356" id="create-account-btn">{l s='Create a free acount!' mod='doofinder'}</a>
+			</div>
+		</div>
 	</div>
 </div>

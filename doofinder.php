@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.0.13';
+    const VERSION = '3.1.0';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.0.13';
+        $this->version = '3.1.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -66,19 +66,35 @@ class Doofinder extends Module
         $this->description = $this->l('Install Doofinder in your shop with no effort');
 
         $this->confirmUninstall = $this->l('Are you sure? This will not cancel your account in Doofinder service');
+
+        $olderPS17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
+        $this->ovFile =  '/override/controllers/front/'.(!$olderPS17 ? 'listing/': '').'SearchController.php';
     }
 
-    public function manualOverride()
+    public function manualOverride($restart = false)
     {
+        
+        if ($restart) {
+            if (file_exists(dirname(__FILE__) . $this->ovFile)) {
+                unlink(dirname(__FILE__) . $this->ovFile);
+            }
+        }
         $msg = $this->displayConfirmationCtm($this->l('Override installed sucessfully!'));
         $originFile = dirname(__FILE__) . '/lib/SearchController.php';
-        $destFile = dirname(__FILE__) . '/override/controllers/front/SearchController.php';
+        $destFile = dirname(__FILE__) . $this->ovFile;
+
+        $olderPS17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
+        if (!$olderPS17
+            && !file_exists(_PS_ROOT_DIR_ . '/override/controllers/front/listing')) {
+            mkdir(_PS_ROOT_DIR_ . '/override/controllers/front/listing', 0755, true);
+        }
 
         if (file_exists($originFile)) {
             if (!file_exists($destFile)) {
                 copy($originFile, $destFile);
                 // Install overrides
                 try {
+                    $this->uninstallOverrides();
                     $this->installOverrides();
                 } catch (Exception $e) {
                     $msg = sprintf($this->displayErrorCtm('Unable to install override: %s'), $e->getMessage());
@@ -92,9 +108,10 @@ class Doofinder extends Module
 
     public function install()
     {
-        if (file_exists(dirname(__FILE__) . '/override/controllers/front/SearchController.php')) {
-            unlink(dirname(__FILE__) . '/override/controllers/front/SearchController.php');
+        if (file_exists(dirname(__FILE__) . $this->ovFile)) {
+            unlink(dirname(__FILE__) . $this->ovFile);
         }
+        
         $msgErrorColumn = 'This module need to be hooked in a column and your '
                 . 'theme does not implement one if you want Search Facets';
         if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true &&
@@ -171,6 +188,9 @@ class Doofinder extends Module
         if ($adv) {
             $output.= $this->renderFormAdvanced();
         }
+        $adv_url = $this->context->link->getAdminLink('AdminModules', true) . '&adv=1'
+        . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
+        $this->context->smarty->assign('adv_url', $adv_url);
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_footer.tpl');
 
         return $output;
@@ -326,9 +346,10 @@ class Doofinder extends Module
                 }
             }
         } else {
-            if (!$this->isRegisteredInHookInShop('productSearchProvider', $id_shop)) {
+            $overwrite_search = Configuration::get('DF_OWSEARCH', null);
+            if ($overwrite_search && !$this->isRegisteredInHookInShop('productSearchProvider', $id_shop)) {
                 $link = $this->context->link->getAdminLink('AdminModulesPositions');
-                $msg = $this->l('You must hook your module on productSearchProvider');
+                $msg = $this->l('You must hook Doofinder on productSearchProvider');
                 $errorsMsg .= $this->displayErrorCtm($msg, $link);
             }
         }
@@ -336,6 +357,7 @@ class Doofinder extends Module
         $this->context->smarty->assign('id_tab', 'internal_search_tab');
         $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $errorsMsg;
+        $html.= $this->renderFormDataEmbeddedSearch($adv);
         $html.= $helper->generateForm(array($this->getConfigFormInternalSearch()));
         $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
@@ -372,7 +394,7 @@ class Doofinder extends Module
         return $html;
     }
 
-    protected function renderFormDataFeedCurrency()
+    protected function renderFormDataFeedCurrency($adv = false)
     {
         $helper = new HelperForm();
 
@@ -385,6 +407,7 @@ class Doofinder extends Module
         $helper->identifier = $this->identifier;
         //$helper->submit_action = 'submitDoofinderModuleDataFeedCurrency';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
@@ -394,6 +417,30 @@ class Doofinder extends Module
             'id_language' => $this->context->language->id,
         );
         return $helper->generateForm(array($this->getConfigFormDataFeedCurrency()));
+    }
+
+    protected function renderFormDataEmbeddedSearch($adv = false)
+    {
+        $helper = new HelperForm();
+
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $helper->module = $this;
+        $helper->default_form_language = $this->context->language->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
+
+        $helper->identifier = $this->identifier;
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
+                . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        $helper->tpl_vars = array(
+            'fields_value' => $this->getConfigFormValuesEmbeddedSearch(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id,
+        );
+        return $helper->generateForm(array($this->getConfigFormEmbeddedSearch()));
     }
 
     protected function getConfigFormDataFeedCurrency()
@@ -517,14 +564,42 @@ class Doofinder extends Module
         );
     }
 
+    protected function getConfigFormEmbeddedSearch()
+    {
+        return array(
+            'form' => array(
+                'legend' => array(
+                    'title' => $this->l('Embedded Search'),
+                    'icon' => 'icon-cogs',
+                ),
+                'description' => $this->l('DF_EB_LAYER_DESCRIPTION'),
+                'input' => array(
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Override Search Page & Enable embedded layer'),
+                        'name' => 'DF_OWSEARCHEB',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                        'desc' => $this->l('It will enable a empty div to print your embedded layer')
+                    )
+                ),
+                'submit' => array(
+                    'title' => $this->l('Save Embedded Search Options'),
+                    'name' => 'submitDoofinderModuleEmbeddedSearch'
+                ),
+            ),
+        );
+    }
+
     protected function getConfigFormInternalSearch()
     {
         return array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Internal Search'),
+                    'title' => $this->l('API Internal Search'),
                     'icon' => 'icon-cogs',
                 ),
+                'description' => $this->l('DF_API_LAYER_DESCRIPTION'),
                 'input' => array(
                     array(
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -821,6 +896,14 @@ class Doofinder extends Module
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ),
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Restart manual override'),
+                        'name' => 'DF_RESTART_OV',
+                        'desc' => $this->l('This will try to remove & reinstall the SearchController'),
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save Internal Search Options'),
@@ -910,6 +993,15 @@ class Doofinder extends Module
         return $fields;
     }
 
+    protected function getConfigFormValuesEmbeddedSearch()
+    {
+        $fields = array(
+            'DF_OWSEARCHEB' => Configuration::get('DF_OWSEARCHEB'),
+        );
+
+        return $fields;
+    }
+
     protected function getConfigFormValuesDataFeedCurrency()
     {
         $default_currency = Currency::getDefaultCurrency();
@@ -945,6 +1037,10 @@ class Doofinder extends Module
             $form_values = array_merge($form_values, $this->getConfigFormValuesInternalSearch());
             $formUpdated = 'internal_search_tab';
         }
+        if (((bool) Tools::isSubmit('submitDoofinderModuleEmbeddedSearch')) == true) {
+            $form_values = array_merge($form_values, $this->getConfigFormValuesEmbeddedSearch());
+            $formUpdated = 'internal_search_tab';
+        }
         if (((bool) Tools::isSubmit('submitDoofinderModuleCustomCSS')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesCustomCSS());
             $formUpdated = 'custom_css_tab';
@@ -954,6 +1050,10 @@ class Doofinder extends Module
             $formUpdated = 'advanced_tab';
             $messages.= $this->testDoofinderApi();
             $this->context->smarty->assign('adv', 1);
+            $restartOV = Tools::getValue('DF_RESTART_OV');
+            if ($restartOV) {
+                $messages.= $this->manualOverride(true);
+            }
         }
 
         foreach (array_keys($form_values) as $key) {
@@ -983,8 +1083,8 @@ class Doofinder extends Module
             }
         }
         $ovrSearch = Configuration::get('DF_OWSEARCH');
-        if ($ovrSearch && $formUpdated == 'internal_search_tab' &&
-                version_compare(_PS_VERSION_, '1.7', '<') === true) {
+        $embeddedSearch = Configuration::get('DF_OWSEARCHEB');
+        if (($ovrSearch || $embeddedSearch) && $formUpdated == 'internal_search_tab') {
             $messages.= $this->manualOverride();
         }
         
@@ -1082,40 +1182,42 @@ class Doofinder extends Module
             $overwrite_search = Configuration::get('DF_OWSEARCH', null);
             $overwrite_facets = Configuration::get('DF_OWSEARCHFAC', null);
             if (version_compare(_PS_VERSION_, '1.7', '<')) {
-                if ($overwrite_search && $overwrite_facets) {
-                    $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
-                    if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
-                        if (!$noPaginaJS) {
-                            $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-pagination.js');
-                        }
-                        if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
-                            $this->context->controller->addCSS(
-                                $css_path . 'blocklayered.css',
-                                'all'
-                            );
+                if ($overwrite_search) {
+                    if ($overwrite_facets) {
+                        $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
+                        if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
+                            if (!$noPaginaJS) {
+                                $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-pagination.js');
+                            }
+                            if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
+                                $this->context->controller->addCSS(
+                                    $css_path . 'blocklayered.css',
+                                    'all'
+                                );
+                            } else {
+                                $this->context->controller->addCSS(
+                                    ($this->_path) . 'views/css/doofinder-filters.css',
+                                    'all'
+                                );
+                            }
                         } else {
-                            $this->context->controller->addCSS(
-                                ($this->_path) . 'views/css/doofinder-filters.css',
-                                'all'
-                            );
+                            if (!$noPaginaJS) {
+                                $this->context->controller->addJS(
+                                    ($this->_path) . 'views/js/doofinder-pagination_15.js'
+                                );
+                            }
+                            if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
+                                $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
+                            } else {
+                                $this->context->controller->addCSS(
+                                    ($this->_path) . 'views/css/doofinder-filters-15.css',
+                                    'all'
+                                );
+                            }
                         }
-                    } else {
-                        if (!$noPaginaJS) {
-                            $this->context->controller->addJS(
-                                ($this->_path) . 'views/js/doofinder-pagination_15.js'
-                            );
+                        if (!$noFacetsJS) {
+                            $this->context->controller->addJS(($this->_path) . 'views/js/doofinder_facets.js');
                         }
-                        if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
-                            $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
-                        } else {
-                            $this->context->controller->addCSS(
-                                ($this->_path) . 'views/css/doofinder-filters-15.css',
-                                'all'
-                            );
-                        }
-                    }
-                    if (!$noFacetsJS) {
-                        $this->context->controller->addJS(($this->_path) . 'views/js/doofinder_facets.js');
                     }
                 }
                 if (!$noCookieJS) {
@@ -1910,6 +2012,11 @@ class Doofinder extends Module
             echo json_encode($response);
             return false;
         }
+    }
+
+    public function getEmbeddedTemplateLocation()
+    {
+        return _PS_MODULE_DIR_ . $this->name . '/views/templates/front/doofinder-embedded.tpl';
     }
     
     private function debug($message)
