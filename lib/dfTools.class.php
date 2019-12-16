@@ -545,7 +545,7 @@ class dfTools
         if (isset(self::$cached_category_paths[$id_category]))
             return self::$cached_category_paths[$id_category];
 
-        $excluded_ids = implode(',', self::getRootCategoryIds($id_lang));
+        $excluded_ids = self::getRootCategoryIds($id_lang);
 
         $sql = "
       SELECT
@@ -574,7 +574,7 @@ class dfTools
         $sql = self::prepareSQL($sql, array('_ID_CATEGORY_' => (int)pSQL($id_category),
                     '_ID_SHOP_' => (int)pSQL($id_shop),
                     '_ID_LANG_' => (int)pSQL($id_lang),
-                    '_EXCLUDED_IDS_' => (string)pSQL($excluded_ids)));
+                    '_EXCLUDED_IDS_' => (string)pSQL(implode(',',$excluded_ids))));
         
         $sql = str_replace("\'","'",$sql);
 
