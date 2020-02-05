@@ -1633,10 +1633,10 @@ class Doofinder extends Module
         }
 
         $sql = 'SELECT COUNT(*)
-			FROM `' . _DB_PREFIX_ . 'hook_module` hm
-			LEFT JOIN `' . _DB_PREFIX_ . 'hook` h ON
+            FROM `' . _DB_PREFIX_ . 'hook_module` hm
+            LEFT JOIN `' . _DB_PREFIX_ . 'hook` h ON
                             (h.`id_hook` = hm.`id_hook`)
-			WHERE h.`name` = \'' . (string)pSQL($hook) . '\''
+            WHERE h.`name` = \'' . (string)pSQL($hook) . '\''
                 . ' AND hm.id_shop = ' . (int)pSQL($id_shop) . ' AND hm.`id_module` = ' . (int) pSQL($this->id);
         return Db::getInstance()->getValue($sql);
     }
@@ -1646,7 +1646,7 @@ class Doofinder extends Module
         if (!class_exists('DoofinderApi')) {
             include_once dirname(__FILE__) . '/lib/doofinder_api.php';
         }
-		$result = false;
+        $result = false;
         $messages = '';
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
@@ -1658,8 +1658,8 @@ class Doofinder extends Module
                         $df = new DoofinderApi($hash_id, $api_key, false, array('apiVersion' => '5'));
                         $dfOptions = $df->getOptions();
                         if ($dfOptions) {
-                            $opt = json_decode($dfOptions,true);
-                            if ($opt['query_limit_reached']) {							
+                            $opt = json_decode($dfOptions, true);
+                            if ($opt['query_limit_reached']) {
                                 $msg = 'Error: Credentials OK but limit query reached for Search Engine - ';
                                 $messages.= $this->displayErrorCtm($this->l($msg) . $lang_iso);
                             } else {
@@ -1683,11 +1683,11 @@ class Doofinder extends Module
                 }
             }
         }
-		if ($onlyOneLang) {
-			return $result;
-		} else {
-			return $messages;
-		}
+        if ($onlyOneLang) {
+            return $result;
+        } else {
+            return $messages;
+        }
     }
 
     public function getDoofinderTermsOptions($only_facets = true)
