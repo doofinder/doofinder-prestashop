@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.1.0';
+    const VERSION = '3.1.2';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.1.1';
+        $this->version = '3.1.2';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1238,13 +1238,16 @@ class Doofinder extends Module
                 $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-banner.js');
             }
         }
+        $extraCSS = Configuration::get('DF_EXTRA_CSS');
         $cssVS = (int)Configuration::get('DF_CSS_VS');
         $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
-        if (file_exists(dirname(__FILE__).'/views/css/'.$file)) {
-            $this->context->controller->addCSS(
-                ($this->_path) . 'views/css/'.$file,
-                'all'
-            );
+        if ($extraCSS) {
+            if (file_exists(dirname(__FILE__).'/views/css/'.$file)) {
+                $this->context->controller->addCSS(
+                    ($this->_path) . 'views/css/'.$file,
+                    'all'
+                );
+            }
         }
         return $this->display(__FILE__, 'views/templates/front/script.tpl');
     }
@@ -1587,11 +1590,15 @@ class Doofinder extends Module
 
     public function hookProductSearchProvider($params)
     {
-        $query = $params['query'];
-        if ($query->getSearchString()) {
-            return new DoofinderProductSearchProvider($this);
+        if ($this->testDoofinderApi(Context::getContext()->language->iso_code)) {
+            $query = $params['query'];
+            if ($query->getSearchString()) {
+                return new DoofinderProductSearchProvider($this);
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            return false;
         }
     }
 
@@ -1626,47 +1633,61 @@ class Doofinder extends Module
         }
 
         $sql = 'SELECT COUNT(*)
-			FROM `' . _DB_PREFIX_ . 'hook_module` hm
-			LEFT JOIN `' . _DB_PREFIX_ . 'hook` h ON
+            FROM `' . _DB_PREFIX_ . 'hook_module` hm
+            LEFT JOIN `' . _DB_PREFIX_ . 'hook` h ON
                             (h.`id_hook` = hm.`id_hook`)
-			WHERE h.`name` = \'' . (string)pSQL($hook) . '\''
+            WHERE h.`name` = \'' . (string)pSQL($hook) . '\''
                 . ' AND hm.id_shop = ' . (int)pSQL($id_shop) . ' AND hm.`id_module` = ' . (int) pSQL($this->id);
         return Db::getInstance()->getValue($sql);
     }
 
-    public function testDoofinderApi()
+    public function testDoofinderApi($onlyOneLang = false)
     {
         if (!class_exists('DoofinderApi')) {
             include_once dirname(__FILE__) . '/lib/doofinder_api.php';
         }
+        $result = false;
         $messages = '';
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            $hash_id = Configuration::get('DF_HASHID_' . Tools::strtoupper($lang['iso_code']));
-            $api_key = Configuration::get('DF_API_KEY');
-            $lang_iso = Tools::strtoupper($lang['iso_code']);
-            if ($hash_id && $api_key) {
-                try {
-                    $df = new DoofinderApi($hash_id, $api_key, false, array('apiVersion' => '5'));
-                    $dfOptions = $df->getOptions();
-                    if ($dfOptions) {
-                        $msg = 'Connection succesful for Search Engine - ';
-                        $messages.= $this->displayConfirmationCtm($this->l($msg) . $lang_iso);
-                    } else {
-                        $msg = 'Error: no connection for Search Engine - ';
-                        $messages.= $this->displayErrorCtm($this->l($msg) . $lang_iso);
+            if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
+                $hash_id = Configuration::get('DF_HASHID_' . Tools::strtoupper($lang['iso_code']));
+                $api_key = Configuration::get('DF_API_KEY');
+                $lang_iso = Tools::strtoupper($lang['iso_code']);
+                if ($hash_id && $api_key) {
+                    try {
+                        $df = new DoofinderApi($hash_id, $api_key, false, array('apiVersion' => '5'));
+                        $dfOptions = $df->getOptions();
+                        if ($dfOptions) {
+                            $opt = json_decode($dfOptions, true);
+                            if ($opt['query_limit_reached']) {
+                                $msg = 'Error: Credentials OK but limit query reached for Search Engine - ';
+                                $messages.= $this->displayErrorCtm($this->l($msg) . $lang_iso);
+                            } else {
+                                $result = true;
+                                $msg = 'Connection succesful for Search Engine - ';
+                                $messages.= $this->displayConfirmationCtm($this->l($msg) . $lang_iso);
+                            }
+                        } else {
+                            $msg = 'Error: no connection for Search Engine - ';
+                            $messages.= $this->displayErrorCtm($this->l($msg) . $lang_iso);
+                        }
+                    } catch (DoofinderException $e) {
+                        $messages.= $this->displayErrorCtm($e->getMessage() . ' - Search Engine ' . $lang_iso);
+                    } catch (Exception $e) {
+                        $msg = $e->getMessage() . ' - Search Engine ';
+                        $messages.= $this->displayErrorCtm($msg . $lang_iso);
                     }
-                } catch (DoofinderException $e) {
-                    $messages.= $this->displayErrorCtm($e->getMessage() . ' - Search Engine ' . $lang_iso);
-                } catch (Exception $e) {
-                    $msg = $e->getMessage() . ' - Search Engine ';
-                    $messages.= $this->displayErrorCtm($msg . $lang_iso);
+                } else {
+                    $msg = 'Empty Api Key or empty Search Engine - ';
+                    $messages.= $this->displayWarningCtm($this->l($msg) . $lang_iso);
                 }
-            } else {
-                $msg = 'Empty Api Key or empty Search Engine - ';
-                $messages.= $this->displayWarningCtm($this->l($msg) . $lang_iso);
             }
         }
-        return $messages;
+        if ($onlyOneLang) {
+            return $result;
+        } else {
+            return $messages;
+        }
     }
 
     public function getDoofinderTermsOptions($only_facets = true)
