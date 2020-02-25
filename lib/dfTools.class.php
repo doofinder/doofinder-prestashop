@@ -429,6 +429,7 @@ class dfTools
         IF(isnull(pa.id_product), p.upc , pa.upc) AS upc,
         IF(isnull(pa.id_product), p.reference , pa.reference) AS reference,
         IF(isnull(pa.id_product), p.supplier_reference , pa.supplier_reference) AS supplier_reference,
+        IF(isnull(pa.id_product), null , pas.default_on) AS df_group_leader,
         pl.name,
         pl.description,
         pl.description_short,
@@ -456,6 +457,8 @@ class dfTools
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT OUTER JOIN _DB_PREFIX_product_attribute pa 
           ON (p.id_product = pa.id_product)
+        LEFT JOIN _DB_PREFIX_product_attribute_shop pas 
+          ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)  
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im 
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
         LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
