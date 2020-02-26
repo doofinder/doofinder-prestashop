@@ -185,7 +185,7 @@ if ($cfg_product_variations == 1) {
 $header = array_merge($header, array('title', 'link', 'description', 'alternate_description',
     'meta_keywords', 'meta_title', 'meta_description', 'image_link',
     'categories', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
-    'supplier_reference','extra_title_1', 'extra_title_2', 'tags'));
+    'supplier_reference', 'extra_title_1', 'extra_title_2', 'tags'));
 
 if (dfTools::versionGte('1.7.0.0')) {
     $header = array_merge($header, array('isbn'));
@@ -202,6 +202,7 @@ if ($cfg_display_prices) {
 
 if ($cfg_product_variations == 1) {
     $header[] = 'variation_reference';
+    $header[] = 'df_group_leader';
     $attribute_keys = dfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
     $alt_attribute_keys = array();
     foreach ($attribute_keys as $key) {
@@ -518,6 +519,8 @@ foreach ($rows as $row) {
         if ($cfg_product_variations == 1) {
             echo TXT_SEPARATOR;
             echo $row['variation_reference'];
+            echo TXT_SEPARATOR;
+            echo $row['df_group_leader'];
             $variation_attributes = dfTools::getAttributesForProductVariation(
                 $row['id_product_attribute'],
                 $lang->id,
