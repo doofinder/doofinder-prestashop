@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.1.3';
+    const VERSION = '3.1.4';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.1.3';
+        $this->version = '3.1.4';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1989,10 +1989,10 @@ class Doofinder extends Module
     {
         $this->context->smarty->assign(
             array(
-                'type_message' => $type,
-                'type_alert' => $alert,
-                'message' => $string,
-                'link' => $link
+                'd_type_message' => $type,
+                'd_type_alert' => $alert,
+                'd_message' => $string,
+                'd_link' => $link
             )
         );
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
