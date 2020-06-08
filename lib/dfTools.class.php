@@ -336,7 +336,9 @@ class dfTools
         }
 
         foreach ($result as $elem) {
+          if (array_search($elem['group_name'], $attribute_keys) !== false) {
             $attributes[array_search($elem['group_name'], $attribute_keys)] = $elem['name'];
+          }
         }
         return $attributes;
     }
