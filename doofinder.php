@@ -109,7 +109,10 @@ class Doofinder extends Module
     public function install()
     {
         return parent::install();
-        //@Todo mover todo el instalador.
+    }
+
+    public function manualInstallation()
+    {
         if (file_exists(dirname(__FILE__) . $this->ovFile)) {
             unlink(dirname(__FILE__) . $this->ovFile);
         }
@@ -132,8 +135,7 @@ class Doofinder extends Module
             $this->registerHook('displayLeftColumn');
         }
 
-        if (!parent::install() ||
-                !$this->registerHook('header') ||
+        if (!$this->registerHook('header') ||
                 !$this->registerHook('displayHeader') ||
                 !$this->registerHook('displayFooter') ||
                 !$this->registerHook('displayMobileTopSiteMap')) {
@@ -196,7 +198,7 @@ class Doofinder extends Module
             . '&token='.$token
             . '&redirect='.urlencode($redirect);
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
-        $this->context->smarty->assign('checkConnection',$this->checkOutsideConnection());
+        $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
 
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
@@ -217,10 +219,12 @@ class Doofinder extends Module
         return $output;
     }
 
-    protected function isConfigured(){
+    protected function isConfigured()
+    {
         $skip = Tools::getValue('skip');
         if ($skip) {
             Configuration::updateValue('DF_ENABLE_HASH', 0);
+            $this->manualInstallation();
         }
         $sql = 'SELECT id_configuration FROM '._DB_PREFIX_.'configuration WHERE name = \'DF_ENABLE_HASH\'';
         return Db::getInstance()->getValue($sql);
@@ -232,7 +236,7 @@ class Doofinder extends Module
         $enable_hash = Configuration::get('DF_ENABLE_HASH');
         $urls = array();
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            foreach (Currency::getCurrencies() as $cur){
+            foreach (Currency::getCurrencies() as $cur) {
                 $currencyIso = Tools::strtoupper($cur['iso_code']);
                 $url = $this->context->shop->getBaseURL(true, false)
                         . $this->_path
@@ -421,35 +425,8 @@ class Doofinder extends Module
         $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $this->renderFeedURLs();
         $html.= $helper->generateForm(array($this->getConfigFormDataFeed()));
-        $html.= $this->renderFormDataFeedCurrency();
         $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
-    }
-
-    protected function renderFormDataFeedCurrency($adv = false)
-    {
-        return false;
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        //$helper->submit_action = 'submitDoofinderModuleDataFeedCurrency';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-                . (($adv)?'&adv=1':'')
-                . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValuesDataFeedCurrency(),
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-        return $helper->generateForm(array($this->getConfigFormDataFeedCurrency()));
     }
 
     protected function renderFormDataEmbeddedSearch($adv = false)
@@ -474,40 +451,6 @@ class Doofinder extends Module
             'id_language' => $this->context->language->id,
         );
         return $helper->generateForm(array($this->getConfigFormEmbeddedSearch()));
-    }
-
-    protected function getConfigFormDataFeedCurrency()
-    {
-        $form = array(
-            'form' => array(
-                'legend' => array(
-                    'title' => $this->l('Data Feed Currencies'),
-                    'icon' => 'icon-dolar-sign',
-                ),
-                'submit' => array(
-                    'title' => $this->l('Save Data Feed Currency Options'),
-                    'name' => 'submitDoofinderModuleDataFeedCurrency'
-                ),
-            ),
-        );
-
-        $optname = 'DF_GS_CURRENCY_';
-        $currencies = dfTools::getAvailableCurrencies();
-        foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            $realoptname = $optname . Tools::strtoupper($lang['iso_code']);
-            $form['form']['input'][] = array(
-                'label' => sprintf($this->l('Currency for %s'), $lang['name']),
-                'type' => 'select',
-                'options' => array(
-                    'query' => $currencies,
-                    'id' => 'iso_code',
-                    'name' => 'name',
-                ),
-                'name' => $realoptname,
-                'required' => true,
-            );
-        }
-        return $form;
     }
 
     protected function getBooleanFormValue()
@@ -561,7 +504,7 @@ class Doofinder extends Module
         foreach ($currencies as $cur) {
             $currency_iso = Tools::strtoupper($cur['iso_code']);
             $label = $this->l('Doofinder Search Engine ID');
-            $label.= ' '.$this->l(sprintf('for currency %s',$currency_iso));
+            $label.= ' '.$this->l(sprintf('for currency %s', $currency_iso));
             $inputs[] = array(
                 'type' => 'text',
                 'label' => $label,
@@ -1023,7 +966,6 @@ class Doofinder extends Module
                     $fields['DF_HASHID_'.$currency_iso][$lang['id_lang']] = Configuration::get($field_name_iso);
                 }
             }
-            
         }
         return $fields;
     }
@@ -1051,20 +993,6 @@ class Doofinder extends Module
         return $fields;
     }
 
-    protected function getConfigFormValuesDataFeedCurrency()
-    {
-        $default_currency = Currency::getDefaultCurrency();
-        $configValues = array();
-
-        $optname = 'DF_GS_CURRENCY_';
-        foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            $realoptname = $optname . Tools::strtoupper($lang['iso_code']);
-            $value = Configuration::get($realoptname);
-            $configValues[$realoptname] = (($value) ? $value : $default_currency->iso_code);
-        }
-        return $configValues;
-    }
-
     protected function postProcess()
     {
         $form_values = array();
@@ -1072,10 +1000,6 @@ class Doofinder extends Module
         $messages = '';
         if (((bool) Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesDataFeed());
-            $formUpdated = 'data_feed_tab';
-        }
-        if (((bool) Tools::isSubmit('submitDoofinderModuleDataFeedCurrency')) == true) {
-            $form_values = array_merge($form_values, $this->getConfigFormValuesDataFeedCurrency());
             $formUpdated = 'data_feed_tab';
         }
         if (((bool) Tools::isSubmit('submitDoofinderModuleSearchLayer')) == true) {
@@ -1135,7 +1059,7 @@ class Doofinder extends Module
         $embeddedSearch = Configuration::get('DF_OWSEARCHEB');
         if (($ovrSearch || $embeddedSearch) && $formUpdated == 'internal_search_tab') {
             $messages.= $this->manualOverride();
-            if ($ovrSearch){
+            if ($ovrSearch) {
                 $this->registerHook('productSearchProvider');
             }
         }
@@ -2114,7 +2038,7 @@ class Doofinder extends Module
 
     public function migrateOldConfigHashIDs()
     {
-        $shops = Shop::getShops();      
+        $shops = Shop::getShops();
         foreach ($shops as $shop) {
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
@@ -2141,18 +2065,18 @@ class Doofinder extends Module
         return true;
     }
 
-    public function checkOutsideConnection(){
+    public function checkOutsideConnection()
+    {
         //Require only on this function to not overload memory with not needed classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST(true, 3);
         $result = $client->get('https://app.doofinder.com/es/admin/login');
         if ($result && $result->originalResponse && isset($result->headers['code'])
-            && (strpos($result->originalResponse,'HTTP/2 200') || $result->headers['code'] == 200)) {
+            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200)) {
             return true;
         } else {
             return false;
         }
-
     }
 
     public function autoinstaller($apikey, $region, $api_version = 1)
@@ -2163,9 +2087,9 @@ class Doofinder extends Module
         $dfhost = 'https://'.$region.'-api.doofinder.com';
         $shops = Shop::getShops();
         $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_' . date('YmdHis'));
-        
+        $this->manualInstallation();
         foreach ($shops as $shop) {
-            $languages = Language::getLanguages(true,$shop['id_shop']);
+            $languages = Language::getLanguages(true, $shop['id_shop']);
             $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
@@ -2205,9 +2129,12 @@ class Doofinder extends Module
                         
                         $seResponse = $client->post(
                             $dfhost.'/api/v2/search_engines',
-                            $seRequest, false, false,
+                            $seRequest,
+                            false,
+                            false,
                             'application/json',
-                            ['Authorization: Token '.$apikey]);
+                            ['Authorization: Token '.$apikey]
+                        );
                     } else {
                         $seRequest = '{
                             "language": "'.$liso.'",
@@ -2218,9 +2145,12 @@ class Doofinder extends Module
     
                         $seResponse = $client->post(
                             $dfhost.'/v1/searchengines',
-                            $seRequest, false, false,
+                            $seRequest,
+                            false,
+                            false,
                             'application/json',
-                            ['Authorization: Token '.$apikey]);
+                            ['Authorization: Token '.$apikey]
+                        );
                     }
                     sleep(1);
                     
@@ -2237,9 +2167,9 @@ class Doofinder extends Module
                         );
 
                         $feed_url = $this->getShopURL($shop['id_shop'])
-                        .'/modules/doofinder/feed.php?language=' 
-                        . Tools::strtoupper($liso) 
-                        . '&currency=' 
+                        .'/modules/doofinder/feed.php?language='
+                        . Tools::strtoupper($liso)
+                        . '&currency='
                         . Tools::strtoupper($ciso)
                         . '&dfsec_hash=' . $doofinder_hash;
 
@@ -2262,46 +2192,59 @@ class Doofinder extends Module
                                 "preset": "product"
                             }';
 
-                            $createIndex = $client->post(
+                            $client->post(
                                 $dfhost.'/api/v2/search_engines/'.$hashid.'/indices',
-                                $indexData, false, false,
+                                $indexData,
+                                false,
+                                false,
                                 'application/json',
-                                ['Authorization: Token '.$apikey]);
-                                sleep(1);
-                            $processSearchEngine = $client->post(
+                                ['Authorization: Token '.$apikey]
+                            );
+                            sleep(1);
+                            $client->post(
                                 $dfhost.'/api/v2/search_engines/'.$hashid.'/_process',
-                                [], false, false,
+                                [],
+                                false,
+                                false,
                                 'application/json',
-                                ['Authorization: Token '.$apikey]);
-                                sleep(1);
+                                ['Authorization: Token '.$apikey]
+                            );
+                            sleep(1);
                         } else {
                             $indexData = '{
                                 "sources": ["'.$feed_url.'"],
                                 "name": "product"
                             }';
 
-                            $createIndex = $client->post(
+                            $client->post(
                                 $dfhost.'/v1/'.$hashid.'/types',
-                                $indexData, false, false,
+                                $indexData,
+                                false,
+                                false,
                                 'application/json',
-                                ['Authorization: Token '.$apikey]);
-                                sleep(1);
-                            
-                            $processSearchEngine = $client->post(
-                                $dfhost.'/v1/'.$hashid.'/tasks/process?force=true',
-                                [], false, false,
-                                'application/json',
-                                ['Authorization: Token '.$apikey]);
-                                sleep(1);
-                            
-                        }
-
-                        $layerInstall = $client->post(
-                            'https://app.doofinder.com/plugin/'.$hashid.'/script/prestashop',
-                            [], false, false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]);
+                                ['Authorization: Token '.$apikey]
+                            );
                             sleep(1);
+                            
+                            $client->post(
+                                $dfhost.'/v1/'.$hashid.'/tasks/process?force=true',
+                                [],
+                                false,
+                                false,
+                                'application/json',
+                                ['Authorization: Token '.$apikey]
+                            );
+                            sleep(1);
+                        }
+                        $client->post(
+                            'https://app.doofinder.com/plugin/'.$hashid.'/script/prestashop',
+                            [],
+                            false,
+                            false,
+                            'application/json',
+                            ['Authorization: Token '.$apikey]
+                        );
+                        sleep(1);
                     }
                 }
             }
@@ -2310,13 +2253,13 @@ class Doofinder extends Module
 
     public function getShopBaseURI($shop)
     {
-        return $this->physical_uri . $this->virtual_uri;
+        return $shop->physical_uri . $shop->virtual_uri;
     }
 
     public function getShopURL($shop_id)
     {
         $shop = new Shop($shop_id);
-        $force_ssl = (Configuration::get('PS_SSL_ENABLED') 
+        $force_ssl = (Configuration::get('PS_SSL_ENABLED')
             && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'));
         $url = ($force_ssl) ? 'https://' . $shop->domain_ssl : 'http://' . $shop->domain;
 

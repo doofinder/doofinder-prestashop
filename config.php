@@ -40,7 +40,7 @@ if ($autoinstallerToken) {
         exit($msgError);
     }
 }
-$module->autoinstaller('',2);
+$module->autoinstaller('', 2);
 $languages = array();
 $configurations = array();
 $currencies = array_keys(dfTools::getAvailableCurrencies());

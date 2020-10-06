@@ -47,7 +47,7 @@
 					<a onclick="javascript:popupDoofinder('login')" href="#" class="btn btn-primary btn-lg btn-doofinder" id="login-account-btn">{l s='I have an account' mod='doofinder'}</a>
 				</div>
 				<div class="col-md-12" style="margin-top:35px">
-					<p><a href="{$skipurl}" style="font-size: 10px;font-style: italic;">{l s='I want to skip the autoinstaller, take me to the module manual configuration.' mod='doofinder'}</a></p>
+					<p><a href="{html_entity_decode($skipurl|escape:'htmlall':'UTF-8')}" style="font-size: 10px;font-style: italic;">{l s='I want to skip the autoinstaller, take me to the module manual configuration.' mod='doofinder'}</a></p>
 				</div>
 			</div>
 			<div class="col-md-6 choose-installer">
@@ -136,7 +136,7 @@ li.active{
 </style>
 <script type="text/javascript">
 	function popupDoofinder(type){
-		var params = '?{$paramsPopup}&mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=autoinstaller';
+		var params = '?{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}&mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=autoinstaller';
 		//var domain = 'https://www.doofinder.com/es/';
 		var domain = 'https://app.doofinder.com/plugins/'+type+'/prestashop';
 		var winObj = popupCenter( domain+params, 'Doofinder', 400,  850);
