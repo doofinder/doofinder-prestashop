@@ -92,6 +92,8 @@ $_MODULE['<{doofinder}prestashop>configure_9b6545e4cea9b4ad4979d41bb9170e2b'] = 
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_08c1cf7707bb72744cd07192c8580580'] = 'Feed URLs to use on Doofinder Admin panel';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459fc2615'] = 'Data feed URL for';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_049b99b73ee7ed3a8c0b4a4ba22ad2ac'] = 'Use your free trial now!';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_7edaed702d94d2c7807d20d662c7067a'] = 'I have an account';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_4d6db8d5a88bb9c3e6b55bce672e0dd9'] = 'I want to skip the autoinstaller, take me to the module manual configuration.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_ba26552e526b4e94f440ab5a0f7ce65f'] = 'Add a smart search engine to your e-commerce in 5 minutes and with no programming';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_1e084cd6e247c0daa8f4004976a10df5'] = 'ABOUT DOOFINDER';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_4e8d60123a65cdc90c37d56ff9f5899e'] = 'Doofinder provides you with an instant search layer to display your products when your visitors use the search bar';
@@ -125,3 +127,4 @@ $_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] 
 $_MODULE['<{doofinder}prestashop>support_tab_79061f39882168064500dc7decfd3d13'] = 'Create a free acount!';
 $_MODULE['<{doofinder}prestashop>doofinder_facets_8524de963f07201e5c086830d370797f'] = 'Loading...';
 $_MODULE['<{doofinder}prestashop>doofinder-no-products_5c9838becf9bbce28ba90a7426daf171'] = 'There are no products.';
+$_MODULE['<{doofinder}prestashop>doofinder_c8628d94a88fdf8fb676f34127785226'] = 'Para activar esto debes habilitar la sobreescritura de la página de búsqueda';

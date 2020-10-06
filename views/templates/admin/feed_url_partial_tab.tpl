@@ -19,7 +19,7 @@
 				<h4>{l s='Feed URLs to use on Doofinder Admin panel' mod='doofinder'}</h4>
 				<dl>
 					{foreach from=$df_feed_urls item=feed_url}
-						<dt>{l s='Data feed URL for ' mod='doofinder'} [{$feed_url.lang|escape:'htmlall':'UTF-8'}]<dt>
+						<dt>{l s='Data feed URL for ' mod='doofinder'} [{$feed_url.lang|escape:'htmlall':'UTF-8'} - {$feed_url.currency|escape:'htmlall':'UTF-8'}]<dt>
 						<dd><a href="{html_entity_decode($feed_url.url|escape:'htmlall':'UTF-8')}" target="_blank">{$feed_url.url|escape:'htmlall':'UTF-8'}</a></dd>
 					{/foreach}
 				</dl>
