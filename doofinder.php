@@ -2152,12 +2152,21 @@ class Doofinder extends Module
                             ['Authorization: Token '.$apikey]
                         );
                     }
-                    sleep(1);
                     
 
                     $seData = json_decode($seResponse->response, true);
                     
                     if ($hashid = $seData['hashid']) {
+
+                        $client->post(
+                            'https://app.doofinder.com/plugins/'.$hashid.'/script/prestashop',
+                            [],
+                            false,
+                            false,
+                            'application/json',
+                            ['Authorization: Token '.$apikey]
+                        );
+
                         Configuration::updateValue(
                             'DF_HASHID_'.Tools::strtoupper($ciso).'_'.Tools::strtoupper($liso),
                             $hashid,
@@ -2200,7 +2209,7 @@ class Doofinder extends Module
                                 'application/json',
                                 ['Authorization: Token '.$apikey]
                             );
-                            sleep(1);
+                            
                             $client->post(
                                 $dfhost.'/api/v2/search_engines/'.$hashid.'/_process',
                                 [],
@@ -2209,7 +2218,7 @@ class Doofinder extends Module
                                 'application/json',
                                 ['Authorization: Token '.$apikey]
                             );
-                            sleep(1);
+                            sleep(3);
                         } else {
                             $indexData = '{
                                 "sources": ["'.$feed_url.'"],
@@ -2236,15 +2245,6 @@ class Doofinder extends Module
                             );
                             sleep(1);
                         }
-                        $client->post(
-                            'https://app.doofinder.com/plugin/'.$hashid.'/script/prestashop',
-                            [],
-                            false,
-                            false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]
-                        );
-                        sleep(1);
                     }
                 }
             }
