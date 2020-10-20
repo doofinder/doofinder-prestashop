@@ -28,9 +28,10 @@ if ($autoinstallerToken) {
     $tmpToken = Tools::encrypt($redirect);
     if ($tmpToken == $autoinstallerToken) {
         $apiToken = Tools::getValue('api_token');
-        $region = Tools::getValue('zone');
+        $api_endpoint = Tools::getValue('api_endpoint');
+        $admin_endpoint = Tools::getValue('admin_endpoint');
         if ($apiToken) {
-            $module->autoinstaller($apiToken, $region, 2);
+            $module->autoinstaller($apiToken, $api_endpoint, $admin_endpoint);
         }
         exit('OK');
     } else {

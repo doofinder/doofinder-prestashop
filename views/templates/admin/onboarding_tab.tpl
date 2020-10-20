@@ -24,6 +24,12 @@
 				{/if}
 				</p>
 			</div>
+			<div class="bootstrap message-popup" style="display:none;">
+				<div class="module_warning alert alert-warning" >
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					{l s='You don\'t receive the Api Key or you close too quickly the popup window. Please try again. If you think this is an error, please contact our support or try the module manual configuration option.' mod='doofinder'}
+				</div>
+			</div>
 			<div class="col-12 text-center loading-installer" style="display:none;">
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" />
 				<br>
@@ -140,7 +146,7 @@ li.active{
 		//var domain = 'https://www.doofinder.com/es/';
 		var domain = 'https://app.doofinder.com/plugins/'+type+'/prestashop';
 		var winObj = popupCenter( domain+params, 'Doofinder', 400,  850);
-
+		
 		var loop = setInterval(function() {   
 			if(winObj.closed) {  
 				clearInterval(loop);
@@ -151,15 +157,29 @@ li.active{
 	}
 
 	function installingLoop(){
-		$('.choose-installer').hide();
-		$('.loading-installer').show();
-		var loop = setInterval(function() {
-			$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
-			if($('.loading-installer ul li.active').index() < 0) {  
-				clearInterval(loop);
-				location.reload();
-			}  
-		}, 3000);
+		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
+			'check_api_key':1
+		}, function(data){
+			if(data == 'OK') {
+				$('.choose-installer').hide();
+				$('.loading-installer').show();
+				var loop = setInterval(function() {
+					$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
+					if($('.loading-installer ul li.active').index() < 0) {  
+						clearInterval(loop);
+						location.reload();
+					}  
+				}, 3000);
+			} else {
+				$('.message-popup').show();
+				setTimeout(function(){
+					$('.message-popup').hide();
+				} ,10000);
+			}
+		});
+
+		
 	}
 
 	function popupCenter(url, title, w, h){

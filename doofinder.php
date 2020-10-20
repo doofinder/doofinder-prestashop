@@ -196,7 +196,7 @@ class Doofinder extends Module
         $token = Tools::encrypt($redirect);
         $paramsPopup = 'email='. $this->context->employee->email
             . '&token='.$token
-            . '&redirect='.urlencode($redirect);
+            . '&return_path='.urlencode($redirect);
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
 
@@ -2079,12 +2079,14 @@ class Doofinder extends Module
         }
     }
 
-    public function autoinstaller($apikey, $region, $api_version = 1)
+    public function autoinstaller($apikey, $api_endpoint, $admin_endpoint)
     {
         //Require only on this function to not overload memory with not needed classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST();
-        $dfhost = 'https://'.$region.'-api.doofinder.com';
+        $dfhost = 'https://'.$api_endpoint;
+        $api_endpoint_array = explode('-', $api_endpoint);
+        $region = $api_endpoint_array[0];
         $shops = Shop::getShops();
         $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_' . date('YmdHis'));
         $this->manualInstallation();
@@ -2115,51 +2117,31 @@ class Doofinder extends Module
                     $ciso = $cur['iso_code'];
                     $shop_name = $this->getShopURL($shopId).' | Lang:'.$liso.' Currency:'.$ciso;
                     
-                    if ($api_version == 2) {
-                        $seRequest = '{
-                            "inactive": false,
-                            "indices": [],
-                            "language": "'.$liso.'",
-                            "currency": "'.$ciso.'",
-                            "name": "'.$shop_name.'",
-                            "search_url": "http://'.$region.'-search.doofinder.com",
-                            "site_url": "'.$this->getShopURL($shopId).'",
-                            "stopwords": false
-                        }';
-                        
-                        $seResponse = $client->post(
-                            $dfhost.'/api/v2/search_engines',
-                            $seRequest,
-                            false,
-                            false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]
-                        );
-                    } else {
-                        $seRequest = '{
-                            "language": "'.$liso.'",
-                            "currency": "'.$ciso.'",
-                            "name": "'.$shop_name.'",
-                            "site_url": "'.$this->getShopURL($shopId).'"
-                          }';
-    
-                        $seResponse = $client->post(
-                            $dfhost.'/v1/searchengines',
-                            $seRequest,
-                            false,
-                            false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]
-                        );
-                    }
+                    $seRequest = '{
+                        "inactive": false,
+                        "indices": [],
+                        "language": "'.$liso.'",
+                        "currency": "'.$ciso.'",
+                        "name": "'.$shop_name.'",
+                        "search_url": "http://'.$region.'-search.doofinder.com",
+                        "site_url": "'.$this->getShopURL($shopId).'",
+                        "stopwords": false
+                    }';
                     
+                    $seResponse = $client->post(
+                        $dfhost.'/api/v2/search_engines',
+                        $seRequest,
+                        false,
+                        false,
+                        'application/json',
+                        ['Authorization: Token '.$apikey]
+                    );
 
                     $seData = json_decode($seResponse->response, true);
                     
                     if ($hashid = $seData['hashid']) {
-
                         $client->post(
-                            'https://app.doofinder.com/plugins/'.$hashid.'/script/prestashop',
+                            'https://'.$admin_endpoint.'/plugins/'.$hashid.'/script/prestashop',
                             [],
                             false,
                             false,
@@ -2181,70 +2163,42 @@ class Doofinder extends Module
                         . '&currency='
                         . Tools::strtoupper($ciso)
                         . '&dfsec_hash=' . $doofinder_hash;
-
                     
-                        if ($api_version == 2) {
-                            $indexData = '{
-                                "options": {
-                                    "exclude_out_of_stock_items": false,
-                                    "group_variants": false
-                                },
-                                "datasources": [
-                                    {
-                                        "options": {
-                                            "url": "'.$feed_url.'"
-                                        },
-                                        "type": "file"
-                                    }
-                                ],
-                                "name": "product",
-                                "preset": "product"
-                            }';
+                        $indexData = '{
+                            "options": {
+                                "exclude_out_of_stock_items": false,
+                                "group_variants": false
+                            },
+                            "datasources": [
+                                {
+                                    "options": {
+                                        "url": "'.$feed_url.'"
+                                    },
+                                    "type": "file"
+                                }
+                            ],
+                            "name": "product",
+                            "preset": "product"
+                        }';
 
-                            $client->post(
-                                $dfhost.'/api/v2/search_engines/'.$hashid.'/indices',
-                                $indexData,
-                                false,
-                                false,
-                                'application/json',
-                                ['Authorization: Token '.$apikey]
-                            );
-                            
-                            $client->post(
-                                $dfhost.'/api/v2/search_engines/'.$hashid.'/_process',
-                                [],
-                                false,
-                                false,
-                                'application/json',
-                                ['Authorization: Token '.$apikey]
-                            );
-                            sleep(3);
-                        } else {
-                            $indexData = '{
-                                "sources": ["'.$feed_url.'"],
-                                "name": "product"
-                            }';
-
-                            $client->post(
-                                $dfhost.'/v1/'.$hashid.'/types',
-                                $indexData,
-                                false,
-                                false,
-                                'application/json',
-                                ['Authorization: Token '.$apikey]
-                            );
-                            sleep(1);
-                            
-                            $client->post(
-                                $dfhost.'/v1/'.$hashid.'/tasks/process?force=true',
-                                [],
-                                false,
-                                false,
-                                'application/json',
-                                ['Authorization: Token '.$apikey]
-                            );
-                            sleep(1);
-                        }
+                        $client->post(
+                            $dfhost.'/api/v2/search_engines/'.$hashid.'/indices',
+                            $indexData,
+                            false,
+                            false,
+                            'application/json',
+                            ['Authorization: Token '.$apikey]
+                        );
+                        
+                        $client->post(
+                            $dfhost.'/api/v2/search_engines/'.$hashid.'/_process',
+                            [],
+                            false,
+                            false,
+                            'application/json',
+                            ['Authorization: Token '.$apikey]
+                        );
+                        sleep(1);
                     }
                 }
             }
@@ -2264,5 +2218,14 @@ class Doofinder extends Module
         $url = ($force_ssl) ? 'https://' . $shop->domain_ssl : 'http://' . $shop->domain;
 
         return $url . $this->getShopBaseURI($shop);
+    }
+
+    public function checkApiKey($text = false)
+    {
+        $result = Db::getInstance()->getValue('SELECT id_configuration FROM '._DB_PREFIX_
+        .'configuration WHERE name = "DF_API_KEY" AND (value IS NOT NULL OR value <> "")');
+        $return = (($result) ? 'OK' : 'KO');
+        
+        return ($text) ? $return : $result;
     }
 }
