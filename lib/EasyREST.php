@@ -46,16 +46,6 @@ class EasyREST {
              curl_setopt($this->curl,CURLOPT_HTTPGET,true);
              $this->treatURL();
          } else if ($this->method === "PUT") {
-             //curl_setopt($this->curl,CURLOPT_PUT,true);
-             //curl_setopt($this->curl,CURLOPT_POSTFIELDS,$this->params);
-             /*
-             $this->treatURL();
-             $this->file = tmpFile();
-             fwrite($this->file,$this->params);
-             fseek($this->file,0);
-             curl_setopt($this->curl,CURLOPT_INFILE,$this->file);
-             curl_setopt($this->curl,CURLOPT_INFILESIZE,strlen($this->params));
-             */
              curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "PUT");
              if(is_object($this->params) || is_array($this->params)){
                  $params = http_build_query($this->params);
