@@ -143,7 +143,6 @@ li.active{
 <script type="text/javascript">
 	function popupDoofinder(type){
 		var params = '?{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}&mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=autoinstaller';
-		//var domain = 'https://www.doofinder.com/es/';
 		var domain = 'https://app.doofinder.com/plugins/'+type+'/prestashop';
 		var winObj = popupCenter( domain+params, 'Doofinder', 400,  850);
 		
