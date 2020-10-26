@@ -32,8 +32,8 @@
 			<div class="col-md-12">
 				<h3>{l s='Need help configuring your search engine?' mod='doofinder'}</h3>
 				<dl>
-					<dt>&middot; {l s='How to install Doofinder in PrestaShop 1.4+' mod='doofinder'}</dt>
-					<dd><a href="https://www.doofinder.com/support/plugins/prestashop-14" target="_blank">https://www.doofinder.com/support/plugins/prestashop-14</a></dd>
+					<dt>&middot; {l s='How to install Doofinder in PrestaShop 1.5-1.7' mod='doofinder'}</dt>
+					<dd><a href="https://www.doofinder.com/support/plugins/prestashop-15" target="_blank">https://www.doofinder.com/support/plugins/prestashop-15</a></dd>
 					
 					<dt>&middot; {l s='Products are displayed without VAT in PrestaShop' mod='doofinder'}</dt>
 					<dd><a href="https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop" target="_blank">https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop</a></dd>

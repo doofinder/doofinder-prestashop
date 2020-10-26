@@ -20,6 +20,11 @@ Context::getContext()->controller->php_self = 'search';
 
 $doofinder = Module::getInstanceByName('doofinder');
 
+$check_api_key = Tools::getValue('check_api_key');
+if ($check_api_key) {
+    die($doofinder->checkApiKey(true));
+}
+
 if ($doofinder->canAjax()) {
     echo $doofinder->ajaxCall();
 }

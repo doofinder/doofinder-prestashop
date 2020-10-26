@@ -21,6 +21,27 @@ $context = Context::getContext();
 header("Content-Type:application/json; charset=utf-8");
 
 $module = Module::getInstanceByName('doofinder');
+$autoinstallerToken = Tools::getValue('token');
+if ($autoinstallerToken) {
+    $redirect = Context::getContext()->shop->getBaseURL(true, false)
+        . $module->getPathUri() . 'config.php';
+    $tmpToken = Tools::encrypt($redirect);
+    if ($tmpToken == $autoinstallerToken) {
+        $apiToken = Tools::getValue('api_token');
+        $api_endpoint = Tools::getValue('api_endpoint');
+        $admin_endpoint = Tools::getValue('admin_endpoint');
+        if ($apiToken) {
+            $module->autoinstaller($apiToken, $api_endpoint, $admin_endpoint);
+        }
+        exit('OK');
+    } else {
+        header('HTTP/1.1 403 Forbidden', true, 403);
+        $msgError = 'Forbidden access.'
+                . ' Token for autoinstaller invalid.';
+        exit($msgError);
+    }
+}
+$module->autoinstaller('', 2);
 $languages = array();
 $configurations = array();
 $currencies = array_keys(dfTools::getAvailableCurrencies());

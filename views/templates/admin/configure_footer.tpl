@@ -11,6 +11,8 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}	
-	<div class="tab-pane" id="support_tab">{include file='./support_tab.tpl'}</div>
+	{if $configured}
+		<div class="tab-pane" id="support_tab">{include file='./support_tab.tpl'}</div>
+	{/if}
 </div>
 <!-- End Tab panes -->
