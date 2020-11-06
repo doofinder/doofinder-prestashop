@@ -202,6 +202,10 @@ if ($cfg_display_prices) {
 
 if ($cfg_product_variations == 1) {
     $header[] = 'variation_reference';
+    $header[] = 'variation_supplier_reference';
+    $header[] = 'variation_mpn';
+    $header[] = 'variation_ean13';
+    $header[] = 'variation_upc';
     $header[] = 'df_group_leader';
     $attribute_keys = dfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
     $alt_attribute_keys = array();
@@ -519,6 +523,14 @@ foreach ($rows as $row) {
         if ($cfg_product_variations == 1) {
             echo TXT_SEPARATOR;
             echo $row['variation_reference'];
+            echo TXT_SEPARATOR;
+            echo $row['variation_supplier_reference'];
+            echo TXT_SEPARATOR;
+            echo $row['variation_mpn'];
+            echo TXT_SEPARATOR;
+            echo $row['variation_ean13'];
+            echo TXT_SEPARATOR;
+            echo $row['variation_upc'];
             echo TXT_SEPARATOR;
             echo $row['df_group_leader'];
             $variation_attributes = dfTools::getAttributesForProductVariation(
