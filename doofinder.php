@@ -45,7 +45,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '3.2.3';
+    const VERSION = '4.0.0';
     const YES = 1;
     const NO = 0;
 
@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '3.2.3';
+        $this->version = '4.0.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -200,12 +200,17 @@ class Doofinder extends Module
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
 
+        $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
+        $this->context->smarty->assign('dfEnabledV9', $dfEnabledV9);
+        
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
             $output.= $this->renderFormDataFeed($adv);
             $output.= $this->renderFormSearchLayer($adv);
-            $output.= $this->renderFormInternalSearch($adv);
-            $output.= $this->renderFormCustomCSS($adv);
+            if (!$dfEnabledV9) {
+                $output.= $this->renderFormInternalSearch($adv);
+                $output.= $this->renderFormCustomCSS($adv);
+            }
             if ($adv) {
                 $output.= $this->renderFormAdvanced();
             }
@@ -224,6 +229,7 @@ class Doofinder extends Module
         $skip = Tools::getValue('skip');
         if ($skip) {
             Configuration::updateValue('DF_ENABLE_HASH', 0);
+            Configuration::updateValue('DF_ENABLED_V9', true);
             $this->manualInstallation();
         }
         $sql = 'SELECT id_configuration FROM '._DB_PREFIX_.'configuration WHERE name = \'DF_ENABLE_HASH\'';
@@ -338,8 +344,37 @@ class Doofinder extends Module
         $this->context->smarty->assign('id_tab', 'search_layer_tab');
         $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $helper->generateForm(array($this->getConfigFormSearchLayer()));
+        if ($this->haveHashId()) {
+            $html.= $this->renderFormchangeVersion($adv);
+            $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/change_version.tpl');
+        }
+
         $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
+    }
+
+    protected function renderFormChangeVersion($adv = false)
+    {
+        $helper = new HelperForm();
+
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $helper->module = $this;
+        $helper->default_form_language = $this->context->language->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
+
+        $helper->identifier = $this->identifier;
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+                . (($adv)?'&adv=1':'')
+                . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        $helper->tpl_vars = array(
+            'fields_value' => $this->getConfigFormValuesChangeVersion(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id,
+        );
+        return $helper->generateForm(array($this->getConfigFormChangeVersion()));
     }
 
     protected function renderFormInternalSearch($adv = false)
@@ -501,17 +536,27 @@ class Doofinder extends Module
         $currencies = Currency::getCurrencies();
 
         $inputs = array();
-        foreach ($currencies as $cur) {
-            $currency_iso = Tools::strtoupper($cur['iso_code']);
-            $label = $this->l('Doofinder Search Engine ID');
-            $label.= ' '.$this->l(sprintf('for currency %s', $currency_iso));
+        if (!$this->haveHashId() || Configuration::get('DF_ENABLED_V9')) {
             $inputs[] = array(
                 'type' => 'text',
-                'label' => $label,
-                'name' => 'DF_HASHID_'.$currency_iso,
-                'desc' => $this->l('SEARCH_ENGINE_ID_EXPLANATION'),
-                'lang' => true,
+                'label' => $this->l('Doofinder Installation ID'),
+                'name' => 'DF_INSTALLATION_ID',
+                'desc' => $this->l('INSTALLATION_ID_EXPLANATION'),
+                'lang' => false,
             );
+        } else {
+            foreach ($currencies as $cur) {
+                $currency_iso = Tools::strtoupper($cur['iso_code']);
+                $label = $this->l('Doofinder Search Engine ID');
+                $label.= ' '.$this->l(sprintf('for currency %s', $currency_iso));
+                $inputs[] = array(
+                    'type' => 'text',
+                    'label' => $label,
+                    'name' => 'DF_HASHID_'.$currency_iso,
+                    'desc' => $this->l('SEARCH_ENGINE_ID_EXPLANATION'),
+                    'lang' => true,
+                );
+            }
         }
 
         $inputs[] = array(
@@ -544,6 +589,41 @@ class Doofinder extends Module
                 'submit' => array(
                     'title' => $this->l('Save Layer Widget Options'),
                     'name' => 'submitDoofinderModuleSearchLayer'
+                ),
+            ),
+        );
+    }
+
+    protected function getConfigFormChangeVersion()
+    {
+        return array(
+            'form' => array(
+                'legend' => array(
+                    'title' => $this->l('Live Layer'),
+                    'icon' => 'icon-cogs',
+                ),
+                'description' => $this->l('Activate this option to update Doofinder layer to the Live Layer version'),
+                'input' => array(
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Activate Live Layer?'),
+                        'name' => 'DF_ENABLED_V9',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ),
+                    array(
+                        'type' => (Configuration::get('DF_API_KEY') ? 'hidden' : 'text'),
+                        'label' => $this->l('Doofinder Api Key'),
+                        'name' => 'DF_API_KEY',
+                        'desc' => sprintf(
+                            $this->l('Click %s to access your API key'),
+                            '<a href="https://app.doofinder.com/en/admin/api/" target="_blank">'.$this->l('here').'</a>'
+                        ),
+                    )
+                ),
+                'submit' => array(
+                    'title' => $this->l('Change version'),
+                    'name' => 'submitDoofinderModuleChangeVersion'
                 ),
             ),
         );
@@ -944,26 +1024,32 @@ class Doofinder extends Module
     protected function getConfigFormValuesSearchLayer($update = false)
     {
         $fields = array(
-            'DF_REGION' => Configuration::get('DF_REGION')
+            'DF_REGION' => Configuration::get('DF_REGION'),
         );
-        
-        //Language on this must be "false" to get inactive also and can save. The problem is that the default
-        //multilang selector on PrestaShop inputs get disabled langs on the shop and rear to the admin to think
-        //cannot save correctly on submit, when really not save the langs that are not enable on that shop :/
-        //The same problem trying to filter with the shop :/ So false,null on this case
-        foreach (Language::getLanguages(false, null) as $lang) {
-            $currencies = Currency::getCurrencies();
-            foreach ($currencies as $cur) {
-                $currency_iso = Tools::strtoupper($cur['iso_code']);
-                $field_name = 'DF_HASHID_'.$currency_iso.'_'.$lang['id_lang'];
-                $field_name_iso = 'DF_HASHID_'.$currency_iso.'_' . Tools::strtoupper($lang['iso_code']);
-                if ($update) {
-                    $fields[$field_name] = array(
-                        'real_config' => $field_name_iso,
-                        'value' => Configuration::get($field_name)
-                    );
-                } else {
-                    $fields['DF_HASHID_'.$currency_iso][$lang['id_lang']] = Configuration::get($field_name_iso);
+
+        if (!$this->haveHashId() || Configuration::get('DF_ENABLED_V9')) {
+            $fields['DF_INSTALLATION_ID'] = Configuration::get('DF_INSTALLATION_ID');
+
+            Configuration::updateValue('DF_ENABLED_V9', true);
+        } else {
+            //Language on this must be "false" to get inactive also and can save. The problem is that the default
+            //multilang selector on PrestaShop inputs get disabled langs on the shop and rear to the admin to think
+            //cannot save correctly on submit, when really not save the langs that are not enable on that shop :/
+            //The same problem trying to filter with the shop :/ So false,null on this case
+            foreach (Language::getLanguages(false, null) as $lang) {
+                $currencies = Currency::getCurrencies();
+                foreach ($currencies as $cur) {
+                    $currency_iso = Tools::strtoupper($cur['iso_code']);
+                    $field_name = 'DF_HASHID_'.$currency_iso.'_'.$lang['id_lang'];
+                    $field_name_iso = 'DF_HASHID_'.$currency_iso.'_' . Tools::strtoupper($lang['iso_code']);
+                    if ($update) {
+                        $fields[$field_name] = array(
+                            'real_config' => $field_name_iso,
+                            'value' => Configuration::get($field_name)
+                        );
+                    } else {
+                        $fields['DF_HASHID_'.$currency_iso][$lang['id_lang']] = Configuration::get($field_name_iso);
+                    }
                 }
             }
         }
@@ -984,6 +1070,16 @@ class Doofinder extends Module
         return $fields;
     }
 
+    protected function getConfigFormValuesChangeVersion()
+    {
+        $fields = array(
+            'DF_ENABLED_V9' => Configuration::get('DF_ENABLED_V9'),
+            'DF_API_KEY' => Configuration::get('DF_API_KEY'),
+        );
+
+        return $fields;
+    }
+
     protected function getConfigFormValuesEmbeddedSearch()
     {
         $fields = array(
@@ -998,6 +1094,49 @@ class Doofinder extends Module
         $form_values = array();
         $formUpdated = '';
         $messages = '';
+        if (Tools::isSubmit('submitDoofinderModuleChangeVersion')) {
+            if (Tools::getValue('DF_ENABLED_V9')) {
+                Configuration::updateValue('DF_API_KEY', Tools::getValue('DF_API_KEY'));
+
+                if (!Configuration::get('DF_INSTALLATION_ID')) {
+                    $shopHashes = array();
+                    $defaultHash = array();
+
+                    foreach (Language::getLanguages(false, null) as $lang) {
+                        $currencies = Currency::getCurrencies();
+                        foreach ($currencies as $cur) {
+                            $currency_iso = Tools::strtoupper($cur['iso_code']);
+                            $field_name_iso = 'DF_HASHID_'.$currency_iso.'_' . Tools::strtoupper($lang['iso_code']);
+                            $hashId = Configuration::get($field_name_iso);
+                            if ($hashId && $hashId != null && $hashId != '') {
+                                $shopHashes[$lang['iso_code']][$currency_iso] = $hashId;
+                                if (empty($defaultHash)) {
+                                    $defaultHash = array(
+                                        "currency" => $currency_iso,
+                                        "language" => $lang['iso_code'],
+                                        "hashid" => $hashId
+                                    );
+                                }
+                            }
+                        }
+                    }
+
+                    $installationID = $this->createInstallationID($shopHashes, $defaultHash);
+                    Configuration::updateValue('DF_INSTALLATION_ID', $installationID);
+                } else {
+                    $hashIdDefault = $this->haveHashId(true);
+                    $this->alternateLayoutStateInDoofinder($hashIdDefault, true);
+                }
+
+                Configuration::updateValue('DF_ENABLED_V9', true);
+            } else {
+                $hashIdDefault = $this->haveHashId(true);
+                $this->alternateLayoutStateInDoofinder($hashIdDefault, false);
+                Configuration::updateValue('DF_ENABLED_V9', false);
+            }
+            $formUpdated = 'search_layer_tab';
+        }
+
         if (((bool) Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesDataFeed());
             $formUpdated = 'data_feed_tab';
@@ -1125,6 +1264,7 @@ class Doofinder extends Module
         $script = Configuration::get("DOOFINDER_SCRIPT_" . $lang);
         $extra_css = Configuration::get('DF_EXTRA_CSS');
         $df_querySelector = Configuration::get('DF_SEARCH_SELECTOR');
+        $installation_ID = Configuration::get('DF_INSTALLATION_ID');
         if (empty($df_querySelector)) {
             $df_querySelector = '#search_query_top';
         }
@@ -1138,7 +1278,9 @@ class Doofinder extends Module
             'df_region' => $df_region,
             'self' => dirname(__FILE__),
             'df_another_params' => $params,
-            'doofinder_search_selector' => $df_querySelector
+            'doofinder_search_selector' => $df_querySelector,
+            'installation_ID' => $installation_ID,
+            'currency' => $currency,
         ));
         $appendTo = Configuration::get('DF_APPEND_BANNER');
         if (empty($appendTo)) {
@@ -1152,84 +1294,90 @@ class Doofinder extends Module
     public function hookHeader($params)
     {
         $this->configureHookCommon($params);
-        if (isset($this->context->controller->php_self) &&
-                $this->context->controller->php_self == 'search') {
-            $noCookieJS = Configuration::get('DF_DSBL_DFCKIE_JS');
-            $noFacetsJS = Configuration::get('DF_DSBL_DFFAC_JS');
-            $noPaginaJS = Configuration::get('DF_DSBL_DFPAG_JS');
-            $noLinksJS = Configuration::get('DF_DSBL_DFLINK_JS');
+        if (Configuration::get('DF_ENABLED_V9')) {
+            return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
+        } else {
+            if (isset($this->context->controller->php_self) &&
+                    $this->context->controller->php_self == 'search') {
+                $noCookieJS = Configuration::get('DF_DSBL_DFCKIE_JS');
+                $noFacetsJS = Configuration::get('DF_DSBL_DFFAC_JS');
+                $noPaginaJS = Configuration::get('DF_DSBL_DFPAG_JS');
+                $noLinksJS = Configuration::get('DF_DSBL_DFLINK_JS');
 
-            $overwrite_search = Configuration::get('DF_OWSEARCH', null);
-            $overwrite_facets = Configuration::get('DF_OWSEARCHFAC', null);
-            if (version_compare(_PS_VERSION_, '1.7', '<')) {
-                if ($overwrite_search) {
-                    if ($overwrite_facets) {
-                        $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
-                        if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
-                            if (!$noPaginaJS) {
-                                $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-pagination.js');
-                            }
-                            if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
-                                $this->context->controller->addCSS(
-                                    $css_path . 'blocklayered.css',
-                                    'all'
-                                );
+                $overwrite_search = Configuration::get('DF_OWSEARCH', null);
+                $overwrite_facets = Configuration::get('DF_OWSEARCHFAC', null);
+                if (version_compare(_PS_VERSION_, '1.7', '<')) {
+                    if ($overwrite_search) {
+                        if ($overwrite_facets) {
+                            $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
+                            if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
+                                if (!$noPaginaJS) {
+                                    $this->context->controller->addJS(
+                                        ($this->_path) . 'views/js/doofinder-pagination.js'
+                                    );
+                                }
+                                if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
+                                    $this->context->controller->addCSS(
+                                        $css_path . 'blocklayered.css',
+                                        'all'
+                                    );
+                                } else {
+                                    $this->context->controller->addCSS(
+                                        ($this->_path) . 'views/css/doofinder-filters.css',
+                                        'all'
+                                    );
+                                }
                             } else {
-                                $this->context->controller->addCSS(
-                                    ($this->_path) . 'views/css/doofinder-filters.css',
-                                    'all'
-                                );
+                                if (!$noPaginaJS) {
+                                    $this->context->controller->addJS(
+                                        ($this->_path) . 'views/js/doofinder-pagination_15.js'
+                                    );
+                                }
+                                if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
+                                    $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
+                                } else {
+                                    $this->context->controller->addCSS(
+                                        ($this->_path) . 'views/css/doofinder-filters-15.css',
+                                        'all'
+                                    );
+                                }
                             }
-                        } else {
-                            if (!$noPaginaJS) {
-                                $this->context->controller->addJS(
-                                    ($this->_path) . 'views/js/doofinder-pagination_15.js'
-                                );
+                            if (!$noFacetsJS) {
+                                $this->context->controller->addJS(($this->_path) . 'views/js/doofinder_facets.js');
                             }
-                            if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
-                                $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
-                            } else {
-                                $this->context->controller->addCSS(
-                                    ($this->_path) . 'views/css/doofinder-filters-15.css',
-                                    'all'
-                                );
-                            }
-                        }
-                        if (!$noFacetsJS) {
-                            $this->context->controller->addJS(($this->_path) . 'views/js/doofinder_facets.js');
                         }
                     }
+                    if (!$noCookieJS) {
+                        $this->context->controller->addJS(($this->_path) . 'views/js/js.cookie.js');
+                    }
+                    $this->context->controller->addJQueryUI('ui.slider');
+                    $this->context->controller->addJQueryUI('ui.accordion');
+                    $this->context->controller->addJqueryPlugin('multiaccordion');
+                    $this->context->controller->addJQueryUI('ui.sortable');
+                    $this->context->controller->addJqueryPlugin('jscrollpane');
+                    $this->context->controller->addJQueryPlugin('scrollTo');
                 }
-                if (!$noCookieJS) {
-                    $this->context->controller->addJS(($this->_path) . 'views/js/js.cookie.js');
+                if (!$noLinksJS) {
+                    $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-links.js');
                 }
-                $this->context->controller->addJQueryUI('ui.slider');
-                $this->context->controller->addJQueryUI('ui.accordion');
-                $this->context->controller->addJqueryPlugin('multiaccordion');
-                $this->context->controller->addJQueryUI('ui.sortable');
-                $this->context->controller->addJqueryPlugin('jscrollpane');
-                $this->context->controller->addJQueryPlugin('scrollTo');
+                $appendTo = Configuration::get('DF_APPEND_BANNER');
+                if ($appendTo) {
+                    $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-banner.js');
+                }
             }
-            if (!$noLinksJS) {
-                $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-links.js');
+            $extraCSS = Configuration::get('DF_EXTRA_CSS');
+            $cssVS = (int)Configuration::get('DF_CSS_VS');
+            $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
+            if ($extraCSS) {
+                if (file_exists(dirname(__FILE__).'/views/css/'.$file)) {
+                    $this->context->controller->addCSS(
+                        ($this->_path) . 'views/css/'.$file,
+                        'all'
+                    );
+                }
             }
-            $appendTo = Configuration::get('DF_APPEND_BANNER');
-            if ($appendTo) {
-                $this->context->controller->addJS(($this->_path) . 'views/js/doofinder-banner.js');
-            }
+            return $this->display(__FILE__, 'views/templates/front/script.tpl');
         }
-        $extraCSS = Configuration::get('DF_EXTRA_CSS');
-        $cssVS = (int)Configuration::get('DF_CSS_VS');
-        $file = 'doofinder_custom_'.$this->context->shop->id.'_vs_'.$cssVS.'.css';
-        if ($extraCSS) {
-            if (file_exists(dirname(__FILE__).'/views/css/'.$file)) {
-                $this->context->controller->addCSS(
-                    ($this->_path) . 'views/css/'.$file,
-                    'all'
-                );
-            }
-        }
-        return $this->display(__FILE__, 'views/templates/front/script.tpl');
     }
 
     public function hookDisplayFooter($params)
@@ -2096,6 +2244,9 @@ class Doofinder extends Module
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
             $shopId = $sid;
+            $shopHashes = array();
+            $defaultHash = array();
+            $installationID = null;
 
             /*if (count($shops) == 1 && !Shop::isFeatureActive()) {
                 $sid = null;
@@ -2149,13 +2300,15 @@ class Doofinder extends Module
                             ['Authorization: Token '.$apikey]
                         );
 
-                        Configuration::updateValue(
-                            'DF_HASHID_'.Tools::strtoupper($ciso).'_'.Tools::strtoupper($liso),
-                            $hashid,
-                            false,
-                            $sgid,
-                            $sid
-                        );
+                        $shopHashes[$liso][$ciso] = $hashid;
+
+                        if (empty($defaultHash)) {
+                            $defaultHash = array(
+                                "currency" => $ciso,
+                                "language" => $liso,
+                                "hashid" => $hashid
+                            );
+                        }
 
                         $feed_url = $this->getShopURL($shop['id_shop'])
                         .'/modules/doofinder/feed.php?language='
@@ -2202,6 +2355,13 @@ class Doofinder extends Module
                     }
                 }
             }
+
+            $installationID = $this->createInstallationID($shopHashes, $defaultHash);
+
+            if ($installationID) {
+                Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $sgid, $sid);
+                Configuration::updateValue('DF_ENABLED_V9', true, false, $sgid, $sid);
+            }
         }
     }
 
@@ -2227,5 +2387,79 @@ class Doofinder extends Module
         $return = (($result) ? 'OK' : 'KO');
         
         return ($text) ? $return : $result;
+    }
+
+    protected function haveHashId($return_hash = false)
+    {
+        foreach (Language::getLanguages(false, null) as $lang) {
+            $currencies = Currency::getCurrencies();
+            foreach ($currencies as $cur) {
+                $currency_iso = Tools::strtoupper($cur['iso_code']);
+                $field_name_iso = 'DF_HASHID_'.$currency_iso.'_' . Tools::strtoupper($lang['iso_code']);
+                $hashId = Configuration::get($field_name_iso);
+                if ($hashId && $hashId != null && $hashId != '') {
+                    return $return_hash ? $hashId : true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected function createInstallationID($shopHashes, $defaultHash)
+    {
+        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+        $client = new EasyREST();
+        $api_endpoint_installationid = 'https://app.doofinder.com/plugins/script/prestashop';
+        $apikey = Configuration::get('DF_API_KEY');
+        $apikey = explode('-', $apikey)[1];
+
+        $shRequest = '{
+            "config": {
+                "defaults": '.json_encode($defaultHash).',
+                "search_engines": '.json_encode($shopHashes).'
+            }
+        }';
+
+        $shResponse = $client->post(
+            $api_endpoint_installationid,
+            $shRequest,
+            false,
+            false,
+            'application/json',
+            ['Authorization: Token '.$apikey]
+        );
+
+        $shData = json_decode($shResponse->response, true);
+
+        $script = $shData['script'];
+        if (preg_match('/installationId:\s\"(.*)\"/', $script, $matches)) {
+            $installationID = $matches[1];
+        }
+        
+        return $installationID;
+    }
+
+    protected function alternateLayoutStateInDoofinder($hashId, $state)
+    {
+        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+        $client = new EasyREST();
+        $api_endpoint = 'https://app.doofinder.com/plugins/state/prestashop';
+        $apikey = Configuration::get('DF_API_KEY');
+        $apikey = explode('-', $apikey)[1];
+
+        $request = '{
+            "search_engine": "'.$hashId.'",
+            "state": '.($state ? 'true' : 'false').'
+        }';
+
+        $client->post(
+            $api_endpoint,
+            $request,
+            false,
+            false,
+            'application/json',
+            ['Authorization: Token '.$apikey]
+        );
     }
 }
