@@ -2433,7 +2433,7 @@ class Doofinder extends Module
         $shData = json_decode($shResponse->response, true);
 
         $script = $shData['script'];
-        if (preg_match('/installationId:\s\"(.*)\"/', $script, $matches)) {
+        if (preg_match('/installationId:\s\'(.*)\'/', $script, $matches)) {
             $installationID = $matches[1];
         }
         
