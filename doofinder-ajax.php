@@ -25,6 +25,21 @@ if ($check_api_key) {
     die($doofinder->checkApiKey(true));
 }
 
+$autoinstaller = Tools::getValue('autoinstaller');
+if ($autoinstaller) {
+    if (Tools::getValue('token') == Tools::encrypt('doofinder-ajax')) {
+        $apiToken = Configuration::get('DF_AI_APIKEY');
+        $admin_endpoint = Configuration::get('DF_AI_ADMIN_ENDPOINT');
+        $api_endpoint = Configuration::get('DF_AI_API_ENDPOINT');
+        $doofinder->autoinstaller($apiToken, $api_endpoint, $admin_endpoint);
+        die('OK');
+    } else {
+        $msgError = 'Forbidden access.'
+                . ' Token for autoinstaller invalid.';
+        die($msgError);
+    }
+}
+
 if ($doofinder->canAjax()) {
     echo $doofinder->ajaxCall();
 }
