@@ -1,3 +1,4 @@
+*.zip
 config*.xml
 localconfig.json
 node_modules
