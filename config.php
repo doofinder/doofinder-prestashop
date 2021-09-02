@@ -31,7 +31,7 @@ if ($autoinstallerToken) {
         $api_endpoint = Tools::getValue('api_endpoint');
         $admin_endpoint = Tools::getValue('admin_endpoint');
         if ($apiToken) {
-            $module->autoinstaller($apiToken, $api_endpoint, $admin_endpoint);
+            $module->saveApiData($apiToken, $api_endpoint, $admin_endpoint);
         }
         exit('OK');
     } else {

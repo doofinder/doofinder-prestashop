@@ -45,7 +45,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.0.1';
+    const VERSION = '4.0.2';
     const YES = 1;
     const NO = 0;
 
@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.0.1';
+        $this->version = self::VERSION;
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -199,6 +199,7 @@ class Doofinder extends Module
             . '&return_path='.urlencode($redirect);
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
+        $this->context->smarty->assign('tokenAjax', Tools::encrypt('doofinder-ajax'));
 
         $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
         $this->context->smarty->assign('dfEnabledV9', $dfEnabledV9);
@@ -2227,6 +2228,23 @@ class Doofinder extends Module
         }
     }
 
+    public function saveApiData($apikey, $api_endpoint, $admin_endpoint)
+    {
+        Configuration::updateValue('DF_AI_APIKEY', $apikey);
+        Configuration::updateValue('DF_AI_ADMIN_ENDPOINT', $admin_endpoint);
+        Configuration::updateValue('DF_AI_API_ENDPOINT', $api_endpoint);
+
+        $api_endpoint_array = explode('-', $api_endpoint);
+        $region = $api_endpoint_array[0];
+        $shops = Shop::getShops();
+        foreach ($shops as $shop) {
+            $sid = $shop['id_shop'];
+            $sgid = $shop['id_shop_group'];
+
+            Configuration::updateValue('DF_API_KEY', $region.'-'.$apikey, false, $sgid, $sid);
+        }
+    }
+
     public function autoinstaller($apikey, $api_endpoint, $admin_endpoint)
     {
         //Require only on this function to not overload memory with not needed classes
@@ -2433,7 +2451,7 @@ class Doofinder extends Module
         $shData = json_decode($shResponse->response, true);
 
         $script = $shData['script'];
-        if (preg_match('/installationId:\s\"(.*)\"/', $script, $matches)) {
+        if (preg_match('/installationId:\s\'(.*)\'/', $script, $matches)) {
             $installationID = $matches[1];
         }
         

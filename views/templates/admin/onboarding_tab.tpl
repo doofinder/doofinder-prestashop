@@ -163,13 +163,7 @@ li.active{
 			if(data == 'OK') {
 				$('.choose-installer').hide();
 				$('.loading-installer').show();
-				var loop = setInterval(function() {
-					$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
-					if($('.loading-installer ul li.active').index() < 0) {  
-						clearInterval(loop);
-						location.reload();
-					}  
-				}, 3000);
+				launchAutoinstaller();				
 			} else {
 				$('.message-popup').show();
 				setTimeout(function(){
@@ -179,6 +173,30 @@ li.active{
 		});
 
 		
+	}
+
+	function launchAutoinstaller(){
+		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+		var token = '{$tokenAjax|escape:'htmlall':'UTF-8'}';
+		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
+			'autoinstaller':1,
+			'token':token
+		}, function(data){
+			if(data == 'OK') {
+				var loop = setInterval(function() {
+					$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
+					if($('.loading-installer ul li.active').index() < 0) {  
+						clearInterval(loop);
+						location.reload();
+					}  
+				}, 3000);
+			} else {
+				$('.message-popup').show();
+			}
+		})
+		.fail(function() {
+		    location.reload();
+		});
 	}
 
 	function popupCenter(url, title, w, h){
