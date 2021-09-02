@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = self::VERSION;
+        $this->version = '4.0.2';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -73,7 +73,7 @@ class Doofinder extends Module
 
     public function manualOverride($restart = false)
     {
-        
+
         if ($restart) {
             if (file_exists(dirname(__FILE__) . $this->ovFile)) {
                 unlink(dirname(__FILE__) . $this->ovFile);
@@ -116,7 +116,7 @@ class Doofinder extends Module
         if (file_exists(dirname(__FILE__) . $this->ovFile)) {
             unlink(dirname(__FILE__) . $this->ovFile);
         }
-        
+
         $msgErrorColumn = 'This module need to be hooked in a column and your '
                 . 'theme does not implement one if you want Search Facets via API';
         if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true &&
@@ -173,7 +173,7 @@ class Doofinder extends Module
         $adv = Tools::getValue('adv', 0);
         $this->context->smarty->assign('adv', $adv);
 
-        
+
         $msg = $this->postProcess();
 
         $output = $msg;
@@ -190,7 +190,7 @@ class Doofinder extends Module
         $skipurl = $this->context->link->getAdminLink('AdminModules', true) . '&skip=1'
             . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $this->context->smarty->assign('skipurl', $skipurl);
-        
+
         $redirect = $this->context->shop->getBaseURL(true, false)
         . $this->_path . 'config.php';
         $token = Tools::encrypt($redirect);
@@ -203,7 +203,7 @@ class Doofinder extends Module
 
         $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
         $this->context->smarty->assign('dfEnabledV9', $dfEnabledV9);
-        
+
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
             $output.= $this->renderFormDataFeed($adv);
@@ -1207,7 +1207,7 @@ class Doofinder extends Module
         if (!$ovrSearch && $formUpdated == 'internal_search_tab') {
             $this->unregisterHook('productSearchProvider');
         }
-        
+
         $ovrSearchFac = Configuration::get('DF_OWSEARCHFAC');
         if ($ovrSearchFac && $formUpdated == 'internal_search_tab') {
             $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_Facets' . date('YmdHis'));
@@ -1222,7 +1222,7 @@ class Doofinder extends Module
                 $messages .= $this->displayWarningCtm($msg);
             }
         }
-        
+
         if ($formUpdated == 'custom_css_tab') {
             try {
                 $extraCSS = Configuration::get('DF_EXTRA_CSS');
@@ -1996,9 +1996,9 @@ class Doofinder extends Module
             }
             $db = Db::getInstance(_PS_USE_SQL_SLAVE_);
             $id_lang = $context->language->id;
-            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock, 
+            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock,
                 IFNULL(stock.quantity, 0) as quantity,
-                pl.`description_short`, pl.`available_now`, 
+                pl.`description_short`, pl.`available_now`,
                 pl.`available_later`, pl.`link_rewrite`, pl.`name`,
                 ' . (Combination::isFeatureActive() && $show_variations ?
                 ' IF(pai.`id_image` IS NULL OR pai.`id_image` = 0, MAX(image_shop.`id_image`),pai.`id_image`)'
@@ -2033,7 +2033,7 @@ class Doofinder extends Module
                 . ((Combination::isFeatureActive() && $show_variations) ?
                     ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_image` pai'
                     . ' ON (pai.`id_product_attribute` = product_attribute_shop.`id_product_attribute`) ' : ' ')
-                . Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . ' 
+                . Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . '
                 LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il'
                     . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) pSQL($id_lang) . ') '
                     . ' WHERE p.`id_product` IN (' . pSQL($product_pool) . ') ' .
@@ -2120,7 +2120,7 @@ class Doofinder extends Module
     {
         return $this->displayGeneralMsg($string, 'confirmation', 'success', $link);
     }
-    
+
     public function displayGeneralMsg($string, $type, $alert, $link = false)
     {
         $this->context->smarty->assign(
@@ -2133,7 +2133,7 @@ class Doofinder extends Module
         );
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
     }
-    
+
     public function canAjax()
     {
         $id_shop = 1;
@@ -2163,7 +2163,7 @@ class Doofinder extends Module
                 'error' => 'Doofinder facets not enabled but executing ajax request??'
             );
         }
-        
+
         if (empty($response)) {
             return true;
         } else {
@@ -2176,7 +2176,7 @@ class Doofinder extends Module
     {
         return _PS_MODULE_DIR_ . $this->name . '/views/templates/front/doofinder-embedded.tpl';
     }
-    
+
     private function debug($message)
     {
         $debug = Configuration::get('DF_DEBUG', null);
@@ -2285,7 +2285,7 @@ class Doofinder extends Module
                 foreach ($currencies as $cur) {
                     $ciso = $cur['iso_code'];
                     $shop_name = $this->getShopURL($shopId).' | Lang:'.$liso.' Currency:'.$ciso;
-                    
+
                     $seRequest = '{
                         "inactive": false,
                         "indices": [],
@@ -2296,7 +2296,7 @@ class Doofinder extends Module
                         "site_url": "'.$this->getShopURL($shopId).'",
                         "stopwords": false
                     }';
-                    
+
                     $seResponse = $client->post(
                         $dfhost.'/api/v2/search_engines',
                         $seRequest,
@@ -2307,7 +2307,7 @@ class Doofinder extends Module
                     );
 
                     $seData = json_decode($seResponse->response, true);
-                    
+
                     if ($hashid = $seData['hashid']) {
                         $client->post(
                             'https://'.$admin_endpoint.'/plugins/'.$hashid.'/script/prestashop',
@@ -2334,7 +2334,7 @@ class Doofinder extends Module
                         . '&currency='
                         . Tools::strtoupper($ciso)
                         . '&dfsec_hash=' . $doofinder_hash;
-                    
+
                         $indexData = '{
                             "options": {
                                 "exclude_out_of_stock_items": false,
@@ -2360,7 +2360,7 @@ class Doofinder extends Module
                             'application/json',
                             ['Authorization: Token '.$apikey]
                         );
-                        
+
                         $client->post(
                             $dfhost.'/api/v2/search_engines/'.$hashid.'/_process',
                             [],
@@ -2403,7 +2403,7 @@ class Doofinder extends Module
         $result = Db::getInstance()->getValue('SELECT id_configuration FROM '._DB_PREFIX_
         .'configuration WHERE name = "DF_API_KEY" AND (value IS NOT NULL OR value <> "")');
         $return = (($result) ? 'OK' : 'KO');
-        
+
         return ($text) ? $return : $result;
     }
 
@@ -2454,7 +2454,7 @@ class Doofinder extends Module
         if (preg_match('/installationId:\s\'(.*)\'/', $script, $matches)) {
             $installationID = $matches[1];
         }
-        
+
         return $installationID;
     }
 
