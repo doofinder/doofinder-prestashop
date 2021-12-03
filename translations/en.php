@@ -98,6 +98,7 @@ $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459
 $_MODULE['<{doofinder}prestashop>onboarding_tab_6b866b4e92effe404fd83e7a7885ad19'] = 'Connection with Doofinder successful.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_deed258a0a8c1f5382450930479ac0fd'] = 'You cannot connect with Doofinder. Please contact your server provider to check your web server internet connection or firewall.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_174bcd82d4523f740126e83438409838'] = 'You don\'t receive the Api Key or you close too quickly the popup window. Please try again. If you think this is an error, please contact our support or try the module manual configuration option.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] = 'An error occurred during the installation process. Please contact our support team on';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_dbf056cb2234471370ef68f03587e486'] = 'Please be patient, we are autoinstalling your definitive search solution...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] = 'Creating search engines...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_f7c1251d5362d2d5d94acc2032a50484'] = 'Recover data feed of your products...';

@@ -98,6 +98,7 @@ $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459
 $_MODULE['<{doofinder}prestashop>onboarding_tab_6b866b4e92effe404fd83e7a7885ad19'] = 'Conexión correcta con Doofinder.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_deed258a0a8c1f5382450930479ac0fd'] = 'No puedes conectar con Doofinder. Por favor contacta con tu proveedor del servidor web para comprobar la conexión a internet o el cortafuegos.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_174bcd82d4523f740126e83438409838'] = 'No has recibido los datos desde Doofinder o has cerrado demasiado pronto la ventana emergente. Por favor, inténtelo de nuevo. Si cree que es un error, por favor contacte con nuestro soporte o pruebe la opción de configuración manual.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] = 'Se ha producido un error durante la instalación. Por favor, contacta con nuestro equipo de soporte a través de';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_dbf056cb2234471370ef68f03587e486'] = 'Por favor se paciente, estamos instalando la solución definitiva de búsqueda...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] = 'Creando los motores de búsqueda...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_f7c1251d5362d2d5d94acc2032a50484'] = 'Recopilando los catálogos de productos...';
