@@ -30,6 +30,12 @@
 					{l s='You don\'t receive the Api Key or you close too quickly the popup window. Please try again. If you think this is an error, please contact our support or try the module manual configuration option.' mod='doofinder'}
 				</div>
 			</div>
+			<div class="bootstrap message-error" style="display:none;">
+				<div class="module_warning alert alert-danger" >
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					{l s='An error occurred during the installation process. Please contact our support team on' mod='doofinder'} support@doofinder.com
+				</div>
+			</div>
 			<div class="col-12 text-center loading-installer" style="display:none;">
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" />
 				<br>
@@ -191,7 +197,7 @@ li.active{
 					}  
 				}, 3000);
 			} else {
-				$('.message-popup').show();
+				$('.message-error').show();
 			}
 		})
 		.fail(function() {

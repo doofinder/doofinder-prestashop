@@ -98,6 +98,7 @@ $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459
 $_MODULE['<{doofinder}prestashop>onboarding_tab_6b866b4e92effe404fd83e7a7885ad19'] = 'Connexion correcte avec Doofinder.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_deed258a0a8c1f5382450930479ac0fd'] = 'Vous ne pouvez pas vous connecter à Doofinder. Veuillez contacter votre fournisseur de serveur Web pour vérifier la connexion Internet ou le pare-feu.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_174bcd82d4523f740126e83438409838'] = 'Vous ne recevez pas la clé Api ou vous fermez trop rapidement la fenêtre contextuelle. Veuillez réessayer. Si vous pensez qu\'il s\'agit d\'une erreur, veuillez contacter notre support ou essayez l\'option de configuration manuelle du module.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] = 'Une erreur s’est produite durant l’installation. Veuillez contacter notre support à';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_dbf056cb2234471370ef68f03587e486'] = 'Soyez patient, nous installons la solution de recherche ultime ...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] = 'Création de moteurs de recherche ...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_f7c1251d5362d2d5d94acc2032a50484'] = 'Collecte de catalogues de produits ...';
