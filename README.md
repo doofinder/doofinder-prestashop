@@ -9,7 +9,6 @@ This installation brings:
 
 - **a mysql container** for the database (on port 3308)
 - **a prestashop container** (in which you can choose the version to install) on port 9000
-- **a phpMyAdmin container** to do simple operations on the database on port 9001
 
 To choose the prestashop version, in the container image change:
 
