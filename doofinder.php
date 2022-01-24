@@ -1296,6 +1296,19 @@ class Doofinder extends Module
     {
         $this->configureHookCommon($params);
         if (Configuration::get('DF_ENABLED_V9')) {
+            /**
+             * loads different cart handling assets depending on the version of prestashop used
+             * (uses different javascript implementations for this purpose in prestashop 1.6.x and 1.7.x)
+             */
+            if( version_compare(_PS_VERSION_, '1.7', '<') === true) {
+                $this->context->controller->addJS(
+                    ($this->_path) . 'views/js/add-to-cart/doofinder-add_to_cart_ps16.js'
+                );
+            } else {
+                $this->context->controller->addJS(
+                    ($this->_path) . 'views/js/add-to-cart/doofinder-add_to_cart_ps17.js'
+                );
+            }
             return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
         } else {
             if (isset($this->context->controller->php_self) &&
