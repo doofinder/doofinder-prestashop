@@ -17,10 +17,10 @@ let dfAddToCart = (cartOptions) => {
     cuantityInput.setAttribute("value", cartOptions.cuantity);
     cuantityInput.setAttribute("min", 1);
 
-    let customizationInput = document.createElement("input");
-    customizationInput.setAttribute("type", "hidden");
-    customizationInput.setAttribute("name", "id_customization");
-    customizationInput.setAttribute("value", cartOptions.customizationID);
+    let productAttributeInput = document.createElement("input");
+    productAttributeInput.setAttribute("type", "hidden");
+    productAttributeInput.setAttribute("name", "id_product_attribute");
+    productAttributeInput.setAttribute("value", cartOptions.customizationID);
 
     let productInput = document.createElement("input");
     productInput.setAttribute("type", "hidden");
@@ -37,7 +37,7 @@ let dfAddToCart = (cartOptions) => {
     submit.setAttribute("data-button-action", "add-to-cart");
 
     form.appendChild(cuantityInput);
-    form.appendChild(customizationInput);
+    form.appendChild(productAttributeInput);
     form.appendChild(productInput);
     form.appendChild(tokenInput);
     form.appendChild(submit);
