@@ -7,30 +7,40 @@ let dfAddToCart = (cartOptions) => {
      * for "add to cart").
      */
     let form = document.createElement("form");
-    form.setAttribute("method", "post");
-    form.setAttribute("action", cartOptions.cartURL);
-    form.setAttribute("style", "display: none;");
+    Object.assign(form, {
+        method: "post",
+        action: cartOptions.cartURL,
+        style: "display: none;"
+    });
 
     let cuantityInput = document.createElement("input");
-    cuantityInput.setAttribute("type", "number");
-    cuantityInput.setAttribute("name", "qty");
-    cuantityInput.setAttribute("value", cartOptions.cuantity);
-    cuantityInput.setAttribute("min", 1);
+    Object.assign(cuantityInput, {
+        type    : "number",
+        name    : "qty",
+        value   : cartOptions.cuantity,
+        min     : 1
+    });
 
     let productAttributeInput = document.createElement("input");
-    productAttributeInput.setAttribute("type", "hidden");
-    productAttributeInput.setAttribute("name", "id_product_attribute");
-    productAttributeInput.setAttribute("value", cartOptions.customizationID);
+    Object.assign(productAttributeInput, {
+        type    : "hidden",
+        name    : "id_product_attribute",
+        value   : cartOptions.customizationID
+    });
 
     let productInput = document.createElement("input");
-    productInput.setAttribute("type", "hidden");
-    productInput.setAttribute("name", "id_product");
-    productInput.setAttribute("value", cartOptions.productID);
+    Object.assign(productInput, {
+        type    : "hidden",
+        name    : "id_product",
+        value   : cartOptions.productID
+    });
 
     let tokenInput = document.createElement("input");
-    tokenInput.setAttribute("type", "hidden");
-    tokenInput.setAttribute("name", "token");
-    tokenInput.setAttribute("value", cartOptions.cartToken);
+    Object.assign(tokenInput, {
+        type    : "hidden",
+        name    : "token",
+        value   : cartOptions.cartToken
+    });
 
     let submit = document.createElement("input");
     submit.setAttribute("type", "submit");
