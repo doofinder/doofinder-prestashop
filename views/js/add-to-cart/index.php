@@ -1,3 +1,4 @@
+<?php
 /**
  * NOTICE OF LICENSE
  *
@@ -12,9 +13,12 @@
  * @license   GPLv3
  */
 
-//implementation of "add to cart" functionality for prestashop 1.6.x
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 
-let doofinderManageCart = (cartOptions) => {
-    ajaxCart.add(cartOptions.productID, cartOptions.customizationID);
-    closeDoofinderLayer();
-}
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+
+header('Location: ../');
+exit;
