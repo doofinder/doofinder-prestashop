@@ -113,6 +113,7 @@ if (!$shop->id) {
 
 // CONFIG
 $lang = dfTools::getLanguageFromRequest();
+$context->language = $lang;
 $currency = dfTools::getCurrencyForLanguageFromRequest($lang);
 
 
