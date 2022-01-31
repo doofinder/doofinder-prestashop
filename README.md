@@ -2,6 +2,21 @@
 
 Plugin that allows to configure the [Doofinder](http://www.doofinder.com) search service in a Prestashop 1.5 store with less effort than configuring it from scratch.
 
+## Developers
+
+For a local installation of a prestashop environment use `docker-compose up -d`. 
+This installation brings: 
+
+- **a mysql container** for the database (on port 3308)
+- **a prestashop container** (in which you can choose the version to install) on port 9000
+
+To choose the prestashop version, in the container image change:
+
+- **prestashop/prestashop:1.6** for version 1.6
+- **prestashop/prestashop:1.7** for version 1.7
+- **prestashop/prestashop:latest** for the latest available version of prestashop
+
+Once the environment is installed, move the module files to `/modules/doofinder`.
 ## How to install
 
 The easiest way of installing the plugin is downloading it from our [support page](http://www.doofinder.com/support). If you want to download it from this page, you can download the latest release from the tags section, but you will have to prepare the module `.zip` file prior to installing it.

@@ -26,6 +26,32 @@
     })(document, 'script', 'https://cdn.doofinder.com/livelayer/1/js/loader.min.js', function () {
       doofinderLoader.load(dfLayerOptions);
     });
+
+    let closeDoofinderLayer = () => {
+      document.querySelector('button[dfd-click="close-layer"').click();
+    }
+
+    document.addEventListener('doofinder.cart.add', function(event) {
+
+      const checkIfCartItemHasVariation = (cartObject) => {
+        return (cartObject.item_id === cartObject.grouping_id) ? false : true;
+      }
+
+      /**
+      * Returns only ID from string
+      */
+      const sanitizeVariationID = (variationID) => {
+        return variationID.replace(/\D/g, "")
+      }
+
+      doofinderManageCart({
+        cartURL          : "{$urls.pages.cart|escape:'htmlall':'UTF-8'}",  //required for prestashop 1.7, in previous versions it will be empty.
+        cartToken        : "{$static_token|escape:'htmlall':'UTF-8'}",
+        productID        : checkIfCartItemHasVariation(event.detail) ? event.detail.grouping_id : event.detail.item_id,
+        customizationID  : checkIfCartItemHasVariation(event.detail) ? sanitizeVariationID(event.detail.item_id) : 0,   // If there are no combinations, the value will be 0
+        cuantity         : event.detail.amount,
+      });
+    });
   </script>
 <!-- END OF DOOFINDER SCRIPT -->
 {/if}
