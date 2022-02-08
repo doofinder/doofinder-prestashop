@@ -45,7 +45,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.0.6';
+    const VERSION = '4.0.7';
     const YES = 1;
     const NO = 0;
 
@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.0.6';
+        $this->version = '4.0.7';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -2009,12 +2009,12 @@ class Doofinder extends Module
             }
             $db = Db::getInstance(_PS_USE_SQL_SLAVE_);
             $id_lang = $context->language->id;
-            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock,
+            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock, 
                 IFNULL(stock.quantity, 0) as quantity,
                 pl.`description_short`, pl.`available_now`,
                 pl.`available_later`, pl.`link_rewrite`, pl.`name`,
                 ' . (Combination::isFeatureActive() && $show_variations ?
-                ' IF(pai.`id_image` IS NULL OR pai.`id_image` = 0, MAX(image_shop.`id_image`),pai.`id_image`)'
+                ' IF(ipa.`id_image` IS NULL OR ipa.`id_image` = 0, MAX(image_shop.`id_image`),ipa.`id_image`)'
                     . ' id_image, ' : 'i.id_image, ') . '
                 il.`legend`, m.`name` manufacturer_name '
                 . (Combination::isFeatureActive() ? (($show_variations) ?
@@ -2049,6 +2049,30 @@ class Doofinder extends Module
                 . Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . '
                 LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il'
                     . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) pSQL($id_lang) . ') '
+                    . (Combination::isFeatureActive() && $show_variations ?
+                     'LEFT JOIN (
+                        SELECT i.id_image, P.id_product, P.id_product_attribute
+                            from
+                            (
+                            select 
+                                pa.id_product, 
+                                pa.id_product_attribute,
+                                paic.id_attribute,min(i.position) 
+                                as min_position
+                            from ' . _DB_PREFIX_ . 'product_attribute pa
+                             inner join ' . _DB_PREFIX_ . 'product_attribute_image pai
+                               on pai.id_product_attribute = pa.id_product_attribute
+                             inner join  ' . _DB_PREFIX_ . 'product_attribute_combination paic
+                               on pai.id_product_attribute = paic.id_product_attribute
+                             inner join ' . _DB_PREFIX_ . 'image i
+                               on pai.id_image = i.id_image   
+                            group by pa.id_product, pa.id_product_attribute,paic.id_attribute
+                            ) as P
+                            inner join ' . _DB_PREFIX_ . 'image i
+                             on i.id_product = P.id_product and i.position =  P.min_position
+                    ) 
+                    AS ipa ON p.`id_product` = ipa.`id_product` 
+                    AND pai.`id_product_attribute` = ipa.`id_product_attribute`' : '')
                     . ' WHERE p.`id_product` IN (' . pSQL($product_pool) . ') ' .
                     (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
                         . ' OR product_attribute_shop.`id_product_attribute`'
