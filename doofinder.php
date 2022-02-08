@@ -2054,7 +2054,11 @@ class Doofinder extends Module
                         SELECT i.id_image, P.id_product, P.id_product_attribute
                             from
                             (
-                            select pa.id_product, pa.id_product_attribute,paic.id_attribute,min(i.position) as min_position
+                            select 
+                                pa.id_product, 
+                                pa.id_product_attribute,
+                                paic.id_attribute,min(i.position) 
+                                as min_position
                             from ' . _DB_PREFIX_ . 'product_attribute pa
                              inner join ' . _DB_PREFIX_ . 'product_attribute_image pai
                                on pai.id_product_attribute = pa.id_product_attribute
@@ -2066,7 +2070,9 @@ class Doofinder extends Module
                             ) as P
                             inner join ' . _DB_PREFIX_ . 'image i
                              on i.id_product = P.id_product and i.position =  P.min_position
-                    ) AS ipa ON p.`id_product` = ipa.`id_product` AND pai.`id_product_attribute` = ipa.`id_product_attribute`' : '')
+                    ) 
+                    AS ipa ON p.`id_product` = ipa.`id_product` 
+                    AND pai.`id_product_attribute` = ipa.`id_product_attribute`' : '')
                     . ' WHERE p.`id_product` IN (' . pSQL($product_pool) . ') ' .
                     (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
                         . ' OR product_attribute_shop.`id_product_attribute`'
