@@ -53,7 +53,9 @@ class SearchController extends SearchControllerCore
                         $query = Tools::replaceAccentedChars(urldecode($query));
 
                         foreach ($search['result'] as &$product) {
-                            $product['link'] .= (strpos($product['link'], '?') === false ? '?' : '&') . 'search_query=' . urlencode($query) . '&results=' . (int) $search['total'];
+                            $product['link'] .= (strpos($product['link'], '?') === false ? '?' : '&');
+                            $product['link'] .= 'search_query=' . urlencode($query);
+                            $product['link'] .= '&results=' . (int) $search['total'];
                         }
                         Hook::exec('actionSearch', array('expr' => $query, 'total' => $search['total']));
                         $nbProducts = $search['total'];
@@ -72,13 +74,14 @@ class SearchController extends SearchControllerCore
 
                         $this->context->smarty->assign(
                             array(
-                                'products' => $search['result'], // DEPRECATED (since to 1.4), not use this: conflict with block_cart module
+                                'products' => $search['result'], //DEPRECATED
                                 'search_products' => $search['result'],
                                 'nbProducts' => $search['total'],
                                 'search_query' => $original_query,
                                 'homeSize' => $imageSize
                             )
                         );
+                        //Info: DEPRECATED (since to 1.4), do not use this: conflict with block_cart module
 
                         $this->context->smarty->assign(
                             array(

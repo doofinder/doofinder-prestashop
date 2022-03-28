@@ -2,7 +2,8 @@
 /**
  * Class EasyREST
  * Wraps HTTP calls using cURL, aimed for accessing and testing RESTful webservice.
- * Original RestClient By Diogo Souza da Silva <manifesto@manifesto.blog.br> and modified by Daniel Martin <dmartin@webimpacto.es>
+ * Original RestClient By Diogo Souza da Silva <manifesto@manifesto.blog.br> and modified by
+ * Daniel Martin <dmartin@webimpacto.es>
  * @author    Doofinder
  * @copyright Doofinder
  * @license   GPLv3
@@ -10,7 +11,6 @@
 
 class EasyREST
 {
-
     private $curl;
     public $url;
     public $response = "";
@@ -49,10 +49,10 @@ class EasyREST
         if ($this->method === "POST") {
             curl_setopt($this->curl, CURLOPT_POST, true);
             curl_setopt($this->curl, CURLOPT_POSTFIELDS, $this->params);
-        } else if ($this->method == "GET") {
+        } elseif ($this->method == "GET") {
             curl_setopt($this->curl, CURLOPT_HTTPGET, true);
             $this->treatURL();
-        } else if ($this->method === "PUT") {
+        } elseif ($this->method === "PUT") {
             curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "PUT");
             if (is_object($this->params) || is_array($this->params)) {
                 $params = http_build_query($this->params);
@@ -104,7 +104,8 @@ class EasyREST
         if ($r == null or strlen($r) < 1) {
             return;
         }
-        $parts  = explode("\n\r", $r); // HTTP packets define that Headers end in a blank line (\n\r) where starts the body
+        // HTTP packets define that Headers end in a blank line (\n\r) where starts the body
+        $parts  = explode("\n\r", $r);
         while (preg_match('@HTTP/1.[0-1] 100 Continue@', $parts[0]) or preg_match("@Moved@", $parts[0])) {
             // Continue header must be bypass
             for ($i = 1; $i < count($parts); $i++) {
@@ -112,11 +113,17 @@ class EasyREST
             }
             unset($parts[count($parts) - 1]);
         }
-        preg_match("@Content-Type: ([a-zA-Z0-9-]+/?[a-zA-Z0-9-]*)@", $parts[0], $reg); // This extract the content type
+
+        // This extract the content type
+        preg_match("@Content-Type: ([a-zA-Z0-9-]+/?[a-zA-Z0-9-]*)@", $parts[0], $reg);
+
         if (isset($reg[1])) {
             $this->headers['content-type'] = $reg[1];
         }
-        preg_match("@HTTP/1.[0-1] ([0-9]{3}) ([a-zA-Z ]+)@", $parts[0], $reg); // This extracts the response header Code and Message
+
+        // This extracts the response header Code and Message
+        preg_match("@HTTP/1.[0-1] ([0-9]{3}) ([a-zA-Z ]+)@", $parts[0], $reg);
+
         $this->headers['code'] = $reg[1];
         $this->headers['message'] = $reg[2];
         if ($this->headers['code'] == null) {
@@ -304,8 +311,14 @@ class EasyREST
      * @param string $contentType="multpary/form-data" [optional] commom post (multipart/form-data) as default
      * @return EasyREST
      */
-    public static function post($url, $params = null, $user = null, $pwd = null, $contentType = "multipart/form-data", $httpHeaders = null)
-    {
+    public static function post(
+        $url,
+        $params = null,
+        $user = null,
+        $pwd = null,
+        $contentType = "multipart/form-data",
+        $httpHeaders = null
+    ) {
         return self::call("POST", $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
@@ -331,8 +344,14 @@ class EasyREST
      * @param string $password=null [optional]
      * @return EasyREST
      */
-    public static function get($url, array $params = null, $user = null, $pwd = null, $contentType = "multipart/form-data", $httpHeaders = null)
-    {
+    public static function get(
+        $url,
+        array $params = null,
+        $user = null,
+        $pwd = null,
+        $contentType = "multipart/form-data",
+        $httpHeaders = null
+    ) {
         return self::call("GET", $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
@@ -360,8 +379,15 @@ class EasyREST
      * @param array  $httpHeaders=null [optional]
      * @return EasyREST
      */
-    public static function call($method, $url, $body, $user = null, $pwd = null, $contentType = null, $httpHeaders = null)
-    {
+    public static function call(
+        $method,
+        $url,
+        $body,
+        $user = null,
+        $pwd = null,
+        $contentType = null,
+        $httpHeaders = null
+    ) {
         return self::createClient($url)
             ->setParameters($body)
             ->setMethod($method)

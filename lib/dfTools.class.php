@@ -17,11 +17,13 @@ define('CATEGORY_SEPARATOR', '%%');
 define('CATEGORY_TREE_SEPARATOR', '>');
 define('TXT_SEPARATOR', '|');
 
-class dfTools
+class DfTools
 {
 
     // http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
-    const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})|./x';
+    const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF]
+    [\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F]
+    [\x80-\xBF]{2})|./x';
 
     //
     // Validation
@@ -247,7 +249,8 @@ class dfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image   
-            where pa.id_product = " . (int)pSQL($id_product) . " and pa.id_product_attribute = " . (int)pSQL($id_product_attribute) . "      
+            where pa.id_product = " . (int)pSQL($id_product) . " 
+                and pa.id_product_attribute = " . (int)pSQL($id_product_attribute) . "      
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -411,7 +414,8 @@ class dfTools
           ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
+        LEFT JOIN (_DB_PREFIX_tag tag 
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
           ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 
@@ -477,10 +481,12 @@ class dfTools
           ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)  
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im 
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
-        LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
+        LEFT JOIN (_DB_PREFIX_tag tag 
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute) 
+          ON (p.id_product = sa.id_product 
+            AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute) 
             AND (sa.id_shop = _ID_SHOP_ OR 
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
@@ -530,7 +536,8 @@ class dfTools
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
-    protected static $root_category_ids = null;    protected static $cached_category_paths = array();
+    protected static $root_category_ids = null;
+    protected static $cached_category_paths = array();
 
     /**
      * Returns an array of "root" categories in Prestashop for a language.
@@ -994,7 +1001,9 @@ class dfTools
     public static function getFeedURL($langIsoCode)
     {
         $currency = self::getCurrencyForLanguage($langIsoCode);
-        return self::getModuleLink('feed.php') . "?language=" . strtoupper($langIsoCode) . "&currency=" . strtoupper($currency->iso_code);
+        $feedUrl = self::getModuleLink('feed.php') . "?language=" . strtoupper($langIsoCode);
+        $feedUrl .= "&currency=" . strtoupper($currency->iso_code);
+        return $feedUrl;
     }
 
     /**
@@ -1056,16 +1065,16 @@ class dfTools
         return $v;
     }
 
-    public static function walk_apply_html_entities(&$item, $key)
+    public static function walkApplyHtmlEntities(&$item, $key)
     {
         if (is_string($item)) {
             $item = htmlentities($item);
         }
     }
 
-    public static function json_encode($data)
+    public static function jsonEncode($data)
     {
-        array_walk_recursive($data, array(get_class(), 'walk_apply_html_entities'));
+        array_walk_recursive($data, array(get_class(), 'walkApplyHtmlEntities'));
         return str_replace("\\/", "/", html_entity_decode(json_encode($data)));
     }
 }
