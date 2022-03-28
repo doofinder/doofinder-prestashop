@@ -3,7 +3,9 @@
  * Class EasyREST
  * Wraps HTTP calls using cURL, aimed for accessing and testing RESTful webservice. 
  * Original RestClient By Diogo Souza da Silva <manifesto@manifesto.blog.br> and modified by Daniel Martin <dmartin@webimpacto.es>
+ * @author Diogo Souza da Silva <manifesto@manifesto.blog.br>
  */
+
 class EasyREST {
 
      private $curl ;
