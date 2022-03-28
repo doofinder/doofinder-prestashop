@@ -90,7 +90,7 @@ class DoofinderApi
 
 
         $this->apiVersion = array_key_exists('apiVersion', $init_options) ?
-                $init_options['apiVersion'] : self::DEFAULT_API_VERSION;
+            $init_options['apiVersion'] : self::DEFAULT_API_VERSION;
         $this->serializationArray = $_REQUEST;
         if (array_key_exists('restrictedRequest', $init_options)) {
             switch (strtolower($init_options['restrictedRequest'])) {
@@ -359,8 +359,10 @@ class DoofinderApi
      */
     public function removeTerm($filterName, $term)
     {
-        if ($this->optionExists('filter') && isset($this->search_options['filter'][$filterName]) &&
-                in_array($term, $this->search_options['filter'][$filterName])) {
+        if (
+            $this->optionExists('filter') && isset($this->search_options['filter'][$filterName]) &&
+            in_array($term, $this->search_options['filter'][$filterName])
+        ) {
 
             function filter_me($value)
             {
@@ -586,7 +588,6 @@ class DoofinderApi
         }
         return 'terms';
     }
-
 }
 
 /**
@@ -629,7 +630,7 @@ class DoofinderResults
         }
         // doofinder status
         $this->status = isset($this->properties['doofinder_status']) ?
-                $this->properties['doofinder_status'] : self::SUCCESS;
+            $this->properties['doofinder_status'] : self::SUCCESS;
 
         // results
         $this->results = array();
@@ -701,7 +702,7 @@ class DoofinderResults
     public function getProperty($propertyName)
     {
         return array_key_exists($propertyName, $this->properties) ?
-                $this->properties[$propertyName] : null;
+            $this->properties[$propertyName] : null;
     }
 
     /**
@@ -839,5 +840,4 @@ class DoofinderResults
 
 class DoofinderException extends Exception
 {
-    
 }

@@ -19,14 +19,14 @@ class SearchController extends SearchControllerCore
     public function initContent()
     {
         $parentContent = true;
-        if (Module::isEnabled('doofinder')){
+        if (Module::isEnabled('doofinder')) {
             $m = Module::getInstanceByName('doofinder');
             if ($m->testDoofinderApi(Context::getContext()->language->iso_code)) {
                 $olderThan17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
                 $overwrite_embedded = Configuration::get('DF_OWSEARCHEB', null);
                 if ($overwrite_embedded) {
                     //HERE you are using embedded layer
-                    if  ($olderThan17) {
+                    if ($olderThan17) {
                         $parentContent = false;
                         $this->setTemplate($m->getEmbeddedTemplateLocation());
                         FrontController::initContent();
@@ -43,10 +43,10 @@ class SearchController extends SearchControllerCore
                     //HERE you are using API!
                     //If your PS is 1.6 or older. Newer are using productSearchProvider hook
                     $query = Tools::getValue('search_query', Tools::getValue('ref', Tools::getValue('s')));
-                    $overwrite_search = Configuration::get('DF_OWSEARCH', null);           
+                    $overwrite_search = Configuration::get('DF_OWSEARCH', null);
                     $this->p = abs((int) (Tools::getValue('p', 1)));
                     $this->n = abs((int) (Tools::getValue('n', Configuration::get('PS_PRODUCTS_PER_PAGE'))));
-                    
+
                     if ($overwrite_search && ($search = $m->generateSearch(true)) && $query && !is_array($query)) {
                         $parentContent = false;
                         $original_query = $query;
@@ -59,7 +59,7 @@ class SearchController extends SearchControllerCore
                         $nbProducts = $search['total'];
                         $this->pagination($nbProducts);
 
-                        if (method_exists($this, 'addColorsToProductList')) { 
+                        if (method_exists($this, 'addColorsToProductList')) {
                             //RETROCOMPATIBILITY
                             $this->addColorsToProductList($search['result']);
                         }
@@ -82,7 +82,7 @@ class SearchController extends SearchControllerCore
 
                         $this->context->smarty->assign(
                             array(
-                                'add_prod_display' => Configuration::get('PS_ATTRIBUTE_CATEGORY_DISPLAY'), 
+                                'add_prod_display' => Configuration::get('PS_ATTRIBUTE_CATEGORY_DISPLAY'),
                                 'comparator_max_item' => Configuration::get('PS_COMPARATOR_MAX_ITEM')
                             )
                         );
