@@ -17,17 +17,19 @@ define('CATEGORY_SEPARATOR', '%%');
 define('CATEGORY_TREE_SEPARATOR', '>');
 define('TXT_SEPARATOR', '|');
 
-class dfTools
+class DfTools
 {
 
     // http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
-    const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})|./x';
+    const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF]
+    [\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F]
+    [\x80-\xBF]{2})|./x';
 
     //
     // Validation
     //
 
-  public static function isBasicValue($v)
+    public static function isBasicValue($v)
     {
         return $v && !empty($v) && Validate::isGenericName($v);
     }
@@ -36,7 +38,7 @@ class dfTools
     // SQL Tools
     //
 
-  public static function prepareSQL($sql, $args = array())
+    public static function prepareSQL($sql, $args = array())
     {
         $keys = array('_DB_PREFIX_');
         $values = array(_DB_PREFIX_);
@@ -67,7 +69,7 @@ class dfTools
 
     //
 
-  /**
+    /**
      * Returns an array of image size names to be used in a <select> box.
      *
      * @return array (assoc) with the value of each key as value for it.
@@ -87,8 +89,9 @@ class dfTools
         `name`;
     ";
 
-        foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $size)
+        foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $size) {
             $sizes[$size['DF_GS_IMAGE_SIZE']] = $size;
+        }
 
         return $sizes;
     }
@@ -112,9 +115,9 @@ class dfTools
       ORDER BY `name`;
     ";
 
-        foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $currency)
+        foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $currency) {
             $currencies[$currency['iso_code']] = $currency;
-
+        }
         return $currencies;
     }
 
@@ -179,8 +182,10 @@ class dfTools
         fs.id_shop = _ID_SHOP_ 
     ";
 
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
-                    '_ID_SHOP_' => (int)pSQL($id_shop)));
+        $sql = self::prepareSQL($sql, array(
+            '_ID_LANG_' => (int)pSQL($id_lang),
+            '_ID_SHOP_' => (int)pSQL($id_shop)
+        ));
 
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -211,8 +216,10 @@ class dfTools
         ags.id_shop = _ID_SHOP_ 
     ";
 
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
-                    '_ID_SHOP_' => (int)pSQL($id_shop)));
+        $sql = self::prepareSQL($sql, array(
+            '_ID_LANG_' => (int)pSQL($id_lang),
+            '_ID_SHOP_' => (int)pSQL($id_shop)
+        ));
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = array();
@@ -242,7 +249,8 @@ class dfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image   
-            where pa.id_product = ".(int)pSQL($id_product)." and pa.id_product_attribute = ".(int)pSQL($id_product_attribute)."      
+            where pa.id_product = " . (int)pSQL($id_product) . " 
+                and pa.id_product_attribute = " . (int)pSQL($id_product_attribute) . "      
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -250,10 +258,11 @@ class dfTools
             ";
         $sql = self::prepareSQL($sql, array());
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        if (isset($result[0]))
+        if (isset($result[0])) {
             return $result[0]['id_image'];
-        else
+        } else {
             return "";
+        }
     }
 
     /**
@@ -279,8 +288,10 @@ class dfTools
         fp.id_product = _ID_PRODUCT
     ";
 
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
-                    '_ID_PRODUCT' => (int)pSQL($id_product)));
+        $sql = self::prepareSQL($sql, array(
+            '_ID_LANG_' => (int)pSQL($id_lang),
+            '_ID_PRODUCT' => (int)pSQL($id_product)
+        ));
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
 
@@ -288,8 +299,9 @@ class dfTools
 
 
         foreach ($result as $elem) {
-            if (in_array($elem['name'], $feature_keys))
+            if (in_array($elem['name'], $feature_keys)) {
                 $features[$elem['name']][] = $elem['value'];
+            }
         }
 
         return $features;
@@ -321,8 +333,10 @@ class dfTools
           pc.id_product_attribute = _VARIATION_ID
       ";
 
-            $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
-                        '_VARIATION_ID' => (int)pSQL($variation_id)));
+            $sql = self::prepareSQL($sql, array(
+                '_ID_LANG_' => (int)pSQL($id_lang),
+                '_VARIATION_ID' => (int)pSQL($variation_id)
+            ));
 
             $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         } else {
@@ -336,9 +350,9 @@ class dfTools
         }
 
         foreach ($result as $elem) {
-          if (array_search($elem['group_name'], $attribute_keys) !== false) {
-            $attributes[array_search($elem['group_name'], $attribute_keys)] = $elem['name'];
-          }
+            if (array_search($elem['group_name'], $attribute_keys) !== false) {
+                $attributes[array_search($elem['group_name'], $attribute_keys)] = $elem['name'];
+            }
         }
         return $attributes;
     }
@@ -357,10 +371,10 @@ class dfTools
 
         $isbn = '';
         if (dfTools::versionGte('1.7.0.0')) {
-          $isbn = 'p.isbn,';
-          if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-            $isbn = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
-          }
+            $isbn = 'p.isbn,';
+            if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+                $isbn = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
+            }
         }
 
         $sql = "
@@ -371,7 +385,7 @@ class dfTools
         m.name AS manufacturer,
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
-        ".$isbn."
+        " . $isbn . "
         p.upc,
         p.reference,
         p.supplier_reference,
@@ -400,7 +414,8 @@ class dfTools
           ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
+        LEFT JOIN (_DB_PREFIX_tag tag 
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
           ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 
@@ -430,7 +445,7 @@ class dfTools
         m.name AS manufacturer,
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
-        ".$isbn."
+        " . $isbn . "
         p.upc AS upc,
         p.reference AS reference,
         p.supplier_reference AS supplier_reference,
@@ -466,10 +481,12 @@ class dfTools
           ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)  
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im 
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
-        LEFT JOIN (_DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
+        LEFT JOIN (_DB_PREFIX_tag tag 
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute) 
+          ON (p.id_product = sa.id_product 
+            AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute) 
             AND (sa.id_shop = _ID_SHOP_ OR 
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
@@ -500,26 +517,27 @@ class dfTools
             $visibility = "";
         }
 
-        
+
 
         $sql = self::limitSQL($sql, $limit, $offset);
-        $sql = self::prepareSQL($sql, array('_ID_LANG_' => (int)pSQL($id_lang),
-                    '_ID_SHOP_' => (int)pSQL($id_shop),
-                    '_ID_SHOPGROUP_' => (int)pSQL($Shop->id_shop_group),
-                    '__MPN__' => (string)pSQL($mpn_field),
-                    '_IMS_COVER_' => (string)pSQL($ims_cover),
-                    '__ID_CATEGORY_DEFAULT__' => (int)pSQL($id_category_default),
-                    '__IS_ACTIVE__' => (string)pSQL($is_active),
-                    '__VISIBILITY__' => (string)pSQL($visibility)));
+        $sql = self::prepareSQL($sql, array(
+            '_ID_LANG_' => (int)pSQL($id_lang),
+            '_ID_SHOP_' => (int)pSQL($id_shop),
+            '_ID_SHOPGROUP_' => (int)pSQL($Shop->id_shop_group),
+            '__MPN__' => (string)pSQL($mpn_field),
+            '_IMS_COVER_' => (string)pSQL($ims_cover),
+            '__ID_CATEGORY_DEFAULT__' => (int)pSQL($id_category_default),
+            '__IS_ACTIVE__' => (string)pSQL($is_active),
+            '__VISIBILITY__' => (string)pSQL($visibility)
+        ));
 
-        $sql = str_replace("\'","'",$sql);
+        $sql = str_replace("\'", "'", $sql);
 
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
-    protected static
-            $root_category_ids = null,
-            $cached_category_paths = array();
+    protected static $root_category_ids = null;
+    protected static $cached_category_paths = array();
 
     /**
      * Returns an array of "root" categories in Prestashop for a language.
@@ -530,8 +548,9 @@ class dfTools
     {
         if (null === self::$root_category_ids) {
             self::$root_category_ids = array();
-            foreach (Category::getRootCategories($id_lang) as $category)
+            foreach (Category::getRootCategories($id_lang) as $category) {
                 self::$root_category_ids[] = $category['id_category'];
+            }
         }
 
         return self::$root_category_ids;
@@ -550,8 +569,9 @@ class dfTools
      */
     public static function getCategoryPath($id_category, $id_lang, $id_shop, $full = true)
     {
-        if (isset(self::$cached_category_paths[$id_category]))
+        if (isset(self::$cached_category_paths[$id_category])) {
             return self::$cached_category_paths[$id_category];
+        }
 
         $excluded_ids = self::getRootCategoryIds($id_lang);
 
@@ -572,28 +592,33 @@ class dfTools
         AND parent.level_depth <> 0
         AND parent.active = 1 ";
 
-        if (count($excluded_ids) > 0 && $excluded_ids[0] != "")
+        if (count($excluded_ids) > 0 && $excluded_ids[0] != "") {
             $sql .= "AND parent.id_category NOT IN (_EXCLUDED_IDS_) ";
+        }
 
         $sql .= "ORDER BY
         parent.nleft
       ;";
 
-        $sql = self::prepareSQL($sql, array('_ID_CATEGORY_' => (int)pSQL($id_category),
-                    '_ID_SHOP_' => (int)pSQL($id_shop),
-                    '_ID_LANG_' => (int)pSQL($id_lang),
-                    '_EXCLUDED_IDS_' => (string)pSQL(implode(',',$excluded_ids))));
-        
-        $sql = str_replace("\'","'",$sql);
+        $sql = self::prepareSQL($sql, array(
+            '_ID_CATEGORY_' => (int)pSQL($id_category),
+            '_ID_SHOP_' => (int)pSQL($id_shop),
+            '_ID_LANG_' => (int)pSQL($id_lang),
+            '_EXCLUDED_IDS_' => (string)pSQL(implode(',', $excluded_ids))
+        ));
+
+        $sql = str_replace("\'", "'", $sql);
 
         $path = array();
-        foreach (Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $row)
+        foreach (Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $row) {
             $path[] = str_replace(array(CATEGORY_TREE_SEPARATOR, CATEGORY_SEPARATOR), "-", $row['name']);
+        }
 
-        if ($full)
+        if ($full) {
             $path = implode(CATEGORY_TREE_SEPARATOR, $path);
-        else
+        } else {
             $path = end($path);
+        }
 
         $path = self::cleanString($path);
         self::$cached_category_paths[$id_category] = $path;
@@ -612,9 +637,9 @@ class dfTools
      */
     public static function getCategoriesForProductIdAndLanguage($id_product, $id_lang, $id_shop, $flat = true)
     {
-        
+
         $use_main_category = (bool) dfTools::cfg($id_shop, 'DF_FEED_MAINCATEGORY_PATH', Doofinder::YES);
-        
+
         $sql = "
       SELECT DISTINCT
         c.id_category,
@@ -638,21 +663,25 @@ class dfTools
     ";
         $mainCategoryInner = '';
         $mainCategoryWhere = '';
-        
-        if($use_main_category){
+
+        if ($use_main_category) {
             $mainInnerSql = 'INNER JOIN _DB_PREFIX_product_shop ps '
-                    . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
-            $mainCategoryInner = self::prepareSQL($mainInnerSql,
-                    array('_ID_PRODUCT_' => (int)pSQL($id_product), '_ID_SHOP_' => (int)pSQL($id_shop)));
+                . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
+            $mainCategoryInner = self::prepareSQL(
+                $mainInnerSql,
+                array('_ID_PRODUCT_' => (int)pSQL($id_product), '_ID_SHOP_' => (int)pSQL($id_shop))
+            );
             $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
         }
-        
-        $sql = self::prepareSQL($sql, array('_ID_PRODUCT_' => (int)pSQL($id_product),
-                    '_MAIN_CATEGORY_INNER_' => (string)pSQL($mainCategoryInner),
-                    '_MAIN_CATEGORY_WHERE_' => (string)pSQL($mainCategoryWhere),
-                    '_ID_SHOP_' => (int)pSQL($id_shop)));
-        
-        $sql = str_replace("\'","'",$sql);
+
+        $sql = self::prepareSQL($sql, array(
+            '_ID_PRODUCT_' => (int)pSQL($id_product),
+            '_MAIN_CATEGORY_INNER_' => (string)pSQL($mainCategoryInner),
+            '_MAIN_CATEGORY_WHERE_' => (string)pSQL($mainCategoryWhere),
+            '_ID_SHOP_' => (int)pSQL($id_shop)
+        ));
+
+        $sql = str_replace("\'", "'", $sql);
 
         $categories = array();
         $last_saved = 0;
@@ -691,9 +720,10 @@ class dfTools
             }
         } // endforeach
 
-        if ($last_saved != $id_category0)
-        // The last item in loop didn't trigger the $id_category0 saving event.
+        if ($last_saved != $id_category0) {
+            // The last item in loop didn't trigger the $id_category0 saving event.
             $categories[] = self::getCategoryPath($id_category0, $id_lang, $id_shop, $use_full_path);
+        }
 
         return $flat ? implode(CATEGORY_SEPARATOR, $categories) : $categories;
     }
@@ -702,13 +732,14 @@ class dfTools
     // Text Tools
     //
 
-  public static function truncateText($text, $length)
+    public static function truncateText($text, $length)
     {
         $l = intval($length);
         $c = trim(preg_replace('/\s+/', ' ', $text));
 
-        if (strlen($c) <= $l)
+        if (strlen($c) <= $l) {
             return $c;
+        }
 
         $n = 0;
         $r = "";
@@ -716,8 +747,9 @@ class dfTools
             if (($tmp = $n + strlen($p) + 1) <= $l) {
                 $n = $tmp;
                 $r .= " $p";
-            } else
+            } else {
                 break;
+            }
         }
 
         return $r;
@@ -731,7 +763,6 @@ class dfTools
             {
                 return chr($matches[1]);
             }
-
         }
 
         if (!function_exists('cb2')) {
@@ -740,13 +771,18 @@ class dfTools
             {
                 return chr('0x' . $matches[1]);
             }
-
         }
         html_entity_decode($text, ENT_QUOTES, "ISO-8859-1");
         $text = preg_replace_callback(
-                '/&#(\d+);/mu', 'cb1', $text);  // decimal notation
+            '/&#(\d+);/mu',
+            'cb1',
+            $text
+        );  // decimal notation
         $text = preg_replace_callback(
-                '/&#x([a-f0-9]+);/miu', 'cb2', $text);  // hex notation
+            '/&#x([a-f0-9]+);/miu',
+            'cb2',
+            $text
+        );  // hex notation
         $text = str_replace("><", "> <", $text);
         $text = preg_replace('/\<br(\s*)?\/?\>/i', " ", $text);
         $text = strip_tags($text);
@@ -762,10 +798,11 @@ class dfTools
 
         $baseUrl = array();
         foreach (explode("/", $text[0]) as $part) {
-            if (in_array(strtolower($part), array('http:', 'https:', '')))
+            if (in_array(strtolower($part), array('http:', 'https:', ''))) {
                 $baseUrl[] = $part;
-            else
+            } else {
                 $baseUrl[] = rawurlencode($part);
+            }
         }
         $text[0] = implode("/", $baseUrl);
 
@@ -777,8 +814,9 @@ class dfTools
             $params = array();
             foreach (explode("&", $text[1]) as $param) {
                 $param = explode("=", $param);
-                foreach ($param as $idx => $part)
+                foreach ($param as $idx => $part) {
                     $param[$idx] = urlencode($part);
+                }
                 $params[] = implode("=", $param);
             }
             $text[1] = implode('&', $params);
@@ -826,7 +864,7 @@ class dfTools
 
     //
 
-  /**
+    /**
      * Returns a boolean value for the $parameter specified. If the parameter does
      * not exist (is NULL) then $default is returned instead.
      *
@@ -836,8 +874,9 @@ class dfTools
     {
         $v = Tools::getValue($parameter, null);
 
-        if ($v === null)
+        if ($v === null) {
             return $default;
+        }
 
         switch (strtolower($v)) {
             case 'false':
@@ -866,8 +905,9 @@ class dfTools
         $context = Context::getContext();
         $id_lang = Tools::getValue('language', $context->language->id);
 
-        if (!is_numeric($id_lang))
+        if (!is_numeric($id_lang)) {
             $id_lang = Language::getIdByIso($id_lang);
+        }
 
         return new Language($id_lang);
     }
@@ -885,8 +925,9 @@ class dfTools
         $optname = 'DF_GS_CURRENCY_' . strtoupper($code);
         $id_currency = Configuration::get($optname);
 
-        if ($id_currency)
+        if ($id_currency) {
             return new Currency(Currency::getIdByIsoCode($id_currency));
+        }
 
         return new Currency(Context::getContext()->currency->id);
     }
@@ -903,12 +944,12 @@ class dfTools
     public static function getCurrencyForLanguageFromRequest(Language $lang)
     {
         if ($id_currency = Tools::getValue('currency')) {
-            if (is_numeric($id_currency))
+            if (is_numeric($id_currency)) {
                 $id_currency = intval($id_currency);
-            else
+            } else {
                 $id_currency = Currency::getIdByIsoCode(strtoupper($id_currency));
-        }
-        else {
+            }
+        } else {
             $optname = 'DF_GS_CURRENCY_' . strtoupper($lang->iso_code);
             $id_currency = Currency::getIdByIsoCode(Configuration::get($optname));
         }
@@ -938,9 +979,9 @@ class dfTools
 
     public static function fixURL($url)
     {
-        if (preg_match('~^https?://~', $url) === 0)
+        if (preg_match('~^https?://~', $url) === 0) {
             $url = "http://$url";
-
+        }
         return $url;
     }
 
@@ -960,7 +1001,9 @@ class dfTools
     public static function getFeedURL($langIsoCode)
     {
         $currency = self::getCurrencyForLanguage($langIsoCode);
-        return self::getModuleLink('feed.php') . "?language=" . strtoupper($langIsoCode) . "&currency=" . strtoupper($currency->iso_code);
+        $feedUrl = self::getModuleLink('feed.php') . "?language=" . strtoupper($langIsoCode);
+        $feedUrl .= "&currency=" . strtoupper($currency->iso_code);
+        return $feedUrl;
     }
 
     /**
@@ -971,8 +1014,9 @@ class dfTools
     public static function fixScriptTag($jsCode)
     {
         $result = trim(preg_replace('/<!--(.*?)-->/', '', $jsCode));
-        if (strlen($result) && !preg_match('/<script([^>]*?)>/', $result))
+        if (strlen($result) && !preg_match('/<script([^>]*?)>/', $result)) {
             $result = "<script type=\"text/javascript\">\n$result\n</script>";
+        }
         return $result;
     }
 
@@ -984,8 +1028,9 @@ class dfTools
     public static function fixStyleTag($cssCode)
     {
         $result = trim(preg_replace('/<!--(.*?)-->/', '', $cssCode));
-        if (strlen($result) && !preg_match('/<style([^>]*?)>/', $result))
+        if (strlen($result) && !preg_match('/<style([^>]*?)>/', $result)) {
             $result = "<style type=\"text/css\">\n$result\n</style>";
+        }
         return $result;
     }
 
@@ -995,10 +1040,12 @@ class dfTools
      */
     public static function flush()
     {
-        if (function_exists('flush'))
+        if (function_exists('flush')) {
             @flush();
-        if (function_exists('ob_flush'))
+        }
+        if (function_exists('ob_flush')) {
             @ob_flush();
+        }
     }
 
     /**
@@ -1012,20 +1059,22 @@ class dfTools
     public static function cfg($id_shop, $key, $default = false)
     {
         $v = Configuration::get($key, null, null, $id_shop);
-        if ($v === false)
+        if ($v === false) {
             return $default;
+        }
         return $v;
     }
 
-    public static function walk_apply_html_entities(&$item, $key)
+    public static function walkApplyHtmlEntities(&$item, $key)
     {
-        if (is_string($item))
+        if (is_string($item)) {
             $item = htmlentities($item);
+        }
     }
 
-    public static function json_encode($data)
+    public static function jsonEncode($data)
     {
-        array_walk_recursive($data, array(get_class(), 'walk_apply_html_entities'));
+        array_walk_recursive($data, array(get_class(), 'walkApplyHtmlEntities'));
         return str_replace("\\/", "/", html_entity_decode(json_encode($data)));
     }
 }
