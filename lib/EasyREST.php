@@ -124,8 +124,8 @@ class EasyREST
         // This extracts the response header Code and Message
         preg_match("@HTTP/1.[0-1] ([0-9]{3}) ([a-zA-Z ]+)@", $parts[0], $reg);
 
-        $this->headers['code'] = $reg[1];
-        $this->headers['message'] = $reg[2];
+        $this->headers['code'] = @$reg[1];
+        $this->headers['message'] = @$reg[2];
         if ($this->headers['code'] == null) {
             $this->headers['code'] = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
         }
