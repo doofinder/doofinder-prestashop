@@ -559,9 +559,8 @@ foreach ($rows as $row) {
             echo TXT_SEPARATOR;
             foreach (dfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $values) {
                 foreach ($values as $index => $value) {
-                    echo ($index > 0) ? "/" : "";
                     echo slugify($key) . "=";
-                    echo str_replace('/', '\/', dfTools::cleanString($value));
+                    echo str_replace('/', '\/', dfTools::cleanString($value)) . "/";
                 }
             }
         }
