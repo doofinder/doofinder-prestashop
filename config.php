@@ -81,4 +81,4 @@ $cfg = array(
     ),
 );
 
-echo dfTools::json_encode($cfg);
+echo dfTools::jsonEncode($cfg);
