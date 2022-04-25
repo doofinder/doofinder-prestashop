@@ -315,6 +315,7 @@ class Doofinder extends Module
         );
         $this->context->smarty->assign('id_tab', 'advanced_tab');
         $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
+        $html.= $this->renderFeedURLs();
         $html.= $helper->generateForm(array($this->getConfigFormAdvanced()));
         $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
@@ -459,7 +460,6 @@ class Doofinder extends Module
         );
         $this->context->smarty->assign('id_tab', 'data_feed_tab');
         $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
-        $html.= $this->renderFeedURLs();
         $html.= $helper->generateForm(array($this->getConfigFormDataFeed()));
         $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
         return $html;
