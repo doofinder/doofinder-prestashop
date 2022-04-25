@@ -29,19 +29,17 @@
 require_once(dirname(__FILE__) . '/../../config/config.inc.php');
 require_once(dirname(__FILE__) . '/../../init.php');
 
-$doofinder_hash = Configuration::get('DF_FEED_HASH');
+$doofinder_apy_key = Configuration::get('DF_API_KEY');
 $enable_hash = Configuration::get('DF_ENABLE_HASH', null);
 $dfsec_hash = Tools::getValue('dfsec_hash');
-if ($enable_hash) {
-    if (!empty($doofinder_hash) && $dfsec_hash != $doofinder_hash) {
-        header('HTTP/1.1 403 Forbidden', true, 403);
-        $msgError = 'Forbidden access.'
-            . ' Maybe security token missed.'
-            . ' Please check on your doofinder module'
-            . ' configuration page the new URL'
-            . ' for your feed';
-        exit($msgError);
-    }
+if (!empty($doofinder_apy_key) && $dfsec_hash != $doofinder_apy_key) {
+    header('HTTP/1.1 403 Forbidden', true, 403);
+    $msgError = 'Forbidden access.'
+        . ' Maybe security token missed.'
+        . ' Please check on your doofinder module'
+        . ' configuration page the new URL'
+        . ' for your feed';
+    exit($msgError);
 }
 
 

@@ -239,8 +239,6 @@ class Doofinder extends Module
 
     protected function renderFeedURLs()
     {
-        $doofinder_hash = Configuration::get('DF_FEED_HASH');
-        $enable_hash = Configuration::get('DF_ENABLE_HASH');
         $urls = array();
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
             foreach (Currency::getCurrencies() as $cur) {
@@ -248,10 +246,8 @@ class Doofinder extends Module
                 $url = $this->context->shop->getBaseURL(true, false)
                         . $this->_path
                         . 'feed.php?language=' . Tools::strtoupper($lang['iso_code'])
-                        . "&currency=" . Tools::strtoupper($currencyIso);
-                if (!empty($doofinder_hash) && $enable_hash) {
-                    $url.='&dfsec_hash=' . $doofinder_hash;
-                }
+                        . '&currency=' . Tools::strtoupper($currencyIso)
+                        . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
                 $urls[] = array(
                     'url' => $url,
                     'lang' => Tools::strtoupper($lang['iso_code']),
@@ -730,21 +726,6 @@ class Doofinder extends Module
                 'input' => array(
                     array(
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Enable security hash on feed URL'),
-                        'name' => 'DF_ENABLE_HASH',
-                        'is_bool' => true,
-                        'desc' => $this->l('HASH_FEED_EXPLANATION'),
-                        'values' => $this->getBooleanFormValue(),
-                    ),
-                    array(
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Display Stock in Data Feed'),
-                        'name' => 'DF_GS_STOCK',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ),
-                    array(
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('Display Prices in Data Feed'),
                         'name' => 'DF_GS_DISPLAY_PRICES',
                         'is_bool' => true,
@@ -1006,8 +987,6 @@ class Doofinder extends Module
     protected function getConfigFormValuesDataFeed()
     {
         return array(
-            'DF_ENABLE_HASH' => Configuration::get('DF_ENABLE_HASH'),
-            'DF_GS_STOCK' => Configuration::get('DF_GS_STOCK'),
             'DF_GS_DISPLAY_PRICES' => Configuration::get('DF_GS_DISPLAY_PRICES'),
             'DF_GS_PRICES_USE_TAX' => Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => Configuration::get('DF_FEED_FULL_PATH'),
@@ -1187,14 +1166,6 @@ class Doofinder extends Module
             Configuration::updateValue($postKey, $value, $html);
         }
 
-        $doofinder_hash = Configuration::get('DF_FEED_HASH');
-        $enable_hash = Configuration::get('DF_ENABLE_HASH');
-        if (empty($doofinder_hash)) {
-            if ($enable_hash) {
-                $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_' . date('YmdHis'));
-                Configuration::updateValue('DF_FEED_HASH', $doofinder_hash);
-            }
-        }
         $ovrSearch = Configuration::get('DF_OWSEARCH');
         $embeddedSearch = Configuration::get('DF_OWSEARCHEB');
         if (($ovrSearch || $embeddedSearch) && $formUpdated == 'internal_search_tab') {
@@ -1217,10 +1188,6 @@ class Doofinder extends Module
         if ($formUpdated == 'data_feed_tab') {
             $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
             $messages .= $this->displayWarningCtm($msg);
-            if (!empty($doofinder_hash) && $enable_hash) {
-                $msg = $this->l('Be sure to update your feed URL on Doofinder with the new params');
-                $messages .= $this->displayWarningCtm($msg);
-            }
         }
 
         if ($formUpdated == 'custom_css_tab') {
@@ -2291,7 +2258,6 @@ class Doofinder extends Module
         $api_endpoint_array = explode('-', $api_endpoint);
         $region = $api_endpoint_array[0];
         $shops = Shop::getShops();
-        $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_' . date('YmdHis'));
         $this->manualInstallation();
         foreach ($shops as $shop) {
             $languages = Language::getLanguages(true, $shop['id_shop']);
@@ -2313,7 +2279,6 @@ class Doofinder extends Module
             Configuration::updateValue('DF_GS_PRICES_USE_TAX', true, false, $sgid, $sid);
             Configuration::updateValue('DF_FEED_FULL_PATH', true, false, $sgid, $sid);
             Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $sgid, $sid);
-            Configuration::updateValue('DF_FEED_HASH', $doofinder_hash, false, $sgid, $sid);
             Configuration::updateValue('DF_REGION', $region, false, $sgid, $sid);
             Configuration::updateValue('DF_API_KEY', $region.'-'.$apikey, false, $sgid, $sid);
 
@@ -2367,7 +2332,7 @@ class Doofinder extends Module
                         . Tools::strtoupper($liso)
                         . '&currency='
                         . Tools::strtoupper($ciso)
-                        . '&dfsec_hash=' . $doofinder_hash;
+                        . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
 
                         $indexData = '{
                             "options": {
