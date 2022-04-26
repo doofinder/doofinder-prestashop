@@ -556,26 +556,6 @@ class Doofinder extends Module
             }
         }
 
-        $inputs[] = array(
-            'type' => 'select',
-            'label' => $this->l('Doofinder Region'),
-            'name' => 'DF_REGION',
-            'options' => array(
-                'query' => array(
-                    array(
-                        'id' => 'eu1',
-                        'name' => $this->l('eu1')
-                    ),
-                    array(
-                        'id' => 'us1',
-                        'name' => $this->l('us1')
-                    ),
-                ),
-                'id' => 'id',
-                'name' => 'name'
-            ),
-        );
-
         return array(
             'form' => array(
                 'legend' => array(
@@ -1003,9 +983,7 @@ class Doofinder extends Module
 
     protected function getConfigFormValuesSearchLayer($update = false)
     {
-        $fields = array(
-            'DF_REGION' => Configuration::get('DF_REGION'),
-        );
+        $fields = array();
 
         if (!$this->haveHashId() || Configuration::get('DF_ENABLED_V9')) {
             $fields['DF_INSTALLATION_ID'] = Configuration::get('DF_INSTALLATION_ID');
