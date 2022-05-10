@@ -795,25 +795,6 @@ class Doofinder extends Module
                     ),
                     array(
                         'type' => 'select',
-                        'label' => $this->l('Product Description Length'),
-                        'name' => 'DF_GS_DESCRIPTION_TYPE',
-                        'options' => array(
-                            'query' => array(
-                                array(
-                                    'DF_GS_DESCRIPTION_TYPE' => self::GS_SHORT_DESCRIPTION,
-                                    'name' => $this->l('Short')
-                                ),
-                                array(
-                                    'DF_GS_DESCRIPTION_TYPE' => self::GS_LONG_DESCRIPTION,
-                                    'name' => $this->l('Long')
-                                ),
-                            ),
-                            'id' => 'DF_GS_DESCRIPTION_TYPE',
-                            'name' => 'name'
-                        ),
-                    ),
-                    array(
-                        'type' => 'select',
                         'label' => $this->l('MPN Field for Data Feed'),
                         'name' => 'DF_GS_MPN_FIELD',
                         'options' => array(
@@ -976,7 +957,6 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_FEATURES' => Configuration::get('DF_SHOW_PRODUCT_FEATURES'),
             'DF_FEATURES_SHOWN[]' => explode(',', Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => Configuration::get('DF_GS_IMAGE_SIZE'),
-            'DF_GS_DESCRIPTION_TYPE' => Configuration::get('DF_GS_DESCRIPTION_TYPE'),
             'DF_GS_MPN_FIELD' => Configuration::get('DF_GS_MPN_FIELD'),
         );
     }
@@ -2259,6 +2239,7 @@ class Doofinder extends Module
             Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $sgid, $sid);
             Configuration::updateValue('DF_REGION', $region, false, $sgid, $sid);
             Configuration::updateValue('DF_API_KEY', $region.'-'.$apikey, false, $sgid, $sid);
+            Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', self::GS_SHORT_DESCRIPTION, false, $sgid, $sid);
 
             foreach ($languages as $lang) {
                 $liso = $lang['iso_code'];
