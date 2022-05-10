@@ -86,7 +86,9 @@ class DfTools
       WHERE
         `products` = 1
       ORDER BY
-        `name`;
+        CASE
+            WHEN name = 'home_default' THEN '1'
+        END DESC;
     ";
 
         foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $size) {
