@@ -207,7 +207,6 @@ class Doofinder extends Module
         $output.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
             $output.= $this->renderFormDataFeed($adv);
-            $output.= $this->renderFormSearchLayer($adv);
             if (!$dfEnabledV9) {
                 $output.= $this->renderFormInternalSearch($adv);
                 $output.= $this->renderFormCustomCSS($adv);
@@ -317,40 +316,6 @@ class Doofinder extends Module
         return $html;
     }
 
-    protected function renderFormSearchLayer($adv = false)
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        //$helper->submit_action = 'submitDoofinderModuleSearchLayer';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-                . (($adv)?'&adv=1':'')
-                . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValuesSearchLayer(),
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-        $this->context->smarty->assign('id_tab', 'search_layer_tab');
-        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
-        $html.= $helper->generateForm(array($this->getConfigFormSearchLayer()));
-        if ($this->haveHashId()) {
-            $html.= $this->renderFormchangeVersion($adv);
-            $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/change_version.tpl');
-        }
-
-        $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
-        return $html;
-    }
-
     protected function renderFormChangeVersion($adv = false)
     {
         $helper = new HelperForm();
@@ -449,15 +414,25 @@ class Doofinder extends Module
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
+        $this->context->smarty->assign('id_tab', 'data_feed_tab');
+        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
+        // Data feed form
         $helper->tpl_vars = array(
             'fields_value' => $this->getConfigFormValuesDataFeed(),
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
-        $this->context->smarty->assign('id_tab', 'data_feed_tab');
-        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
         $html.= $helper->generateForm(array($this->getConfigFormDataFeed()));
+
+        // Search layer form
+        $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
+        $html.= $helper->generateForm(array($this->getConfigFormSearchLayer()));
+        if ($this->haveHashId()) {
+            $html.= $this->renderFormchangeVersion($adv);
+            $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/change_version.tpl');
+        }
         $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
+
         return $html;
     }
 
