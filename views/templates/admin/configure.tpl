@@ -33,7 +33,6 @@
     <li class="active"><a href="#onboarding_tab" role="tab" data-toggle="tab">{l s='On Boarding' mod='doofinder'}</a></li>
     {else}
     <li class="active"><a href="#data_feed_tab" role="tab" data-toggle="tab">{l s='Data Feed' mod='doofinder'}</a></li>
-    <li><a href="#search_layer_tab" role="tab" data-toggle="tab">{l s='Search Layer' mod='doofinder'}</a></li>
     {if !$dfEnabledV9}
         <li><a href="#internal_search_tab" role="tab" data-toggle="tab">{l s='Internal Search' mod='doofinder'}</a></li>
         <li><a href="#custom_css_tab" role="tab" data-toggle="tab">{l s='Custom CSS' mod='doofinder'}</a></li>
