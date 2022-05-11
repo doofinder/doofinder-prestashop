@@ -701,13 +701,6 @@ class Doofinder extends Module
                         'values' => $this->getBooleanFormValue(),
                     ),
                     array(
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Export only main category of product in the feed'),
-                        'name' => 'DF_FEED_MAINCATEGORY_PATH',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ),
-                    array(
                         'type' => 'select',
                         'label' => $this->l('Include product variations in feed'),
                         'name' => 'DF_SHOW_PRODUCT_VARIATIONS',
@@ -926,7 +919,6 @@ class Doofinder extends Module
             'DF_GS_DISPLAY_PRICES' => Configuration::get('DF_GS_DISPLAY_PRICES'),
             'DF_GS_PRICES_USE_TAX' => Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => Configuration::get('DF_FEED_FULL_PATH'),
-            'DF_FEED_MAINCATEGORY_PATH' => Configuration::get('DF_FEED_MAINCATEGORY_PATH'),
             'DF_SHOW_PRODUCT_VARIATIONS' => Configuration::get('DF_SHOW_PRODUCT_VARIATIONS'),
             'DF_GROUP_ATTRIBUTES_SHOWN[]' => explode(',', Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN')),
             'DF_SHOW_PRODUCT_FEATURES' => Configuration::get('DF_SHOW_PRODUCT_FEATURES'),
@@ -1089,6 +1081,10 @@ class Doofinder extends Module
             }
             if (is_array($value)) {
                 $value = implode(',', $value);
+            }
+            if($postKey === 'DF_FEED_FULL_PATH')
+            {
+                Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', !$value);
             }
             $value = trim($value);
             $html = false;
@@ -2215,6 +2211,7 @@ class Doofinder extends Module
             Configuration::updateValue('DF_REGION', $region, false, $sgid, $sid);
             Configuration::updateValue('DF_API_KEY', $region.'-'.$apikey, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', self::GS_SHORT_DESCRIPTION, false, $sgid, $sid);
+            Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $sgid, $sid);
 
             foreach ($languages as $lang) {
                 $liso = $lang['iso_code'];
