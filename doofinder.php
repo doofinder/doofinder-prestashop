@@ -760,34 +760,7 @@ class Doofinder extends Module
                             'id' => 'DF_GS_IMAGE_SIZE',
                             'name' => 'name'
                         ),
-                    ),
-                    array(
-                        'type' => 'select',
-                        'label' => $this->l('MPN Field for Data Feed'),
-                        'name' => 'DF_GS_MPN_FIELD',
-                        'options' => array(
-                            'query' => array(
-                                array(
-                                    'id' => 'reference',
-                                    'name' => 'reference'
-                                ),
-                                array(
-                                    'id' => 'supplier_reference',
-                                    'name' => 'supplier_reference'
-                                ),
-                                array(
-                                    'id' => 'ean13',
-                                    'name' => 'ean13'
-                                ),
-                                array(
-                                    'id' => 'upc',
-                                    'name' => 'upc'
-                                ),
-                            ),
-                            'id' => 'id',
-                            'name' => 'name'
-                        ),
-                    ),
+                    )
                 ),
                 'submit' => array(
                     'title' => $this->l('Save Data Feed Options'),
@@ -924,7 +897,6 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_FEATURES' => Configuration::get('DF_SHOW_PRODUCT_FEATURES'),
             'DF_FEATURES_SHOWN[]' => explode(',', Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => Configuration::get('DF_GS_IMAGE_SIZE'),
-            'DF_GS_MPN_FIELD' => Configuration::get('DF_GS_MPN_FIELD'),
         );
     }
 
@@ -2211,6 +2183,7 @@ class Doofinder extends Module
             Configuration::updateValue('DF_REGION', $region, false, $sgid, $sid);
             Configuration::updateValue('DF_API_KEY', $region.'-'.$apikey, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', self::GS_SHORT_DESCRIPTION, false, $sgid, $sid);
+            Configuration::updateValue('DF_GS_MPN_FIELD', "reference", false, $sgid, $sid);
             Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $sgid, $sid);
 
             foreach ($languages as $lang) {
