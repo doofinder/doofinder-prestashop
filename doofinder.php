@@ -45,7 +45,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.1.0';
+    const VERSION = '4.1.1';
     const YES = 1;
     const NO = 0;
 
@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.1.0';
+        $this->version = '4.1.1';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -427,7 +427,9 @@ class Doofinder extends Module
         // Search layer form
         $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
         $html.= $helper->generateForm(array($this->getConfigFormSearchLayer()));
-        if ($this->haveHashId()) {
+
+        $usingV9 = (boolean)Configuration::get('DF_ENABLED_V9');
+        if (!$usingV9) {
             $html.= $this->renderFormchangeVersion($adv);
             $html.= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/change_version.tpl');
         }
@@ -760,6 +762,13 @@ class Doofinder extends Module
                             'id' => 'DF_GS_IMAGE_SIZE',
                             'name' => 'name'
                         ),
+                    ),
+                    array(
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Overwrite Search page with Doofinder results'),
+                        'name' => 'DF_OWSEARCH',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
                     )
                 ),
                 'submit' => array(
@@ -897,6 +906,7 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_FEATURES' => Configuration::get('DF_SHOW_PRODUCT_FEATURES'),
             'DF_FEATURES_SHOWN[]' => explode(',', Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => Configuration::get('DF_GS_IMAGE_SIZE'),
+            'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
         );
     }
 
@@ -1087,6 +1097,9 @@ class Doofinder extends Module
         }
 
         if ($formUpdated == 'data_feed_tab') {
+            if ((boolean)Configuration::get('DF_ENABLED_V9') && (boolean)Configuration::get('DF_OWSEARCH')) {
+                $this->setSearchEnginesByConfig();
+            }
             $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
             $messages .= $this->displayWarningCtm($msg);
         }
@@ -2080,6 +2093,30 @@ class Doofinder extends Module
     public function getEmbeddedTemplateLocation()
     {
         return _PS_MODULE_DIR_ . $this->name . '/views/templates/front/doofinder-embedded.tpl';
+    }
+
+    private function setSearchEnginesByConfig()
+    {
+        require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_layer_api.php';
+        $installationID = Configuration::get('DF_INSTALLATION_ID');
+
+        $shopID = Shop::getContextShopID();
+        $languages = Language::getLanguages(true, $shopID);
+        $currencies = Currency::getCurrenciesByIdShop($shopID);
+
+        foreach($languages as $language) {
+            foreach($currencies as $currency) {
+
+                $hashid_by_api = DoofinderLayerApi::getHashidByInstallationID($installationID, $currency["iso_code"], $language["iso_code"]);
+                if($hashid_by_api !== null)
+                {
+                    Configuration::updateValue(
+                        'DF_HASHID_'.$currency["iso_code"].'_'.strtoupper($language["iso_code"]),
+                        $hashid_by_api,
+                    );
+                }
+            }
+        }
     }
 
     private function debug($message)
