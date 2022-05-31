@@ -26,7 +26,8 @@ class DoofinderLayerApi
     public static function getHashidByInstallationID($installationID, $currency, $language)
     {
         $client = new EasyREST();
-        $api_endpoint = "https://eu1-layer.doofinder.com/api/1/installation/".$installationID.'?currency='.$currency.'&language='.$language;
+        $base_endpoint = "https://eu1-layer.doofinder.com/api/1/installation";
+        $api_endpoint = $base_endpoint."/".$installationID.'?currency='.$currency.'&language='.$language;
 
         $response = $client->get($api_endpoint);
 
