@@ -19,20 +19,20 @@ require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 class DoofinderLayerApi
 {
     /**
-     * Function that returns a hashid given an installationID, currency and language. 
-     * Since this API returns the default hashid if both currency and language do not match, 
+     * Function that returns a hashid given an installationID, currency and language.
+     * Since this API returns the default hashid if both currency and language do not match,
      * a check is made to see if the desired hashid is returned.
      */
-    public static function getHashidByInstallationID($installationID, $currency, $language) {
+    public static function getHashidByInstallationID($installationID, $currency, $language)
+    {
         $client = new EasyREST();
         $api_endpoint = "https://eu1-layer.doofinder.com/api/1/installation/".$installationID.'?currency='.$currency.'&language='.$language;
 
         $response = $client->get($api_endpoint);
 
-        if($response->headers['code'] === 200){
+        if ($response->headers['code'] === 200) {
             $options = json_decode($response->response)->options;
-            if($currency === $options->currency && $language === $options->language)
-            {
+            if ($currency === $options->currency && $language === $options->language) {
                 return $options->hashid;
             }
         }
