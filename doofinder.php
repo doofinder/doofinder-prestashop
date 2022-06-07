@@ -45,7 +45,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.1.2';
+    const VERSION = '4.1.3';
     const YES = 1;
     const NO = 0;
 
@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.1.2';
+        $this->version = '4.1.3';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -147,7 +147,67 @@ class Doofinder extends Module
 
     public function uninstall()
     {
-        return parent::uninstall();
+        return parent::uninstall()
+            && $this->deleteConfigVars();;
+    }
+
+    public function deleteConfigVars(){
+        $config_vars = array(
+            'DF_AI_ADMIN_ENDPOINT',
+            'DF_AI_API_ENDPOINT',
+            'DF_AI_APIKEY',
+            'DF_API_KEY',
+            'DF_API_LAYER_DESCRIPTION',
+            'DF_APPEND_BANNER',
+            'DF_CSS_VS',
+            'DF_CUSTOMEXPLODEATTR',
+            'DF_DEBUG',
+            'DF_DEBUG_CURL',
+            'DF_DSBL_AJAX_TKN',
+            'DF_DSBL_DFCKIE_JS',
+            'DF_DSBL_DFFAC_JS',
+            'DF_DSBL_DFLINK_JS',
+            'DF_DSBL_DFPAG_JS',
+            'DF_DSBL_FAC_CACHE',
+            'DF_DSBL_HTTPS_CURL',
+            'DF_EB_LAYER_DESCRIPTION',
+            'DF_ENABLED_V9',
+            'DF_ENABLE_HASH',
+            'DF_EXTRA_CSS',
+            'DF_FACETS_TOKEN',
+            'DF_FEATURES_SHOWN',
+            'DF_FEED_FULL_PATH',
+            'DF_FEED_MAINCATEGORY_PATH',
+            'DF_GROUP_ATTRIBUTES_SHOWN',
+            'DF_GS_DESCRIPTION_TYPE',
+            'DF_GS_DISPLAY_PRICES',
+            'DF_GS_IMAGE_SIZE',
+            'DF_GS_MPN_FIELD',
+            'DF_GS_PRICES_USE_TAX',
+            'DF_INSTALLATION_ID',
+            'DF_OWSEARCH',
+            'DF_OWSEARCHEB',
+            'DF_OWSEARCHFAC',
+            'DF_REGION',
+            'DF_RESTART_OV',
+            'DF_SEARCH_SELECTOR',
+            'DF_SHOW_PRODUCT_FEATURES',
+            'DF_SHOW_PRODUCT_VARIATIONS'
+        );
+
+        $hashid_vars = array_column(
+            Db::getInstance()->executeS("
+            SELECT name FROM ps_configuration where name like 'DF_HASHID_%'"),
+            "name"
+        );
+
+        $config_vars = array_merge($config_vars, $hashid_vars);
+
+        foreach ($config_vars as $var) {
+            Configuration::deleteByName($var);
+        }
+
+        return true;
     }
 
     protected function getWarningMultishopHtml()
