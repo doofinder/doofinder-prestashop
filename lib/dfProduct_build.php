@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -65,7 +64,13 @@ class DfProductBuild
 
     private function getProductData()
     {
-        $products = DfTools::getAvailableProductsForLanguage($this->id_lang, $this->id_shop, false, false, $this->products);
+        $products = DfTools::getAvailableProductsForLanguage(
+            $this->id_lang,
+            $this->id_shop,
+            false,
+            false,
+            $this->products
+        );
 
         return $products;
     }
@@ -227,16 +232,16 @@ class DfProductBuild
 
                 return $image_link;
             }
-
-            return dfTools::cleanURL(
-                dfTools::getImageLink(
-                    $product['id_product'],
-                    $product['id_image'],
-                    $product['link_rewrite'],
-                    $this->image_size
-                )
-            );
         }
+
+        return dfTools::cleanURL(
+            dfTools::getImageLink(
+                $product['id_product'],
+                $product['id_image'],
+                $product['link_rewrite'],
+                $this->image_size
+            )
+        );
     }
 
     private function getAvailability($product)
@@ -299,9 +304,9 @@ class DfProductBuild
     {
         $features = array();
 
-        $feature_keys = $this->featuresKeys;
+        $keys = $this->featuresKeys;
 
-        foreach (dfTools::getFeaturesForProduct($product['id_product'], $this->id_lang, $feature_keys) as $key => $values) {
+        foreach (dfTools::getFeaturesForProduct($product['id_product'], $this->id_lang, $keys) as $key => $values) {
             foreach ($values as $value) {
                 $features[$key][] = dfTools::cleanString($value);
             }
@@ -326,8 +331,8 @@ class DfProductBuild
     {
         $attributes = DfTools::getAttributesByCombination(
             $product['id_product_attribute'],
-            $this->attributes_shown,
-            $this->id_lang
+            $this->id_lang,
+            $this->attributes_shown
         );
 
         $alt_attributes = array();

@@ -366,7 +366,7 @@ class DfTools
      * @param int Language ID.
      * @return array of rows (assoc arrays).
      */
-    public static function getAttributesByCombination($variation_id, $attr_limit = false, $id_lang)
+    public static function getAttributesByCombination($variation_id, $id_lang, $attr_limit = false)
     {
         if (isset($variation_id) && $variation_id > 0) {
             $sql = "SELECT pc.id_product_attribute,
@@ -407,8 +407,13 @@ class DfTools
      * @param array Optional. Filter product ids.
      * @return array of rows (assoc arrays).
      */
-    public static function getAvailableProductsForLanguage($id_lang, $id_shop, $limit = false, $offset = false, $ids = null)
-    {
+    public static function getAvailableProductsForLanguage(
+        $id_lang,
+        $id_shop,
+        $limit = false,
+        $offset = false,
+        $ids = null
+    ) {
         $Shop = new Shop($id_shop);
 
         $isbn = '';

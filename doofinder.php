@@ -212,7 +212,10 @@ class Doofinder extends Module
             'DF_RESTART_OV',
             'DF_SEARCH_SELECTOR',
             'DF_SHOW_PRODUCT_FEATURES',
-            'DF_SHOW_PRODUCT_VARIATIONS'
+            'DF_SHOW_PRODUCT_VARIATIONS',
+            'DF_UPDATE_ON_SAVE',
+            'DF_UPDATE_ON_SAVE_DELAY',
+            'DF_UPDATE_ON_SAVE_LAST_EXEC'
         );
 
         $hashid_vars = array_column(
@@ -868,10 +871,10 @@ class Doofinder extends Module
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => array(
                             'query' => array(
-                                15 => array("id" => 15, "name" => "15 minutos"),
-                                30 => array("id" => 30, "name" => "30 minutos"),
+                                90 => array("id" => 90, "name" => "90 minutos"),
                                 60 => array("id" => 60, "name" => "60 minutos"),
-                                90 => array("id" => 90, "name" => "90 minutos")
+                                30 => array("id" => 30, "name" => "30 minutos"),
+                                15 => array("id" => 15, "name" => "15 minutos")
                             ),
                             'id' => 'id',
                             'name' => 'name'
@@ -1206,9 +1209,14 @@ class Doofinder extends Module
         }
 
         if ($formUpdated == 'data_feed_tab') {
-            if ((boolean)Configuration::get('DF_ENABLED_V9') && (boolean)Configuration::get('DF_OWSEARCH')) {
+            if (((boolean)Configuration::get('DF_ENABLED_V9') && (boolean)Configuration::get('DF_OWSEARCH')) || 
+                (boolean)Configuration::get('DF_UPDATE_ON_SAVE')) {
                 $this->setSearchEnginesByConfig();
             }
+            if((int)Tools::getValue("DF_UPDATE_ON_SAVE_DELAY") < 15){
+                Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 15);
+            }
+
             $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
             $messages .= $this->displayWarningCtm($msg);
         }
@@ -1745,6 +1753,10 @@ class Doofinder extends Module
             $action = $params["product"]->active ? "update" : "delete";
             $id_shop = $this->context->shop->id;
             $this->addProductQueue($params["id_product"], $id_shop, $action);
+
+            if($this->allowProcessProductsQueue()){
+                $this->processProductQueue($id_shop);
+            }
         }
     }
 
@@ -1753,7 +1765,34 @@ class Doofinder extends Module
         if (Configuration::get("DF_UPDATE_ON_SAVE")) {
             $id_shop = $this->context->shop->id;
             $this->addProductQueue($params["id_product"], $id_shop, "delete");
+
+            if($this->allowProcessProductsQueue()){
+                $this->processProductQueue($id_shop);
+            }
         }
+    }
+
+    public function allowProcessProductsQueue(){
+        if (Configuration::get("DF_UPDATE_ON_SAVE")) {
+            $last_exec = Configuration::get("DF_UPDATE_ON_SAVE_LAST_EXEC", null, null, null, 0);
+            $delay = Configuration::get("DF_UPDATE_ON_SAVE_DELAY", null, null, null, 30);
+
+            if(is_int($delay)){
+                $last_exec_ts = strtotime($last_exec);
+
+                $diff_min = (time() - $last_exec_ts) / 60;
+                
+                if($diff_min > $delay){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function setExecUpdateOnSave(){
+        Configuration::updateValue("DF_UPDATE_ON_SAVE_LAST_EXEC", date('Y-m-d H:i:s'));
     }
 
     public function addProductQueue($id_product, $id_shop, $action)
@@ -1773,18 +1812,23 @@ class Doofinder extends Module
     }
 
     public function processProductQueue($id_shop)
-    {
-        $products = $this->getProductsQueue($id_shop);
+    {   
+        $this->setExecUpdateOnSave();
+
+        $products_update = $this->getProductsQueue($id_shop);
+        $products_delete = $this->getProductsQueue($id_shop, "delete");
 
         $languages = Language::getLanguages(true, $id_shop);
         $currencies = Currency::getCurrenciesByIdShop($id_shop);
 
         foreach ($languages as $language) {
             foreach ($currencies as $currency) {
-                $this->sendProductsApi($products, $id_shop, $language['id_lang'], $currency['id_currency']);
+                $this->sendProductsApi($products_update, $id_shop, $language['id_lang'], $currency['id_currency']);
+                $this->sendProductsApi($products_delete, $id_shop, $language['id_lang'], $currency['id_currency'], "delete");
             }
         }
-        # TODO: delete products queue
+
+        $this->deleteProductQueue($id_shop);
     }
 
     public function getProductsQueue($id_shop, $action = "update")
@@ -1798,23 +1842,51 @@ class Doofinder extends Module
         return array_column($products, "id_product");
     }
 
-    public function sendProductsApi($products, $id_shop, $id_lang, $id_currency)
+    public function deleteProductQueue($id_shop){
+        Db::getInstance()->execute("DELETE from " . _DB_PREFIX_ . "doofinder_product WHERE id_shop = " . (int)$id_shop);
+    }
+
+    public function sendProductsApi($products, $id_shop, $id_lang, $id_currency, $action = "update")
     {
+        if(empty($products)){
+            return;
+        }
+
         $lang_iso = strtoupper(Language::getIsoById($id_lang));
-        $curr_iso = strtoupper(Currency::getIsoCodeById($id_lang));
+        $curr_iso = strtoupper($this->getIsoCodeById($id_currency));
+        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
+        $region = Configuration::get('DF_REGION');
 
-        $key = "DF_HASHID_" . $curr_iso . "_" . $lang_iso;
+        $hashid_key = "DF_HASHID_" . $curr_iso . "_" . $lang_iso;;
 
-        $hashid = Configuration::get($key);
+        $hashid = Configuration::get($hashid_key);
         
         if($hashid){
             require_once(dirname(__FILE__) . '/lib/dfProduct_build.php');
+            require_once(dirname(__FILE__) . '/lib/doofinder_api_products.php');
 
-            $builder = new DfProductBuild($id_shop, $id_lang, $id_currency);
-            $builder->setProducts($products);
-            $payload = $builder->build();
+            if($action == "update"){
+                $builder = new DfProductBuild($id_shop, $id_lang, $id_currency);
+                $builder->setProducts($products);
+                $payload = $builder->build();
 
-            # TODO: send payload to API
+                $api = new DoofinderApiProducts($hashid, $apikey, $region);
+                $response = $api->updateBulk($payload);
+
+                if(isset($response['error']) && !empty($response['error'])){
+                    $this->debug(json_encode($response['error']));
+                }
+
+            } elseif($action == "delete"){
+                $api = new DoofinderApiProducts($hashid, $apikey, $region);
+                $payload = array_map(function($a){return array("id" => $a);}, $products);
+
+                $response = $api->deleteBulk(json_encode($payload));
+
+                if(isset($response['error']) && !empty($response['error'])){
+                    $this->debug(json_encode($response['error']));
+                }
+            }
         }
     }
 
@@ -2609,6 +2681,13 @@ class Doofinder extends Module
             false,
             'application/json',
             ['Authorization: Token '.$apikey]
+        );
+    }
+
+    protected function getIsoCodeById($id)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
+            SELECT `iso_code` FROM ' . _DB_PREFIX_ . 'currency WHERE `id_currency` = ' . (int) $id
         );
     }
 }
