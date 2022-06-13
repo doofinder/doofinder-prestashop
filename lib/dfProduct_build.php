@@ -91,7 +91,8 @@ class DfProductBuild
         $p['categories'] = dfTools::getCategoriesForProductIdAndLanguage(
             $product['id_product'],
             $this->id_lang,
-            $this->id_shop
+            $this->id_shop,
+            false
         );
         $p['availability'] = $this->getAvailability($product);
         $p['brand'] = dfTools::cleanString($product['manufacturer']);
@@ -125,7 +126,7 @@ class DfProductBuild
             $p['variation_mpn'] = $product['variation_mpn'];
             $p['variation_ean13'] = $product['variation_ean13'];
             $p['variation_upc'] = $product['variation_upc'];
-            $p['df_group_leader'] = $product['df_group_leader'];
+            $p['df_group_leader'] = (!is_null($product['df_group_leader']) ? true : false);
 
             $attributes = $this->getAttributes($product);
 

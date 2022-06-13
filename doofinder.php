@@ -1775,7 +1775,7 @@ class Doofinder extends Module
     public function allowProcessProductsQueue(){
         if (Configuration::get("DF_UPDATE_ON_SAVE")) {
             $last_exec = Configuration::get("DF_UPDATE_ON_SAVE_LAST_EXEC", null, null, null, 0);
-            $delay = Configuration::get("DF_UPDATE_ON_SAVE_DELAY", null, null, null, 30);
+            $delay = (int)Configuration::get("DF_UPDATE_ON_SAVE_DELAY", null, null, null, 30);
 
             if(is_int($delay)){
                 $last_exec_ts = strtotime($last_exec);

@@ -63,7 +63,7 @@ class DoofinderApiProducts
             false,
             false,
             'application/json',
-            ['Authorization: Tsken ' . $this->api_key]
+            ['Authorization: Token ' . $this->api_key]
         );
 
         return json_decode($response->response, true);
