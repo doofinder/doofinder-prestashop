@@ -861,20 +861,23 @@ class Doofinder extends Module
                     array(
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('Update on save'),
+                        'desc' => $this->l('If "Update on save" is enabled when a product is created /
+                            updated / deleted this change is sent to Doofinder'),
                         'name' => 'DF_UPDATE_ON_SAVE',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ),
                     array(
                         'type' => 'select',
-                        'label' => $this->l('Update on save delay'),
+                        'label' => $this->l('Process changed products'),
+                        'desc' => $this->l('Configure when registered product changes are sent to Doofinder'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => array(
                             'query' => array(
-                                90 => array("id" => 90, "name" => "90 minutos"),
-                                60 => array("id" => 60, "name" => "60 minutos"),
-                                30 => array("id" => 30, "name" => "30 minutos"),
-                                15 => array("id" => 15, "name" => "15 minutos")
+                                90 => array("id" => 90, "name" => sprintf($this->l('Every %s minutes'), '90')),
+                                60 => array("id" => 60, "name" => sprintf($this->l('Every %s minutes'), '60')),
+                                30 => array("id" => 30, "name" => sprintf($this->l('Every %s minutes'), '30')),
+                                15 => array("id" => 15, "name" => sprintf($this->l('Every %s minutes'), '15'))
                             ),
                             'id' => 'id',
                             'name' => 'name'
