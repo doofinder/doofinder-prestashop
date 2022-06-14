@@ -248,7 +248,6 @@ class DfProductBuild
     private function getAvailability($product)
     {
         $available = (int)$product['available_for_order'] > 0;
-        $available = (int)$product['available_for_order'] > 0;
 
         if ((int)$this->stock_management) {
             $stock = StockAvailable::getQuantityAvailableByProduct(
