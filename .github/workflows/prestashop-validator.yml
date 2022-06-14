@@ -1,0 +1,20 @@
+name: Prestashop validator
+on: [push, pull_request]
+jobs:
+  prestashop-validator:
+    name: Build & Send to validator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+
+      - name: Create temporal tag
+        run: git tag ci
+
+      - name: Build
+        run: sh build.sh ci
+
+      - name: Send to validator API
+        env:
+            VALIDATOR_API_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
+        run: bash ./.github/scripts/validate-prestashop.sh

@@ -3,3 +3,4 @@
 /\.editorconfig       export-ignore
 /\.travis\.yml        export-ignore
 /build\.sh            export-ignore
+/\.github		      export-ignore
