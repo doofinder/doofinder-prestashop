@@ -45,7 +45,7 @@
       }
 
       doofinderManageCart({
-        cartURL          : "{$urls.pages.cart|escape:'htmlall':'UTF-8'}",  //required for prestashop 1.7, in previous versions it will be empty.
+        cartURL          : "{if isset($urls)}{$urls.pages.cart|escape:'htmlall':'UTF-8'}{/if}",  //required for prestashop 1.7, in previous versions it will be empty.
         cartToken        : "{$static_token|escape:'htmlall':'UTF-8'}",
         productID        : checkIfCartItemHasVariation(event.detail) ? event.detail.grouping_id : event.detail.item_id,
         customizationID  : checkIfCartItemHasVariation(event.detail) ? sanitizeVariationID(event.detail.item_id) : 0,   // If there are no combinations, the value will be 0
