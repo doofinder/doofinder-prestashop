@@ -213,7 +213,6 @@ class Doofinder extends Module
             'DF_SEARCH_SELECTOR',
             'DF_SHOW_PRODUCT_FEATURES',
             'DF_SHOW_PRODUCT_VARIATIONS',
-            'DF_UPDATE_ON_SAVE',
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC'
         );
@@ -859,21 +858,13 @@ class Doofinder extends Module
                         'values' => $this->getBooleanFormValue(),
                     ),
                     array(
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Update on save'),
-                        'desc' => $this->l('If "Update on save" is enabled when a product is created /
-                            updated / deleted this change is sent to Doofinder'),
-                        'name' => 'DF_UPDATE_ON_SAVE',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ),
-                    array(
                         'type' => 'select',
                         'label' => $this->l('Process changed products'),
                         'desc' => $this->l('Configure when registered product changes are sent to Doofinder'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => array(
                             'query' => array(
+                                0 => array("id" => 0, "name" => $this->l('Every day')),
                                 90 => array("id" => 90, "name" => sprintf($this->l('Every %s minutes'), '90')),
                                 60 => array("id" => 60, "name" => sprintf($this->l('Every %s minutes'), '60')),
                                 30 => array("id" => 30, "name" => sprintf($this->l('Every %s minutes'), '30')),
@@ -1020,7 +1011,6 @@ class Doofinder extends Module
             'DF_FEATURES_SHOWN[]' => explode(',', Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => Configuration::get('DF_GS_IMAGE_SIZE'),
             'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
-            'DF_UPDATE_ON_SAVE' => Configuration::get('DF_UPDATE_ON_SAVE'),
             'DF_UPDATE_ON_SAVE_DELAY' => Configuration::get('DF_UPDATE_ON_SAVE_DELAY'),
         );
     }
@@ -1213,10 +1203,10 @@ class Doofinder extends Module
 
         if ($formUpdated == 'data_feed_tab') {
             if (((boolean)Configuration::get('DF_ENABLED_V9') && (boolean)Configuration::get('DF_OWSEARCH')) || 
-                (boolean)Configuration::get('DF_UPDATE_ON_SAVE')) {
+                (boolean)Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
                 $this->setSearchEnginesByConfig();
             }
-            if((int)Tools::getValue("DF_UPDATE_ON_SAVE_DELAY") < 15){
+            if(Tools::getValue("DF_UPDATE_ON_SAVE_DELAY") && (int)Tools::getValue("DF_UPDATE_ON_SAVE_DELAY") < 15){
                 Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 15);
             }
 
@@ -1752,7 +1742,7 @@ class Doofinder extends Module
 
     public function hookActionProductSave($params)
     {
-        if (Configuration::get("DF_UPDATE_ON_SAVE")) {
+        if (Configuration::get("DF_UPDATE_ON_SAVE_DELAY")) {
             $action = $params["product"]->active ? "update" : "delete";
             $id_shop = $this->context->shop->id;
             $this->addProductQueue($params["id_product"], $id_shop, $action);
@@ -1765,7 +1755,7 @@ class Doofinder extends Module
 
     public function hookActionProductDelete($params)
     {
-        if (Configuration::get("DF_UPDATE_ON_SAVE")) {
+        if (Configuration::get("DF_UPDATE_ON_SAVE_DELAY")) {
             $id_shop = $this->context->shop->id;
             $this->addProductQueue($params["id_product"], $id_shop, "delete");
 
@@ -1776,7 +1766,7 @@ class Doofinder extends Module
     }
 
     public function allowProcessProductsQueue(){
-        if (Configuration::get("DF_UPDATE_ON_SAVE")) {
+        if (Configuration::get("DF_UPDATE_ON_SAVE_DELAY")) {
             $last_exec = Configuration::get("DF_UPDATE_ON_SAVE_LAST_EXEC", null, null, null, 0);
             $delay = (int)Configuration::get("DF_UPDATE_ON_SAVE_DELAY", null, null, null, 30);
 
