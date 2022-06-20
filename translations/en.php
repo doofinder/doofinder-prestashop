@@ -129,6 +129,15 @@ $_MODULE['<{doofinder}prestashop>doofinder_ebe75aa799359b32559a09eae8594835'] =
 'Select features will be shown in feed';
 $_MODULE['<{doofinder}prestashop>doofinder_90dce1b992114b5c7ab37ee99ea195ec'] =
 'Product Image Size';
+$_MODULE['<{doofinder}prestashop>doofinder_9a1ef478e7c0709548f092860f9493d8'] =
+'If \"Update on save\" is enabled when a product is created / updated / deleted this change is sent to Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinder_43111e94d9e2034787c59b4c200c1631'] =
+'Process changed products';
+$_MODULE['<{doofinder}prestashop>doofinder_c2cad3c344198599b69e25634315170d'] =
+'Configure when registered product changes are sent to Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinder_48bf14c419a1d441412510faf39c326d'] = 'Every day';
+$_MODULE['<{doofinder}prestashop>doofinder_643bd9766a482fed97aff60a7a4f1b3b'] =
+'Every %s minutes';
 $_MODULE['<{doofinder}prestashop>doofinder_deae37c282541e631c6f8885d107e89a'] =
 'Product Description Length';
 $_MODULE['<{doofinder}prestashop>doofinder_30bb747c98bccdd11b3f89e644c4d0ad'] =

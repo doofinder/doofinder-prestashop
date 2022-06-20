@@ -45,7 +45,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.1.5';
+    const VERSION = '4.2.0';
     const YES = 1;
     const NO = 0;
 
@@ -53,7 +53,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.1.5';
+        $this->version = '4.2.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -108,7 +108,26 @@ class Doofinder extends Module
 
     public function install()
     {
-        return parent::install();
+        return parent::install()
+            && $this->installDb()
+            && $this->registerHook('actionProductSave')
+            && $this->registerHook('actionProductDelete');
+    }
+
+    public function installDb()
+    {
+        return Db::getInstance()->execute(
+            '
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_product` (
+                `id_doofinder_product` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `id_shop` INT(10) UNSIGNED NOT NULL,
+                `id_product` INT(10) UNSIGNED NOT NULL,
+                `action` VARCHAR(45) NOT NULL,
+                `date_upd` DATETIME NOT NULL,
+                PRIMARY KEY (`id_doofinder_product`),
+                CONSTRAINT uc_shop_product UNIQUE KEY (id_shop,id_product)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
+        );
     }
 
     public function manualInstallation()
@@ -148,7 +167,8 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
-            && $this->deleteConfigVars();;
+            && $this->deleteConfigVars()
+            && $this->uninstallDb();
     }
 
     public function deleteConfigVars(){
@@ -192,7 +212,9 @@ class Doofinder extends Module
             'DF_RESTART_OV',
             'DF_SEARCH_SELECTOR',
             'DF_SHOW_PRODUCT_FEATURES',
-            'DF_SHOW_PRODUCT_VARIATIONS'
+            'DF_SHOW_PRODUCT_VARIATIONS',
+            'DF_UPDATE_ON_SAVE_DELAY',
+            'DF_UPDATE_ON_SAVE_LAST_EXEC'
         );
 
         $hashid_vars = array_column(
@@ -208,6 +230,11 @@ class Doofinder extends Module
         }
 
         return true;
+    }
+
+    public function uninstallDb()
+    {
+        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`');
     }
 
     protected function getWarningMultishopHtml()
@@ -829,6 +856,23 @@ class Doofinder extends Module
                         'name' => 'DF_OWSEARCH',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
+                    ),
+                    array(
+                        'type' => 'select',
+                        'label' => $this->l('Process changed products'),
+                        'desc' => $this->l('Configure when registered product changes are sent to Doofinder'),
+                        'name' => 'DF_UPDATE_ON_SAVE_DELAY',
+                        'options' => array(
+                            'query' => array(
+                                0 => array("id" => 0, "name" => $this->l('Every day')),
+                                90 => array("id" => 90, "name" => sprintf($this->l('Every %s minutes'), '90')),
+                                60 => array("id" => 60, "name" => sprintf($this->l('Every %s minutes'), '60')),
+                                30 => array("id" => 30, "name" => sprintf($this->l('Every %s minutes'), '30')),
+                                15 => array("id" => 15, "name" => sprintf($this->l('Every %s minutes'), '15'))
+                            ),
+                            'id' => 'id',
+                            'name' => 'name'
+                        )
                     )
                 ),
                 'submit' => array(
@@ -967,6 +1011,7 @@ class Doofinder extends Module
             'DF_FEATURES_SHOWN[]' => explode(',', Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => Configuration::get('DF_GS_IMAGE_SIZE'),
             'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
+            'DF_UPDATE_ON_SAVE_DELAY' => Configuration::get('DF_UPDATE_ON_SAVE_DELAY'),
         );
     }
 
@@ -1157,9 +1202,14 @@ class Doofinder extends Module
         }
 
         if ($formUpdated == 'data_feed_tab') {
-            if ((boolean)Configuration::get('DF_ENABLED_V9') && (boolean)Configuration::get('DF_OWSEARCH')) {
+            if (((boolean)Configuration::get('DF_ENABLED_V9') && (boolean)Configuration::get('DF_OWSEARCH')) || 
+                (boolean)Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
                 $this->setSearchEnginesByConfig();
             }
+            if(Tools::getValue("DF_UPDATE_ON_SAVE_DELAY") && (int)Tools::getValue("DF_UPDATE_ON_SAVE_DELAY") < 15){
+                Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 15);
+            }
+
             $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
             $messages .= $this->displayWarningCtm($msg);
         }
@@ -1687,6 +1737,149 @@ class Doofinder extends Module
             }
         } else {
             return false;
+        }
+    }
+
+    public function hookActionProductSave($params)
+    {
+        if (Configuration::get("DF_UPDATE_ON_SAVE_DELAY")) {
+            $action = $params["product"]->active ? "update" : "delete";
+            $id_shop = $this->context->shop->id;
+            $this->addProductQueue($params["id_product"], $id_shop, $action);
+
+            if($this->allowProcessProductsQueue()){
+                $this->processProductQueue($id_shop);
+            }
+        }
+    }
+
+    public function hookActionProductDelete($params)
+    {
+        if (Configuration::get("DF_UPDATE_ON_SAVE_DELAY")) {
+            $id_shop = $this->context->shop->id;
+            $this->addProductQueue($params["id_product"], $id_shop, "delete");
+
+            if($this->allowProcessProductsQueue()){
+                $this->processProductQueue($id_shop);
+            }
+        }
+    }
+
+    public function allowProcessProductsQueue(){
+        if (Configuration::get("DF_UPDATE_ON_SAVE_DELAY")) {
+            $last_exec = Configuration::get("DF_UPDATE_ON_SAVE_LAST_EXEC", null, null, null, 0);
+            $delay = (int)Configuration::get("DF_UPDATE_ON_SAVE_DELAY", null, null, null, 30);
+
+            if(is_int($delay)){
+                $last_exec_ts = strtotime($last_exec);
+
+                $diff_min = (time() - $last_exec_ts) / 60;
+                
+                if($diff_min > $delay){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function setExecUpdateOnSave(){
+        Configuration::updateValue("DF_UPDATE_ON_SAVE_LAST_EXEC", date('Y-m-d H:i:s'));
+    }
+
+    public function addProductQueue($id_product, $id_shop, $action)
+    {
+        Db::getInstance()->insert(
+            "doofinder_product",
+            array(
+                "id_shop" => $id_shop,
+                "id_product" => $id_product,
+                "action" => $action,
+                "date_upd" => date('Y-m-d H:i:s')
+            ),
+            false,
+            true,
+            Db::REPLACE
+        );
+    }
+
+    public function processProductQueue($id_shop)
+    {   
+        $this->setExecUpdateOnSave();
+
+        $products_update = $this->getProductsQueue($id_shop);
+        $products_delete = $this->getProductsQueue($id_shop, "delete");
+
+        $languages = Language::getLanguages(true, $id_shop);
+        $currencies = Currency::getCurrenciesByIdShop($id_shop);
+
+        foreach ($languages as $language) {
+            foreach ($currencies as $currency) {
+                $this->sendProductsApi($products_update, $id_shop, $language['id_lang'], $currency['id_currency']);
+                $this->sendProductsApi($products_delete, $id_shop, $language['id_lang'], $currency['id_currency'], "delete");
+            }
+        }
+
+        $this->deleteProductQueue($id_shop);
+    }
+
+    public function getProductsQueue($id_shop, $action = "update")
+    {
+        $products = Db::getInstance()->executeS(
+            "
+            SELECT id_product FROM " . _DB_PREFIX_ . "doofinder_product 
+            WHERE action = '" . pSQL($action) . "' AND id_shop = " . (int)$id_shop
+        );
+
+        return array_column($products, "id_product");
+    }
+
+    public function deleteProductQueue($id_shop){
+        Db::getInstance()->execute("DELETE from " . _DB_PREFIX_ . "doofinder_product WHERE id_shop = " . (int)$id_shop);
+    }
+
+    public function sendProductsApi($products, $id_shop, $id_lang, $id_currency, $action = "update")
+    {
+        if(empty($products)){
+            return;
+        }
+
+        $lang_iso = strtoupper(Language::getIsoById($id_lang));
+        $curr_iso = strtoupper($this->getIsoCodeById($id_currency));
+        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
+        $region = Configuration::get('DF_REGION');
+
+        $hashid_key = "DF_HASHID_" . $curr_iso . "_" . $lang_iso;;
+
+        $hashid = Configuration::get($hashid_key);
+        
+        if($hashid){
+            require_once(dirname(__FILE__) . '/lib/dfProduct_build.php');
+            require_once(dirname(__FILE__) . '/lib/doofinder_api_products.php');
+
+            if($action == "update"){
+                $builder = new DfProductBuild($id_shop, $id_lang, $id_currency);
+                $builder->setProducts($products);
+                $payload = $builder->build();
+
+                $api = new DoofinderApiProducts($hashid, $apikey, $region);
+                $response = $api->updateBulk($payload);
+
+                if(isset($response['error']) && !empty($response['error'])){
+                    $this->debug(json_encode($response['error']));
+                }
+
+            } elseif($action == "delete"){
+                $api = new DoofinderApiProducts($hashid, $apikey, $region);
+                $payload = array_map(function($a){return array("id" => $a);}, $products);
+
+                $response = $api->deleteBulk(json_encode($payload));
+
+                if(isset($response['error']) && !empty($response['error'])){
+                    $this->debug(json_encode($response['error']));
+                }
+            }
         }
     }
 
@@ -2481,6 +2674,13 @@ class Doofinder extends Module
             false,
             'application/json',
             ['Authorization: Token '.$apikey]
+        );
+    }
+
+    protected function getIsoCodeById($id)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
+            SELECT `iso_code` FROM ' . _DB_PREFIX_ . 'currency WHERE `id_currency` = ' . (int) $id
         );
     }
 }

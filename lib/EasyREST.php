@@ -60,6 +60,14 @@ class EasyREST
                 $params = $this->params;
             }
             curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
+        } elseif ($this->method === "DELETE") {
+            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            if (is_object($this->params) || is_array($this->params)) {
+                $params = http_build_query($this->params);
+            } else {
+                $params = $this->params;
+            }
+            curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
         } else {
             curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $this->method);
         }
@@ -363,9 +371,15 @@ class EasyREST
      * @param string $password=null [optional]
      * @return EasyREST
      */
-    public static function delete($url, array $params = null, $user = null, $pwd = null)
-    {
-        return self::call("DELETE", $url, $params, $user, $pwd);
+    public static function delete(
+        $url,
+        $params = null,
+        $user = null,
+        $pwd = null,
+        $contentType = "multipart/form-data",
+        $httpHeaders = null
+    ) {
+        return self::call("DELETE", $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
     /**

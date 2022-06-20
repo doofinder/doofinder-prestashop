@@ -31,7 +31,7 @@ class DoofinderLayerApi
 
         $response = $client->get($api_endpoint);
 
-        if ($response->headers['code'] === 200) {
+        if ((int)$response->headers['code'] === 200) {
             $options = json_decode($response->response)->options;
             if ($currency === $options->currency && $language === $options->language) {
                 return $options->hashid;

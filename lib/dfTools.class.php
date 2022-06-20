@@ -360,15 +360,60 @@ class DfTools
     }
 
     /**
+     * Returns the product combination attributes
+     * @param int Product Attribute ID.
+     * @param bool Attribute groups IDs.
+     * @param int Language ID.
+     * @return array of rows (assoc arrays).
+     */
+    public static function getAttributesByCombination($variation_id, $id_lang, $attr_limit = false)
+    {
+        if (isset($variation_id) && $variation_id > 0) {
+            $sql = "SELECT pc.id_product_attribute,
+                    pal.name,
+                    pagl.name AS group_name
+
+            FROM
+            _DB_PREFIX_product_attribute_combination pc
+                LEFT JOIN _DB_PREFIX_attribute pa
+                    ON pc.id_attribute = pa.id_attribute
+                LEFT JOIN _DB_PREFIX_attribute_lang pal
+                    ON (pc.id_attribute = pal.id_attribute AND pal.id_lang = _ID_LANG_)
+                LEFT JOIN _DB_PREFIX_attribute_group_lang pagl
+                    ON (pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = _ID_LANG_)
+            WHERE
+            pc.id_product_attribute = _VARIATION_ID";
+
+            if ($attr_limit) {
+                $sql .= " AND pa.id_attribute_group IN (" . pSQL($attr_limit) . ")";
+            }
+            $sql = self::prepareSQL($sql, array(
+                '_ID_LANG_' => (int)pSQL($id_lang),
+                '_VARIATION_ID' => (int)pSQL($variation_id)
+            ));
+
+            return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        } else {
+            return array();
+        }
+    }
+
+    /**
      * Returns the products available for a language
      * @param int Language ID.
      * @param int Optional. Default false. Number of products to get.
      * @param int Optional. Default false. Offset to start the select from.
      * @param string Optional. Fields to select.
+     * @param array Optional. Filter product ids.
      * @return array of rows (assoc arrays).
      */
-    public static function getAvailableProductsForLanguage($id_lang, $id_shop, $limit = false, $offset = false)
-    {
+    public static function getAvailableProductsForLanguage(
+        $id_lang,
+        $id_shop,
+        $limit = false,
+        $offset = false,
+        $ids = null
+    ) {
         $Shop = new Shop($id_shop);
 
         $isbn = '';
@@ -426,6 +471,7 @@ class DfTools
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
+        __PRODUCT_IDS__
       GROUP BY
         p.id_product
       ORDER BY
@@ -494,6 +540,7 @@ class DfTools
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
+        __PRODUCT_IDS__
       GROUP BY pa.id_product_attribute, p.id_product
       ORDER BY
         p.id_product
@@ -519,7 +566,11 @@ class DfTools
             $visibility = "";
         }
 
-
+        if (is_array($ids) && count($ids)) {
+            $product_ids = "AND p.id_product IN (" . implode(",", $ids) . ")";
+        } else {
+            $product_ids = "";
+        }
 
         $sql = self::limitSQL($sql, $limit, $offset);
         $sql = self::prepareSQL($sql, array(
@@ -530,7 +581,8 @@ class DfTools
             '_IMS_COVER_' => (string)pSQL($ims_cover),
             '__ID_CATEGORY_DEFAULT__' => (int)pSQL($id_category_default),
             '__IS_ACTIVE__' => (string)pSQL($is_active),
-            '__VISIBILITY__' => (string)pSQL($visibility)
+            '__VISIBILITY__' => (string)pSQL($visibility),
+            '__PRODUCT_IDS__' => (string)pSQL($product_ids)
         ));
 
         $sql = str_replace("\'", "'", $sql);

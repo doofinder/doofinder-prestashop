@@ -142,6 +142,16 @@ $_MODULE['<{doofinder}prestashop>doofinder_8394f0347c184cf156ac5924dccb773b'] =
 'Longue';
 $_MODULE['<{doofinder}prestashop>doofinder_fb801a312f1d7b14a5df6f2cdb9882d2'] =
 'Champ MPN dans votre flux';
+$_MODULE['<{doofinder}prestashop>doofinder_9a1ef478e7c0709548f092860f9493d8'] =
+'Si l\'option \"Update on save\" est activée, lorsqu\'un produit est créé / mis à
+ jour / supprimé, cette modification est envoyée à Doofinder.';
+$_MODULE['<{doofinder}prestashop>doofinder_43111e94d9e2034787c59b4c200c1631'] =
+'Traitement des produits modifiés';
+$_MODULE['<{doofinder}prestashop>doofinder_c2cad3c344198599b69e25634315170d'] =
+'Configurer le moment où les changements de produits enregistrés sont envoyés à Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinder_48bf14c419a1d441412510faf39c326d'] = 'Chaque jour';
+$_MODULE['<{doofinder}prestashop>doofinder_643bd9766a482fed97aff60a7a4f1b3b'] =
+'Toutes les %s minutes';
 $_MODULE['<{doofinder}prestashop>doofinder_836f443d97d58d8ec45b18fd574c8933'] =
 'Sauvegarder les options du flux produit';
 $_MODULE['<{doofinder}prestashop>doofinder_9dfc5d5738312210c3c75e68a468691d'] =
