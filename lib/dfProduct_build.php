@@ -138,10 +138,8 @@ class DfProductBuild
 
     private function getId($product)
     {
-        if ($this->product_variations) {
-            if (isset($product['id_product_attribute']) && (int)$product['id_product_attribute'] > 0) {
-                return "VAR-" . $product['id_product_attribute'];
-            }
+        if ($this->haveVariations($product)) {
+            return "VAR-" . $product['id_product_attribute'];
         }
 
         return $product['id_product'];
@@ -149,10 +147,8 @@ class DfProductBuild
 
     private function getItemGroupId($product)
     {
-        if ($this->product_variations) {
-            if (isset($product['id_product_attribute']) && (int)$product['id_product_attribute'] > 0) {
-                return $product['id_product'];
-            }
+        if ($this->haveVariations($product)) {
+            return $product['id_product'];
         }
 
         return "";
@@ -160,23 +156,21 @@ class DfProductBuild
 
     private function getLink($product)
     {
-        if ($this->product_variations) {
-            if (isset($product['id_product_attribute']) && (int)$product['id_product_attribute'] > 0) {
-                return dfTools::cleanURL(
-                    $this->link->getProductLink(
-                        (int)$product['id_product'],
-                        $product['link_rewrite'],
-                        $product['cat_link_rew'],
-                        $$product['ean13'],
-                        $this->id_lang,
-                        $this->id_shop,
-                        $product['id_product_attribute'],
-                        $this->link_rewrite_conf,
-                        false,
-                        true
-                    )
-                );
-            }
+        if ($this->haveVariations($product)) {
+            return dfTools::cleanURL(
+                $this->link->getProductLink(
+                    (int)$product['id_product'],
+                    $product['link_rewrite'],
+                    $product['cat_link_rew'],
+                    $$product['ean13'],
+                    $this->id_lang,
+                    $this->id_shop,
+                    $product['id_product_attribute'],
+                    $this->link_rewrite_conf,
+                    false,
+                    true
+                )
+            );
         }
 
         return dfTools::cleanURL(
@@ -195,44 +189,42 @@ class DfProductBuild
 
     private function getImageLink($product)
     {
-        if ($this->product_variations) {
-            if (isset($product['id_product_attribute']) && (int)$product['id_product_attribute'] > 0) {
-                $id_image = dfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
+        if ($this->haveVariations($product)) {
+            $id_image = dfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
 
-                if (isset($id_image)) {
-                    $image_link = dfTools::cleanURL(
-                        dfTools::getImageLink(
-                            $product['id_product_attribute'],
-                            $id_image,
-                            $product['link_rewrite'],
-                            $this->image_size
-                        )
-                    );
-                } else {
-                    $image_link = dfTools::cleanURL(
-                        dfTools::getImageLink(
-                            $product['id_product_attribute'],
-                            $product['id_image'],
-                            $product['link_rewrite'],
-                            $this->image_size
-                        )
-                    );
-                }
-
-                // For variations with no specific pictures
-                if (strpos($image_link, "/-") > -1) {
-                    $image_link = dfTools::cleanURL(
-                        dfTools::getImageLink(
-                            $product['id_product'],
-                            $product['id_image'],
-                            $product['link_rewrite'],
-                            $this->image_size
-                        )
-                    );
-                }
-
-                return $image_link;
+            if (isset($id_image)) {
+                $image_link = dfTools::cleanURL(
+                    dfTools::getImageLink(
+                        $product['id_product_attribute'],
+                        $id_image,
+                        $product['link_rewrite'],
+                        $this->image_size
+                    )
+                );
+            } else {
+                $image_link = dfTools::cleanURL(
+                    dfTools::getImageLink(
+                        $product['id_product_attribute'],
+                        $product['id_image'],
+                        $product['link_rewrite'],
+                        $this->image_size
+                    )
+                );
             }
+
+            // For variations with no specific pictures
+            if (strpos($image_link, "/-") > -1) {
+                $image_link = dfTools::cleanURL(
+                    dfTools::getImageLink(
+                        $product['id_product'],
+                        $product['id_image'],
+                        $product['link_rewrite'],
+                        $this->image_size
+                    )
+                );
+            }
+
+            return $image_link;
         }
 
         return dfTools::cleanURL(
@@ -344,6 +336,16 @@ class DfProductBuild
         return $alt_attributes;
     }
 
+    private function haveVariations($product)
+    {
+        if ($this->product_variations) {
+            if (isset($product['id_product_attribute']) && (int)$product['id_product_attribute'] > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private function slugify($text)
     {
