@@ -2461,8 +2461,6 @@ class Doofinder extends Module
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
             $shopId = $sid;
-            $shopHashes = array();
-            $defaultHash = array();
             $installationID = null;
 
             Configuration::updateValue('DF_ENABLE_HASH', true, false, $sgid, $sid);
@@ -2498,12 +2496,12 @@ class Doofinder extends Module
                         . Tools::strtoupper($ciso)
                         . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
 
-                    //"stopwords": false <==================================== Es necesario en doomanager?
                     $store_data["search_engines"][] = [
                         'name' => $shop_name,
                         'language' => $liso,
                         'currency' => $ciso,
                         'site_url' => $this->getShopURL($shopId),
+                        'stopwords' => false,
                         'datatypes' => [
                             [
                                 "name" => "product",
