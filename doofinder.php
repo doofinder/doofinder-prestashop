@@ -2445,13 +2445,18 @@ class Doofinder extends Module
         //Require only on this function to not overload memory with not needed classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST();
-        $dfhost = 'https://'.$api_endpoint;
         $api_endpoint_array = explode('-', $api_endpoint);
         $region = $api_endpoint_array[0];
         $shops = Shop::getShops();
         $this->manualInstallation();
         foreach ($shops as $shop) {
             $languages = Language::getLanguages(true, $shop['id_shop']);
+            $primary_lang_id = Configuration::get('PS_LANG_DEFAULT');
+            $primary_language = reset(array_filter($languages, function ($lang) use ($primary_lang_id) {
+                return (int)$lang["id_lang"] === (int)$primary_lang_id;
+            }));
+            $primary_language_iso_code = $primary_language["iso_code"];
+
             $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
@@ -2460,120 +2465,97 @@ class Doofinder extends Module
             $defaultHash = array();
             $installationID = null;
 
-            /*if (count($shops) == 1 && !Shop::isFeatureActive()) {
-                $sid = null;
-                $sgid = null;
-            }*/
-
             Configuration::updateValue('DF_ENABLE_HASH', true, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_DISPLAY_PRICES', true, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_PRICES_USE_TAX', true, false, $sgid, $sid);
             Configuration::updateValue('DF_FEED_FULL_PATH', true, false, $sgid, $sid);
             Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $sgid, $sid);
             Configuration::updateValue('DF_REGION', $region, false, $sgid, $sid);
-            Configuration::updateValue('DF_API_KEY', $region.'-'.$apikey, false, $sgid, $sid);
+            Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', self::GS_SHORT_DESCRIPTION, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_MPN_FIELD', "reference", false, $sgid, $sid);
             Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_IMAGE_SIZE', key(dfTools::getAvailableImageSizes()), false, $sgid, $sid);
 
+            $shop_name = $this->getShopURL($shopId);
+            $store_data = [
+                "name" => $shop_name,
+                "platform" => "prestashop",
+                "primary_language" => $primary_language_iso_code,
+                "search_engines" => [],
+                "sector" => ""
+            ];
+
             foreach ($languages as $lang) {
                 $liso = $lang['iso_code'];
                 foreach ($currencies as $cur) {
                     $ciso = $cur['iso_code'];
-                    $shop_name = $this->getShopURL($shopId).' | Lang:'.$liso.' Currency:'.$ciso;
-
-                    $seRequest = '{
-                        "language": "'.$liso.'",
-                        "currency": "'.$ciso.'",
-                        "name": "'.$shop_name.'",
-                        "site_url": "'.$this->getShopURL($shopId).'",
-                        "stopwords": false
-                    }';
-
-                    $seResponse = $client->post(
-                        $dfhost.'/api/v2/search_engines',
-                        $seRequest,
-                        false,
-                        false,
-                        'application/json',
-                        ['Authorization: Token '.$apikey]
-                    );
-
-                    $seData = json_decode($seResponse->response, true);
-
-                    if ($hashid = $seData['hashid']) {
-                        $client->post(
-                            'https://'.$admin_endpoint.'/plugins/'.$hashid.'/script/prestashop',
-                            [],
-                            false,
-                            false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]
-                        );
-
-                        $shopHashes[$liso][$ciso] = $hashid;
-
-                        if (empty($defaultHash)) {
-                            $defaultHash = array(
-                                "currency" => $ciso,
-                                "language" => $liso,
-                                "hashid" => $hashid
-                            );
-                        }
-
-                        $feed_url = $this->getShopURL($shop['id_shop'])
-                        .'/modules/doofinder/feed.php?language='
+                    $shop_name = $this->getShopURL($shopId) . ' | Lang:' . $liso . ' Currency:' . $ciso;
+                    $feed_url = $this->getShopURL($shop['id_shop'])
+                        . 'modules/doofinder/feed.php?language='
                         . Tools::strtoupper($liso)
                         . '&currency='
                         . Tools::strtoupper($ciso)
                         . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
 
-                        $indexData = '{
-                            "options": {
-                                "exclude_out_of_stock_items": false,
-                                "group_variants": false
-                            },
-                            "datasources": [
-                                {
-                                    "options": {
-                                        "url": "'.$feed_url.'"
-                                    },
-                                    "type": "file"
-                                }
-                            ],
-                            "name": "product",
-                            "preset": "product"
-                        }';
-
-                        $client->post(
-                            $dfhost.'/api/v2/search_engines/'.$hashid.'/indices',
-                            $indexData,
-                            false,
-                            false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]
-                        );
-
-                        $client->post(
-                            $dfhost.'/api/v2/search_engines/'.$hashid.'/_process',
-                            [],
-                            false,
-                            false,
-                            'application/json',
-                            ['Authorization: Token '.$apikey]
-                        );
-                        sleep(1);
-                    }
+                    //"stopwords": false <==================================== Es necesario en doomanager?
+                    $store_data["search_engines"][] = [
+                        'name' => $shop_name,
+                        'language' => $liso,
+                        'currency' => $ciso,
+                        'site_url' => $this->getShopURL($shopId),
+                        'datatypes' => [
+                            [
+                                "name" => "product",
+                                "preset" => "product",
+                                "datasources" => [
+                                    [
+                                        "options" => [
+                                            "url" => $feed_url
+                                        ],
+                                        "type" => "file"
+                                    ]
+                                ],
+                                "options" => [
+                                    "exclude_out_of_stock_items" => false,
+                                    "group_variants" => false
+                                ],
+                            ]
+                        ]
+                    ];
                 }
             }
 
-            $installationID = $this->createInstallationID($shopHashes, $defaultHash);
+            $json_store_data = json_encode($store_data);
+            $this->debug('Create Store Start');
+            $this->debug(print_r($store_data, true));
 
-            if ($installationID) {
-                Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $sgid, $sid);
-                Configuration::updateValue('DF_ENABLED_V9', true, false, $sgid, $sid);
+            $response = $client->post(
+                'https://' . $admin_endpoint . '/plugins/create-store',
+                $json_store_data,
+                false,
+                false,
+                'application/json',
+                ['Authorization: Token ' . $apikey]
+            );
+
+            if ($response->getResponseCode() == 200) {
+                $response = json_decode($response->response, true);
+                $installationID = @$response["installation_id"];
+                $this->debug("Create Store response:");
+                $this->debug(print_r($response, true));
+
+                if ($installationID) {
+                    $this->debug("Set installation ID: $installationID");
+                    Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $sgid, $sid);
+                    Configuration::updateValue('DF_ENABLED_V9', true, false, $sgid, $sid);
+                } else {
+                    $this->debug("Invalid installation ID");
+                    die('ko');
+                }
             } else {
+                $this->debug("Create Store failed with code {$response->getResponseCode()} and message '{$response->getResponseMessage()}'");
+                $this->debug("Response: " . print_r($response->response, true));
                 die('ko');
             }
         }
