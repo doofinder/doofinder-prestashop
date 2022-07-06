@@ -2475,9 +2475,9 @@ class Doofinder extends Module
             Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $sgid, $sid);
             Configuration::updateValue('DF_GS_IMAGE_SIZE', key(dfTools::getAvailableImageSizes()), false, $sgid, $sid);
 
-            $shop_name = $this->getShopURL($shopId);
+            $shop_url = $this->getShopURL($shopId);
             $store_data = [
-                "name" => $shop_name,
+                "name" => $shop_url,
                 "platform" => "prestashop",
                 "primary_language" => $primary_language_iso_code,
                 "search_engines" => [],
@@ -2488,8 +2488,7 @@ class Doofinder extends Module
                 $liso = $lang['iso_code'];
                 foreach ($currencies as $cur) {
                     $ciso = $cur['iso_code'];
-                    $shop_name = $this->getShopURL($shopId) . ' | Lang:' . $liso . ' Currency:' . $ciso;
-                    $feed_url = $this->getShopURL($shop['id_shop'])
+                    $feed_url = $shop_url 
                         . 'modules/doofinder/feed.php?language='
                         . Tools::strtoupper($liso)
                         . '&currency='
@@ -2497,10 +2496,10 @@ class Doofinder extends Module
                         . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
 
                     $store_data["search_engines"][] = [
-                        'name' => $shop_name,
+                        'name' => $shop_url . ' | Lang:' . $liso . ' Currency:' . $ciso,
                         'language' => $liso,
                         'currency' => $ciso,
-                        'site_url' => $this->getShopURL($shopId),
+                        'site_url' => $shop_url,
                         'stopwords' => false,
                         'datatypes' => [
                             [
