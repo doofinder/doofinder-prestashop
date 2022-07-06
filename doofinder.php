@@ -2451,16 +2451,12 @@ class Doofinder extends Module
         $this->manualInstallation();
         foreach ($shops as $shop) {
             $languages = Language::getLanguages(true, $shop['id_shop']);
-            $primary_lang_id = Configuration::get('PS_LANG_DEFAULT');
-            $primary_language = reset(array_filter($languages, function ($lang) use ($primary_lang_id) {
-                return (int)$lang["id_lang"] === (int)$primary_lang_id;
-            }));
-            $primary_language_iso_code = $primary_language["iso_code"];
-
             $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
             $shopId = $sid;
+            $primary_lang_id = Configuration::get('PS_LANG_DEFAULT', null, $sgid, $sid);
+            $primary_language_iso_code = Language::getIsoById($primary_lang_id);
             $installationID = null;
 
             Configuration::updateValue('DF_ENABLE_HASH', true, false, $sgid, $sid);
