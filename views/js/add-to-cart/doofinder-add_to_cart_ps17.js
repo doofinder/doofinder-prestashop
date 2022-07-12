@@ -81,5 +81,4 @@ let dfAddToCart = (cartOptions) => {
 
 let doofinderManageCart = (cartOptions) => {
     dfAddToCart(cartOptions);
-    closeDoofinderLayer();
 }

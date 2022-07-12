@@ -27,10 +27,6 @@
       doofinderLoader.load(dfLayerOptions);
     });
 
-    let closeDoofinderLayer = () => {
-      document.querySelector('button[dfd-click="close-layer"').click();
-    }
-
     document.addEventListener('doofinder.cart.add', function(event) {
 
       const checkIfCartItemHasVariation = (cartObject) => {

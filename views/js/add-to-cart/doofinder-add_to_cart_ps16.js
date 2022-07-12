@@ -16,5 +16,4 @@
 
 let doofinderManageCart = (cartOptions) => {
     ajaxCart.add(cartOptions.productID, cartOptions.customizationID);
-    closeDoofinderLayer();
 }
