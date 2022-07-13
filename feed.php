@@ -532,17 +532,17 @@ foreach ($rows as $row) {
 
         if ($cfg_product_variations == 1) {
             echo TXT_SEPARATOR;
-            echo $row['variation_reference'];
+            echo dfTools::cleanString($row['variation_reference']);
             echo TXT_SEPARATOR;
-            echo $row['variation_supplier_reference'];
+            echo dfTools::cleanString($row['variation_supplier_reference']);
             echo TXT_SEPARATOR;
-            echo $row['variation_mpn'];
+            echo dfTools::cleanString($row['variation_mpn']);
             echo TXT_SEPARATOR;
-            echo $row['variation_ean13'];
+            echo dfTools::cleanString($row['variation_ean13']);
             echo TXT_SEPARATOR;
-            echo $row['variation_upc'];
+            echo dfTools::cleanString($row['variation_upc']);
             echo TXT_SEPARATOR;
-            echo $row['df_group_leader'];
+            echo dfTools::cleanString($row['df_group_leader']);
             $variation_attributes = dfTools::getAttributesForProductVariation(
                 $row['id_product_attribute'],
                 $lang->id,
@@ -568,7 +568,7 @@ foreach ($rows as $row) {
          */
         foreach ($extra_header as $extra) {
             echo TXT_SEPARATOR;
-            echo isset($row[$extra]) ? $row[$extra] : "";
+            echo isset($row[$extra]) ? dfTools::cleanString($row[$extra]) : "";
         }
 
         echo PHP_EOL;
