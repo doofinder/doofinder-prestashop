@@ -48,4 +48,6 @@
 <div class="tab-content">
     {if !$configured}
     <div class="tab-pane active" id="onboarding_tab">{include file='./onboarding_tab.tpl'}</div>
+    {elseif $is_new_shop}
+    <div class="tab-pane active" id="onboarding_tab">{include file='./new_shop_onboarding_tab.tpl'}</div>
     {/if}
