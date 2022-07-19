@@ -26,12 +26,10 @@ if ($check_api_key) {
 }
 
 $autoinstaller = Tools::getValue('autoinstaller');
+$shop_id =  Tools::getValue('shop_id', NULL);
 if ($autoinstaller) {
     if (Tools::getValue('token') == Tools::encrypt('doofinder-ajax')) {
-        $apiToken = Configuration::get('DF_AI_APIKEY');
-        $admin_endpoint = Configuration::get('DF_AI_ADMIN_ENDPOINT');
-        $api_endpoint = Configuration::get('DF_AI_API_ENDPOINT');
-        $doofinder->autoinstaller($apiToken, $api_endpoint, $admin_endpoint);
+        $doofinder->autoinstaller($shop_id );
         die('OK');
     } else {
         $msgError = 'Forbidden access.'
