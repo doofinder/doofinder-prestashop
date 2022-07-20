@@ -28,6 +28,7 @@
 				<div class="module_warning alert alert-danger" >
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
 					{l s='An error occurred during the installation process. Please contact our support team on' mod='doofinder'} support@doofinder.com
+					<ul id="installation-errors"></ul>
 				</div>
 			</div>
 			<div class="col-12 text-center loading-installer" style="display:none;">
@@ -74,10 +75,6 @@
 				</dl>
 				<br />
 				<p>{l s='More than 5000 e-commerce sites over 35 countries are already using it' mod='doofinder'}.</p>
-				<br />
-				<p>{l s='What are you waiting for?' mod='doofinder'}</p>
-				<br />
-				<p><a onclick="javascript:popupDoofinder('signup')" href="#">{l s='Test our solution for 30 days, for free!' mod='doofinder'}</a></p>
 				</div>
 			</div>
 		</div>
@@ -123,19 +120,12 @@ li.active{
     background-color: #1b1851;
     border-color: #1b1851;
 }
-#login-account-btn{
-	color: #ffffff;
-    background-color: #4842c1;
-	border-color: #4842c1;
-}
-#login-account-btn:hover{
-	color: #fff031;
-    background-color: #1b1851;
-	border-color: #1b1851;
-}
 
 #module_form{
 	display:none;
+}
+#installation-errors {
+    padding-left: 18px;
 }
 </style>
 <script type="text/javascript">
@@ -157,10 +147,20 @@ li.active{
 			'shop_id': {$shop_id},
 			'token':token
 		}, function(data){
+			$('#installation-errors').empty();
+			clearInterval(loop);
 			if(data == 'OK') {				
-				clearInterval(loop);
 				location.reload();
 			} else {
+				$(".loading-installer").hide();
+				data = JSON.parse(data);
+				if(data.errors){
+					for (i in data.errors){
+						error = data.errors[i];
+						$('#installation-errors').append("<li>"+error+"</li>")
+					}
+				}
+				
 				$('.message-error').show();
 			}
 		})

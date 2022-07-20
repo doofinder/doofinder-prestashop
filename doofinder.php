@@ -344,20 +344,27 @@ class Doofinder extends Module
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
             foreach (Currency::getCurrencies() as $cur) {
                 $currencyIso = Tools::strtoupper($cur['iso_code']);
-                $url = $this->context->shop->getBaseURL(true, false)
-                    . $this->_path
-                    . 'feed.php?language=' . Tools::strtoupper($lang['iso_code'])
-                    . '&currency=' . Tools::strtoupper($currencyIso)
-                    . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
+                $langIso = Tools::strtoupper($lang['iso_code']);
                 $urls[] = array(
-                    'url' => $url,
-                    'lang' => Tools::strtoupper($lang['iso_code']),
+                    'url' => $this->buildFeedUrl($this->context->shop->id, $langIso, $currencyIso),
+                    'lang' => $langIso,
                     'currency' => $currencyIso
                 );
             }
         }
         $this->context->smarty->assign('df_feed_urls', $urls);
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/feed_url_partial_tab.tpl');
+    }
+
+    protected function buildFeedUrl($shop_id, $language, $currency)
+    {
+        $shop_url = $this->getShopURL($shop_id);
+
+        return $shop_url . ltrim($this->_path, DIRECTORY_SEPARATOR)
+            . 'feed.php?'
+            . 'currency=' . Tools::strtoupper($currency)
+            . '&language=' . Tools::strtoupper($language)
+            . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
     }
 
     protected function renderFormCustomCSS($adv = false)
@@ -2551,14 +2558,7 @@ class Doofinder extends Module
             $liso = $lang['iso_code'];
             foreach ($currencies as $cur) {
                 $ciso =  $cur['iso_code'];
-                $query =  http_build_query([
-                    'currency' => $ciso,
-                    'language' => $liso,
-                    'dfsec_hash' =>  $apikey
-                ]);
-
-                $feed_url = $shop_url . 'modules/doofinder/feed.php?' . $query;
-
+                $feed_url = $this->buildFeedUrl($shopId, $liso, $ciso);
                 $store_data["search_engines"][] = [
                     'name' => $shop['name'] . ' | Lang:' . strtoupper($liso) . ' Currency:' . strtoupper($ciso),
                     'language' => $liso,
@@ -2619,7 +2619,8 @@ class Doofinder extends Module
             $response_msg = "Response: " . print_r($response->response, true);
             $this->debug($error_msg);
             $this->debug($response_msg);
-            die('ko');
+            echo $response->response;
+            die();
         }
     }
 
