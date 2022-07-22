@@ -556,7 +556,7 @@ class Doofinder extends Module
 
     protected function doofinderInShop($shop)
     {
-        $installation_id = Configuration::get('DF_INSTALLATION_ID', null, $shop->id_category,  $shop->id);
+        $installation_id = Configuration::get('DF_INSTALLATION_ID', null, $shop->id_shop_group,  $shop->id);
         return !empty($installation_id);
     }
 
@@ -2496,9 +2496,9 @@ class Doofinder extends Module
 
     public function saveApiData($apikey, $api_endpoint, $admin_endpoint)
     {
-        Configuration::updateValue('DF_AI_APIKEY', $apikey);
-        Configuration::updateValue('DF_AI_ADMIN_ENDPOINT', $admin_endpoint);
-        Configuration::updateValue('DF_AI_API_ENDPOINT', $api_endpoint);
+        Configuration::updateGlobalValue('DF_AI_APIKEY', $apikey);
+        Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $admin_endpoint);
+        Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $api_endpoint);
 
         $api_endpoint_array = explode('-', $api_endpoint);
         $region = $api_endpoint_array[0];
@@ -2531,10 +2531,8 @@ class Doofinder extends Module
         //Require only on this function to not overload memory with unneeded classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST();
-
-        //$apikey = Configuration::get('DF_API_KEY');
-        $apikey = Configuration::get('DF_AI_APIKEY', null, 1, 1);
-        $admin_endpoint = Configuration::get('DF_AI_ADMIN_ENDPOINT', null, 1, 1);
+        $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
+        $admin_endpoint = Configuration::getGlobalValue('DF_AI_ADMIN_ENDPOINT');
         $languages = Language::getLanguages(true, $shop['id_shop']);
         $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
@@ -2626,8 +2624,8 @@ class Doofinder extends Module
 
     public function setDefaultShopConfig($shopGroupId, $shopId)
     {
-        $apikey = Configuration::get('DF_AI_APIKEY', null, 1, 1);
-        $api_endpoint = Configuration::get('DF_AI_API_ENDPOINT', null, 1, 1);
+        $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
+        $api_endpoint = Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
         $api_endpoint_array = explode('-', $api_endpoint);
         $region = $api_endpoint_array[0];
 
