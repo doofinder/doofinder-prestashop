@@ -144,7 +144,7 @@ li.active{
 		var token = '{$tokenAjax|escape:'htmlall':'UTF-8'}';
 		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
 			'autoinstaller':1,
-			'shop_id': {$shop_id},
+			'shop_id': {$shop_id|escape:'htmlall':'UTF-8'},
 			'token':token
 		}, function(data){
 			$('#installation-errors').empty();
