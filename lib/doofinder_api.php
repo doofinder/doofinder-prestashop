@@ -71,6 +71,7 @@ class DoofinderApi
         if (2 === count($zone_key_array)) {
             $this->api_key = $zone_key_array[1];
             $this->zone = $zone_key_array[0];
+            $this->zone = preg_replace('/^https?:\/\//m', '', $this->zone);
             $this->url = "https://" . $this->zone . self::URL_SUFFIX;
         } else {
             throw new DoofinderException("API Key is no properly set.");
