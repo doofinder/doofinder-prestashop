@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -71,6 +72,7 @@ class DoofinderApi
         if (2 === count($zone_key_array)) {
             $this->api_key = $zone_key_array[1];
             $this->zone = $zone_key_array[0];
+            $this->zone = preg_replace('/^https?:\/\//m', '', $this->zone);
             $this->url = "https://" . $this->zone . self::URL_SUFFIX;
         } else {
             throw new DoofinderException("API Key is no properly set.");
@@ -361,9 +363,7 @@ class DoofinderApi
      */
     public function removeTerm($filterName, $term)
     {
-        if ($this->optionExists('filter') && isset($this->search_options['filter'][$filterName])
-            && in_array($term, $this->search_options['filter'][$filterName])
-        ) {
+        if ($this->optionExists('filter') && isset($this->search_options['filter'][$filterName]) && in_array($term, $this->search_options['filter'][$filterName])) {
             function filter_me($value)
             {
                 global $term;
@@ -371,7 +371,7 @@ class DoofinderApi
             }
 
             $this->search_options['filter'][$filterName] =
-            array_filter($this->search_options['filter'][$filterName], 'filter_me');
+                array_filter($this->search_options['filter'][$filterName], 'filter_me');
         }
     }
 
