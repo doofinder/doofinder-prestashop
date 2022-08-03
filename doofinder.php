@@ -709,7 +709,7 @@ class Doofinder extends Module
                         'name' => 'DF_API_KEY',
                         'desc' => sprintf(
                             $this->l('Click %s to access your API key'),
-                            '<a href="https://app.doofinder.com/en/admin/api/" target="_blank">' . $this->l('here') . '</a>'
+                            '<a href="https://admin.doofinder.com/en/admin/api/" target="_blank">' . $this->l('here') . '</a>'
                         ),
                     )
                 ),
@@ -2483,7 +2483,7 @@ class Doofinder extends Module
         //Require only on this function to not overload memory with not needed classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST(true, 3);
-        $result = $client->get('https://app.doofinder.com/es/admin/login');
+        $result = $client->get('https://admin.doofinder.com/auth/login');
         if (
             $result && $result->originalResponse && isset($result->headers['code'])
             && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200)
@@ -2687,7 +2687,7 @@ class Doofinder extends Module
     {
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST();
-        $api_endpoint_installationid = 'https://app.doofinder.com/plugins/script/prestashop';
+        $api_endpoint_installationid = 'https://admin.doofinder.com/plugins/script/prestashop';
         $apikey = Configuration::get('DF_API_KEY');
         $apikey = explode('-', $apikey)[1];
 
@@ -2721,7 +2721,7 @@ class Doofinder extends Module
     {
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST();
-        $api_endpoint = 'https://app.doofinder.com/plugins/state/prestashop';
+        $api_endpoint = 'https://admin.doofinder.com/plugins/state/prestashop';
         $apikey = Configuration::get('DF_API_KEY');
         $apikey = explode('-', $apikey)[1];
 
