@@ -21,7 +21,7 @@
 		</div>
 		<div class="col-xs-12 col-md-4 text-center">
 			<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaign=support_tab&utm_content=prestashop_module_support_tab" target="_blank" class="btn btn-primary" id="create-account-btn">{l s='Create an account now!' mod='doofinder'}</a><br />
-			{l s='Already have an account?' mod='doofinder'}<a href="https://app.doofinder.com/admin/login" target="_blank"> {l s='Log in' mod='doofinder'}</a>
+			{l s='Already have an account?' mod='doofinder'}<a href="https://admin.doofinder.com/auth/login" target="_blank"> {l s='Log in' mod='doofinder'}</a>
 		</div>
 	</div>
 
