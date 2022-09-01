@@ -36,12 +36,12 @@ if ($autoinstallerToken) {
             echo json_encode(["success" => true]);
             exit;
         }
+    } else {
+        header('HTTP/1.1 403 Forbidden', true, 403);
+        $msgError = 'Forbidden access.'
+            . ' Token for autoinstaller invalid.';
+        exit($msgError);
     }
-} else {
-    header('HTTP/1.1 403 Forbidden', true, 403);
-    $msgError = 'Forbidden access.'
-        . ' Token for autoinstaller invalid.';
-    exit($msgError);
 }
 $languages = array();
 $configurations = array();
