@@ -28,7 +28,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_4_3_1($module)
+function upgrade_module_4_3_1()
 {
     $current_admin_endpoint = Configuration::getGlobalValue('DF_AI_ADMIN_ENDPOINT');
     $admin_endpoint = str_replace("app", "admin", $current_admin_endpoint);
