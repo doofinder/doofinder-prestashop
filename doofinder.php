@@ -297,8 +297,7 @@ class Doofinder extends Module
             . $this->_path . 'config.php';
         $token = Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $this->context->employee->email
-            . '&token=' . $token
-            . '&return_path=' . urlencode($redirect);
+            . '&token=' . $token;
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
         $this->context->smarty->assign('tokenAjax', Tools::encrypt('doofinder-ajax'));
