@@ -165,8 +165,7 @@ li.active{
 	function launchAutoinstaller(){
 		$('.choose-installer').hide();
 		initializeAutoinstallerMessages()
-
-		return
+		
 		var token = '{$tokenAjax|escape:'htmlall':'UTF-8'}';
 		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
 			'autoinstaller':1,
