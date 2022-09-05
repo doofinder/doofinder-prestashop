@@ -280,7 +280,7 @@ class Doofinder extends Module
             $this->context->controller->addCSS($this->_path . 'views/css/admin-theme_15.css');
         }
         $configured = $this->isConfigured();
-        $is_new_shop = !$this->doofinderInShop(Context::getContext()->shop);
+        $is_new_shop = $this->showNewShopForm(Context::getContext()->shop);
         $shop_id = Context::getContext()->shop->id;
 
         $this->context->smarty->assign('oldPS', $oldPS);
@@ -533,7 +533,7 @@ class Doofinder extends Module
             'id_language' => $this->context->language->id,
         );
 
-        if ($this->doofinderInShop(Context::getContext()->shop)) {
+        if ($this->showNewShopForm(Context::getContext()->shop)) {
             $html .= $helper->generateForm(array($this->getConfigFormDataFeed()));
 
             // Search layer form
@@ -553,10 +553,17 @@ class Doofinder extends Module
         return $html;
     }
 
-    protected function doofinderInShop($shop)
+    protected function showNewShopForm($shop)
     {
-        $installation_id = Configuration::get('DF_INSTALLATION_ID', null, $shop->id_shop_group,  $shop->id);
-        return !empty($installation_id);
+        $installation_id = Configuration::get('DF_INSTALLATION_ID', null, (int)$shop->id_shop_group,  (int)$shop->id);
+        $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
+        $apikey = Configuration::get('DF_AI_APIKEY');
+
+        if(!$installation_id && $multishop_enable && $apikey){
+            return true;
+        }
+
+        return false;
     }
 
     protected function renderFormDataEmbeddedSearch($adv = false)
