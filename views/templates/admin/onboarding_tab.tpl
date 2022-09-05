@@ -144,55 +144,35 @@ li.active{
 }
 </style>
 <script type="text/javascript">
+	let shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
 	function popupDoofinder(type){
 		var params = '?{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}&mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=autoinstaller';
 		var domain = 'https://admin.doofinder.com/plugins/'+type+'/prestashop';
 		var winObj = popupCenter( domain+params, 'Doofinder', 400,  850);
-		
-		var loop = setInterval(function() {   
-			if(winObj.closed) {  
-				clearInterval(loop);
-				installingLoop();  
-			}  
-		}, 1000); 
-
 	}
 
-	function installingLoop(){
-		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
-			'check_api_key':1
-		}, function(data){
-			if(data == 'OK') {
-				$('.choose-installer').hide();
-				$('.loading-installer').show();
-				launchAutoinstaller();				
-			} else {
-				$('.message-popup').show();
-				setTimeout(function(){
-					$('.message-popup').hide();
-				} ,10000);
+	function initializeAutoinstallerMessages(){
+		$('.loading-installer').show();
+		var loop = setInterval(function() {
+			if(!$('.loading-installer ul li.active').is(":last-child")){
+				$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
+			}else{
+				clearInterval(loop);
 			}
-		});
-
-		
+		}, 4000);
 	}
 
 	function launchAutoinstaller(){
-		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+		$('.choose-installer').hide();
+		initializeAutoinstallerMessages()
+		
 		var token = '{$tokenAjax|escape:'htmlall':'UTF-8'}';
 		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
 			'autoinstaller':1,
 			'token':token
 		}, function(data){
 			if(data == 'OK') {
-				var loop = setInterval(function() {
-					$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
-					if($('.loading-installer ul li.active').index() < 0) {  
-						clearInterval(loop);
-						location.reload();
-					}  
-				}, 3000);
+				location.reload();
 			} else {
 				$('.message-error').show();
 			}
@@ -229,4 +209,54 @@ li.active{
 		if (window.focus) newWindow.focus();
 		return newWindow;
 	}
+
+	window.addEventListener(
+		"message",
+		(event) => {
+		  const doofinder_regex = /.*\.doofinder\.com/gm;
+		  //Check that the sender is doofinder
+		  if (!doofinder_regex.test(event.origin)) return;
+		  if (event.data) {
+			data = event.data.split("|");
+			event_name = data[0];
+			event_data = JSON.parse(atob(data[1]));
+			processMessage(event_name, event_data);
+		  }
+		},
+		false
+	  );
+	
+	  function processMessage(name, data) {
+		console.log("processMessage: " + name)
+		console.log(data)
+		if (name === "set_doofinder_data") send_connect_data(data);
+	  }
+	
+	  function send_connect_data(data) {
+		console.log("Received connection data:")
+		console.log(data)
+		$.ajax({
+		  type: "POST",
+		  dataType: 'json',
+		  url: shopDomain + '/modules/doofinder/config.php',
+		  data: data,
+		  success: function (response) {
+			if(response.success) {
+				launchAutoinstaller();	
+			} else {
+				showConnectionError()
+			}
+		  },
+		  error: function(data){
+			showConnectionError()
+		  }
+		});
+	  }
+
+	  function showConnectionError(){
+		$('.message-popup').show();
+		setTimeout(function(){
+			$('.message-popup').hide();
+		} ,10000);
+	  }
 </script>
