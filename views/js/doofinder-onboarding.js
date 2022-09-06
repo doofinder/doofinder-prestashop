@@ -115,7 +115,7 @@ function launchAutoinstaller() {
     token: installerToken,
   };
 
-  if (typeof shop_id != 'undefined') {
+  if (typeof shop_id != "undefined") {
     data["shop_id"] = shop_id;
   }
 
@@ -125,7 +125,7 @@ function launchAutoinstaller() {
     url: shopDomain + "/modules/doofinder/doofinder-ajax.php",
     data: data,
     success: function (data) {
-      if (data == "OK") {
+      if (data.success) {
         location.reload();
       } else {
         if (data.errors && data.errors.length > 0) {

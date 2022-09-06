@@ -2634,8 +2634,6 @@ class Doofinder extends Module
         $this->debug('Create Store Start');
         $this->debug(print_r($store_data, true));
 
-       // die($json_store_data);
-
         $response = $client->post(
             'https://' . $admin_endpoint . '/plugins/create-store',
             $json_store_data,
