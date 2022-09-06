@@ -48,7 +48,7 @@
 				<br/>
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_mac.png" />
 				<div class="col-md-12" style="margin-top:15px">
-					<a onclick="javascript:launchShopAutoinstaller()" href="#" class="btn btn-primary btn-lg btn-doofinder" id="create-store-btn">{l s='Create this shop in Doofinder' mod='doofinder'}</a>
+					<a onclick="javascript:showSectorSelector()" href="#" class="btn btn-primary btn-lg btn-doofinder" id="create-store-btn">{l s='Create this shop in Doofinder' mod='doofinder'}</a>
 				</div>
 			</div>
 			<div class="col-md-6 choose-installer">
@@ -78,6 +78,24 @@
 				</div>
 			</div>
 		</div>
+		<div id="choose-sector" class="row justify-content-md-center" style="display:none">
+			<div class="col-md-8 col-md-offset-2">
+				<h2 class="mb3">{l s='Select a sector' mod='doofinder'}</h2>
+				<form id="sector-form">
+					<div class="form-group">
+						<label for="exampleFormControlSelect1">{l s='Choose a sector for %s' sprintf=[$shop_data['name']] mod='doofinder'}</label>
+						<select required class="form-control sector-select"	id="sector-select-{$shop_data['id_shop']}" name="sector_shop[{$shop_id}]">
+							<option selected disabled value="">{l s=" - Choose a sector - " mod="doofinder"}</option>
+							{foreach from=$sectors item=sector key=clave}
+							<option value="{$clave}">{$sector}</option>
+							{/foreach}
+						</select>
+					</div>					
+					<button type="submit" class="btn btn-primary">{l s="Continue" mod="doofinder"}</button>
+					<input type="hidden" name="action" value="set_sector" />
+				</form>
+			</div>
+		</div>		
 		<hr />
 	</div>
 </div>
@@ -128,44 +146,9 @@ li.active{
     padding-left: 18px;
 }
 </style>
+
 <script type="text/javascript">
-	function launchShopAutoinstaller(){
-		$('.choose-installer').hide();
-		$('.loading-installer').show();
-
-		var loop = setInterval(function() {
-			$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
-			if($('.loading-installer ul li.active').index() < 0) {  
-				clearInterval(loop);				
-			}  
-		}, 3000);
-
-		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-		var token = '{$tokenAjax|escape:'htmlall':'UTF-8'}';
-		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
-			'autoinstaller':1,
-			'shop_id': {$shop_id|escape:'htmlall':'UTF-8'},
-			'token':token
-		}, function(data){
-			$('#installation-errors').empty();
-			clearInterval(loop);
-			if(data == 'OK') {				
-				location.reload();
-			} else {
-				$(".loading-installer").hide();
-				data = JSON.parse(data);
-				if(data.errors){
-					for (i in data.errors){
-						error = data.errors[i];
-						$('#installation-errors').append("<li>"+error+"</li>")
-					}
-				}
-				
-				$('.message-error').show();
-			}
-		})
-		.fail(function() {
-		    location.reload();
-		});
-	}
+	const shop_id = {$shop_id|escape:'htmlall':'UTF-8'};
+	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF - 8'}";
 </script>
+<script type="text/javascript" src="/modules/doofinder/views/js/doofinder-onboarding.js" ></script>

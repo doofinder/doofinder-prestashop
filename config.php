@@ -43,6 +43,16 @@ if ($autoinstallerToken) {
         exit($msgError);
     }
 }
+
+$action = Tools::getValue('action');
+if($action === 'set_sector'){
+    $sector_data = Tools::getValue('sector_shop');
+    $module->saveSectorData($sector_data);
+    echo json_encode(["success" => true]);
+    exit;
+}
+
+
 $languages = array();
 $configurations = array();
 $currencies = array_keys(dfTools::getAvailableCurrencies());

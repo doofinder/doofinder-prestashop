@@ -259,6 +259,25 @@ class Doofinder extends Module
         return $stop;
     }
 
+    public function getSectors()
+    {
+        $sectors = [
+            "parapharmacy"  => $this->l("Pharma & Cosmetics"),
+            "technology"    => $this->l("Tech Products & Electronics"),
+            "fashion"       => $this->l("Apparel & Accessories"),
+            "sport"         => $this->l("Sport & Fitness"),
+            "childcare"     => $this->l("Childcare"),
+            "pets"          => $this->l("Pets"),
+            "home"          => $this->l("Home & Garden"),
+            "food"          => $this->l("Food & Beverages"),
+            "toys"          => $this->l("Toys & Hobbies"),
+            "autos"         => $this->l("Auto Parts & Accessories"),
+            "leisure"       => $this->l("Leisure & Culture"),
+            "others"        => $this->l("Others")
+        ];
+        return $sectors;
+    }
+
     public function getContent()
     {
         $stop = $this->getWarningMultishopHtml();
@@ -282,27 +301,35 @@ class Doofinder extends Module
         $configured = $this->isConfigured();
         $is_new_shop = !$this->doofinderInShop(Context::getContext()->shop);
         $shop_id = Context::getContext()->shop->id;
+        $shops = Shop::getShops();
+        //Sort by shopid
+        usort($shops, function($a, $b) {
+            return $a['id_shop'] - $b['id_shop'];
+        });
+        $skip_url_params = [
+            "skip" => 1,
+            "configure" => $this->name,
+            "tab_module" => $this->tab,
+            "module_name" => $this->name
+        ];
+        $skipurl = $this->context->link->getAdminLink('AdminModules', true) . "?" . http_build_query($skip_url_params);
+        $redirect = $this->context->shop->getBaseURL(true, false) . $this->_path . 'config.php';
+        $token = Tools::encrypt($redirect);
+        $paramsPopup = 'email=' . $this->context->employee->email . '&token=' . $token;
+        $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
 
         $this->context->smarty->assign('oldPS', $oldPS);
         $this->context->smarty->assign('module_dir', $this->_path);
         $this->context->smarty->assign('configured', $configured);
         $this->context->smarty->assign('is_new_shop', $is_new_shop);
         $this->context->smarty->assign('shop_id', $shop_id);
-
-        $skipurl = $this->context->link->getAdminLink('AdminModules', true) . '&skip=1'
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $this->context->smarty->assign('skipurl', $skipurl);
-
-        $redirect = $this->context->shop->getBaseURL(true, false)
-            . $this->_path . 'config.php';
-        $token = Tools::encrypt($redirect);
-        $paramsPopup = 'email=' . $this->context->employee->email
-            . '&token=' . $token;
-        $this->context->smarty->assign('paramsPopup', $paramsPopup);
+        $this->context->smarty->assign('shop_data', (array)Context::getContext()->shop);
+        $this->context->smarty->assign('sectors', $this->getSectors());
+        $this->context->smarty->assign('shops', $shops);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
         $this->context->smarty->assign('tokenAjax', Tools::encrypt('doofinder-ajax'));
-
-        $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
+        $this->context->smarty->assign('skipurl', $skipurl);
+        $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('dfEnabledV9', $dfEnabledV9);
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
@@ -2510,6 +2537,18 @@ class Doofinder extends Module
         }
     }
 
+    public function saveSectorData($sectorData)
+    {
+        $shops = Shop::getShops();
+        foreach ($shops as $shop) {
+            $sid = $shop['id_shop'];
+            $sgid = $shop['id_shop_group'];
+            if (array_key_exists($sid, $sectorData)) {
+                Configuration::updateValue('DF_SECTOR', $sectorData[$sid], false, $sgid, $sid);
+            }
+        }
+    }
+
     public function autoinstaller($shop_id = NULL)
     {
         if (!empty($shop_id)) {
@@ -2548,7 +2587,7 @@ class Doofinder extends Module
             "platform" => "prestashop",
             "primary_language" => $primary_language_iso_code,
             "search_engines" => [],
-            "sector" => ""
+            "sector" => Configuration::get('DF_SECTOR', null, $shopGroupId,  $shopId)
         ];
 
         foreach ($languages as $lang) {
@@ -2587,6 +2626,8 @@ class Doofinder extends Module
         $json_store_data = json_encode($store_data);
         $this->debug('Create Store Start');
         $this->debug(print_r($store_data, true));
+
+       // die($json_store_data);
 
         $response = $client->post(
             'https://' . $admin_endpoint . '/plugins/create-store',
