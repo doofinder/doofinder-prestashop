@@ -84,14 +84,14 @@
 				<form id="sector-form">
 					<div class="form-group">
 						<label for="exampleFormControlSelect1">{l s='Choose a sector for %s' sprintf=[$shop_data['name']] mod='doofinder'}</label>
-						<select required class="form-control sector-select"	id="sector-select-{$shop_data['id_shop']}" name="sector_shop[{$shop_id}]">
-							<option selected disabled value="">{l s=" - Choose a sector - " mod="doofinder"}</option>
+						<select required class="form-control sector-select"	id="sector-select-{$shop_data['id_shop']|escape:'htmlall':'UTF-8'}" name="sector_shop[{$shop_id|escape:'htmlall':'UTF-8'}]">
+							<option selected disabled value="">{l s=' - Choose a sector - ' mod='doofinder'}</option>
 							{foreach from=$sectors item=sector key=clave}
-							<option value="{$clave}">{$sector}</option>
+							<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector|escape:'htmlall':'UTF-8'}</option>
 							{/foreach}
 						</select>
 					</div>					
-					<button type="submit" class="btn btn-primary">{l s="Continue" mod="doofinder"}</button>
+					<button type="submit" class="btn btn-primary">{l s='Continue' mod='doofinder'}</button>
 					<input type="hidden" name="action" value="set_sector" />
 				</form>
 			</div>

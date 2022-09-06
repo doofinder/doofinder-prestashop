@@ -116,21 +116,22 @@
 							<div class="form-group">
 								<label for="exampleFormControlSelect1">{l s='Choose a sector for %s' sprintf=[$shop['name']] mod='doofinder'}</label>
 								<select required class="form-control sector-select{if $is_first == 'true'} default-shop{/if}"
-									id="sector-select-{$shop['id_shop']}" name="sector_shop[{$shop['id_shop']}]">
-									<option selected disabled value="">{l s=" - Choose a sector - " mod="doofinder"}</option>
+									id="sector-select-{$shop['id_shop']|escape:'htmlall':'UTF-8'}" 
+									name="sector_shop[{$shop['id_shop']|escape:'htmlall':'UTF-8'}]">
+									<option selected disabled value="">{l s=' - Choose a sector - ' mod='doofinder'}</option>
 									{foreach from=$sectors item=sector key=clave}
 										<option value="{$clave}">{$sector}</option>
 									{/foreach}
 								</select>
 								{if $is_first == "true"}
 								<input type="checkbox" class="form-check-input" id="apply-to-all">
-								<label class="form-check-label" for="apply-to-all">Apply selection to all stores</label>
+								<label class="form-check-label" for="apply-to-all">{l s='Apply selection to all stores' mod='doofinder'}</label>
 								{/if}
 							</div>
 							{assign var="is_first" value="false"}
 						{/if}
 					{/foreach}
-					<button type="submit" class="btn btn-primary">{l s="Continue" mod="doofinder"}</button>
+					<button type="submit" class="btn btn-primary">{l s='Continue' mod='doofinder'}</button>
 					<input type="hidden" name="action" value="set_sector" />
 				</form>
 			</div>
