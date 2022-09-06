@@ -120,7 +120,7 @@
 									name="sector_shop[{$shop['id_shop']|escape:'htmlall':'UTF-8'}]">
 									<option selected disabled value="">{l s=' - Choose a sector - ' mod='doofinder'}</option>
 									{foreach from=$sectors item=sector key=clave}
-										<option value="{$clave}">{$sector}</option>
+										<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector|escape:'htmlall':'UTF-8'}</option>
 									{/foreach}
 								</select>
 								{if $is_first == "true"}
