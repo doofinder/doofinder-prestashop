@@ -114,13 +114,13 @@
 					{foreach from=$shops item=shop}
 						{if $shop["active"] == 1}
 							<div class="form-group">
-								<label for="exampleFormControlSelect1">{l s='Choose a sector for %s' sprintf=[$shop['name']] mod='doofinder'}</label>
+								<label>{l s='Choose a sector for %s' sprintf=[$shop['name']] mod='doofinder'}</label>
 								<select required class="form-control sector-select{if $is_first == 'true'} default-shop{/if}"
 									id="sector-select-{$shop['id_shop']|escape:'htmlall':'UTF-8'}" 
 									name="sector_shop[{$shop['id_shop']|escape:'htmlall':'UTF-8'}]">
 									<option selected disabled value="">{l s=' - Choose a sector - ' mod='doofinder'}</option>
 									{foreach from=$sectors item=sector_html key=clave}
-										<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector_html}</option>
+										<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector_html}{* HTML content, no escape necessary *}</option>
 									{/foreach}
 								</select>
 								{if $is_first == "true"}

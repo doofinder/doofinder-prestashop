@@ -83,11 +83,11 @@
 				<h2 class="mb3">{l s='Select a sector' mod='doofinder'}</h2>
 				<form id="sector-form">
 					<div class="form-group">
-						<label for="exampleFormControlSelect1">{l s='Choose a sector for %s' sprintf=[$shop_data['name']] mod='doofinder'}</label>
-						<select required class="form-control sector-select"	id="sector-select-{$shop_data['id_shop']|escape:'htmlall':'UTF-8'}" name="sector_shop[{$shop_id|escape:'htmlall':'UTF-8'}]">
+						<label>{l s='Choose a sector for %s' sprintf=[$shop_data['name']] mod='doofinder'}</label>
+						<select required class="form-control sector-select"	id="sector-select-{$shop_id|escape:'htmlall':'UTF-8'}" name="sector_shop[{$shop_id|escape:'htmlall':'UTF-8'}]">
 							<option selected disabled value="">{l s=' - Choose a sector - ' mod='doofinder'}</option>
 							{foreach from=$sectors item=sector_html key=clave}
-							<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector_html}</option>
+							<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector_html}{* HTML content, no escape necessary *}</option>
 							{/foreach}
 						</select>
 					</div>					
