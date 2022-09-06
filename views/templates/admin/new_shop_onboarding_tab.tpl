@@ -149,6 +149,6 @@ li.active{
 
 <script type="text/javascript">
 	const shop_id = {$shop_id|escape:'htmlall':'UTF-8'};
-	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF - 8'}";
+	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF-8'}";
 </script>
 <script type="text/javascript" src="/modules/doofinder/views/js/doofinder-onboarding.js" ></script>
