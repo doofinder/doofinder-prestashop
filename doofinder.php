@@ -533,7 +533,7 @@ class Doofinder extends Module
             'id_language' => $this->context->language->id,
         );
 
-        if ($this->showNewShopForm(Context::getContext()->shop)) {
+        if (!$this->showNewShopForm(Context::getContext()->shop)) {
             $html .= $helper->generateForm(array($this->getConfigFormDataFeed()));
 
             // Search layer form
