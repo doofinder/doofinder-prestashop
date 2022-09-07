@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -33,13 +32,12 @@ if ($autoinstallerToken) {
         $admin_endpoint = Tools::getValue('admin_endpoint');
         if ($apiToken) {
             $module->saveApiData($apiToken, $api_endpoint, $admin_endpoint);
-            echo json_encode(["success" => true]);
-            exit;
         }
+        exit('OK');
     } else {
         header('HTTP/1.1 403 Forbidden', true, 403);
         $msgError = 'Forbidden access.'
-            . ' Token for autoinstaller invalid.';
+                . ' Token for autoinstaller invalid.';
         exit($msgError);
     }
 }

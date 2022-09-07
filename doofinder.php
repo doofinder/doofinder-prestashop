@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.3.3';
+    const VERSION = '4.3.2';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.3.3';
+        $this->version = '4.3.2';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -297,7 +297,8 @@ class Doofinder extends Module
             . $this->_path . 'config.php';
         $token = Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $this->context->employee->email
-            . '&token=' . $token;
+            . '&token=' . $token
+            . '&return_path=' . urlencode($redirect);
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
         $this->context->smarty->assign('tokenAjax', Tools::encrypt('doofinder-ajax'));
