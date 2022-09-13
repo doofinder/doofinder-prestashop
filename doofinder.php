@@ -223,7 +223,8 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_FEATURES',
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
-            'DF_UPDATE_ON_SAVE_LAST_EXEC'
+            'DF_UPDATE_ON_SAVE_LAST_EXEC',
+            'DF_SECTOR'
         );
 
         $hashid_vars = array_column(
