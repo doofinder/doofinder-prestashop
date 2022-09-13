@@ -1475,7 +1475,7 @@ class Doofinder extends Module
 
     private function configureHookCommon($params = false)
     {
-        $lang = Tools::strtoupper($this->context->language->iso_code);
+        $lang = Tools::strtoupper($this->getLanguageCode($this->context->language->language_code));
         $currency = Tools::strtoupper($this->context->currency->iso_code);
         $search_engine_id = Configuration::get('DF_HASHID_' . $currency . '_' . $lang);
         $df_region = Configuration::get('DF_REGION');
@@ -2712,8 +2712,8 @@ class Doofinder extends Module
         $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
-        $primary_lang_id = Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId);
-        $primary_language_iso_code = Language::getIsoById($primary_lang_id);
+        $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
+        $primary_language_iso_code = $this->getLanguageCode($primary_lang->language_code);
         $installationID = null;
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
@@ -2728,7 +2728,7 @@ class Doofinder extends Module
         ];
 
         foreach ($languages as $lang) {
-            $liso = $lang['iso_code'];
+            $liso = $this->getLanguageCode($lang['language_code']);
             foreach ($currencies as $cur) {
                 $ciso =  $cur['iso_code'];
                 $feed_url = $this->buildFeedUrl($shopId, $liso, $ciso);
@@ -2921,6 +2921,13 @@ class Doofinder extends Module
             '
             SELECT `iso_code` FROM ' . _DB_PREFIX_ . 'currency WHERE `id_currency` = ' . (int) $id
         );
+    }
+
+    protected function getLanguageCode($code){
+        // $code is in the form of 'xx-YY' where xx is the language code
+        // and 'YY' a country code identifying a variant of the language.
+        $lang_country = explode('-', $code);
+        return $lang_country[0];
     }
 
     protected function updateSector()
