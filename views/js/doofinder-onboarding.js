@@ -19,42 +19,6 @@ const shopDomain =
   (location.port ? ":" + location.port : "");
 
 $(document).ready(function () {
-  $("#apply-to-all").on("change", function () {
-    if ($(this).is(":checked")) {
-      set_default_value();
-    } else {
-      $(".sector-select")
-        .not(".default-shop")
-        .find('option[value=""]')
-        .prop("selected", true);
-    }
-  });
-
-  $(".sector-select.default-shop").on("change", function () {
-    if ($("#apply-to-all").is(":checked")) {
-      set_default_value();
-    }
-  });
-
-  $("#sector-form").submit(function (event) {
-    event.preventDefault();
-    let formData = $(this).serializeArray();
-    $.ajax({
-      type: "POST",
-      url: shopDomain + "/modules/doofinder/config.php",
-      data: formData,
-      dataType: "json",
-      success: function (response) {
-        console.log(response);
-        if (response.success) {
-          launchAutoinstaller();
-        } else {
-          alert("An error ocurred while saving the sector");
-        }
-      },
-    });
-  });
-
   window.addEventListener(
     "message",
     (event) => {
@@ -72,17 +36,6 @@ $(document).ready(function () {
   );
 });
 
-function showSectorSelector() {
-  $(".choose-installer").hide();
-  $("#choose-sector").show();
-}
-
-function set_default_value() {
-  let value = $(".default-shop").val();
-  console.log("Selected value = " + value);
-  $(".sector-select").not(".default-shop").val(value).change();
-}
-
 function popupDoofinder(type) {
   var params =
     "?" +
@@ -93,6 +46,7 @@ function popupDoofinder(type) {
 }
 
 function initializeAutoinstallerMessages() {
+  $(".choose-installer").hide();
   $(".loading-installer").show();
   var loop = setInterval(function () {
     if (!$(".loading-installer ul li.active").is(":last-child")) {
@@ -199,7 +153,7 @@ function send_connect_data(data) {
     data: data,
     success: function (response) {
       if (response.success) {
-        showSectorSelector();
+        launchAutoinstaller();
       } else {
         showConnectionError();
       }
@@ -218,5 +172,6 @@ function showConnectionError() {
 }
 
 function showErrorMessage() {
+  $(".loading-installer").hide();
   $(".message-error").show();
 }

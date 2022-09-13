@@ -57,6 +57,11 @@
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" />
 				<br />
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_mac.png" />
+				{if $is_new_shop}
+				<div class="col-md-12" style="margin-top:15px">
+					<a onclick="javascript:launchAutoinstaller()" href="#" class="btn btn-primary btn-lg btn-doofinder" id="create-store-btn">{l s='Create this shop in Doofinder' mod='doofinder'}</a>
+				</div>
+				{else}
 				<div class="col-md-12">
 					<a onclick="javascript:popupDoofinder('signup')" href="#"
 						class="btn btn-primary btn-lg btn-doofinder" id="create-account-btn">{l s='Use your free trial
@@ -67,6 +72,7 @@
 						class="btn btn-primary btn-lg btn-doofinder" id="login-account-btn">{l s='I have an account'
 						mod='doofinder'}</a>
 				</div>
+				{/if}
 			</div>
 			<div class="col-md-6 choose-installer">
 				<div class="col-md-8">
@@ -106,37 +112,6 @@
 				</div>
 			</div>
 		</div>
-		<div id="choose-sector" class="row justify-content-md-center" style="display:none">
-			<div class="col-md-8 col-md-offset-2">
-				<h2 class="mb3">{l s='Select a sector for each store' mod='doofinder'}</h2>
-				<form id="sector-form">
-					{assign var="is_first" value="true"}
-					{foreach from=$shops item=shop}
-						{if $shop["active"] == 1}
-							<div class="form-group">
-								<label>{l s='Choose a sector for %s' sprintf=[$shop['name']] mod='doofinder'}</label>
-								<select required class="form-control sector-select{if $is_first == 'true'} default-shop{/if}"
-									id="sector-select-{$shop['id_shop']|escape:'htmlall':'UTF-8'}" 
-									name="sector_shop[{$shop['id_shop']|escape:'htmlall':'UTF-8'}]">
-									<option selected disabled value="">{l s=' - Choose a sector - ' mod='doofinder'}</option>
-									{foreach from=$sectors item=sector_html key=clave}
-										<option value="{$clave|escape:'htmlall':'UTF-8'}">{$sector_html}{* HTML content, no escape necessary *}</option>
-									{/foreach}
-								</select>
-								{if $is_first == "true"}
-								<input type="checkbox" class="form-check-input" id="apply-to-all">
-								<label class="form-check-label" for="apply-to-all">{l s='Apply selection to all stores' mod='doofinder'}</label>
-								{/if}
-							</div>
-							{assign var="is_first" value="false"}
-						{/if}
-					{/foreach}
-					<button type="submit" class="btn btn-primary">{l s='Continue' mod='doofinder'}</button>
-					<input type="hidden" name="action" value="set_sector" />
-				</form>
-			</div>
-		</div>
-		<hr />
 	</div>
 </div>
 <style type="text/css">
@@ -173,13 +148,13 @@
 		border-radius: 50px !important;
 	}
 
-	#create-account-btn {
+	#create-account-btn, #create-store-btn {
 		color: #1b1851;
 		background-color: #fff031;
 		border-color: #fff031;
 	}
 
-	#create-account-btn:hover {
+	#create-account-btn:hover, #create-store-btn:hover{
 		color: #fff031;
 		background-color: #1b1851;
 		border-color: #1b1851;
@@ -198,8 +173,10 @@
 	}
 </style>
 <script type="text/javascript" src="/modules/doofinder/views/js/doofinder-onboarding.js" ></script>
-
 <script type="text/javascript">
 	const paramsPopup = "{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}";
 	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF-8'}";
+	{if $shop_id}
+	const shop_id = {$shop_id|escape:'htmlall':'UTF-8'};
+	{/if}
 </script>
