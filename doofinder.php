@@ -369,11 +369,7 @@ class Doofinder extends Module
 
     protected function isSectorConfigured($shop_id)
     {
-        $shops = Shop::getShops();
-        usort($shops, function ($a, $b) {
-            return $a['id_shop'] - $b['id_shop'];
-        });
-
+        $shops = $this->getSortedShops();
         foreach ($shops as $key => $shop) {
             if (!empty($shop_id) && $shop_id !=  $shop["id_shop"]) {
                 continue;
