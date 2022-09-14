@@ -734,7 +734,8 @@ class Doofinder extends Module
                 'name' => $sector_name
             ];
         }
-        $first = true;
+        //Show the apply to all checkbox only when stores are more than one
+        $first = count($shops) > 1;
         foreach ($shops as $key => $shop) {
             if (!is_null($shop_id) && $shop_id !=  $shop["id_shop"]) {
                 continue;
