@@ -80,7 +80,8 @@ function launchAutoinstaller() {
     data: data,
     success: function (data) {
       if (data.success) {
-        location.reload();
+        //reload without resending post data
+        history.go(0);
       } else {
         if (data.errors && data.errors.length > 0) {
           $(".loading-installer").hide();
