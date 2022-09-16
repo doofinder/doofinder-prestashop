@@ -223,8 +223,7 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_FEATURES',
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
-            'DF_UPDATE_ON_SAVE_LAST_EXEC',
-            'DF_SECTOR'
+            'DF_UPDATE_ON_SAVE_LAST_EXEC'
         );
 
         $hashid_vars = array_column(
@@ -1215,11 +1214,6 @@ class Doofinder extends Module
             $formUpdated = 'custom_css_tab';
         }
 
-        if (((bool) Tools::isSubmit('submitDoofinderModuleSectors')) == true) {
-            $form_values = array_merge($form_values, $this->getConfigFormValuesSectors());
-            $formUpdated = 'onboarding_tab';
-        }
-
         if (((bool) Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesAdvanced());
             $formUpdated = 'advanced_tab';
@@ -1249,12 +1243,7 @@ class Doofinder extends Module
                 $html = true;
                 $value = str_replace('type="text/javascript"', '', $value);
             }
-
-            if (strpos($postKey, 'DF_SECTOR') >= 0) {
-                $this->updateSector();
-            } else {
-                Configuration::updateValue($postKey, $value, $html);
-            }
+            Configuration::updateValue($postKey, $value, $html);
         }
 
         $ovrSearch = Configuration::get('DF_OWSEARCH');
@@ -2780,13 +2769,4 @@ class Doofinder extends Module
         return $lang_country[0];
     }
 
-    protected function updateSector()
-    {
-        $value = Tools::getValue('DF_SECTOR');
-        foreach ($value as $shop_group_id => $sector_values) {
-            foreach ($sector_values as $shop_id => $sector_value) {
-                Configuration::updateValue('DF_SECTOR', $sector_value, null, $shop_group_id, $shop_id);
-            }
-        }
-    }
 }

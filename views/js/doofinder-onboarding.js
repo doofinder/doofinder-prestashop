@@ -61,7 +61,6 @@ function initializeAutoinstallerMessages() {
 }
 
 function launchAutoinstaller() {
-  $("#choose-sector").hide();
   $("#installation-errors").empty();
   initializeAutoinstallerMessages();
   let data = {

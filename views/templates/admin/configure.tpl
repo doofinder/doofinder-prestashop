@@ -28,7 +28,6 @@
 </script>
 {/if}
 
-<script type="text/javascript" src="/modules/doofinder/views/js/doofinder-configure.js" ></script>
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist">
