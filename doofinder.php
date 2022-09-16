@@ -563,9 +563,6 @@ class Doofinder extends Module
         $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
         $apikey = Configuration::get('DF_AI_APIKEY');
 
-        echo "Installation_id $installation_id <br>";
-        echo "Multishop enabled $multishop_enable <br>";
-        echo "Api key $apikey <br>";
         if (!$installation_id && $multishop_enable && $apikey) {
             return true;
         }
