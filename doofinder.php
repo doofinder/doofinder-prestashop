@@ -260,25 +260,6 @@ class Doofinder extends Module
         return $stop;
     }
 
-    public function getSectors()
-    {
-        $sectors = [
-            "parapharmacy"  => $this->l("Pharma & Cosmetics"),
-            "technology"    => $this->l("Tech Products & Electronics"),
-            "fashion"       => $this->l("Apparel & Accessories"),
-            "sport"         => $this->l("Sport & Fitness"),
-            "childcare"     => $this->l("Childcare"),
-            "pets"          => $this->l("Pets"),
-            "home"          => $this->l("Home & Garden"),
-            "food"          => $this->l("Food & Beverages"),
-            "toys"          => $this->l("Toys & Hobbies"),
-            "autos"         => $this->l("Auto Parts & Accessories"),
-            "leisure"       => $this->l("Leisure & Culture"),
-            "others"        => $this->l("Others")
-        ];
-        return $sectors;
-    }
-
     public function getContent()
     {
         $stop = $this->getWarningMultishopHtml();
@@ -317,7 +298,6 @@ class Doofinder extends Module
         $token = Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $this->context->employee->email . '&token=' . $token;
         $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
-        $is_sector_configured = $this->isSectorConfigured($shop_id);
 
         $this->context->smarty->assign('oldPS', $oldPS);
         $this->context->smarty->assign('module_dir', $this->_path);
@@ -329,7 +309,6 @@ class Doofinder extends Module
         $this->context->smarty->assign('skipurl', $skipurl);
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('dfEnabledV9', $dfEnabledV9);
-        $this->context->smarty->assign('is_sector_configured', $is_sector_configured);
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
@@ -344,10 +323,6 @@ class Doofinder extends Module
             $adv_url = $this->context->link->getAdminLink('AdminModules', true) . '&adv=1'
                 . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
             $this->context->smarty->assign('adv_url', $adv_url);
-        }
-
-        if (!$is_sector_configured) {
-            $output .= $this->renderFormSectors($adv, $shop_id);
         }
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_footer.tpl');
@@ -365,21 +340,6 @@ class Doofinder extends Module
         }
         $sql = 'SELECT id_configuration FROM ' . _DB_PREFIX_ . 'configuration WHERE name = \'DF_ENABLE_HASH\'';
         return Db::getInstance()->getValue($sql);
-    }
-
-    protected function isSectorConfigured($shop_id)
-    {
-        $shops = $this->getSortedShops();
-        foreach ($shops as $key => $shop) {
-            if (!empty($shop_id) && $shop_id !=  $shop["id_shop"]) {
-                continue;
-            }
-            $sector = Configuration::get('DF_SECTOR', null, $shop["id_shop_group"], $shop["id_shop"], FALSE);
-            if (!$sector) {
-                return FALSE;
-            }
-        }
-        return TRUE;
     }
 
     protected function renderFeedURLs()
@@ -604,6 +564,9 @@ class Doofinder extends Module
         $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
         $apikey = Configuration::get('DF_AI_APIKEY');
 
+        echo "Installation_id $installation_id <br>";
+        echo "Multishop enabled $multishop_enable <br>";
+        echo "Api key $apikey <br>";
         if (!$installation_id && $multishop_enable && $apikey) {
             return true;
         }
@@ -633,36 +596,6 @@ class Doofinder extends Module
             'id_language' => $this->context->language->id,
         );
         return $helper->generateForm(array($this->getConfigFormEmbeddedSearch()));
-    }
-
-    protected function renderFormSectors($adv = false, $shop_id = NULL)
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        //$helper->submit_action = 'submitDoofinderModuleCustomCSS';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            . (($adv) ? '&adv=1' : '')
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValuesSectors(),
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-
-        $this->context->smarty->assign('id_tab', 'onboarding_tab');
-        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
-        $html .= $helper->generateForm(array($this->getConfigFormSectors($shop_id)));
-        $html .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
-        return $html;
     }
 
     protected function getBooleanFormValue()
@@ -722,68 +655,6 @@ class Doofinder extends Module
                 ),
             ),
         );
-    }
-
-    protected function getConfigFormSectors($shop_id)
-    {
-        $shops = $this->getSortedShops();
-        $inputs = $options = [];
-        foreach ($this->getSectors() as $key => $sector_name) {
-            $options[] = [
-                'id_option' => $key,
-                'name' => $sector_name
-            ];
-        }
-        //Show the apply to all checkbox only when stores are more than one
-        $first = count($shops) > 1;
-        foreach ($shops as $key => $shop) {
-            if (!is_null($shop_id) && $shop_id !=  $shop["id_shop"]) {
-                continue;
-            }
-            $default_value = Configuration::get('DF_SECTOR', null, $shop["id_shop_group"], $shop["id_shop"], '');
-            $desc = '';
-            $class = 'sector-select';
-            if ($first && $shop_id === NULL) {
-                $class .= ' default-shop';
-                $desc = '<label><input type="checkbox" class="apply-to-all" style="margin-right: 10px;">' . $this->l("Apply selection to all stores") . '</label>';
-                $first = false;
-            }
-
-            $inputs[] = [
-                'type' => 'select',
-                'label' => sprintf($this->l('Choose a sector for %s'), $shop["name"]),
-                'id' => 'sector-shop-' . $shop["id_shop"],
-                'name' => 'DF_SECTOR[' . $shop["id_shop_group"] . '][' . $shop["id_shop"] . ']',
-                'default_value' => $default_value,
-                'options' => array(
-                    'query' => $options,
-                    'id' => 'id_option',
-                    'name' => 'name',
-                    'default' => array(
-                        'value' => '',
-                        'label' => $this->l(" -- Select an option -- ")
-                    )
-                ),
-                'class' => $class,
-                'desc' => $desc,
-                'required' => true
-            ];
-        }
-
-        $config = array(
-            'form' => array(
-                'legend' => array(
-                    'title' => $this->l('Select your business sectors'),
-                    'icon' => 'icon-cogs',
-                ),
-                'input' => $inputs,
-                'submit' => array(
-                    'title' => $this->l('Save'),
-                    'name' => 'submitDoofinderModuleSectors'
-                ),
-            ),
-        );
-        return $config;
     }
 
     protected function getConfigFormSearchLayer()
@@ -1273,25 +1144,6 @@ class Doofinder extends Module
         );
 
         return $fields;
-    }
-
-    protected function getConfigFormValuesSectors()
-    {
-        $fields = [];
-        foreach ($this->getSortedShops() as $shop) {
-            $field_name = 'DF_SECTOR[' . $shop['id_shop_group'] . '][' . $shop['id_shop'] . ']';
-            $fields[$field_name] =  Configuration::get('DF_SECTOR', null, $shop['id_shop_group'], $shop['id_shop'], '');
-        }
-        return $fields;
-    }
-
-    protected function getSortedShops()
-    {
-        $shops = Shop::getShops();
-        usort($shops, function ($a, $b) {
-            return $a['id_shop'] - $b['id_shop'];
-        });
-        return $shops;
     }
 
     protected function postProcess()
@@ -2722,7 +2574,7 @@ class Doofinder extends Module
             "platform" => "prestashop",
             "primary_language" => $primary_language_iso_code,
             "search_engines" => [],
-            "sector" => Configuration::get('DF_SECTOR', null, $shopGroupId,  $shopId)
+            "sector" => ""
         ];
 
         foreach ($languages as $lang) {

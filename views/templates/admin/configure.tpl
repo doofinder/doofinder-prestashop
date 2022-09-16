@@ -49,6 +49,6 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-    {if $is_sector_configured && !$configured || $is_new_shop}
+    {if !$configured || $is_new_shop}
         <div class="tab-pane active" id="onboarding_tab">{include file='./onboarding_tab.tpl'}</div>
     {/if}
