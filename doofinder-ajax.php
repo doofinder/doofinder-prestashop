@@ -28,12 +28,14 @@ if ($check_api_key) {
 $autoinstaller = Tools::getValue('autoinstaller');
 $shop_id =  Tools::getValue('shop_id', NULL);
 if ($autoinstaller) {
+    header("Content-Type:application/json; charset=utf-8");
     if (Tools::getValue('token') == Tools::encrypt('doofinder-ajax')) {
-        $doofinder->autoinstaller($shop_id );
-        die('OK');
+        $doofinder->autoinstaller($shop_id);
+        echo json_encode(['success' => TRUE]);
+        exit();
     } else {
         $msgError = 'Forbidden access.'
-                . ' Token for autoinstaller invalid.';
+            . ' Token for autoinstaller invalid.';
         die($msgError);
     }
 }
