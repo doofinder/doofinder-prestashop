@@ -24,16 +24,11 @@
 				{/if}
 				</p>
 			</div>
-			<div class="bootstrap message-popup" style="display:none;">
-				<div class="module_warning alert alert-warning" >
-					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					{l s='You don\'t receive the Api Key or you close too quickly the popup window. Please try again. If you think this is an error, please contact our support or try the module manual configuration option.' mod='doofinder'}
-				</div>
-			</div>
 			<div class="bootstrap message-error" style="display:none;">
 				<div class="module_warning alert alert-danger" >
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
 					{l s='An error occurred during the installation process. Please contact our support team on' mod='doofinder'} support@doofinder.com
+					<ul id="installation-errors"></ul>
 				</div>
 			</div>
 			<div class="col-12 text-center loading-installer" style="display:none;">
@@ -52,11 +47,8 @@
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" />
 				<br/>
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_mac.png" />
-				<div class="col-md-12">
-					<a onclick="javascript:popupDoofinder('signup')" href="#" class="btn btn-primary btn-lg btn-doofinder" id="create-account-btn">{l s='Use your free trial now!' mod='doofinder'}</a>
-				</div>
 				<div class="col-md-12" style="margin-top:15px">
-					<a onclick="javascript:popupDoofinder('login')" href="#" class="btn btn-primary btn-lg btn-doofinder" id="login-account-btn">{l s='I have an account' mod='doofinder'}</a>
+					<a onclick="javascript:launchShopAutoinstaller()" href="#" class="btn btn-primary btn-lg btn-doofinder" id="create-store-btn">{l s='Create this shop in Doofinder' mod='doofinder'}</a>
 				</div>
 			</div>
 			<div class="col-md-6 choose-installer">
@@ -83,10 +75,6 @@
 				</dl>
 				<br />
 				<p>{l s='More than 5000 e-commerce sites over 35 countries are already using it' mod='doofinder'}.</p>
-				<br />
-				<p>{l s='What are you waiting for?' mod='doofinder'}</p>
-				<br />
-				<p><a onclick="javascript:popupDoofinder('signup')" href="#">{l s='Test our solution for 30 days, for free!' mod='doofinder'}</a></p>
 				</div>
 			</div>
 		</div>
@@ -122,111 +110,62 @@ li.active{
     white-space: normal!important;
 	border-radius: 50px!important;
 }
-#create-account-btn{
+#create-store-btn{
     color: #1b1851;
     background-color: #fff031;
     border-color: #fff031;
 }
-#create-account-btn:hover{
+#create-store-btn:hover{
     color: #fff031;
     background-color: #1b1851;
     border-color: #1b1851;
 }
-#login-account-btn{
-	color: #ffffff;
-    background-color: #4842c1;
-	border-color: #4842c1;
+
+#module_form{
+	display:none;
 }
-#login-account-btn:hover{
-	color: #fff031;
-    background-color: #1b1851;
-	border-color: #1b1851;
+#installation-errors {
+    padding-left: 18px;
 }
 </style>
 <script type="text/javascript">
-	function popupDoofinder(type){
-		var params = '?{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}&mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=autoinstaller';
-		var domain = 'https://admin.doofinder.com/plugins/'+type+'/prestashop';
-		var winObj = popupCenter( domain+params, 'Doofinder', 400,  850);
-		
-		var loop = setInterval(function() {   
-			if(winObj.closed) {  
-				clearInterval(loop);
-				installingLoop();  
+	function launchShopAutoinstaller(){
+		$('.choose-installer').hide();
+		$('.loading-installer').show();
+
+		var loop = setInterval(function() {
+			$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
+			if($('.loading-installer ul li.active').index() < 0) {  
+				clearInterval(loop);				
 			}  
-		}, 1000); 
+		}, 3000);
 
-	}
-
-	function installingLoop(){
-		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
-		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
-			'check_api_key':1
-		}, function(data){
-			if(data == 'OK') {
-				$('.choose-installer').hide();
-				$('.loading-installer').show();
-				launchAutoinstaller();				
-			} else {
-				$('.message-popup').show();
-				setTimeout(function(){
-					$('.message-popup').hide();
-				} ,10000);
-			}
-		});
-
-		
-	}
-
-	function launchAutoinstaller(){
 		var shopDomain = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
 		var token = '{$tokenAjax|escape:'htmlall':'UTF-8'}';
 		$.post(shopDomain+'/modules/doofinder/doofinder-ajax.php', {
 			'autoinstaller':1,
+			'shop_id': {$shop_id|escape:'htmlall':'UTF-8'},
 			'token':token
 		}, function(data){
-			if(data == 'OK') {
-				var loop = setInterval(function() {
-					$('.loading-installer ul li.active').removeClass('active').next().addClass('active');  
-					if($('.loading-installer ul li.active').index() < 0) {  
-						clearInterval(loop);
-						location.reload();
-					}  
-				}, 3000);
+			$('#installation-errors').empty();
+			clearInterval(loop);
+			if(data == 'OK') {				
+				location.reload();
 			} else {
+				$(".loading-installer").hide();
+				data = JSON.parse(data);
+				if(data.errors){
+					for (i in data.errors){
+						error = data.errors[i];
+						$('#installation-errors').append("<li>"+error+"</li>")
+					}
+				}
+				
 				$('.message-error').show();
 			}
 		})
 		.fail(function() {
 		    location.reload();
 		});
-	}
-
-	function popupCenter(url, title, w, h){
-		const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
-		const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
-
-		const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-		const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-
-		const systemZoom = width / window.screen.availWidth;
-		const left = (width - w) / 2 / systemZoom + dualScreenLeft
-		const top = (height - h) / 2 / systemZoom + dualScreenTop
-		{literal}
-		const newWindow = window.open(url, title, 
-		`
-		scrollbars=yes,
-		width=${w / systemZoom}, 
-		height=${h / systemZoom}, 
-		top=${top}, 
-		left=${left},
-		status=0,
-		toolbar=0,
-		location=0
-		`
-		)
-		{/literal}
-		if (window.focus) newWindow.focus();
-		return newWindow;
 	}
 </script>
