@@ -1132,7 +1132,8 @@ class DfTools
         return str_replace("\\/", "/", html_entity_decode(json_encode($data)));
     }
 
-    public static function escapeSlashes($string){
+    public static function escapeSlashes($string)
+    {
         return $string = str_replace("/", "//", $string);
     }
 }
