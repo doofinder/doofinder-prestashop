@@ -442,7 +442,7 @@ class DfTools
         pl.meta_title,
         pl.meta_keywords,
         pl.meta_description,
-        GROUP_CONCAT(tag.name SEPARATOR '/') AS tags,
+        GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
         pl.link_rewrite,
         cl.link_rewrite AS cat_link_rew,
         im.id_image,
@@ -504,7 +504,7 @@ class DfTools
         pl.meta_title,
         pl.meta_keywords,
         pl.meta_description,
-        GROUP_CONCAT(tag.name SEPARATOR '/') AS tags,
+        GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
         pl.link_rewrite,
         cl.link_rewrite AS cat_link_rew,
         im.id_image,
@@ -1130,5 +1130,10 @@ class DfTools
     {
         array_walk_recursive($data, array(get_class(), 'walkApplyHtmlEntities'));
         return str_replace("\\/", "/", html_entity_decode(json_encode($data)));
+    }
+
+    public static function escapeSlashes($string)
+    {
+        return $string = str_replace("/", "//", $string);
     }
 }

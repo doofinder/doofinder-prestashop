@@ -461,8 +461,8 @@ foreach ($rows as $row) {
         echo dfTools::splitReferences($product_title) . TXT_SEPARATOR;
 
         // TAGS
-        echo dfTools::cleanString($row['tags']);
-
+        echo str_replace(",", "/", dfTools::cleanString(dfTools::escapeSlashes($row['tags'])));
+        
         //ISBN
         if (dfTools::versionGte('1.7.0.0')) {
             echo TXT_SEPARATOR;
