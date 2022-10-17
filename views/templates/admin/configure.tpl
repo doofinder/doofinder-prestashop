@@ -27,13 +27,15 @@
     });
 </script>
 {/if}
+
+
 <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist">
     {if !$configured}
     <li class="active"><a href="#onboarding_tab" role="tab" data-toggle="tab">{l s='On Boarding' mod='doofinder'}</a></li>
     {else}
     <li class="active"><a href="#data_feed_tab" role="tab" data-toggle="tab">{l s='Data Feed' mod='doofinder'}</a></li>
-    {if !$dfEnabledV9}
+    {if !$dfEnabledV9 && !$is_new_shop}
         <li><a href="#internal_search_tab" role="tab" data-toggle="tab">{l s='Internal Search' mod='doofinder'}</a></li>
         <li><a href="#custom_css_tab" role="tab" data-toggle="tab">{l s='Custom CSS' mod='doofinder'}</a></li>
     {/if}
@@ -46,8 +48,6 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-    {if !$configured}
-    <div class="tab-pane active" id="onboarding_tab">{include file='./onboarding_tab.tpl'}</div>
-    {elseif $is_new_shop}
-    <div class="tab-pane active" id="onboarding_tab">{include file='./new_shop_onboarding_tab.tpl'}</div>
+    {if !$configured || $is_new_shop}
+        <div class="tab-pane active" id="onboarding_tab">{include file='./onboarding_tab.tpl'}</div>
     {/if}
