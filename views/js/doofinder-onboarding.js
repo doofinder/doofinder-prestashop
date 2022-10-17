@@ -63,41 +63,32 @@ function initializeAutoinstallerMessages() {
 function launchAutoinstaller() {
   $("#installation-errors").empty();
   initializeAutoinstallerMessages();
-  let data = {
+  let post_data = {
     autoinstaller: 1,
     token: installerToken,
   };
 
   if (typeof shop_id != "undefined") {
-    data["shop_id"] = shop_id;
+    post_data["shop_id"] = shop_id;
   }
 
-  $.post({
-    type: "POST",
-    dataType: "json",
-    url: shopDomain + "/modules/doofinder/doofinder-ajax.php",
-    data: data,
-    success: function (data) {
-      if (data.success) {
-        //reload without resending post data
-        history.go(0);
-      } else {
-        if (data.errors && data.errors.length > 0) {
-          $(".loading-installer").hide();
-          for (const error in data.errors) {
-            if (Object.hasOwnProperty.call(data.errors, error)) {
-              $("#installation-errors").append(
-                "<li>" + data.errors[error] + "</li>"
-              );
-            }
+  $.post(shopDomain + "/modules/doofinder/doofinder-ajax.php", post_data, function (data) {
+    if (data.success) {
+      //reload without resending post data
+      history.go(0);
+    } else {
+      if (data.errors && data.errors.length > 0) {
+        $(".loading-installer").hide();
+        for (const error in data.errors) {
+          if (Object.hasOwnProperty.call(data.errors, error)) {
+            $("#installation-errors").append(
+              "<li>" + data.errors[error] + "</li>"
+            );
           }
         }
-        showErrorMessage();
       }
-    },
-    error: function () {
       showErrorMessage();
-    },
+    }
   });
 }
 
