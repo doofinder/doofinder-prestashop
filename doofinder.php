@@ -46,7 +46,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.3.7';
+    const VERSION = '4.3.8';
     const YES = 1;
     const NO = 0;
 
@@ -54,7 +54,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.3.7';
+        $this->version = '4.3.8';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.7');
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -281,29 +281,32 @@ class Doofinder extends Module
         }
         $configured = $this->isConfigured();
         $is_new_shop = $this->showNewShopForm(Context::getContext()->shop);
-        $shop_id = Context::getContext()->shop->id;
+        $shop_id = NULL;
+        if ($is_new_shop) {
+            $shop_id = Context::getContext()->shop->id;
+        }
+
+        $skip_url_params = [
+            "skip" => 1,
+            "configure" => $this->name,
+            "tab_module" => $this->tab,
+            "module_name" => $this->name
+        ];
+        $skipurl = $this->context->link->getAdminLink('AdminModules', true) . "?" . http_build_query($skip_url_params);
+        $redirect = $this->context->shop->getBaseURL(true, false) . $this->_path . 'config.php';
+        $token = Tools::encrypt($redirect);
+        $paramsPopup = 'email=' . $this->context->employee->email . '&token=' . $token;
+        $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
 
         $this->context->smarty->assign('oldPS', $oldPS);
         $this->context->smarty->assign('module_dir', $this->_path);
         $this->context->smarty->assign('configured', $configured);
         $this->context->smarty->assign('is_new_shop', $is_new_shop);
         $this->context->smarty->assign('shop_id', $shop_id);
-
-        $skipurl = $this->context->link->getAdminLink('AdminModules', true) . '&skip=1'
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $this->context->smarty->assign('skipurl', $skipurl);
-
-        $redirect = $this->context->shop->getBaseURL(true, false)
-            . $this->_path . 'config.php';
-        $token = Tools::encrypt($redirect);
-        $paramsPopup = 'email=' . $this->context->employee->email
-            . '&token=' . $token
-            . '&return_path=' . urlencode($redirect);
-        $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
         $this->context->smarty->assign('tokenAjax', Tools::encrypt('doofinder-ajax'));
-
-        $dfEnabledV9 = Configuration::get('DF_ENABLED_V9');
+        $this->context->smarty->assign('skipurl', $skipurl);
+        $this->context->smarty->assign('paramsPopup', $paramsPopup);
         $this->context->smarty->assign('dfEnabledV9', $dfEnabledV9);
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
@@ -560,7 +563,7 @@ class Doofinder extends Module
         $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
         $apikey = Configuration::get('DF_AI_APIKEY');
 
-        if(!$installation_id && $multishop_enable && $apikey){
+        if (!$installation_id && $multishop_enable && $apikey) {
             return true;
         }
 
@@ -1207,6 +1210,7 @@ class Doofinder extends Module
             $form_values = array_merge($form_values, $this->getConfigFormValuesCustomCSS());
             $formUpdated = 'custom_css_tab';
         }
+
         if (((bool) Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesAdvanced());
             $formUpdated = 'advanced_tab';
@@ -1307,7 +1311,7 @@ class Doofinder extends Module
 
     private function configureHookCommon($params = false)
     {
-        $lang = Tools::strtoupper($this->context->language->language_code);
+        $lang = Tools::strtoupper($this->getLanguageCode($this->context->language->language_code));
         $currency = Tools::strtoupper($this->context->currency->iso_code);
         $search_engine_id = Configuration::get('DF_HASHID_' . $currency . '_' . $lang);
         $df_region = Configuration::get('DF_REGION');
@@ -2545,6 +2549,7 @@ class Doofinder extends Module
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
+        $primary_language_iso_code = $this->getLanguageCode($primary_lang->language_code);
         $installationID = null;
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
@@ -2553,18 +2558,19 @@ class Doofinder extends Module
         $store_data = [
             "name" => $shop['name'],
             "platform" => "prestashop",
-            "primary_language" => $primary_lang->language_code,
+            "primary_language" => $primary_language_iso_code,
             "search_engines" => [],
             "sector" => ""
         ];
 
         foreach ($languages as $lang) {
+            $liso = $this->getLanguageCode($lang['language_code']);
             foreach ($currencies as $cur) {
                 $ciso =  $cur['iso_code'];
-                $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
+                $feed_url = $this->buildFeedUrl($shopId, $liso, $ciso);
                 $store_data["search_engines"][] = [
-                    'name' => $shop['name'] . ' | Lang:' . $lang['iso_code'] . ' Currency:' . strtoupper($ciso),
-                    'language' => $lang['language_code'],
+                    'name' => $shop['name'] . ' | Lang:' . strtoupper($liso) . ' Currency:' . strtoupper($ciso),
+                    'language' => $liso,
                     'currency' => $ciso,
                     'site_url' => $shop_url,
                     'stopwords' => false,
@@ -2752,4 +2758,12 @@ class Doofinder extends Module
             SELECT `iso_code` FROM ' . _DB_PREFIX_ . 'currency WHERE `id_currency` = ' . (int) $id
         );
     }
+
+    protected function getLanguageCode($code){
+        // $code is in the form of 'xx-YY' where xx is the language code
+        // and 'YY' a country code identifying a variant of the language.
+        $lang_country = explode('-', $code);
+        return $lang_country[0];
+    }
+
 }

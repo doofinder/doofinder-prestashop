@@ -33,7 +33,8 @@ if ($autoinstallerToken) {
         if ($apiToken) {
             $module->saveApiData($apiToken, $api_endpoint, $admin_endpoint);
         }
-        exit('OK');
+        echo json_encode(["success" => true]);
+        exit;
     } else {
         header('HTTP/1.1 403 Forbidden', true, 403);
         $msgError = 'Forbidden access.'
@@ -41,6 +42,7 @@ if ($autoinstallerToken) {
         exit($msgError);
     }
 }
+
 $languages = array();
 $configurations = array();
 $currencies = array_keys(dfTools::getAvailableCurrencies());
