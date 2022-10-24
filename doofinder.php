@@ -1919,14 +1919,10 @@ class Doofinder extends Module
             return;
         }
 
-        $lang_iso = strtoupper(Language::getIsoById($id_lang));
-        $curr_iso = strtoupper($this->getIsoCodeById($id_currency));
         $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
         $region = Configuration::get('DF_REGION');
 
-        $hashid_key = "DF_HASHID_" . $curr_iso . "_" . $lang_iso;;
-
-        $hashid = Configuration::get($hashid_key);
+        $hashid = $this->getHashId($id_lang, $id_currency);
 
         if ($hashid) {
             require_once(dirname(__FILE__) . '/lib/dfProduct_build.php');
@@ -2134,9 +2130,7 @@ class Doofinder extends Module
         if (isset($debug) && $debug) {
             $this->debug('Search On API Start');
         }
-        $lang_iso = Tools::strtoupper(Context::getContext()->language->iso_code);
-        $currency_iso =  Tools::strtoupper(Context::getContext()->currency->iso_code);
-        $hash_id = Configuration::get('DF_HASHID_' . $currency_iso . '_' . $lang_iso, null);
+        $hash_id = $this->getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
         $api_key = Configuration::get('DF_API_KEY');
         $show_variations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         if ((int) $show_variations !== 1) {
@@ -2433,21 +2427,13 @@ class Doofinder extends Module
     {
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_layer_api.php';
         $installationID = Configuration::get('DF_INSTALLATION_ID');
+        $api_key = Configuration::get('DF_API_KEY');
 
-        $shopID = Shop::getContextShopID();
-        $languages = Language::getLanguages(true, $shopID);
-        $currencies = Currency::getCurrenciesByIdShop($shopID);
+        $data = DoofinderLayerApi::getInstallationData($installationID, $api_key);
 
-        foreach ($languages as $language) {
-            foreach ($currencies as $currency) {
-
-                $hashid_by_api = DoofinderLayerApi::getHashidByInstallationID($installationID, $currency["iso_code"], $language["language_code"]);
-                if ($hashid_by_api !== null) {
-                    Configuration::updateValue(
-                        'DF_HASHID_' . $currency["iso_code"] . '_' . strtoupper($language["iso_code"]),
-                        $hashid_by_api
-                    );
-                }
+        foreach ($data["config"]["search_engines"] as $lang => $currencies) {
+            foreach ($currencies as $currency => $hashid) {
+                Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
             }
         }
     }
@@ -2759,11 +2745,27 @@ class Doofinder extends Module
         );
     }
 
-    protected function getLanguageCode($code){
+    protected function getLanguageCode($code)
+    {
         // $code is in the form of 'xx-YY' where xx is the language code
         // and 'YY' a country code identifying a variant of the language.
         $lang_country = explode('-', $code);
         return $lang_country[0];
     }
 
+    protected function getHashId($id_lang, $id_currency)
+    {
+        $curr_iso = strtoupper($this->getIsoCodeById($id_currency));
+        $lang = new Language($id_lang);
+
+        $hashid_key = "DF_HASHID_" . $curr_iso . "_" . strtoupper($lang->language_code);
+        $hashid = Configuration::get($hashid_key);
+
+        if (!$hashid) {
+            $hashid_key = "DF_HASHID_" . $curr_iso . "_" . strtoupper($this->getLanguageCode($lang->language_code));
+            $hashid = Configuration::get($hashid_key);
+        }
+
+        return $hashid;
+    }
 }
