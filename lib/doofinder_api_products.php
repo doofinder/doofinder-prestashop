@@ -12,7 +12,6 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 
 const API_URL = 'https://{region}-api.doofinder.com';
@@ -24,11 +23,12 @@ class DoofinderApiProducts
     {
         $this->hashid = $hashid;
         $this->api_key = $api_key;
-        $this->api_url = str_replace("{region}", $region, API_URL);
+        $this->api_url = str_replace('{region}', $region, API_URL);
     }
 
     /**
      * Make a request to the API to update the specified products
+     *
      * @param array Product data
      */
     public function updateBulk($payload)
@@ -42,6 +42,7 @@ class DoofinderApiProducts
 
     /**
      * Make a request to the API to delete the specified products
+     *
      * @param array Product ids
      */
     public function deleteBulk($payload)

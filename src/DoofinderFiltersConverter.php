@@ -12,21 +12,19 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 
 class DoofinderFiltersConverter
 {
-
     public function getFacetsFromFacetedSearchFilters(array $facetedSearchFilters)
     {
-        $facets = array();
+        $facets = [];
         foreach ($facetedSearchFilters as $facetArray) {
             $facet = new Facet();
             $facet
-                    ->setLabel($facetArray['name'])
-                    ->setMultipleSelectionAllowed(true)
+                ->setLabel($facetArray['name'])
+                ->setMultipleSelectionAllowed(true)
             ;
             switch ($facetArray['type']) {
                 case 'category':
@@ -49,10 +47,10 @@ class DoofinderFiltersConverter
                     foreach ($facetArray['values'] as $id => $filterArray) {
                         $filter = new Filter();
                         $filter
-                                ->setType($type)
-                                ->setLabel($filterArray['name'])
-                                ->setMagnitude($filterArray['nbr'])
-                                ->setValue($id)
+                            ->setType($type)
+                            ->setLabel($filterArray['name'])
+                            ->setMagnitude($filterArray['nbr'])
+                            ->setValue($id)
                         ;
                         if (isset($filterArray['color']) && $filterArray['color'] != '') {
                             $filter->setProperty('color', $filterArray['color']);
@@ -67,23 +65,23 @@ class DoofinderFiltersConverter
                 case 'weight':
                 case 'price':
                     $facet
-                            ->setType($facetArray['type'])
-                            ->setProperty('min', $facetArray['min'])
-                            ->setProperty('max', $facetArray['max'])
-                            ->setMultipleSelectionAllowed(false)
-                            ->setProperty('range', true)
+                        ->setType($facetArray['type'])
+                        ->setProperty('min', $facetArray['min'])
+                        ->setProperty('max', $facetArray['max'])
+                        ->setMultipleSelectionAllowed(false)
+                        ->setProperty('range', true)
                     ;
 
                     foreach ($facetArray['list_of_values'] as $value) {
                         $filter = new Filter();
                         $filter
-                                ->setType($facetArray['type'])
-                                ->setMagnitude($value['nbr'])
-                                ->setProperty('symbol', $facetArray['unit'])
-                                ->setValue(array(
-                                    'from' => $value[0],
-                                    'to' => $value[1],
-                                ))
+                            ->setType($facetArray['type'])
+                            ->setMagnitude($value['nbr'])
+                            ->setProperty('symbol', $facetArray['unit'])
+                            ->setValue([
+                                'from' => $value[0],
+                                'to' => $value[1],
+                            ])
                         ;
                         $facet->addFilter($filter);
                     }
@@ -121,7 +119,7 @@ class DoofinderFiltersConverter
      */
     public function getFacetedSearchFiltersFromFacets(array $facets)
     {
-        $facetedSearchFilters = array();
+        $facetedSearchFilters = [];
 
         foreach ($facets as $facet) {
             switch ($facet->getType()) {
@@ -140,7 +138,7 @@ class DoofinderFiltersConverter
                         $type = 'id_feature';
                     }
                     if (!isset($facetedSearchFilters[$type])) {
-                        $facetedSearchFilters[$type] = array();
+                        $facetedSearchFilters[$type] = [];
                     }
                     foreach ($facet->getFilters() as $filter) {
                         if (!$filter->isActive()) {
@@ -165,10 +163,10 @@ class DoofinderFiltersConverter
                         if (!$filter->isActive()) {
                             continue;
                         }
-                        $facetedSearchFilters[$facet->getType()] = array(
+                        $facetedSearchFilters[$facet->getType()] = [
                             $filter->getValue()['from'],
                             $filter->getValue()['to'],
-                        );
+                        ];
                         break;
                     }
                     break;

@@ -12,10 +12,21 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
+/**
+ * NOTICE OF LICENSE
+ *
+ * This file is licenced under the Software License Agreement.
+ * With the purchase or the installation of the software in your application
+ * you accept the licence agreement.
+ *
+ * You must not modify, adapt or create derivative works of this source code
+ *
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   GPLv3
+ */
 class SearchController extends SearchControllerCore
 {
-
     public function initContent()
     {
         $parentContent = true;
@@ -25,7 +36,7 @@ class SearchController extends SearchControllerCore
                 $olderThan17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
                 $overwrite_embedded = Configuration::get('DF_OWSEARCHEB', null);
                 if ($overwrite_embedded) {
-                    //HERE you are using embedded layer
+                    // HERE you are using embedded layer
                     if ($olderThan17) {
                         $parentContent = false;
                         $this->setTemplate($m->getEmbeddedTemplateLocation());
@@ -34,18 +45,18 @@ class SearchController extends SearchControllerCore
                         $parentContent = false;
                         ProductListingFrontController::initContent();
                         $html = $this->context->smarty->fetch($m->getEmbeddedTemplateLocation());
-                        $this->context->smarty->assign(array(
+                        $this->context->smarty->assign([
                             'HOOK_HOME' => trim($html),
-                        ));
+                        ]);
                         $this->setTemplate('index');
                     }
                 } elseif ($olderThan17) {
-                    //HERE you are using API!
-                    //If your PS is 1.6 or older. Newer are using productSearchProvider hook
+                    // HERE you are using API!
+                    // If your PS is 1.6 or older. Newer are using productSearchProvider hook
                     $query = Tools::getValue('search_query', Tools::getValue('ref', Tools::getValue('s')));
                     $overwrite_search = Configuration::get('DF_OWSEARCH', null);
-                    $this->p = abs((int) (Tools::getValue('p', 1)));
-                    $this->n = abs((int) (Tools::getValue('n', Configuration::get('PS_PRODUCTS_PER_PAGE'))));
+                    $this->p = abs((int) Tools::getValue('p', 1));
+                    $this->n = abs((int) Tools::getValue('n', Configuration::get('PS_PRODUCTS_PER_PAGE')));
 
                     if ($overwrite_search && ($search = $m->generateSearch(true)) && $query && !is_array($query)) {
                         $parentContent = false;
@@ -57,12 +68,12 @@ class SearchController extends SearchControllerCore
                             $product['link'] .= 'search_query=' . urlencode($query);
                             $product['link'] .= '&results=' . (int) $search['total'];
                         }
-                        Hook::exec('actionSearch', array('expr' => $query, 'total' => $search['total']));
+                        Hook::exec('actionSearch', ['expr' => $query, 'total' => $search['total']]);
                         $nbProducts = $search['total'];
                         $this->pagination($nbProducts);
 
                         if (method_exists($this, 'addColorsToProductList')) {
-                            //RETROCOMPATIBILITY
+                            // RETROCOMPATIBILITY
                             $this->addColorsToProductList($search['result']);
                         }
 
@@ -73,21 +84,21 @@ class SearchController extends SearchControllerCore
                         }
 
                         $this->context->smarty->assign(
-                            array(
-                                'products' => $search['result'], //DEPRECATED
+                            [
+                                'products' => $search['result'], // DEPRECATED
                                 'search_products' => $search['result'],
                                 'nbProducts' => $search['total'],
                                 'search_query' => $original_query,
-                                'homeSize' => $imageSize
-                            )
+                                'homeSize' => $imageSize,
+                            ]
                         );
-                        //Info: DEPRECATED (since to 1.4), do not use this: conflict with block_cart module
+                        // Info: DEPRECATED (since to 1.4), do not use this: conflict with block_cart module
 
                         $this->context->smarty->assign(
-                            array(
+                            [
                                 'add_prod_display' => Configuration::get('PS_ATTRIBUTE_CATEGORY_DISPLAY'),
-                                'comparator_max_item' => Configuration::get('PS_COMPARATOR_MAX_ITEM')
-                            )
+                                'comparator_max_item' => Configuration::get('PS_COMPARATOR_MAX_ITEM'),
+                            ]
                         );
 
                         $this->setTemplate(_PS_THEME_DIR_ . 'search.tpl');

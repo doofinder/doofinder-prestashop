@@ -1,7 +1,19 @@
 <?php
-
+/**
+ * NOTICE OF LICENSE
+ *
+ * This file is licenced under the Software License Agreement.
+ * With the purchase or the installation of the software in your application
+ * you accept the licence agreement.
+ *
+ * You must not modify, adapt or create derivative works of this source code
+ *
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   GPLv3
+ */
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] =
 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] =
