@@ -40,4 +40,31 @@ class DoofinderLayerApi
         
         return null;
     }
+
+    public static function getInstallationData($installationID, $api_key)
+    {
+        $api_endpoint = "https://admin.doofinder.com/api/v1/graphql.json";
+        $query = '
+            query {
+                installation_by_id(id: "' . $installationID . '")
+                {
+                    id
+                    name
+                    config
+                }
+            }
+        ';
+
+        $client = new EasyREST();
+        $response = $client->post(
+            $api_endpoint, 
+            json_encode(["query" => $query]), 
+            false, 
+            false, 
+            'application/json',
+            ['Authorization: Token ' . $api_key]
+        );
+
+        return json_decode($response->response, true)["data"]["installation_by_id"][0];
+    }
 }
