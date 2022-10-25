@@ -954,6 +954,16 @@ class Doofinder extends Module
                 ),
                 'input' => array(
                     array(
+                        'type' => 'text',
+                        'label' => $this->l('Doofinder Api Key'),
+                        'name' => 'DF_API_KEY',
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Region'),
+                        'name' => 'DF_REGION',
+                    ),
+                    array(
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('Debug Mode. Write info logs in doofinder.log file'),
                         'name' => 'DF_DEBUG',
@@ -1040,6 +1050,8 @@ class Doofinder extends Module
     protected function getConfigFormValuesAdvanced()
     {
         return array(
+            'DF_API_KEY' => Configuration::get('DF_API_KEY'),
+            'DF_REGION' => Configuration::get('DF_REGION'),
             'DF_DEBUG' => Configuration::get('DF_DEBUG'),
             'DF_DSBL_DFLINK_JS' => Configuration::get('DF_DSBL_DFLINK_JS'),
             'DF_DSBL_DFPAG_JS' => Configuration::get('DF_DSBL_DFPAG_JS'),
