@@ -1311,7 +1311,7 @@ class Doofinder extends Module
 
     private function configureHookCommon($params = false)
     {
-        $lang = Tools::strtoupper($this->getLanguageCode($this->context->language->language_code));
+        $lang = Tools::strtoupper($this->context->language->language_code);
         $currency = Tools::strtoupper($this->context->currency->iso_code);
         $search_engine_id = Configuration::get('DF_HASHID_' . $currency . '_' . $lang);
         $df_region = Configuration::get('DF_REGION');
@@ -2535,7 +2535,6 @@ class Doofinder extends Module
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
-        $primary_language_iso_code = $this->getLanguageCode($primary_lang->language_code);
         $installationID = null;
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
@@ -2544,19 +2543,18 @@ class Doofinder extends Module
         $store_data = [
             "name" => $shop['name'],
             "platform" => "prestashop",
-            "primary_language" => $primary_language_iso_code,
+            "primary_language" => $primary_lang->language_code,
             "search_engines" => [],
             "sector" => ""
         ];
 
         foreach ($languages as $lang) {
-            $liso = $this->getLanguageCode($lang['language_code']);
             foreach ($currencies as $cur) {
                 $ciso =  $cur['iso_code'];
-                $feed_url = $this->buildFeedUrl($shopId, $liso, $ciso);
+                $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $store_data["search_engines"][] = [
-                    'name' => $shop['name'] . ' | Lang:' . strtoupper($liso) . ' Currency:' . strtoupper($ciso),
-                    'language' => $liso,
+                    'name' => $shop['name'] . ' | Lang:' . $lang['iso_code'] . ' Currency:' . strtoupper($ciso),
+                    'language' => $lang['language_code'],
                     'currency' => $ciso,
                     'site_url' => $shop_url,
                     'stopwords' => false,
