@@ -278,7 +278,7 @@ class DfProductBuild
         );
 
         if (!$salePrice) {
-            return ($product_price ? Tools::convertPrice($product_price, $this->id_currency) : "");
+            return ($product_price ? Tools::convertPrice($product_price, $this->id_currency) : null);
         } else {
             $onsale_price = Product::getPriceStatic(
                 $product['id_product'],
@@ -288,7 +288,7 @@ class DfProductBuild
             );
 
             return (($product_price && $onsale_price && $product_price != $onsale_price)
-                ? Tools::convertPrice($onsale_price, $this->id_currency) : "");
+                ? Tools::convertPrice($onsale_price, $this->id_currency) : null);
         }
     }
 
