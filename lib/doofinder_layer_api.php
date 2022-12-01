@@ -41,9 +41,9 @@ class DoofinderLayerApi
         return null;
     }
 
-    public static function getInstallationData($installationID, $api_key)
+    public static function getInstallationData($installationID, $api_key, $region = "eu1")
     {
-        $api_endpoint = "https://admin.doofinder.com/api/v1/graphql.json";
+        $api_endpoint = "https://".$region."-admin.doofinder.com/api/v1/graphql.json";
         $query = '
             query {
                 installation_by_id(id: "' . $installationID . '")

@@ -2440,8 +2440,9 @@ class Doofinder extends Module
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_layer_api.php';
         $installationID = Configuration::get('DF_INSTALLATION_ID');
         $api_key = Configuration::get('DF_API_KEY');
+        $region = Configuration::get('DF_REGION');
 
-        $data = DoofinderLayerApi::getInstallationData($installationID, $api_key);
+        $data = DoofinderLayerApi::getInstallationData($installationID, $api_key, $region);
 
         foreach ($data["config"]["search_engines"] as $lang => $currencies) {
             foreach ($currencies as $currency => $hashid) {
