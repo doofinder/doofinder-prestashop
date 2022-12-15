@@ -13,23 +13,23 @@
  * @license   GPLv3
  */
 
-use PrestaShop\PrestaShop\Core\Product\Search\URLFragmentSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
+use PrestaShop\PrestaShop\Core\Product\Search\URLFragmentSerializer;
 
 class DoofinderFacetsURLSerializer
 {
-
     public function addFilterToFacetFilters(array $facetFilters, Filter $facetFilter, $facet)
     {
         if ($facet->getProperty('range')) {
-            $facetFilters[$facet->getLabel()] = array(
+            $facetFilters[$facet->getLabel()] = [
                 $facetFilter->getProperty('symbol'),
                 $facetFilter->getValue()['from'],
                 $facetFilter->getValue()['to'],
-            );
+            ];
         } else {
             $facetFilters[$facet->getLabel()][$facetFilter->getLabel()] = $facetFilter->getLabel();
         }
+
         return $facetFilters;
     }
 
@@ -43,21 +43,22 @@ class DoofinderFacetsURLSerializer
                 unset($facetFilters[$facet->getLabel()]);
             }
         }
+
         return $facetFilters;
     }
 
     public function getActiveFacetFiltersFromFacets(array $facets)
     {
-        $facetFilters = array();
+        $facetFilters = [];
         foreach ($facets as $facet) {
             if ($facet->getProperty('range')) {
                 foreach ($facet->getFilters() as $facetFilter) {
                     if ($facetFilter->isActive()) {
-                        $facetFilters[$facet->getLabel()] = array(
+                        $facetFilters[$facet->getLabel()] = [
                             $facetFilter->getProperty('symbol'),
                             $facetFilter->getValue()['from'],
                             $facetFilter->getValue()['to'],
-                        );
+                        ];
                     }
                 }
             } else {
@@ -76,6 +77,7 @@ class DoofinderFacetsURLSerializer
     {
         $facetFilters = $this->getActiveFacetFiltersFromFacets($facets);
         $urlSerializer = new URLFragmentSerializer();
+
         return $urlSerializer->serialize($facetFilters);
     }
 
@@ -102,10 +104,10 @@ class DoofinderFacetsURLSerializer
 
                         if (!$found) {
                             $filter = new Filter();
-                            $filter->setValue(array(
+                            $filter->setValue([
                                 'from' => $from,
                                 'to' => $to,
-                            ))->setProperty('symbol', $symbol);
+                            ])->setProperty('symbol', $symbol);
                             $filter->setActive(true);
                             $facet->addFilter($filter);
                         }

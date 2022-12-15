@@ -12,29 +12,27 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'DoofinderFiltersConverter.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'DoofinderFacetsURLSerializer.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'DoofinderRangeAggregator.php';
 
-use PrestaShop\PrestaShop\Core\Product\Search\URLFragmentSerializer;
-use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchProviderInterface;
-use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchContext;
-use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
-use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\FacetCollection;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
+use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchContext;
+use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchProviderInterface;
+use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
+use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
+use PrestaShop\PrestaShop\Core\Product\Search\URLFragmentSerializer;
 
 class DoofinderProductSearchProvider implements ProductSearchProviderInterface
 {
-
     private $module;
     private $filtersConverter;
     private $facetsSerializer;
-    private $features_slug = array();
-    private $group_attributes_slug = array();
+    private $features_slug = [];
+    private $group_attributes_slug = [];
     private $doofinderSearchQuery = null;
 
     public function __construct(Doofinder $module)
@@ -141,33 +139,32 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
 
     private function getAvailableSortOrders()
     {
-        return array(
+        return [
             (new SortOrder('product', 'position', 'asc'))->setLabel(
-                $this->module->getTranslator()->trans('Relevance', array(), 'Modules.Facetedsearch.Shop')
+                $this->module->getTranslator()->trans('Relevance', [], 'Modules.Facetedsearch.Shop')
             ),
             (new SortOrder('product', 'name', 'asc'))->setLabel(
-                $this->module->getTranslator()->trans('Name, A to Z', array(), 'Shop.Theme.Catalog')
+                $this->module->getTranslator()->trans('Name, A to Z', [], 'Shop.Theme.Catalog')
             ),
             (new SortOrder('product', 'name', 'desc'))->setLabel(
-                $this->module->getTranslator()->trans('Name, Z to A', array(), 'Shop.Theme.Catalog')
+                $this->module->getTranslator()->trans('Name, Z to A', [], 'Shop.Theme.Catalog')
             ),
             (new SortOrder('product', 'price', 'asc'))->setLabel(
-                $this->module->getTranslator()->trans('Price, low to high', array(), 'Shop.Theme.Catalog')
+                $this->module->getTranslator()->trans('Price, low to high', [], 'Shop.Theme.Catalog')
             ),
             (new SortOrder('product', 'price', 'desc'))->setLabel(
-                $this->module->getTranslator()->trans('Price, high to low', array(), 'Shop.Theme.Catalog')
+                $this->module->getTranslator()->trans('Price, high to low', [], 'Shop.Theme.Catalog')
             ),
-        );
+        ];
     }
 
     public function runQuery(
         ProductSearchContext $context,
         ProductSearchQuery $query
     ) {
-        
         $groupFilters = explode('/', $query->getEncodedFacets());
         $doofinderFilters = $context;
-        $doofinderFilters = array();
+        $doofinderFilters = [];
         $options = $this->module->getDoofinderTermsOptions();
         foreach ($groupFilters as $filters) {
             $filter = explode('-', $filters);
@@ -183,10 +180,10 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
                         is_float((float) $doofinderFilters[$keyFilter][1]) &&
                         is_numeric($doofinderFilters[$keyFilter][2]) &&
                         is_float((float) $doofinderFilters[$keyFilter][2])) {
-                    $doofinderFilters[$keyFilter] = array(
+                    $doofinderFilters[$keyFilter] = [
                         'gte' => $doofinderFilters[$keyFilter][1],
-                        'lte' => $doofinderFilters[$keyFilter][2]
-                    );
+                        'lte' => $doofinderFilters[$keyFilter][2],
+                    ];
                 }
             }
         }
@@ -203,28 +200,28 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
         $result = new ProductSearchResult();
         $menu = $this->getFacetCollectionFromEncodedFacets($query);
 
-        //$order_by = $query->getSortOrder()->toLegacyOrderBy(true);
-        //$order_way = $query->getSortOrder()->toLegacyOrderWay();
+        // $order_by = $query->getSortOrder()->toLegacyOrderBy(true);
+        // $order_way = $query->getSortOrder()->toLegacyOrderWay();
 
         /*$facetedSearchFilters = $this->filtersConverter->getFacetedSearchFiltersFromFacets(
             $menu->getFacets()
         );*/
 
-        $productsAndCount = array(
+        $productsAndCount = [
             'products' => $this->doofinderSearchQuery['result'],
             'count' => $this->doofinderSearchQuery['total'],
-        );
+        ];
 
         if ((int) $productsAndCount['count'] == 0) {
-            $productsAndCount = array(
-                'products' => array(),
+            $productsAndCount = [
+                'products' => [],
                 'count' => 0,
-            );
+            ];
         }
         $result
             ->setProducts($productsAndCount['products'])
             ->setTotalProductsCount($productsAndCount['count'])
-        //->setAvailableSortOrders($this->getAvailableSortOrders())
+        // ->setAvailableSortOrders($this->getAvailableSortOrders())
         ;
 
         $presta17Filters = $this->getFormatedFilters(
@@ -237,7 +234,6 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
             $presta17Filters
         );
 
-
         $this->copyFiltersActiveState(
             $menu->getFacets(),
             $facets
@@ -247,12 +243,13 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
 
         $this->addEncodedFacetsToFilters($facets);
 
-        //$this->hideZeroValues($facets);
-        //$this->hideUselessFacets($facets);
+        // $this->hideZeroValues($facets);
+        // $this->hideUselessFacets($facets);
 
         $nextMenu = (new FacetCollection())->setFacets($facets);
         $result->setFacetCollection($nextMenu);
         $result->setEncodedFacets($this->facetsSerializer->serialize($facets));
+
         return $result;
     }
 
@@ -260,26 +257,26 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
     {
         $filterBlock = $this->module->getFilterBlock($facets, $filters, $queryString);
 
-        $presta17Filters = array();
+        $presta17Filters = [];
         foreach ($filterBlock['facets'] as $facetKey => $facet) {
             if ($facet['_type'] == 'terms') {
-                $values = array();
+                $values = [];
                 foreach ($facet['terms'] as $term) {
-                    $values[] = array(
+                    $values[] = [
                         'name' => $term['term'],
-                        'nbr' => $term['count']
-                    );
+                        'nbr' => $term['count'],
+                    ];
                 }
 
-                $presta17Filters[] = array(
-                    "type_lite" => 'category',
-                    "type" => 'category',
-                    "id_key" => 0,
-                    "name" => $filterBlock['options'][$facetKey],
-                    "values" => $values,
-                    "filter_show_limit" => "0",
-                    "filter_type" => "0",
-                );
+                $presta17Filters[] = [
+                    'type_lite' => 'category',
+                    'type' => 'category',
+                    'id_key' => 0,
+                    'name' => $filterBlock['options'][$facetKey],
+                    'values' => $values,
+                    'filter_show_limit' => '0',
+                    'filter_type' => '0',
+                ];
             } elseif ($facet['_type'] == 'range') {
                 $unit = '';
                 $format = '0.00';
@@ -289,24 +286,24 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
                     $unit = $currency->sign;
                     $format = $currency->format;
                 }
-                $range_array = array(
-                    "type_lite" => 'price',
-                    "type" => 'price',
-                    "id_key" => 0,
-                    "name" => $filterBlock['options'][$facetKey],
-                    "slider" => true,
-                    "max" => $facet['ranges'][0]['max'],
-                    "min" => $facet['ranges'][0]['min'],
-                    "unit" => $unit,
-                    "format" => $format,
-                    "filter_show_limit" => "0",
-                    "filter_type" => "0",
-                    "list_of_values" => array(),
-                    "values" => array(
+                $range_array = [
+                    'type_lite' => 'price',
+                    'type' => 'price',
+                    'id_key' => 0,
+                    'name' => $filterBlock['options'][$facetKey],
+                    'slider' => true,
+                    'max' => $facet['ranges'][0]['max'],
+                    'min' => $facet['ranges'][0]['min'],
+                    'unit' => $unit,
+                    'format' => $format,
+                    'filter_show_limit' => '0',
+                    'filter_type' => '0',
+                    'list_of_values' => [],
+                    'values' => [
                         $facet['ranges'][0]['min'],
-                        $facet['ranges'][0]['max']
-                    )
-                );
+                        $facet['ranges'][0]['max'],
+                    ],
+                ];
 
                 $rangeAggregator = new DoofinderRangeAggregator();
                 if (!empty($this->doofinderSearchQuery['doofinder_results']) &&
@@ -324,14 +321,14 @@ class DoofinderProductSearchProvider implements ProductSearchProviderInterface
                     );
 
                     $range_array['list_of_values'] = array_map(function (array $range) {
-                        return array(
+                        return [
                             0 => $range['min'],
                             1 => $range['max'],
                             'nbr' => $range['count'],
-                        );
+                        ];
                     }, $mergedRanges);
 
-                    $range_array['values'] = array($range_array['min'], $range_array['max']);
+                    $range_array['values'] = [$range_array['min'], $range_array['max']];
                     $presta17Filters[] = $range_array;
                 }
             }

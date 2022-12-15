@@ -12,13 +12,12 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
-require_once(dirname(__FILE__) . '/../../config/config.inc.php');
-require_once(dirname(__FILE__) . '/../../init.php');
+require_once dirname(__FILE__) . '/../../config/config.inc.php';
+require_once dirname(__FILE__) . '/../../init.php';
 
 $context = Context::getContext();
 
-header("Content-Type:application/json; charset=utf-8");
+header('Content-Type:application/json; charset=utf-8');
 
 $module = Module::getInstanceByName('doofinder');
 $autoinstallerToken = Tools::getValue('token');
@@ -33,7 +32,7 @@ if ($autoinstallerToken) {
         if ($apiToken) {
             $module->saveApiData($apiToken, $api_endpoint, $admin_endpoint);
         }
-        echo json_encode(["success" => true]);
+        echo json_encode(['success' => true]);
         exit;
     } else {
         header('HTTP/1.1 403 Forbidden', true, 403);
@@ -43,8 +42,8 @@ if ($autoinstallerToken) {
     }
 }
 
-$languages = array();
-$configurations = array();
+$languages = [];
+$configurations = [];
 $currencies = array_keys(dfTools::getAvailableCurrencies());
 
 $display_prices = (bool) Configuration::get('DF_GS_DISPLAY_PRICES');
@@ -55,32 +54,32 @@ foreach (Language::getLanguages(true, $context->shop->id) as $lang) {
     $currency = dfTools::getCurrencyForLanguage($lang);
 
     $languages[] = $lang;
-    $configurations[$lang] = array(
-        "language" => $lang,
-        "currency" => Tools::strtoupper($currency->iso_code),
-        "prices" => $display_prices,
-        "taxes" => $prices_with_taxes,
-    );
+    $configurations[$lang] = [
+        'language' => $lang,
+        'currency' => Tools::strtoupper($currency->iso_code),
+        'prices' => $display_prices,
+        'taxes' => $prices_with_taxes,
+    ];
 }
 
 $force_ssl = (Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'));
 $shop = $context->shop;
 $base = (($force_ssl) ? 'https://' . $shop->domain_ssl : 'http://' . $shop->domain);
 
-$cfg = array(
-    "platform" => array(
-        "name" => "Prestashop",
-        "version" => _PS_VERSION_
-    ),
-    "module" => array(
-        "version" => Doofinder::VERSION,
-        "feed" => $base . $shop->getBaseURI() . 'modules/doofinder/feed.php',
-        "options" => array(
-            "language" => $languages,
-            "currency" => $currencies,
-        ),
-        "configuration" => $configurations,
-    ),
-);
+$cfg = [
+    'platform' => [
+        'name' => 'Prestashop',
+        'version' => _PS_VERSION_,
+    ],
+    'module' => [
+        'version' => Doofinder::VERSION,
+        'feed' => $base . $shop->getBaseURI() . 'modules/doofinder/feed.php',
+        'options' => [
+            'language' => $languages,
+            'currency' => $currencies,
+        ],
+        'configuration' => $configurations,
+    ],
+];
 
 echo dfTools::jsonEncode($cfg);

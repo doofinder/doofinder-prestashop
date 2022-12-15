@@ -12,9 +12,8 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
-require_once(dirname(__FILE__) . '/../../config/config.inc.php');
-require_once(dirname(__FILE__) . '/../../init.php');
+require_once dirname(__FILE__) . '/../../config/config.inc.php';
+require_once dirname(__FILE__) . '/../../init.php';
 
 Context::getContext()->controller->php_self = 'search';
 
@@ -22,21 +21,21 @@ $doofinder = Module::getInstanceByName('doofinder');
 
 $check_api_key = Tools::getValue('check_api_key');
 if ($check_api_key) {
-    die($doofinder->checkApiKey(true));
+    exit($doofinder->checkApiKey(true));
 }
 
 $autoinstaller = Tools::getValue('autoinstaller');
-$shop_id =  Tools::getValue('shop_id', NULL);
+$shop_id = Tools::getValue('shop_id', null);
 if ($autoinstaller) {
-    header("Content-Type:application/json; charset=utf-8");
+    header('Content-Type:application/json; charset=utf-8');
     if (Tools::getValue('token') == Tools::encrypt('doofinder-ajax')) {
         $doofinder->autoinstaller($shop_id);
-        echo json_encode(['success' => TRUE]);
-        exit();
+        echo json_encode(['success' => true]);
+        exit;
     } else {
         $msgError = 'Forbidden access.'
             . ' Token for autoinstaller invalid.';
-        die($msgError);
+        exit($msgError);
     }
 }
 

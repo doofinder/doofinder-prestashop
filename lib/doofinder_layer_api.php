@@ -11,9 +11,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   GPLv3
- *
  */
-
 require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 
 class DoofinderLayerApi
@@ -26,24 +24,24 @@ class DoofinderLayerApi
     public static function getHashidByInstallationID($installationID, $currency, $language)
     {
         $client = new EasyREST();
-        $base_endpoint = "https://eu1-layer.doofinder.com/api/1/installation";
-        $api_endpoint = $base_endpoint."/".$installationID.'?currency='.$currency.'&language='.$language;
+        $base_endpoint = 'https://eu1-layer.doofinder.com/api/1/installation';
+        $api_endpoint = $base_endpoint . '/' . $installationID . '?currency=' . $currency . '&language=' . $language;
 
         $response = $client->get($api_endpoint);
 
-        if ((int)$response->headers['code'] === 200) {
+        if ((int) $response->headers['code'] === 200) {
             $options = json_decode($response->response)->options;
             if ($currency === $options->currency && $language === $options->language) {
                 return $options->hashid;
             }
         }
-        
+
         return null;
     }
 
-    public static function getInstallationData($installationID, $api_key, $region = "eu1")
+    public static function getInstallationData($installationID, $api_key, $region = 'eu1')
     {
-        $api_endpoint = "https://".$region."-admin.doofinder.com/api/v1/graphql.json";
+        $api_endpoint = 'https://' . $region . '-admin.doofinder.com/api/v1/graphql.json';
         $query = '
             query {
                 installation_by_id(id: "' . $installationID . '")
@@ -57,14 +55,14 @@ class DoofinderLayerApi
 
         $client = new EasyREST();
         $response = $client->post(
-            $api_endpoint, 
-            json_encode(["query" => $query]), 
-            false, 
-            false, 
+            $api_endpoint,
+            json_encode(['query' => $query]),
+            false,
+            false,
             'application/json',
             ['Authorization: Token ' . $api_key]
         );
 
-        return json_decode($response->response, true)["data"]["installation_by_id"][0];
+        return json_decode($response->response, true)['data']['installation_by_id'][0];
     }
 }
