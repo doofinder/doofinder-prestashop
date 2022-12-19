@@ -16,3 +16,17 @@ jobs:
 
       - name: PHP syntax checker 7.3
         uses: prestashop/github-action-php-lint/7.3@master
+
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: composer install
+
+      - name: cs-fixer:init
+        run: php vendor/bin/prestashop-coding-standards cs-fixer:init
+
+      - name: PHP-CS-Fixer
+        run: php vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
