@@ -4,20 +4,20 @@
  * Wraps HTTP calls using cURL, aimed for accessing and testing RESTful webservice.
  * Original RestClient By Diogo Souza da Silva <manifesto@manifesto.blog.br> and modified by
  * Daniel Martin <dmartin@webimpacto.es>
+ *
  * @author    Doofinder
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 class EasyREST
 {
     private $curl;
     public $url;
-    public $response = "";
-    public $headers = array();
-    public $originalResponse = "";
+    public $response = '';
+    public $headers = [];
+    public $originalResponse = '';
 
-    public $method = "GET";
+    public $method = 'GET';
     public $params = null;
     private $contentType = null;
     private $httpHeaders = null;
@@ -26,7 +26,7 @@ class EasyREST
     public function __construct($followLocation = true)
     {
         $this->curl = curl_init();
-        curl_setopt($this->curl, CURLOPT_ENCODING, "");
+        curl_setopt($this->curl, CURLOPT_ENCODING, '');
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl, CURLOPT_AUTOREFERER, true); // This make sure will follow redirects
         if ($followLocation) {
@@ -42,26 +42,27 @@ class EasyREST
 
     /**
      * Execute the call to the webservice
+     *
      * @return EasyREST
      */
     public function execute()
     {
-        if ($this->method === "POST") {
+        if ($this->method === 'POST') {
             curl_setopt($this->curl, CURLOPT_POST, true);
             curl_setopt($this->curl, CURLOPT_POSTFIELDS, $this->params);
-        } elseif ($this->method == "GET") {
+        } elseif ($this->method == 'GET') {
             curl_setopt($this->curl, CURLOPT_HTTPGET, true);
             $this->treatURL();
-        } elseif ($this->method === "PUT") {
-            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        } elseif ($this->method === 'PUT') {
+            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'PUT');
             if (is_object($this->params) || is_array($this->params)) {
                 $params = http_build_query($this->params);
             } else {
                 $params = $this->params;
             }
             curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
-        } elseif ($this->method === "DELETE") {
-            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+        } elseif ($this->method === 'DELETE') {
+            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
             if (is_object($this->params) || is_array($this->params)) {
                 $params = http_build_query($this->params);
             } else {
@@ -71,9 +72,9 @@ class EasyREST
         } else {
             curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $this->method);
         }
-        $headers = array();
+        $headers = [];
         if ($this->contentType != null) {
-            array_push($headers, "Content-Type: " . $this->contentType);
+            array_push($headers, 'Content-Type: ' . $this->contentType);
         }
         if ($this->httpHeaders != null) {
             $headers = array_merge($headers, $this->httpHeaders);
@@ -85,6 +86,7 @@ class EasyREST
         $r = curl_exec($this->curl);
         $this->originalResponse = $r;
         $this->treatResponse($r); // Extract the headers and response
+
         return $this;
     }
 
@@ -98,9 +100,10 @@ class EasyREST
                 $this->url .= '?';
             }
             foreach ($this->params as $k => $v) {
-                $this->url .= "&" . urlencode($k) . "=" . urlencode($v);
+                $this->url .= '&' . urlencode($k) . '=' . urlencode($v);
             }
         }
+
         return $this->url;
     }
 
@@ -113,32 +116,32 @@ class EasyREST
             return;
         }
         // HTTP packets define that Headers end in a blank line (\n\r) where starts the body
-        $parts  = explode("\n\r", $r);
-        while (preg_match('@HTTP/1.[0-1] 100 Continue@', $parts[0]) or preg_match("@Moved@", $parts[0])) {
+        $parts = explode("\n\r", $r);
+        while (preg_match('@HTTP/1.[0-1] 100 Continue@', $parts[0]) or preg_match('@Moved@', $parts[0])) {
             // Continue header must be bypass
-            for ($i = 1; $i < count($parts); $i++) {
+            for ($i = 1; $i < count($parts); ++$i) {
                 $parts[$i - 1] = trim($parts[$i]);
             }
             unset($parts[count($parts) - 1]);
         }
 
         // This extract the content type
-        preg_match("@Content-Type: ([a-zA-Z0-9-]+/?[a-zA-Z0-9-]*)@", $parts[0], $reg);
+        preg_match('@Content-Type: ([a-zA-Z0-9-]+/?[a-zA-Z0-9-]*)@', $parts[0], $reg);
 
         if (isset($reg[1])) {
             $this->headers['content-type'] = $reg[1];
         }
 
         // This extracts the response header Code and Message
-        preg_match("@HTTP/1.[0-1] ([0-9]{3}) ([a-zA-Z ]+)@", $parts[0], $reg);
+        preg_match('@HTTP/1.[0-1] ([0-9]{3}) ([a-zA-Z ]+)@', $parts[0], $reg);
 
         $this->headers['code'] = @$reg[1];
         $this->headers['message'] = @$reg[2];
         if ($this->headers['code'] == null) {
             $this->headers['code'] = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
         }
-        $this->response = "";
-        for ($i = 1; $i < count($parts); $i++) { //This make sure that exploded response get back togheter
+        $this->response = '';
+        for ($i = 1; $i < count($parts); ++$i) { // This make sure that exploded response get back togheter
             if ($i > 1) {
                 $this->response .= "\n\r";
             }
@@ -199,17 +202,20 @@ class EasyREST
 
     /**
      * This sets that will not follow redirects
+     *
      * @return EasyREST
      */
     public function setNoFollow()
     {
         curl_setopt($this->curl, CURLOPT_AUTOREFERER, false);
         curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, false);
+
         return $this;
     }
 
     /**
      * This closes the connection and release resources
+     *
      * @return EasyREST
      */
     public function close()
@@ -219,46 +225,57 @@ class EasyREST
         if ($this->file != null) {
             fclose($this->file);
         }
+
         return $this;
     }
 
     /**
      * Sets the URL to be Called
+     *
      * @return EasyREST
      */
     public function setUrl($url)
     {
         $this->url = $url;
+
         return $this;
     }
 
     /**
      * Set the Content-Type of the request to be send
      * Format like "application/xml" or "text/plain" or other
+     *
      * @param string $contentType
+     *
      * @return EasyREST
      */
     public function setContentType($contentType)
     {
         $this->contentType = $contentType;
+
         return $this;
     }
 
     /**
      * Set the Http Headers of the request to be send
+     *
      * @param array $httpHeaders
+     *
      * @return EasyREST
      */
     public function setHttpHeaders($httpHeaders)
     {
         $this->httpHeaders = $httpHeaders;
+
         return $this;
     }
 
     /**
      * Set the Credentials for BASIC Authentication
+     *
      * @param string $user
      * @param string $pass
+     *
      * @return EasyREST
      */
     public function setCredentials($user, $pass)
@@ -267,18 +284,22 @@ class EasyREST
             curl_setopt($this->curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
             curl_setopt($this->curl, CURLOPT_USERPWD, "{$user}:{$pass}");
         }
+
         return $this;
     }
 
     /**
      * Set the Request HTTP Method
      * For now, only accepts GET and POST
+     *
      * @param string $method
+     *
      * @return EasyREST
      */
     public function setMethod($method)
     {
         $this->method = $method;
+
         return $this;
     }
 
@@ -287,18 +308,23 @@ class EasyREST
      * It can be both a key/value par array (as in array("key"=>"value"))
      * or a string containing the body of the request, like a XML, JSON or other
      * Proper content-type should be set for the body if not a array
+     *
      * @param mixed $params
+     *
      * @return EasyREST
      */
     public function setParameters($params)
     {
         $this->params = $params;
+
         return $this;
     }
 
     /**
      * Creates the RESTClient
+     *
      * @param string $url=null [optional]
+     *
      * @return EasyREST
      */
     public static function createClient($url = null)
@@ -307,16 +333,19 @@ class EasyREST
         if ($url != null) {
             $client->setUrl($url);
         }
+
         return $client;
     }
 
     /**
      * Convenience method wrapping a commom POST call
+     *
      * @param string $url
      * @param mixed params
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      * @param string $contentType="multpary/form-data" [optional] commom post (multipart/form-data) as default
+     *
      * @return EasyREST
      */
     public static function post(
@@ -324,32 +353,36 @@ class EasyREST
         $params = null,
         $user = null,
         $pwd = null,
-        $contentType = "multipart/form-data",
+        $contentType = 'multipart/form-data',
         $httpHeaders = null
     ) {
-        return self::call("POST", $url, $params, $user, $pwd, $contentType, $httpHeaders);
+        return self::call('POST', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
     /**
      * Convenience method wrapping a commom PUT call
+     *
      * @param string $url
      * @param string $body
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      * @param string $contentType=null [optional]
+     *
      * @return EasyREST
      */
     public static function put($url, $body, $user = null, $pwd = null, $contentType = null)
     {
-        return self::call("PUT", $url, $body, $user, $pwd, $contentType);
+        return self::call('PUT', $url, $body, $user, $pwd, $contentType);
     }
 
     /**
      * Convenience method wrapping a commom GET call
+     *
      * @param string $url
      * @param array params
      * @param string $user=null [optional]
      * @param string $password=null [optional]
+     *
      * @return EasyREST
      */
     public static function get(
@@ -357,18 +390,20 @@ class EasyREST
         array $params = null,
         $user = null,
         $pwd = null,
-        $contentType = "multipart/form-data",
+        $contentType = 'multipart/form-data',
         $httpHeaders = null
     ) {
-        return self::call("GET", $url, $params, $user, $pwd, $contentType, $httpHeaders);
+        return self::call('GET', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
     /**
      * Convenience method wrapping a commom delete call
+     *
      * @param string $url
      * @param array params
      * @param string $user=null [optional]
      * @param string $password=null [optional]
+     *
      * @return EasyREST
      */
     public static function delete(
@@ -376,21 +411,23 @@ class EasyREST
         $params = null,
         $user = null,
         $pwd = null,
-        $contentType = "multipart/form-data",
+        $contentType = 'multipart/form-data',
         $httpHeaders = null
     ) {
-        return self::call("DELETE", $url, $params, $user, $pwd, $contentType, $httpHeaders);
+        return self::call('DELETE', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
     /**
      * Convenience method wrapping a commom custom call
+     *
      * @param string $method
      * @param string $url
      * @param string $body
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      * @param string $contentType=null [optional]
-     * @param array  $httpHeaders=null [optional]
+     * @param array $httpHeaders=null [optional]
+     *
      * @return EasyREST
      */
     public static function call(

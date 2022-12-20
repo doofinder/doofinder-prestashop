@@ -11,10 +11,8 @@
  * - getProperty : get single property of the search results (rpp, page, etc....)
  * - getResults: get an array with the results
  */
-
 class DoofinderResults
 {
-
     // doofinder status
     const SUCCESS = 'success';      // everything ok
     const NOTFOUND = 'notfound';    // no account with the provided hashid found
@@ -45,7 +43,7 @@ class DoofinderResults
             $this->properties['doofinder_status'] : self::SUCCESS;
 
         // results
-        $this->results = array();
+        $this->results = [];
 
         if (isset($rawResults['results']) && is_array($rawResults['results'])) {
             $this->results = $rawResults['results'];
@@ -56,7 +54,7 @@ class DoofinderResults
         }
 
         // build a friendly filter array
-        $this->filter = array();
+        $this->filter = [];
         // reorder filter, before assigning it to $this
         if (isset($rawResults['filter'])) {
             foreach ($rawResults['filter'] as $filterType => $filters) {
@@ -67,7 +65,7 @@ class DoofinderResults
         }
 
         // facets
-        $this->facets = array();
+        $this->facets = [];
         if (isset($rawResults['facets'])) {
             $this->facets = $rawResults['facets'];
 
@@ -75,7 +73,7 @@ class DoofinderResults
             foreach ($this->facets as $facetName => $facetProperties) {
                 if (!isset($facetProperties['_type'])) {
                     $facetProperties['_type'] = null;
-                    //$facetProperties['_type'] = (array_key_exists('terms',$facetProperties)?'terms':((array_key_exists('range',$facetProperties))?'range':null));
+                    // $facetProperties['_type'] = (array_key_exists('terms',$facetProperties)?'terms':((array_key_exists('range',$facetProperties))?'range':null));
                 }
                 switch ($facetProperties['_type']) {
                     case 'terms':
@@ -111,7 +109,9 @@ class DoofinderResults
      * getProperty
      *
      * get single property from the results
+     *
      * @param string @propertyName: 'results_per_page', 'query', 'max_score', 'page', 'total', 'hashid'
+     *
      * @return mixed the value of the property
      */
     public function getProperty($propertyName)
@@ -124,14 +124,14 @@ class DoofinderResults
      * getResults
      *
      * @return array search results. at the moment, only the 'cooked' version.
-     *                   Each result is of the form:
-     *                     array('header'=>...,
-     *                           'body' => ..,
-     *                           'price' => ..,
-     *                           'href' => ...,
-     *                           'image' => ...,
-     *                           'type' => ...,
-     *                           'id' => ..)
+     *               Each result is of the form:
+     *               array('header'=>...,
+     *               'body' => ..,
+     *               'price' => ..,
+     *               'href' => ...,
+     *               'image' => ...,
+     *               'type' => ...,
+     *               'id' => ..)
      */
     public function getResults()
     {
@@ -139,10 +139,9 @@ class DoofinderResults
     }
 
     /**
-     *
      * getFacetsNames
      *
-     * @return array facets names.
+     * @return array facets names
      */
     public function getFacetsNames()
     {
@@ -155,42 +154,40 @@ class DoofinderResults
      * @param string name the facet name whose results are wanted
      *
      * @return array facet search data
-     *                - for terms facets
-     *                array(
-     *                    '_type'=> 'terms',  // type of facet 'terms' or 'range'
-     *                    'missing'=> 3, // # of elements with no value for this facet
-     *                    'others'=> 2, // # of terms not present in the search response
-     *                    'total'=> 6, // # number of possible terms for this facet
-     *                    'terms'=> array(
-     *                        array('count'=>6, 'term'=>'Blue', 'selected'=>false),
-     *                        // in the response, there are 6 'blue' terms
-     *                        array('count'=>3, 'term': 'Red', 'selected'=>true),
-     *                        // if 'selected'=>true, that term has been selected as filter
-     *                        ...
-     *                    )
-     *                )
-     *                - for range facets
-     *                array(
-     *                    '_type'=> 'range',
-     *                    'ranges'=> array(
-     *                        array(
-     *                              'count'=>6, // in the response, 6 elements within that range.
-     *                              'from':0,
-     *                              'min': 30
-     *                              'max': 90,
-     *                              'mean'=>33.2,
-     *                              'total'=>432,
-     *                              'total_count'=>6,
-     *                              'selected_from'=> 34.3
-     *                               // if present. this value has been used as filter. false otherwise
-     *                              'selected_to'=> 99.3
-     *                               // if present. this value has been used as filter. false otherwise
-     *                        ),
-     *                        ...
-     *                    )
-     *                )
-     *
-     *
+     *               - for terms facets
+     *               array(
+     *               '_type'=> 'terms',  // type of facet 'terms' or 'range'
+     *               'missing'=> 3, // # of elements with no value for this facet
+     *               'others'=> 2, // # of terms not present in the search response
+     *               'total'=> 6, // # number of possible terms for this facet
+     *               'terms'=> array(
+     *               array('count'=>6, 'term'=>'Blue', 'selected'=>false),
+     *               // in the response, there are 6 'blue' terms
+     *               array('count'=>3, 'term': 'Red', 'selected'=>true),
+     *               // if 'selected'=>true, that term has been selected as filter
+     *               ...
+     *               )
+     *               )
+     *               - for range facets
+     *               array(
+     *               '_type'=> 'range',
+     *               'ranges'=> array(
+     *               array(
+     *               'count'=>6, // in the response, 6 elements within that range.
+     *               'from':0,
+     *               'min': 30
+     *               'max': 90,
+     *               'mean'=>33.2,
+     *               'total'=>432,
+     *               'total_count'=>6,
+     *               'selected_from'=> 34.3
+     *               // if present. this value has been used as filter. false otherwise
+     *               'selected_to'=> 99.3
+     *               // if present. this value has been used as filter. false otherwise
+     *               ),
+     *               ...
+     *               )
+     *               )
      */
     public function getFacet($facetName)
     {
@@ -233,7 +230,6 @@ class DoofinderResults
      *   "FROM the query results, filter only results that have
      *   ('Sillas de paseo' OR 'Sacos sillas de paseo') categories
      *   AND ('red' OR 'blue') color AND price is BETWEEN 34.3 and 99.3"
-
      */
     public function getAppliedFilters()
     {
@@ -244,8 +240,9 @@ class DoofinderResults
      * isOk
      *
      * checks if all went well
-     * @return boolean true if the status is 'success'.
-     *                 false if the status is not.
+     *
+     * @return bool true if the status is 'success'.
+     *              false if the status is not.
      */
     public function isOk()
     {

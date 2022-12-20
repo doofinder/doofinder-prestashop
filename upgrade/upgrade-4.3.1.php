@@ -23,7 +23,6 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -31,6 +30,7 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_4_3_1($module)
 {
     $current_admin_endpoint = Configuration::getGlobalValue('DF_AI_ADMIN_ENDPOINT');
-    $admin_endpoint = str_replace("app", "admin", $current_admin_endpoint);
+    $admin_endpoint = str_replace('app', 'admin', $current_admin_endpoint);
+
     return Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $admin_endpoint);
 }

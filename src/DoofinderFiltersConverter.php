@@ -18,10 +18,9 @@ use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 
 class DoofinderFiltersConverter
 {
-
     public function getFacetsFromFacetedSearchFilters(array $facetedSearchFilters)
     {
-        $facets = array();
+        $facets = [];
         foreach ($facetedSearchFilters as $facetArray) {
             $facet = new Facet();
             $facet
@@ -80,10 +79,10 @@ class DoofinderFiltersConverter
                                 ->setType($facetArray['type'])
                                 ->setMagnitude($value['nbr'])
                                 ->setProperty('symbol', $facetArray['unit'])
-                                ->setValue(array(
+                                ->setValue([
                                     'from' => $value[0],
                                     'to' => $value[1],
-                                ))
+                                ])
                         ;
                         $facet->addFilter($filter);
                     }
@@ -121,7 +120,7 @@ class DoofinderFiltersConverter
      */
     public function getFacetedSearchFiltersFromFacets(array $facets)
     {
-        $facetedSearchFilters = array();
+        $facetedSearchFilters = [];
 
         foreach ($facets as $facet) {
             switch ($facet->getType()) {
@@ -140,7 +139,7 @@ class DoofinderFiltersConverter
                         $type = 'id_feature';
                     }
                     if (!isset($facetedSearchFilters[$type])) {
-                        $facetedSearchFilters[$type] = array();
+                        $facetedSearchFilters[$type] = [];
                     }
                     foreach ($facet->getFilters() as $filter) {
                         if (!$filter->isActive()) {
@@ -165,10 +164,10 @@ class DoofinderFiltersConverter
                         if (!$filter->isActive()) {
                             continue;
                         }
-                        $facetedSearchFilters[$facet->getType()] = array(
+                        $facetedSearchFilters[$facet->getType()] = [
                             $filter->getValue()['from'],
                             $filter->getValue()['to'],
-                        );
+                        ];
                         break;
                     }
                     break;
