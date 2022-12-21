@@ -2583,7 +2583,7 @@ class Doofinder extends Module
 
         foreach ($languages as $lang) {
             foreach ($currencies as $cur) {
-                if ($cur["deleted"] == 1) {
+                if ($cur['deleted'] == 1) {
                     continue;
                 }
                 $ciso = $cur['iso_code'];
