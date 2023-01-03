@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -289,7 +290,10 @@ class Doofinder extends Module
             'tab_module' => $this->tab,
             'module_name' => $this->name,
         ];
-        $skipurl = $this->context->link->getAdminLink('AdminModules', true) . '&' . http_build_query($skip_url_params);
+        $skipurl = $this->context->link->getAdminLink('AdminModules', true);
+        $separator = strpos($skipurl, '?') === false ? '?' : '&';
+        $skipurl .= $separator . http_build_query($skip_url_params);
+
         $redirect = $this->context->shop->getBaseURL(true, false) . $this->_path . 'config.php';
         $token = Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $this->context->employee->email . '&token=' . $token;
