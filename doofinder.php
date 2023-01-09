@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -43,7 +44,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.3.13';
+    const VERSION = '4.3.14';
     const YES = 1;
     const NO = 0;
 
@@ -51,7 +52,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.3.13';
+        $this->version = '4.3.14';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '1.7'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -289,7 +290,10 @@ class Doofinder extends Module
             'tab_module' => $this->tab,
             'module_name' => $this->name,
         ];
-        $skipurl = $this->context->link->getAdminLink('AdminModules', true) . '?' . http_build_query($skip_url_params);
+        $skipurl = $this->context->link->getAdminLink('AdminModules', true);
+        $separator = strpos($skipurl, '?') === false ? '?' : '&';
+        $skipurl .= $separator . http_build_query($skip_url_params);
+
         $redirect = $this->context->shop->getBaseURL(true, false) . $this->_path . 'config.php';
         $token = Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $this->context->employee->email . '&token=' . $token;
