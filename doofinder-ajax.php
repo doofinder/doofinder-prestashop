@@ -39,6 +39,4 @@ if ($autoinstaller) {
     }
 }
 
-if ($doofinder->canAjax()) {
-    echo $doofinder->ajaxCall();
-}
+echo $doofinder->ajaxCall();

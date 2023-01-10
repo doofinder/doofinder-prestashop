@@ -44,7 +44,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.3.14';
+    const VERSION = '4.3.15';
     const YES = 1;
     const NO = 0;
 
@@ -52,7 +52,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.3.14';
+        $this->version = '4.3.15';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '1.7'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -185,7 +185,6 @@ class Doofinder extends Module
             'DF_AI_APIKEY',
             'DF_API_KEY',
             'DF_API_LAYER_DESCRIPTION',
-            'DF_APPEND_BANNER',
             'DF_CSS_VS',
             'DF_CUSTOMEXPLODEATTR',
             'DF_DEBUG',
@@ -212,12 +211,8 @@ class Doofinder extends Module
             'DF_GS_MPN_FIELD',
             'DF_GS_PRICES_USE_TAX',
             'DF_INSTALLATION_ID',
-            'DF_OWSEARCH',
-            'DF_OWSEARCHEB',
-            'DF_OWSEARCHFAC',
             'DF_REGION',
             'DF_RESTART_OV',
-            'DF_SEARCH_SELECTOR',
             'DF_SHOW_PRODUCT_FEATURES',
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
@@ -314,7 +309,6 @@ class Doofinder extends Module
         if ($configured) {
             $output .= $this->renderFormDataFeed($adv);
             if (!$dfEnabledV9) {
-                $output .= $this->renderFormInternalSearch($adv);
                 $output .= $this->renderFormCustomCSS($adv);
             }
             if ($adv) {
@@ -458,65 +452,6 @@ class Doofinder extends Module
         return $helper->generateForm([$this->getConfigFormChangeVersion()]);
     }
 
-    protected function renderFormInternalSearch($adv = false)
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        // $helper->submit_action = 'submitDoofinderModuleInternalSearch';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            . (($adv) ? '&adv=1' : '')
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = [
-            'fields_value' => $this->getConfigFormValuesInternalSearch(),
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        ];
-
-        $id_shop = 1;
-        $errorsMsg = '';
-        if (method_exists($this->context->shop, 'getContextShopID')) {
-            $id_shop = $this->context->shop->getContextShopID();
-        }
-        if (version_compare(_PS_VERSION_, '1.7', '<')) {
-            $facets_enabled = Configuration::get('DF_OWSEARCHFAC');
-            if ($facets_enabled) {
-                if (
-                    !$this->isRegisteredInHookInShop('displayLeftColumn', $id_shop) &&
-                    !$this->isRegisteredInHookInShop('displayRightColumn', $id_shop)
-                ) {
-                    $link = $this->context->link->getAdminLink('AdminModulesPositions');
-                    $msg = $this->l('You must hook Doofinder on displayLeftColumn or displayRightColumn');
-                    $errorsMsg .= $this->displayErrorCtm($msg, $link);
-                }
-            }
-        } else {
-            $overwrite_search = Configuration::get('DF_OWSEARCH', null);
-            if ($overwrite_search && !$this->isRegisteredInHookInShop('productSearchProvider', $id_shop)) {
-                $link = $this->context->link->getAdminLink('AdminModulesPositions');
-                $msg = $this->l('You must hook Doofinder on productSearchProvider');
-                $errorsMsg .= $this->displayErrorCtm($msg, $link);
-            }
-        }
-
-        $this->context->smarty->assign('id_tab', 'internal_search_tab');
-        $html = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/pre_tab.tpl');
-        $html .= $errorsMsg;
-        $html .= $this->renderFormDataEmbeddedSearch($adv);
-        $html .= $helper->generateForm([$this->getConfigFormInternalSearch()]);
-        $html .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
-
-        return $html;
-    }
-
     protected function renderFormDataFeed($adv = false)
     {
         $helper = new HelperForm();
@@ -574,31 +509,6 @@ class Doofinder extends Module
         }
 
         return false;
-    }
-
-    protected function renderFormDataEmbeddedSearch($adv = false)
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            . (($adv) ? '&adv=1' : '')
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = [
-            'fields_value' => $this->getConfigFormValuesEmbeddedSearch(),
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        ];
-
-        return $helper->generateForm([$this->getConfigFormEmbeddedSearch()]);
     }
 
     protected function getBooleanFormValue()
@@ -740,95 +650,6 @@ class Doofinder extends Module
         ];
     }
 
-    protected function getConfigFormEmbeddedSearch()
-    {
-        return [
-            'form' => [
-                'legend' => [
-                    'title' => $this->l('Embedded Search'),
-                    'icon' => 'icon-cogs',
-                ],
-                'description' => $this->l('DF_EB_LAYER_DESCRIPTION'),
-                'input' => [
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Override Search Page & Enable embedded layer'),
-                        'name' => 'DF_OWSEARCHEB',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                        'desc' => $this->l('It will enable a empty div to print your embedded layer'),
-                    ],
-                ],
-                'submit' => [
-                    'title' => $this->l('Save Embedded Search Options'),
-                    'name' => 'submitDoofinderModuleEmbeddedSearch',
-                ],
-            ],
-        ];
-    }
-
-    protected function getConfigFormInternalSearch()
-    {
-        return [
-            'form' => [
-                'legend' => [
-                    'title' => $this->l('API Internal Search'),
-                    'icon' => 'icon-cogs',
-                ],
-                'description' => $this->l('DF_API_LAYER_DESCRIPTION'),
-                'input' => [
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Overwrite Search page with Doofinder results'),
-                        'name' => 'DF_OWSEARCH',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Enable facets on Overwrite Search Page'),
-                        'desc' => $this->l('To enable this you must enable also Overwrite Search page'),
-                        'name' => 'DF_OWSEARCHFAC',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->l('Doofinder Api Key'),
-                        'name' => 'DF_API_KEY',
-                        'desc' => $this->l('Api Key, needed to overwrite Search page'),
-                    ],
-                    [
-                        'col' => 9,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-code"></i>',
-                        'desc' => $this->l('BANNER_CSS_SELECTOR_EXPLAINING') . ': "#content-wrapper #main h2"',
-                        'name' => 'DF_APPEND_BANNER',
-                        'label' => $this->l('"Append after" banner on Overwrite Search Page'),
-                    ],
-                    [
-                        'col' => 4,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-code"></i>',
-                        'desc' => $this->l('Optional. Default empty. Only if you have another "query input"'),
-                        'name' => 'DF_SEARCH_SELECTOR',
-                        'label' => $this->l('Query Input Selector'),
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->l('Custom attribute separator'),
-                        'name' => 'DF_CUSTOMEXPLODEATTR',
-                        'desc' => $this->l('Optional. Used if you have a custom data feed'),
-                    ],
-                ],
-                'submit' => [
-                    'title' => $this->l('Save Internal Search Options'),
-                    'name' => 'submitDoofinderModuleInternalSearch',
-                ],
-            ],
-        ];
-    }
-
     protected function getConfigFormDataFeed()
     {
         return [
@@ -919,13 +740,6 @@ class Doofinder extends Module
                             'id' => 'DF_GS_IMAGE_SIZE',
                             'name' => 'name',
                         ],
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Overwrite Search page with Doofinder results'),
-                        'name' => 'DF_OWSEARCH',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => 'select',
@@ -1092,7 +906,6 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_FEATURES' => Configuration::get('DF_SHOW_PRODUCT_FEATURES'),
             'DF_FEATURES_SHOWN[]' => explode(',', Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => Configuration::get('DF_GS_IMAGE_SIZE'),
-            'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
             'DF_UPDATE_ON_SAVE_DELAY' => Configuration::get('DF_UPDATE_ON_SAVE_DELAY'),
         ];
     }
@@ -1131,34 +944,11 @@ class Doofinder extends Module
         return $fields;
     }
 
-    protected function getConfigFormValuesInternalSearch()
-    {
-        $fields = [
-            'DF_OWSEARCH' => Configuration::get('DF_OWSEARCH'),
-            'DF_OWSEARCHFAC' => Configuration::get('DF_OWSEARCHFAC'),
-            'DF_API_KEY' => Configuration::get('DF_API_KEY'),
-            'DF_APPEND_BANNER' => Configuration::get('DF_APPEND_BANNER'),
-            'DF_SEARCH_SELECTOR' => Configuration::get('DF_SEARCH_SELECTOR'),
-            'DF_CUSTOMEXPLODEATTR' => Configuration::get('DF_CUSTOMEXPLODEATTR'),
-        ];
-
-        return $fields;
-    }
-
     protected function getConfigFormValuesChangeVersion()
     {
         $fields = [
             'DF_ENABLED_V9' => Configuration::get('DF_ENABLED_V9'),
             'DF_API_KEY' => Configuration::get('DF_API_KEY'),
-        ];
-
-        return $fields;
-    }
-
-    protected function getConfigFormValuesEmbeddedSearch()
-    {
-        $fields = [
-            'DF_OWSEARCHEB' => Configuration::get('DF_OWSEARCHEB'),
         ];
 
         return $fields;
@@ -1220,14 +1010,6 @@ class Doofinder extends Module
             $form_values = array_merge($form_values, $this->getConfigFormValuesSearchLayer(true));
             $formUpdated = 'search_layer_tab';
         }
-        if (((bool) Tools::isSubmit('submitDoofinderModuleInternalSearch')) == true) {
-            $form_values = array_merge($form_values, $this->getConfigFormValuesInternalSearch());
-            $formUpdated = 'internal_search_tab';
-        }
-        if (((bool) Tools::isSubmit('submitDoofinderModuleEmbeddedSearch')) == true) {
-            $form_values = array_merge($form_values, $this->getConfigFormValuesEmbeddedSearch());
-            $formUpdated = 'internal_search_tab';
-        }
         if (((bool) Tools::isSubmit('submitDoofinderModuleCustomCSS')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesCustomCSS());
             $formUpdated = 'custom_css_tab';
@@ -1265,27 +1047,12 @@ class Doofinder extends Module
             Configuration::updateValue($postKey, $value, $html);
         }
 
-        $ovrSearch = Configuration::get('DF_OWSEARCH');
-        $embeddedSearch = Configuration::get('DF_OWSEARCHEB');
-        if (($ovrSearch || $embeddedSearch) && $formUpdated == 'internal_search_tab') {
-            $messages .= $this->manualOverride();
-            if ($ovrSearch) {
-                $this->registerHook('productSearchProvider');
-            }
-        }
-
-        if (!$ovrSearch && $formUpdated == 'internal_search_tab') {
+        if ($formUpdated == 'internal_search_tab') {
             $this->unregisterHook('productSearchProvider');
         }
 
-        $ovrSearchFac = Configuration::get('DF_OWSEARCHFAC');
-        if ($ovrSearchFac && $formUpdated == 'internal_search_tab') {
-            $doofinder_hash = Tools::encrypt('PrestaShop_Doofinder_Facets' . date('YmdHis'));
-            Configuration::updateValue('DF_FACETS_TOKEN', $doofinder_hash);
-        }
-
         if ($formUpdated == 'data_feed_tab') {
-            if (((bool) Configuration::get('DF_ENABLED_V9') && (bool) Configuration::get('DF_OWSEARCH')) ||
+            if (((bool) Configuration::get('DF_ENABLED_V9')) ||
                 (bool) Configuration::get('DF_UPDATE_ON_SAVE_DELAY')
             ) {
                 $this->setSearchEnginesByConfig();
@@ -1338,7 +1105,6 @@ class Doofinder extends Module
         $df_region = Configuration::get('DF_REGION');
         $script = Configuration::get('DOOFINDER_SCRIPT_' . $lang);
         $extra_css = Configuration::get('DF_EXTRA_CSS');
-        $df_querySelector = Configuration::get('DF_SEARCH_SELECTOR');
         $installation_ID = Configuration::get('DF_INSTALLATION_ID');
         if (empty($df_querySelector)) {
             $df_querySelector = '#search_query_top';
@@ -1353,15 +1119,9 @@ class Doofinder extends Module
             'df_region' => $df_region,
             'self' => dirname(__FILE__),
             'df_another_params' => $params,
-            'doofinder_search_selector' => $df_querySelector,
             'installation_ID' => $installation_ID,
             'currency' => $currency,
         ]);
-        $appendTo = Configuration::get('DF_APPEND_BANNER');
-        if (empty($appendTo)) {
-            $appendTo = 'none';
-        }
-        $this->smarty->assign('doofinder_banner_append', $appendTo);
 
         return true;
     }
@@ -1391,53 +1151,9 @@ class Doofinder extends Module
                 $this->context->controller->php_self == 'search'
             ) {
                 $noCookieJS = Configuration::get('DF_DSBL_DFCKIE_JS');
-                $noFacetsJS = Configuration::get('DF_DSBL_DFFAC_JS');
-                $noPaginaJS = Configuration::get('DF_DSBL_DFPAG_JS');
                 $noLinksJS = Configuration::get('DF_DSBL_DFLINK_JS');
 
-                $overwrite_search = Configuration::get('DF_OWSEARCH', null);
-                $overwrite_facets = Configuration::get('DF_OWSEARCHFAC', null);
                 if (version_compare(_PS_VERSION_, '1.7', '<')) {
-                    if ($overwrite_search) {
-                        if ($overwrite_facets) {
-                            $css_path = str_replace('doofinder', 'blocklayered', $this->_path);
-                            if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
-                                if (!$noPaginaJS) {
-                                    $this->context->controller->addJS(
-                                        $this->_path . 'views/js/doofinder-pagination.js'
-                                    );
-                                }
-                                if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered.css')) {
-                                    $this->context->controller->addCSS(
-                                        $css_path . 'blocklayered.css',
-                                        'all'
-                                    );
-                                } else {
-                                    $this->context->controller->addCSS(
-                                        $this->_path . 'views/css/doofinder-filters.css',
-                                        'all'
-                                    );
-                                }
-                            } else {
-                                if (!$noPaginaJS) {
-                                    $this->context->controller->addJS(
-                                        $this->_path . 'views/js/doofinder-pagination_15.js'
-                                    );
-                                }
-                                if (file_exists(_PS_MODULE_DIR_ . 'blocklayered/blocklayered-15.css')) {
-                                    $this->context->controller->addCSS($css_path . 'blocklayered-15.css', 'all');
-                                } else {
-                                    $this->context->controller->addCSS(
-                                        $this->_path . 'views/css/doofinder-filters-15.css',
-                                        'all'
-                                    );
-                                }
-                            }
-                            if (!$noFacetsJS) {
-                                $this->context->controller->addJS($this->_path . 'views/js/doofinder_facets.js');
-                            }
-                        }
-                    }
                     if (!$noCookieJS) {
                         $this->context->controller->addJS($this->_path . 'views/js/js.cookie.js');
                     }
@@ -1450,10 +1166,6 @@ class Doofinder extends Module
                 }
                 if (!$noLinksJS) {
                     $this->context->controller->addJS($this->_path . 'views/js/doofinder-links.js');
-                }
-                $appendTo = Configuration::get('DF_APPEND_BANNER');
-                if ($appendTo) {
-                    $this->context->controller->addJS($this->_path . 'views/js/doofinder-banner.js');
                 }
             }
             $extraCSS = Configuration::get('DF_EXTRA_CSS');
@@ -1478,12 +1190,11 @@ class Doofinder extends Module
             isset($this->context->controller->php_self) &&
             $this->context->controller->php_self == 'search'
         ) {
-            $appendTo = Configuration::get('DF_APPEND_BANNER');
             $savedToken = Configuration::get('DF_FACETS_TOKEN');
             $this->context->smarty->assign([
                 'doofinder_token' => $savedToken,
             ]);
-            if (!empty($this->searchBanner) && !empty($appendTo)) {
+            if (!empty($this->searchBanner)) {
                 $this->context->smarty->assign([
                     'doofinder_banner_image' => $this->searchBanner['image'],
                     'doofinder_banner_blank' => $this->searchBanner['blank'],
@@ -1517,9 +1228,7 @@ class Doofinder extends Module
 
     public function generateSearch($returnToSearchController = false)
     {
-        $overwrite_search = Configuration::get('DF_OWSEARCH');
-        $overwrite_facets = Configuration::get('DF_OWSEARCHFAC');
-        if ($overwrite_search && ($overwrite_facets || $returnToSearchController)) {
+        if ($returnToSearchController) {
             $query = Tools::getValue('search_query', Tools::getValue('ref'));
             $p = abs((int) Tools::getValue('p', 1));
             $n = abs((int) Tools::getValue('n', Configuration::get('PS_PRODUCTS_PER_PAGE')));
@@ -1823,8 +1532,7 @@ class Doofinder extends Module
 
     public function hookProductSearchProvider($params)
     {
-        $ovrSearch = Configuration::get('DF_OWSEARCH');
-        if (isset($params['query']) && $ovrSearch) {
+        if (isset($params['query'])) {
             $query = $params['query'];
             if ($query->getSearchString()) {
                 if ($this->testDoofinderApi(Context::getContext()->language->iso_code)) {
@@ -2200,14 +1908,8 @@ class Doofinder extends Module
             $dfResultsArray = $dfResults->getResults();
             $product_pool_attributes = [];
             $product_pool_ids = [];
-            $customexplodeattr = Configuration::get('DF_CUSTOMEXPLODEATTR');
             foreach ($dfResultsArray as $entry) {
                 if ($entry['type'] == 'product') {
-                    if (!empty($customexplodeattr) && strpos($entry['id'], $customexplodeattr) !== false) {
-                        $id_products = explode($customexplodeattr, $entry['id']);
-                        $product_pool_attributes[] = $id_products[1];
-                        $product_pool_ids[] = (int) pSQL($id_products[0]);
-                    }
                     if (strpos($entry['id'], 'VAR-') === false) {
                         $product_pool_ids[] = (int) pSQL($entry['id']);
                     } else {
@@ -2409,47 +2111,6 @@ class Doofinder extends Module
         );
 
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
-    }
-
-    public function canAjax()
-    {
-        $id_shop = 1;
-        if (method_exists($this->context->shop, 'getContextShopID')) {
-            $id_shop = $this->context->shop->getContextShopID();
-        }
-        $facets_enabled = Configuration::get('DF_OWSEARCHFAC');
-        $response = [];
-        if ($facets_enabled) {
-            $savedToken = Configuration::get('DF_FACETS_TOKEN');
-            $dsblToken = Configuration::get('DF_DSBL_AJAX_TKN');
-            $token = Tools::getValue('token');
-            if (($savedToken == $token) || !$dsblToken) {
-                if (
-                    !$this->isRegisteredInHookInShop('displayLeftColumn', $id_shop) &&
-                    !$this->isRegisteredInHookInShop('displayRightColumn', $id_shop)
-                ) {
-                    $response = [
-                        'error' => 'You must hook Doofinder on displayLeftColumn or displayRightColumn',
-                    ];
-                }
-            } else {
-                $response = [
-                    'error' => 'Token is invalid',
-                ];
-            }
-        } else {
-            $response = [
-                'error' => 'Doofinder facets not enabled but executing ajax request??',
-            ];
-        }
-
-        if (empty($response)) {
-            return true;
-        } else {
-            echo json_encode($response);
-
-            return false;
-        }
     }
 
     public function getEmbeddedTemplateLocation()
