@@ -104,6 +104,7 @@ class DfProductBuild
         $p['extra_title_1'] = dfTools::cleanReferences($p['title']);
         $p['extra_title_2'] = dfTools::splitReferences($p['title']);
         $p['tags'] = dfTools::cleanString($product['tags']);
+        $p['stock_quantity'] = dfTools::cleanString($product['stock_quantity']);
 
         if (dfTools::versionGte('1.7.0.0')) {
             $p['isbn'] = dfTools::cleanString($product['isbn']);

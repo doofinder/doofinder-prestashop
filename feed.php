@@ -128,7 +128,6 @@ $cfg_prices_w_taxes = dfTools::getBooleanFromRequest(
     'taxes',
     (bool) dfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', Doofinder::YES)
 );
-$cfg_display_stock_qty = dfTools::cfg($shop->id, 'DF_GS_STOCK');
 $cfg_image_size = dfTools::cfg($shop->id, 'DF_GS_IMAGE_SIZE');
 $cfg_mod_rewrite = dfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', Doofinder::YES);
 $cfg_product_variations = (int) dfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
@@ -190,9 +189,7 @@ if (dfTools::versionGte('1.7.0.0')) {
     $header = array_merge($header, ['isbn']);
 }
 
-if ($cfg_display_stock_qty) {
-    $header[] = 'stock_quantity';
-}
+$header[] = 'stock_quantity';
 
 if ($cfg_display_prices) {
     $header[] = 'price';
@@ -462,10 +459,8 @@ foreach ($rows as $row) {
         }
 
         // STOCK_QUANTITY
-        if ($cfg_display_stock_qty) {
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['stock_quantity']);
-        }
+        echo TXT_SEPARATOR;
+        echo dfTools::cleanString($row['stock_quantity']);
 
         // PRODUCT PRICE & ON SALE PRICE
         if ($cfg_display_prices && $cfg_product_variations !== 1) {
