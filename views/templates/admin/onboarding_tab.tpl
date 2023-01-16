@@ -177,7 +177,7 @@
 		border-color: #1b1851;
 	}
 </style>
-<script type="text/javascript" src="/modules/doofinder/views/js/doofinder-onboarding.js" ></script>
+<script type="text/javascript" src="{$module_dir}views/js/doofinder-onboarding.js" ></script>
 <script type="text/javascript">
 	const paramsPopup = "{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}";
 	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF-8'}";
