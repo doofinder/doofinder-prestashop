@@ -179,6 +179,7 @@
 </style>
 <script type="text/javascript" src="{$module_dir}views/js/doofinder-onboarding.js" ></script>
 <script type="text/javascript">
+	const df_module_dir = "{$module_dir}";
 	const paramsPopup = "{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}";
 	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF-8'}";
 	{if $shop_id}
