@@ -260,7 +260,7 @@ class Doofinder extends Module
             return $stop;
         }
         $this->migrateOldConfigHashIDs();
-        $adv = Tools::getValue('adv', 0);
+        $adv = Tools::getValue('adv', 1);
 
         $this->context->smarty->assign('adv', $adv);
 
@@ -359,10 +359,10 @@ class Doofinder extends Module
 
     protected function buildFeedUrl($shop_id, $language, $currency)
     {
-        $shop_url = $this->context->shop->getBaseURL(true, false);
+        $shop_url = $this->getShopURL($shop_id);
 
-        return rtrim($shop_url, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($this->_path, DIRECTORY_SEPARATOR)
-            . 'feed.php?'
+        return $shop_url . ltrim('modules/' . $this->name, DIRECTORY_SEPARATOR)
+            . '/feed.php?'
             . 'currency=' . Tools::strtoupper($currency)
             . '&language=' . Tools::strtoupper($language)
             . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
