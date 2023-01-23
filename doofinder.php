@@ -260,7 +260,7 @@ class Doofinder extends Module
             return $stop;
         }
         $this->migrateOldConfigHashIDs();
-        $adv = Tools::getValue('adv', 1);
+        $adv = Tools::getValue('adv', 0);
 
         $this->context->smarty->assign('adv', $adv);
 
