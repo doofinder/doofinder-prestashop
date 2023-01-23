@@ -360,7 +360,7 @@ class Doofinder extends Module
     protected function buildFeedUrl($shop_id, $language, $currency)
     {
         $shop_url = $this->context->shop->getBaseURL(true, false);
-        
+
         return rtrim($shop_url, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($this->_path, DIRECTORY_SEPARATOR)
             . 'feed.php?'
             . 'currency=' . Tools::strtoupper($currency)
