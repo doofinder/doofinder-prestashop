@@ -1,0 +1,26 @@
+name: Create Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+  create-release:
+    name: Build & Send to validator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+
+      - name: Set output
+        id: vars
+        run: |
+          echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+          echo "zip_path=../doofinder-${GITHUB_REF#refs/*/}.zip" >> $GITHUB_OUTPUT
+      - name: Build
+        run: sh build.sh ${{ steps.vars.outputs.tag }}
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: ${{ steps.vars.outputs.zip_path }}
