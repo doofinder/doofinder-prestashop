@@ -1,0 +1,9 @@
+{
+    "id_product" : "30818",
+    "technical_name" : "doofinder",
+    "display_name" : "Doofinder",
+    "channel" : "stable",
+    "type_upgrade" : "updatemin",
+    "product_type" : "module",
+    "compatible_from" : "1.5.0.0"
+}
