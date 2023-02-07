@@ -15,11 +15,12 @@ jobs:
         run: |
           tag=${GITHUB_REF#refs/*/}
           zip_path="doofinder-prestashop.zip"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
           echo "zip_path=$zip_path" >> $GITHUB_OUTPUT
           git archive --format=zip -o $zip_path --prefix doofinder/ $tag
       - name: Create release & upload asset
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          draft: true
           files: ${{ steps.vars.outputs.zip_path }}
+          name: Doofinder Prestashop Addon ${{ steps.vars.outputs.tag }}
