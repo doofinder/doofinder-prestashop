@@ -116,7 +116,7 @@ class DfProductBuild
         }
 
         if ($this->show_product_features) {
-            $p['attributes'] = $this->getFeatures($product);
+            $p = array_merge($p, $this->getFeatures($product));
         }
 
         if ($this->product_variations) {
@@ -300,8 +300,12 @@ class DfProductBuild
         $keys = $this->featuresKeys;
 
         foreach (dfTools::getFeaturesForProduct($product['id_product'], $this->id_lang, $keys) as $key => $values) {
-            foreach ($values as $value) {
-                $features[$key][] = dfTools::cleanString($value);
+            if (count($values) > 1) {
+                foreach ($values as $value) {
+                    $features[strtolower($key)][] = dfTools::cleanString($value);
+                }
+            } else {
+                $features[strtolower($key)] = dfTools::cleanString($values[0]);
             }
         }
 
