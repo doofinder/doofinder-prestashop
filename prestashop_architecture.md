@@ -40,3 +40,26 @@ sequenceDiagram
         end
     end
 ```
+
+### Indexing via feed
+```mermaid
+sequenceDiagram
+    actor client
+    participant doomanager
+    participant prestashop
+    participant dftasks
+
+    alt
+        client->>doomanager: Press the index button
+        doomanager->>dftasks: Request indexing for the search engine
+    end
+    dftasks->>dftasks: retrieve feed_url in datasource
+    dftasks->>prestashop: GET /feed.php
+    prestashop->>prestashop: generate feed on the fly
+    prestashop->>dftasks: RESPONSE: plain text feed
+    dftasks->>dftasks: index all feed products
+    alt
+        dftasks->>doomanager: index OK
+        doomanager->>client: show successful message
+    end
+```
