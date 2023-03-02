@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -310,11 +309,7 @@ class Doofinder extends Module
         $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
         $apikey = Configuration::get('DF_AI_APIKEY');
 
-        if (!$installation_id && $multishop_enable && $apikey) {
-            return true;
-        }
-
-        return false;
+        return !$installation_id && $multishop_enable && $apikey;
     }
 
     /**
@@ -752,7 +747,7 @@ class Doofinder extends Module
      *
      * @param array $params
      *
-     * @return bool
+     * @return void
      */
     private function configureHookCommon($params = false)
     {
@@ -779,8 +774,6 @@ class Doofinder extends Module
             'installation_ID' => $installation_ID,
             'currency' => $currency,
         ]);
-
-        return true;
     }
 
     /**
@@ -790,36 +783,56 @@ class Doofinder extends Module
     {
         $this->configureHookCommon($params);
         if (Configuration::get('DF_ENABLED_V9')) {
-            /*
-             * loads different cart handling assets depending on the version of prestashop used
-             * (uses different javascript implementations for this purpose in prestashop 1.6.x and 1.7.x)
-             */
-            if (version_compare(_PS_VERSION_, '1.7', '<') === true) {
-                $this->context->controller->addJS(
-                    $this->_path . 'views/js/add-to-cart/doofinder-add_to_cart_ps16.js'
-                );
-            } else {
-                $this->context->controller->addJS(
-                    $this->_path . 'views/js/add-to-cart/doofinder-add_to_cart_ps17.js'
-                );
-            }
-
-            return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
+            return $this->displayScriptLiveLayer();
         } else {
-            $extraCSS = Configuration::get('DF_EXTRA_CSS');
-            $cssVS = (int) Configuration::get('DF_CSS_VS');
-            $file = 'doofinder_custom_' . $this->context->shop->id . '_vs_' . $cssVS . '.css';
-            if ($extraCSS) {
-                if (file_exists(dirname(__FILE__) . '/views/css/' . $file)) {
-                    $this->context->controller->addCSS(
-                        $this->_path . 'views/css/' . $file,
-                        'all'
-                    );
-                }
-            }
-
-            return $this->display(__FILE__, 'views/templates/front/script.tpl');
+            return $this->displayScriptV7();
         }
+    }
+
+    /**
+     * Render the script for the Livelayer search layer
+     *
+     * @return string
+     */
+    public function displayScriptLiveLayer()
+    {
+        /*
+         * loads different cart handling assets depending on the version of prestashop used
+         * (uses different javascript implementations for this purpose in prestashop 1.6.x and 1.7.x)
+         */
+        if (version_compare(_PS_VERSION_, '1.7', '<') === true) {
+            $this->context->controller->addJS(
+                $this->_path . 'views/js/add-to-cart/doofinder-add_to_cart_ps16.js'
+            );
+        } else {
+            $this->context->controller->addJS(
+                $this->_path . 'views/js/add-to-cart/doofinder-add_to_cart_ps17.js'
+            );
+        }
+
+        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
+    }
+
+    /**
+     * Render the script for the V7 search layer
+     *
+     * @return string
+     */
+    public function displayScriptV7()
+    {
+        $extraCSS = Configuration::get('DF_EXTRA_CSS');
+        $cssVS = (int) Configuration::get('DF_CSS_VS');
+        $file = 'doofinder_custom_' . $this->context->shop->id . '_vs_' . $cssVS . '.css';
+        if ($extraCSS) {
+            if (file_exists(dirname(__FILE__) . '/views/css/' . $file)) {
+                $this->context->controller->addCSS(
+                    $this->_path . 'views/css/' . $file,
+                    'all'
+                );
+            }
+        }
+
+        return $this->display(__FILE__, 'views/templates/front/script.tpl');
     }
 
     /**
