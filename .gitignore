@@ -9,3 +9,6 @@ test_doofinder.php
 /deploy
 /dist/*
 !/dist/*latest*.zip
+vendor/
+composer.lock
+.php-cs-fixer.dist.php
