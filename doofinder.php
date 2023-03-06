@@ -19,16 +19,6 @@ if (!class_exists('dfTools')) {
     require_once dirname(__FILE__) . '/lib/dfTools.class.php';
 }
 
-if (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
-    require_once implode(DIRECTORY_SEPARATOR, [
-        dirname(__FILE__), 'src', 'DoofinderProductSearchProvider.php',
-    ]);
-
-    require_once implode(DIRECTORY_SEPARATOR, [
-        dirname(__FILE__), 'src', 'DoofinderRangeAggregator.php',
-    ]);
-}
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -43,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.4.0';
+    const VERSION = '4.4.1';
     const YES = 1;
     const NO = 0;
 
@@ -51,7 +41,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.4.0';
+        $this->version = '4.4.1';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
