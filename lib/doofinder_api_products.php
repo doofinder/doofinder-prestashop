@@ -14,7 +14,7 @@
  */
 require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 
-const API_URL = 'https://{region}-api.doofinder.com';
+const API_URL = 'https://{region}-admin.doofinder.com';
 const API_VERSION = '2';
 
 class DoofinderApiProducts
@@ -33,7 +33,7 @@ class DoofinderApiProducts
      */
     public function updateBulk($payload)
     {
-        $endpoint = '/api/v' . API_VERSION . '/search_engines/' . $this->hashid . '/indices/product/items/_bulk';
+        $endpoint = '/plugins/prestashop/' . $this->hashid . '/product_update';
 
         $url = $this->api_url . $endpoint;
 
@@ -47,11 +47,11 @@ class DoofinderApiProducts
      */
     public function deleteBulk($payload)
     {
-        $endpoint = '/api/v' . API_VERSION . '/search_engines/' . $this->hashid . '/indices/product/items/_bulk';
+        $endpoint = '/plugins/prestashop/' . $this->hashid . '/product_delete';
 
         $url = $this->api_url . $endpoint;
 
-        return $this->delete($url, $payload);
+        return $this->post($url, $payload);
     }
 
     private function post($url, $payload)
@@ -59,22 +59,6 @@ class DoofinderApiProducts
         $client = new EasyREST();
 
         $response = $client->post(
-            $url,
-            $payload,
-            false,
-            false,
-            'application/json',
-            ['Authorization: Token ' . $this->api_key]
-        );
-
-        return json_decode($response->response, true);
-    }
-
-    private function delete($url, $payload)
-    {
-        $client = new EasyREST();
-
-        $response = $client->delete(
             $url,
             $payload,
             false,
