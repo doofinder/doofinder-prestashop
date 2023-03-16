@@ -1013,11 +1013,7 @@ class Doofinder extends Module
                 }
             } elseif ($action == 'delete') {
                 $api = new DoofinderApiProducts($hashid, $apikey, $region);
-                $payload = array_map(function ($a) {
-                    return ['id' => $a];
-                }, $products);
-
-                $response = $api->deleteBulk(json_encode($payload));
+                $response = $api->deleteBulk(json_encode($products));
 
                 if (isset($response['error']) && !empty($response['error'])) {
                     $this->debug(json_encode($response['error']));
