@@ -35,10 +35,6 @@
     <li class="active"><a href="#onboarding_tab" role="tab" data-toggle="tab">{l s='On Boarding' mod='doofinder'}</a></li>
     {else}
     <li class="active"><a href="#data_feed_tab" role="tab" data-toggle="tab">{l s='Data Feed' mod='doofinder'}</a></li>
-    {if !$dfEnabledV9 && !$is_new_shop}
-        <li><a href="#internal_search_tab" role="tab" data-toggle="tab">{l s='Internal Search' mod='doofinder'}</a></li>
-        <li><a href="#custom_css_tab" role="tab" data-toggle="tab">{l s='Custom CSS' mod='doofinder'}</a></li>
-    {/if}
     <li><a href="#support_tab" role="tab" data-toggle="tab">{l s='Support' mod='doofinder'}</a></li>
     {/if}
     {if $adv && $configured}
