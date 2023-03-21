@@ -33,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.4.2';
+    const VERSION = '4.4.3';
     const YES = 1;
     const NO = 0;
 
@@ -41,7 +41,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.4.2';
+        $this->version = '4.4.3';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -622,6 +622,13 @@ class Doofinder extends Module
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Enable v9 layer (Livelayer)'),
+                        'name' => 'DF_ENABLED_V9',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ],
+                    [
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->l('Debug Mode. Write info logs in doofinder.log file'),
                         'name' => 'DF_DEBUG',
                         'is_bool' => true,
@@ -662,6 +669,7 @@ class Doofinder extends Module
         return [
             'DF_API_KEY' => Configuration::get('DF_API_KEY'),
             'DF_REGION' => Configuration::get('DF_REGION'),
+            'DF_ENABLED_V9' => Configuration::get('DF_ENABLED_V9'),
             'DF_DEBUG' => Configuration::get('DF_DEBUG'),
             'DF_DSBL_HTTPS_CURL' => Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => Configuration::get('DF_DEBUG_CURL'),
