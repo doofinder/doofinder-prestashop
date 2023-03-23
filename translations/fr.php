@@ -69,7 +69,7 @@ $_MODULE['<{doofinder}prestashop>support_tab_dfc465ee578939c8760c4aa00d2c7234'] 
 $_MODULE['<{doofinder}prestashop>support_tab_a0b0d4b4cb7e019561740ca1fe2e9a4a'] = 'Comprendre comment le flux de produits fonctionne pour afficher les résultats dans la couche de recherche de Doofinder';
 $_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] = 'Comment ajouter des informations dans
  la couche de recherche de Doofinder ?';
- $_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'Comment configurer les filtres de la couche de recherche';
+$_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'Comment configurer les filtres de la couche de recherche';
 $_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Apprendre les bases de Live Layer';
 $_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] = 'Vous pouvez déboguer ou désactiver diverses options dans l\'onglet caché des options avancées du module. Attention : à n\'utiliser que si vous êtes un utilisateur expérimenté !';
 $_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] = ' Activer les options de l\'onglet de module avancé';
