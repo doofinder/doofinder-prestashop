@@ -13,42 +13,36 @@
 *}
 
 <div class="panel">
-	<div class="row doofinder-header">
-		<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" class="col-xs-6 col-md-4 text-center" id="payment-logo" />
-		<div class="col-xs-6 col-md-4 text-center">
-			<h4>{l s='Add a smart search engine to your e-commerce in 5 minutes and with no programming' mod='doofinder'}</h4>
-			<h4>{l s='Doofinder increases sales because your customers search and find the most relevant results' mod='doofinder'}</h4>
-		</div>
-		<div class="col-xs-12 col-md-4 text-center">
-			<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaign=support_tab&utm_content=prestashop_module_support_tab" target="_blank" class="btn btn-primary" id="create-account-btn">{l s='Create an account now!' mod='doofinder'}</a><br />
-			{l s='Already have an account?' mod='doofinder'}<a href="https://admin.doofinder.com/auth/login" target="_blank"> {l s='Log in' mod='doofinder'}</a>
+	<div class="row doofinder-header text-center pb-5 mb-5">
+		<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png"  id="payment-logo" />
+	</div>
+	<div class="row" style="margin-top: 2em;">
+		<div class="col-md-12 text-center">
+			<h3 style="background-color:  #f4f4f4 ; text-transform:uppercase;">{l s='Need help configuring your search engine?' mod='doofinder'}</h3>
 		</div>
 	</div>
-
-	<hr />
-	
+	<div class="row">
+		<div class="col-md-12 text-center">
+			<h2><strong>{l s='All documentation in one place!' mod='doofinder'} </strong><a href="https://support.doofinder.com/">https://support.doofinder.com/</a></h2>
+		</div>
+	</div>
+		
 	<div class="doofinder-content">
-		<div class="row">
+		<div class="row" style="margin-top: 2em;">
 			<div class="col-md-12">
-				<h3>{l s='Need help configuring your search engine?' mod='doofinder'}</h3>
 				<dl>
-					<dt>&middot; {l s='How to install Doofinder in PrestaShop 1.5-1.7' mod='doofinder'}</dt>
-					<dd><a href="https://www.doofinder.com/support/plugins/prestashop-15" target="_blank">https://www.doofinder.com/support/plugins/prestashop-15</a></dd>
+					<dt>&middot; {l s='Understand how the product feed works to display results in the Doofinder search layer' mod='doofinder'}</dt>
+					<dd><a href="https://support.doofinder.com/getting-started/the-product-data-feed.html" target="_blank">Visitar página</a></dd>
 					
-					<dt>&middot; {l s='Products are displayed without VAT in PrestaShop' mod='doofinder'}</dt>
-					<dd><a href="https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop" target="_blank">https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop</a></dd>
+					<dt>&middot; {l s='How to add information in the Doofinder search layer' mod='doofinder'}</dt>
+					<dd><a href="https://support.doofinder.com/layers/appearance.html" target="_blank">Visitar página</a></dd>
 					
-					<dt>&middot; {l s='Customize the Doofinder Layer Look & Feel' mod='doofinder'}</dt>
-					<dd><a href="https://www.doofinder.com/support/layer-customization/custom-look-n-feel" target="_blank">https://www.doofinder.com/support/troubleshooting/products-are-displayed-without-vat-in-prestashop</a></dd>
-					
-					<dt>&middot; {l s='All documentation in one place!' mod='doofinder'}</dt>
-					<dd><a href="https://www.doofinder.com/support/" target="_blank">https://www.doofinder.com/support/</a></dd>
+					<dt>&middot; {l s='How to configure the search layer filters' mod='doofinder'}</dt>
+					<dd><a href="https://support.doofinder.com/managing-results/facets-configuration" target="_blank">Visitar página</a></dd>
 
-					<dt>&middot; {l s='Code example to paste on your Doofinder dashboard to use Embedded layer instead of API on your PrestaShop native search results page' mod='doofinder'}</dt>
-					<dd><a href="https://gist.github.com/danidomen/71f03ad80ac58e22af94bf479675f521" target="_blank">GitHub</a></dd>
+					<dt>&middot; {l s='Learn the basics about Live Layer' mod='doofinder' mod='doofinder'}</dt>
+					<dd><a href="https://support.doofinder.com/layers/live-layer-basics.html" target="_blank">Visitar página</a></dd>
 
-					<dt>&middot; {l s='You can debug or disable some options on the hidden advanced tab of the module. Caution: Use only if you are a experienced user!!' mod='doofinder'}</dt>
-					<dd><a href="{html_entity_decode($adv_url|escape:'htmlall':'UTF-8')}">{l s='Enable advanced module tab options' mod='doofinder'}</a></dd>
 				</dl>
 			</div>
 		</div>
@@ -65,9 +59,8 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-12 text-center">
-				<a href="https://www.doofinder.com/signup/?mktcod=PSHOP&utm_source=prestashop_module&utm_campaign=support_tab&utm_content=prestashop_module_free_trial_link" target="_blank" class="btn btn-primary btn-lg" style="font-size:27px;background-color: #27c356" id="create-account-btn">{l s='Create a free acount!' mod='doofinder'}</a>
-			</div>
+					<span><strong>&middot; {l s='You can debug or disable some options on the hidden advanced tab of the module. Caution: Use only if you are a experienced user!!' mod='doofinder'}</strong></span><br />
+					<span><a href="{html_entity_decode($adv_url|escape:'htmlall':'UTF-8')}">{l s='Enable advanced module tab options' mod='doofinder'}</a></span>
 		</div>
 	</div>
 </div>

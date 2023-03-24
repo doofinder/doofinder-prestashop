@@ -278,43 +278,18 @@ $_MODULE['<{doofinder}prestashop>onboarding_tab_d3de93cac749c0caa87290a2a4a7c8a9
 'Qu’attendez-vous?';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_e6665248f64ed1908bf95510e06c1694'] =
 'Tester notre solution gratuitement pendant 30 jours';
-$_MODULE['<{doofinder}prestashop>support_tab_ba26552e526b4e94f440ab5a0f7ce65f'] =
-'Ajoutez un moteur de recherche intelligent à votre site en moins de 5 minutes et 
-sans programmation';
-$_MODULE['<{doofinder}prestashop>support_tab_641f267a37c2fdbf179212a21a53042b'] =
-'Doofinder vous offre la possibilité d\'afficher vos résultats de manière immédiate 
-dès lors que vos clients effectuent une recherche';
-$_MODULE['<{doofinder}prestashop>support_tab_f431e97ef0f81e233ffa5ff4a2fe5a3a'] =
-'Créer un compte maintenant!';
-$_MODULE['<{doofinder}prestashop>support_tab_21bdc5689c12595ae14298354d5550d5'] =
-'Vous avez déjà un compte?';
-$_MODULE['<{doofinder}prestashop>support_tab_bffe9a3c9a7e00ba00a11749e022d911'] =
-'Log in';
-$_MODULE['<{doofinder}prestashop>support_tab_4c1fee9a2c61bba0f4bbcab7c99948de'] =
-'Vous avez besoin d’aide pour configurer votre moteur de recherche?';
-$_MODULE['<{doofinder}prestashop>support_tab_278897e5a25159f9293dae556cb8640d'] =
-'Comment installer Doofinder dans PrestaShop 1.5-1.7?';
-$_MODULE['<{doofinder}prestashop>support_tab_cdc5604b792036ec806c2bfa75dfea66'] =
-'Les produits sont affichés sans la TVA dans Prestashop';
-$_MODULE['<{doofinder}prestashop>support_tab_978b9b3da46c9039694227d4073831b5'] =
-'Modifier le Look & Feel du Layer de Doofinder';
-$_MODULE['<{doofinder}prestashop>support_tab_dfc465ee578939c8760c4aa00d2c7234'] =
-'Toute la documentation nécessaire';
-$_MODULE['<{doofinder}prestashop>support_tab_fe951ea9094aca1270834d6f64de9993'] =
-' Exemple de code à coller sur votre tableau de bord Doofinder pour utiliser la 
-couche incorporée à la place de l\'API sur votre page de résultats de recherche 
-native de PrestaShop';
-$_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] =
-'You can debug or disable some options on the hidden advanced tab of the module. 
-Caution: Use only if you are a experienced user!!';
-$_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] =
-' Activer les options de l\'onglet de module avancé';
-$_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] =
-'Ou contacter directement notre support, nous serons ravis de vous guider';
-$_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] =
-'Mail de notre support';
-$_MODULE['<{doofinder}prestashop>support_tab_79061f39882168064500dc7decfd3d13'] =
-'Créer gratuitement un compte!';
+$_MODULE['<{doofinder}prestashop>support_tab_4c1fee9a2c61bba0f4bbcab7c99948de'] = 'Vous avez besoin d\’aide pour configurer votre moteur de recherche?';
+$_MODULE['<{doofinder}prestashop>support_tab_dfc465ee578939c8760c4aa00d2c7234'] = 'Toute la documentation nécessaire';
+$_MODULE['<{doofinder}prestashop>support_tab_a0b0d4b4cb7e019561740ca1fe2e9a4a'] = 'Comprendre comment le flux de produits fonctionne pour afficher les résultats dans la couche de recherche de Doofinder';
+$_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] = 'Comment ajouter des informations dans
+ la couche de recherche de Doofinder ?';
+$_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'Comment configurer les filtres de la couche de recherche';
+$_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Apprendre les bases de Live Layer';
+$_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] = 'Vous pouvez déboguer ou désactiver diverses options dans l\'onglet caché des options avancées du module. Attention : à n\'utiliser que si vous êtes un utilisateur expérimenté !';
+$_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] = ' Activer les options de l\'onglet de module avancé';
+$_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'Ou contacter directement notre support, nous serons ravis de vous guider';
+$_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] = 'Mail de notre support';
+$_MODULE['<{doofinder}prestashop>support_tab_79061f39882168064500dc7decfd3d13'] = 'Créer gratuitement un compte!';
 $_MODULE['<{doofinder}prestashop>doofinder_facets_8524de963f07201e5c086830d370797f'] =
 'Chargement...';
 $_MODULE['<{doofinder}prestashop>doofinder-no-products_5c9838becf9bbce28ba90a7426daf171'] =

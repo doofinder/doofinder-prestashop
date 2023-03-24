@@ -265,40 +265,17 @@ $_MODULE['<{doofinder}prestashop>onboarding_tab_d3de93cac749c0caa87290a2a4a7c8a9
 'What are you waiting for?';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_e6665248f64ed1908bf95510e06c1694'] =
 'Test our solution for 30 days, for free!';
-$_MODULE['<{doofinder}prestashop>support_tab_ba26552e526b4e94f440ab5a0f7ce65f'] =
-'Add a smart search engine to your e-commerce in 5 minutes and with no programming';
-$_MODULE['<{doofinder}prestashop>support_tab_641f267a37c2fdbf179212a21a53042b'] =
-'Doofinder increases sales because your customers search and find the most relevant results';
-$_MODULE['<{doofinder}prestashop>support_tab_f431e97ef0f81e233ffa5ff4a2fe5a3a'] =
-'Create an account now!';
-$_MODULE['<{doofinder}prestashop>support_tab_21bdc5689c12595ae14298354d5550d5'] =
-'Already have an account?';
-$_MODULE['<{doofinder}prestashop>support_tab_bffe9a3c9a7e00ba00a11749e022d911'] =
-'Log in';
-$_MODULE['<{doofinder}prestashop>support_tab_4c1fee9a2c61bba0f4bbcab7c99948de'] =
-'Need help configuring your search engine?';
-$_MODULE['<{doofinder}prestashop>support_tab_278897e5a25159f9293dae556cb8640d'] =
-'How to install Doofinder in PrestaShop 1.5-1.7';
-$_MODULE['<{doofinder}prestashop>support_tab_cdc5604b792036ec806c2bfa75dfea66'] =
-'Products are displayed without VAT in PrestaShop';
-$_MODULE['<{doofinder}prestashop>support_tab_978b9b3da46c9039694227d4073831b5'] =
-'Customize the Doofinder Layer Look & Feel';
-$_MODULE['<{doofinder}prestashop>support_tab_dfc465ee578939c8760c4aa00d2c7234'] =
-'All documentation in one place!';
-$_MODULE['<{doofinder}prestashop>support_tab_fe951ea9094aca1270834d6f64de9993'] =
-'Code example to paste on your Doofinder dashboard to use Embedded layer instead of 
-API on your PrestaShop native search results page';
-$_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] =
-'You can debug or disable some options on the hidden advanced tab of the module. 
-Caution: Use only if you are a experienced user!!';
-$_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] =
-'Enable advanced module tab options';
-$_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] =
-'Or contact directly with us. We will be glad to help you';
-$_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] =
-'Support email';
-$_MODULE['<{doofinder}prestashop>support_tab_79061f39882168064500dc7decfd3d13'] =
-'Create a free acount!';
+$_MODULE['<{doofinder}prestashop>support_tab_4c1fee9a2c61bba0f4bbcab7c99948de'] = 'Need help configuring your search engine?';
+$_MODULE['<{doofinder}prestashop>support_tab_dfc465ee578939c8760c4aa00d2c7234'] = 'All documentation in one place!';
+$_MODULE['<{doofinder}prestashop>support_tab_a0b0d4b4cb7e019561740ca1fe2e9a4a'] = 'Understand how the product feed works to display results in the Doofinder search layer';
+$_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] = 'How to add information in the Doofinder search layer';
+$_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Learn the basics about Live Layer';
+$_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] = 'You can debug or disable some options on the hidden advanced tab of the module.  Caution: Use only if you are a experienced user!!';
+$_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'How to configure the search layer filters';
+$_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] = 'Enable advanced module tab options';
+$_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'Or contact directly with us. We will be glad to help you';
+$_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] = 'Support email';
+$_MODULE['<{doofinder}prestashop>support_tab_79061f39882168064500dc7decfd3d13'] = 'Create a free acount!';
 $_MODULE['<{doofinder}prestashop>doofinder_facets_8524de963f07201e5c086830d370797f'] =
 'Loading...';
 $_MODULE['<{doofinder}prestashop>doofinder-no-products_5c9838becf9bbce28ba90a7426daf171'] =
