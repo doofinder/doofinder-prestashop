@@ -316,8 +316,6 @@ class Doofinder extends Module
     {
         $currencies = Currency::getCurrencies();
 
-
-
         $inputs = [
             [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -325,19 +323,19 @@ class Doofinder extends Module
                 'name' => 'DF_SHOW_LAYER',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
-            ],[
+            ], [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                 'label' => $this->l('Doofinder search layer in mobile version'),
                 'name' => 'DF_SHOW_LAYER_MOBILE',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
-            ],[
+            ], [
                 'type' => 'text',
                 'label' => $this->l('Doofinder Store ID'),
                 'name' => 'DF_INSTALLATION_ID',
                 'desc' => $this->l('INSTALLATION_ID_EXPLANATION'),
                 'lang' => false,
-            ]
+            ],
         ];
 
         return [
@@ -376,7 +374,7 @@ class Doofinder extends Module
 
     protected function getShowLayerMobileConfig()
     {
-        return  Configuration::get('DF_SHOW_LAYER_MOBILE', true);
+        return Configuration::get('DF_SHOW_LAYER_MOBILE', true);
     }
 
     /**
@@ -421,6 +419,7 @@ class Doofinder extends Module
             $this->context->controller->warnings[] = $this->l("This shop is new and it hasn't been synchronized with Doofinder yet.");
         }
         $html .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
+
         return $html;
     }
 
