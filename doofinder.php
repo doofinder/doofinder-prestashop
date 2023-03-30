@@ -144,6 +144,8 @@ class Doofinder extends Module
             'DF_GS_MPN_FIELD',
             'DF_GS_PRICES_USE_TAX',
             'DF_INSTALLATION_ID',
+            'DF_SHOW_LAYER',
+            'DF_SHOW_LAYER_MOBILE',
             'DF_REGION',
             'DF_RESTART_OV',
             'DF_SHOW_PRODUCT_FEATURES',
@@ -196,6 +198,8 @@ class Doofinder extends Module
 
         $output = $msg;
         $oldPS = false;
+        $this->context->controller->addJS($this->_path . 'views/js/admin-panel.js');
+
         if (_PS_VERSION_ < 1.6) {
             $oldPS = true;
             $this->context->controller->addJS($this->_path . 'views/js/plugins/bootstrap.min.js');
@@ -235,6 +239,7 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
+            $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_administration_panel.tpl');
             $output .= $this->renderFormDataFeed($adv);
             if ($adv) {
                 $output .= $this->renderFormAdvanced();
@@ -310,20 +315,35 @@ class Doofinder extends Module
     protected function getConfigFormSearchLayer()
     {
         $currencies = Currency::getCurrencies();
-
-        $inputs[] = [
-            'type' => 'text',
-            'label' => $this->l('Doofinder Installation ID'),
-            'name' => 'DF_INSTALLATION_ID',
-            'desc' => $this->l('INSTALLATION_ID_EXPLANATION'),
-            'lang' => false,
+        
+        
+        
+        $inputs = [
+            [
+                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                'label' => $this->l('Doofinder search layer'),
+                'name' => 'DF_SHOW_LAYER',
+                'is_bool' => true,
+                'values' => $this->getBooleanFormValue(),
+            ],[
+                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                'label' => $this->l('Doofinder search layer in mobile version'),
+                'name' => 'DF_SHOW_LAYER_MOBILE',
+                'is_bool' => true,
+                'values' => $this->getBooleanFormValue(),
+            ],[
+                'type' => 'text',
+                'label' => $this->l('Doofinder Store ID'),
+                'name' => 'DF_INSTALLATION_ID',
+                'desc' => $this->l('INSTALLATION_ID_EXPLANATION'),
+                'lang' => false,
+            ]
         ];
 
         return [
             'form' => [
                 'legend' => [
                     'title' => $this->l('Search Layer'),
-                    'icon' => 'icon-cogs',
                 ],
                 'input' => $inputs,
                 'submit' => [
@@ -342,10 +362,19 @@ class Doofinder extends Module
     protected function getConfigFormValuesSearchLayer()
     {
         $fields = [];
-
         $fields['DF_INSTALLATION_ID'] = Configuration::get('DF_INSTALLATION_ID');
+        $fields['DF_SHOW_LAYER'] = $this->getShowLayerConfig();
+        $fields['DF_SHOW_LAYER_MOBILE'] = $this->getShowLayerMobileConfig();
 
         return $fields;
+    }
+
+    protected function getShowLayerConfig(){
+        return Configuration::get('DF_SHOW_LAYER', true);
+    }
+
+    protected function getShowLayerMobileConfig(){
+        return  Configuration::get('DF_SHOW_LAYER_MOBILE',true);
     }
 
     /**
@@ -358,7 +387,7 @@ class Doofinder extends Module
     protected function renderFormDataFeed($adv = false)
     {
         $helper = new HelperForm();
-
+        
         $helper->show_toolbar = false;
         $helper->table = $this->table;
         $helper->module = $this;
@@ -383,15 +412,15 @@ class Doofinder extends Module
 
         if (!$this->showNewShopForm(Context::getContext()->shop)) {
             $html .= $helper->generateForm([$this->getConfigFormDataFeed()]);
-
             // Search layer form
             $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
+
+            
         } else {
             $this->context->controller->warnings[] = $this->l("This shop is new and it hasn't been synchronized with Doofinder yet.");
         }
         $html .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/dummy/after_tab.tpl');
-
         return $html;
     }
 
@@ -406,52 +435,41 @@ class Doofinder extends Module
             'form' => [
                 'legend' => [
                     'title' => $this->l('Data Feed'),
-                    'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Display Prices in Data Feed'),
+                        'label' => $this->l('Index product prices'),
+                        'desc' => $this->l('If you activate this option you will be able to show the prices of each product in the search results.'),
                         'name' => 'DF_GS_DISPLAY_PRICES',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Display Prices With Taxes'),
+                        'label' => $this->l('Show product prices including taxes'),
+                        'desc' => $this->l('If you activate this option, the price of the products that will be displayed will be inclusive of taxes.'),
                         'name' => 'DF_GS_PRICES_USE_TAX',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Export full categories path in the feed'),
+                        'label' => $this->l('Index the full path of the product category'),
                         'name' => 'DF_FEED_FULL_PATH',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => 'select',
-                        'label' => $this->l('Include product variations in feed'),
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Index product attribute combinations'),
                         'name' => 'DF_SHOW_PRODUCT_VARIATIONS',
-                        'options' => [
-                            'query' => [
-                                [
-                                    'id' => '0',
-                                    'name' => $this->l('No, only product'),
-                                ],
-                                [
-                                    'id' => '1',
-                                    'name' => $this->l('Yes, Include each variations'),
-                                ],
-                            ],
-                            'id' => 'id',
-                            'name' => 'name',
-                        ],
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->l('Attribute Groups'),
+                        'label' => $this->l('Define which combinations of product attributes you want to index for'),
                         'name' => 'DF_GROUP_ATTRIBUTES_SHOWN',
                         'multiple' => true,
                         'options' => [
@@ -462,7 +480,7 @@ class Doofinder extends Module
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Include product features in feed'),
+                        'label' => $this->l('Index customized product features'),
                         'name' => 'DF_SHOW_PRODUCT_FEATURES',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
@@ -493,7 +511,7 @@ class Doofinder extends Module
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->l('Process changed products'),
+                        'label' => $this->l('Automatically process product changes'),
                         'desc' => $this->l('Configure when registered product changes are sent to Doofinder'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => [
@@ -706,6 +724,7 @@ class Doofinder extends Module
         foreach (array_keys($form_values) as $key) {
             $postKey = str_replace(['[', ']'], '', $key);
             $value = Tools::getValue($postKey);
+            
             if (isset($form_values[$key]['real_config'])) {
                 $postKey = $form_values[$key]['real_config'];
             }
@@ -716,7 +735,6 @@ class Doofinder extends Module
                 Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', 0);
             }
             $value = trim($value);
-
             Configuration::updateValue($postKey, $value);
         }
 
@@ -779,11 +797,17 @@ class Doofinder extends Module
      */
     public function hookHeader($params)
     {
-        $this->configureHookCommon($params);
-        if (Configuration::get('DF_ENABLED_V9')) {
-            return $this->displayScriptLiveLayer();
-        } else {
-            return $this->displayScriptV7();
+        $displayMobile = $this->getShowLayerMobileConfig();
+        $displayDesktop = $this->getShowLayerConfig();
+        $isMobile = Context::getContext()->isMobile();
+        if ((!empty($isMobile) && $displayMobile) || 
+        (empty($isMobile) && $displayDesktop)) {
+            $this->configureHookCommon($params);
+            if (Configuration::get('DF_ENABLED_V9')) {
+                return $this->displayScriptLiveLayer();
+            } else {
+                return $this->displayScriptV7();
+            }
         }
     }
 
