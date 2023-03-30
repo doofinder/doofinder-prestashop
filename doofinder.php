@@ -31,11 +31,11 @@ class Doofinder extends Module
     public $ps_layered_full_tree = true;
     public $searchBanner = false;
 
-    const GS_SHORT_DESCRIPTION = 1;
-    const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.4.5';
-    const YES = 1;
-    const NO = 0;
+    public const GS_SHORT_DESCRIPTION = 1;
+    public const GS_LONG_DESCRIPTION = 2;
+    public const VERSION = '4.4.5';
+    public const YES = 1;
+    public const NO = 0;
 
     public function __construct()
     {
@@ -315,9 +315,9 @@ class Doofinder extends Module
     protected function getConfigFormSearchLayer()
     {
         $currencies = Currency::getCurrencies();
-        
-        
-        
+
+
+
         $inputs = [
             [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -369,12 +369,14 @@ class Doofinder extends Module
         return $fields;
     }
 
-    protected function getShowLayerConfig(){
+    protected function getShowLayerConfig()
+    {
         return Configuration::get('DF_SHOW_LAYER', true);
     }
 
-    protected function getShowLayerMobileConfig(){
-        return  Configuration::get('DF_SHOW_LAYER_MOBILE',true);
+    protected function getShowLayerMobileConfig()
+    {
+        return  Configuration::get('DF_SHOW_LAYER_MOBILE', true);
     }
 
     /**
@@ -387,7 +389,7 @@ class Doofinder extends Module
     protected function renderFormDataFeed($adv = false)
     {
         $helper = new HelperForm();
-        
+
         $helper->show_toolbar = false;
         $helper->table = $this->table;
         $helper->module = $this;
@@ -415,8 +417,6 @@ class Doofinder extends Module
             // Search layer form
             $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
-
-            
         } else {
             $this->context->controller->warnings[] = $this->l("This shop is new and it hasn't been synchronized with Doofinder yet.");
         }
@@ -724,7 +724,7 @@ class Doofinder extends Module
         foreach (array_keys($form_values) as $key) {
             $postKey = str_replace(['[', ']'], '', $key);
             $value = Tools::getValue($postKey);
-            
+
             if (isset($form_values[$key]['real_config'])) {
                 $postKey = $form_values[$key]['real_config'];
             }
@@ -800,7 +800,7 @@ class Doofinder extends Module
         $displayMobile = $this->getShowLayerMobileConfig();
         $displayDesktop = $this->getShowLayerConfig();
         $isMobile = Context::getContext()->isMobile();
-        if ((!empty($isMobile) && $displayMobile) || 
+        if ((!empty($isMobile) && $displayMobile) ||
         (empty($isMobile) && $displayDesktop)) {
             $this->configureHookCommon($params);
             if (Configuration::get('DF_ENABLED_V9')) {
