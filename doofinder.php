@@ -361,20 +361,10 @@ class Doofinder extends Module
     {
         $fields = [];
         $fields['DF_INSTALLATION_ID'] = Configuration::get('DF_INSTALLATION_ID');
-        $fields['DF_SHOW_LAYER'] = $this->getShowLayerConfig();
-        $fields['DF_SHOW_LAYER_MOBILE'] = $this->getShowLayerMobileConfig();
+        $fields['DF_SHOW_LAYER'] = Configuration::get('DF_SHOW_LAYER', true);
+        $fields['DF_SHOW_LAYER_MOBILE'] = Configuration::get('DF_SHOW_LAYER_MOBILE', true);
 
         return $fields;
-    }
-
-    protected function getShowLayerConfig()
-    {
-        return Configuration::get('DF_SHOW_LAYER', true);
-    }
-
-    protected function getShowLayerMobileConfig()
-    {
-        return Configuration::get('DF_SHOW_LAYER_MOBILE', true);
     }
 
     /**
@@ -796,11 +786,7 @@ class Doofinder extends Module
      */
     public function hookHeader($params)
     {
-        $displayMobile = $this->getShowLayerMobileConfig();
-        $displayDesktop = $this->getShowLayerConfig();
-        $isMobile = Context::getContext()->isMobile();
-        if ((!empty($isMobile) && $displayMobile) ||
-        (empty($isMobile) && $displayDesktop)) {
+        if ($this->searchLayerMustBeInitialized()) {
             $this->configureHookCommon($params);
             if (Configuration::get('DF_ENABLED_V9')) {
                 return $this->displayScriptLiveLayer();
@@ -1703,5 +1689,15 @@ class Doofinder extends Module
         );
 
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
+    }
+
+    private function searchLayerMustBeInitialized()
+    {
+        $displayMobile = Configuration::get('DF_SHOW_LAYER_MOBILE', true);
+        $displayDesktop = Configuration::get('DF_SHOW_LAYER', true);
+        $isMobile = Context::getContext()->isMobile();
+
+        return (!empty($isMobile) && $displayMobile) ||
+        (empty($isMobile) && $displayDesktop);
     }
 }

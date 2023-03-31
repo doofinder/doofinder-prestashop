@@ -146,3 +146,11 @@ $_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] 
 'You can debug or disable some options on the hidden advanced tab of the module.  Caution: Use only if you are a experienced user!!';
 $_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] =
 'Enable advanced module tab options';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_86bbc77fd75ac02c21b84a37b260eadd'] =
+'Administration panel';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_23693319f4ed79081952f04729017d15'] =
+'Config Doofinder in my shop';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_f6e6bc175f0485d397ee4c1d45c1d01e'] =
+'Access the Doofinder dashboard and discover all the functionalities to increase your sales.';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_e77e4aaa7a0d7df358c2f9a8276bee7d'] =
+'Go to Doofinder dashboard';
