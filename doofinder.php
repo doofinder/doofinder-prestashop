@@ -1697,7 +1697,6 @@ class Doofinder extends Module
         $displayDesktop = Configuration::get('DF_SHOW_LAYER', true);
         $isMobile = Context::getContext()->isMobile();
 
-        return (!empty($isMobile) && $displayMobile) ||
-        (empty($isMobile) && $displayDesktop);
+        return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
     }
 }
