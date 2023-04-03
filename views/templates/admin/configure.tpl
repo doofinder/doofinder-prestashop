@@ -34,7 +34,7 @@
     {if !$configured}
     <li class="active"><a href="#onboarding_tab" role="tab" data-toggle="tab">{l s='On Boarding' mod='doofinder'}</a></li>
     {else}
-    <li class="active"><a href="#data_feed_tab" role="tab" data-toggle="tab">{l s='Data Feed' mod='doofinder'}</a></li>
+    <li class="active"><a href="#data_feed_tab" role="tab" data-toggle="tab">{l s='store' mod='doofinder'}</a></li>
     <li><a href="#support_tab" role="tab" data-toggle="tab">{l s='Support' mod='doofinder'}</a></li>
     {/if}
     {if $adv && $configured}

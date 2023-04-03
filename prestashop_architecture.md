@@ -1,4 +1,4 @@
-# Prestasop Architecture & Diagrams
+# Prestashop Architecture & Diagrams
 
 ## Diagrams
 
