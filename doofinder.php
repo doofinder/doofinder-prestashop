@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -68,6 +69,7 @@ class Doofinder extends Module
         return parent::install()
             && $this->installDb()
             && $this->registerHook('displayHeader')
+            && $this->registerHook('moduleRoutes')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
     }
@@ -90,7 +92,18 @@ class Doofinder extends Module
                 PRIMARY KEY (`id_doofinder_product`),
                 CONSTRAINT uc_shop_product UNIQUE KEY (id_shop,id_product)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
-        );
+        )
+            && Db::getInstance()->execute(
+                '
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_landing` (
+                `name` VARCHAR(45) NOT NULL,
+                `id_shop` INT(10) UNSIGNED NOT NULL,
+                `id_lang` INT(10) UNSIGNED NOT NULL,
+                `data` TEXT NOT NULL,
+                `date_upd` DATETIME NOT NULL,
+                PRIMARY KEY (`name`, `id_shop`, `id_lang`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
+            );
     }
 
     /**
@@ -174,7 +187,31 @@ class Doofinder extends Module
      */
     public function uninstallDb()
     {
-        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`');
+        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`')
+            && Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
+    }
+
+    /**
+     * Add controller routes
+     *
+     * @return array
+     */
+    public function hookModuleRoutes()
+    {
+        return [
+            'module-doofinder-landing' => [
+                'controller' => 'landing',
+                'rule' => 'df/{landing_name}',
+                'keywords' => [
+                    'landing_name' => ['regexp' => '[_a-zA-Z0-9_-]+', 'param' => 'landing_name'],
+                ],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'landing',
+                ],
+            ],
+        ];
     }
 
     /**
