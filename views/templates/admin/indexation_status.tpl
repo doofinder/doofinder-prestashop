@@ -36,21 +36,17 @@
 </style>
 
 <script>
-    document.querySelector('.close').addEventListener('click', function() {
-        this.closest('.doofinder-indexation-status').style.display = 'none';
+    $( ".close" ).on( "click", function() {
+        $(".doofinder-indexation-status").css("display", "none");
 
-        // Actualizar uno de los campos de configuración del módulo
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'tu_ruta_para_actualizar_el_campo', true);
+        var adminToken = "{$admin_token}";
+        /*var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'index.php?controller=DoofinderAdminController&token=' + adminToken + '&ajax=1&action=UpdateConfigurationField', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                console.log('Campo actualizado');
-            }
-            else {
-                console.error('Error al actualizar el campo');
-            }
-        };
-        xhr.send('nombre_del_campo=valor_nuevo');
+        xhr.send();*/
+
+        $.post("index.php?controller=DoofinderAdminController&token=" + adminToken + "&ajax=1&action=UpdateConfigurationField", function( data ) {
+            console.log(data)
+        });
     });
 </script>

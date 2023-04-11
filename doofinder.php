@@ -241,8 +241,15 @@ class Doofinder extends Module
             $callback_url = Context::getContext()->link->getModuleLink('doofinder', 'callback', array());
             
             $this->context->controller->warnings[] = $callback_url;
-            $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
+            $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
+            if(empty($feed_indexed)){
+                $admin_token = Tools::getAdminTokenLite('AdminModules');
+                $this->context->controller->warnings[] = $admin_token;
 
+                $this->context->smarty->assign('admin_token', $admin_token);
+                $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
+            }
+            
             $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_administration_panel.tpl');
             $output .= $this->renderFormDataFeed($adv);
             if ($adv) {
