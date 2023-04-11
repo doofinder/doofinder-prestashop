@@ -33,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.4.6';
+    const VERSION = '4.4.7';
     const YES = 1;
     const NO = 0;
 
@@ -41,12 +41,11 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.4.6';
+        $this->version = '4.4.7';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
         $this->bootstrap = true;
-
         parent::__construct();
 
         $this->displayName = $this->l('Doofinder');
@@ -239,6 +238,11 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
+            $callback_url = Context::getContext()->link->getModuleLink('doofinder', 'callback', array());
+            
+            $this->context->controller->warnings[] = $callback_url;
+            $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
+
             $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_administration_panel.tpl');
             $output .= $this->renderFormDataFeed($adv);
             if ($adv) {
