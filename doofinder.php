@@ -239,12 +239,12 @@ class Doofinder extends Module
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
             $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
-            if(empty($feed_indexed)){
+            if (empty($feed_indexed)) {
                 $admin_token = Tools::getAdminTokenLite('AdminModules');
                 $this->context->smarty->assign('admin_token', $admin_token);
                 $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
             }
-            
+
             $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_administration_panel.tpl');
             $output .= $this->renderFormDataFeed($adv);
             if ($adv) {
@@ -1436,7 +1436,6 @@ class Doofinder extends Module
             'sector' => '',
         ];
 
-
         foreach ($languages as $lang) {
             foreach ($currencies as $cur) {
                 if ($cur['deleted'] == 1) {
@@ -1713,6 +1712,6 @@ class Doofinder extends Module
 
     private function getProcessCallbackUrl()
     {
-        return Context::getContext()->link->getModuleLink('doofinder', 'callback', array());
+        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
     }
 }

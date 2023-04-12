@@ -1,4 +1,5 @@
 <?php
+
 class DoofinderCallbackModuleFrontController extends ModuleFrontController
 {
     public function postProcess()
@@ -11,10 +12,10 @@ class DoofinderCallbackModuleFrontController extends ModuleFrontController
 
             Configuration::updateValue('DF_FEED_INDEXED', true);
 
-            die(json_encode(['status' => 'success']));
+            exit(json_encode(['status' => 'success']));
         } else {
             http_response_code(405);
-            die();
+            exit;
         }
     }
 
