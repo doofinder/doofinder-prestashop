@@ -238,14 +238,9 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
-            $callback_url = Context::getContext()->link->getModuleLink('doofinder', 'callback', array());
-            
-            $this->context->controller->warnings[] = $callback_url;
             $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
             if(empty($feed_indexed)){
                 $admin_token = Tools::getAdminTokenLite('AdminModules');
-                $this->context->controller->warnings[] = $admin_token;
-
                 $this->context->smarty->assign('admin_token', $admin_token);
                 $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
             }
@@ -1428,6 +1423,7 @@ class Doofinder extends Module
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
         $installationID = null;
+        $callbacksUrls = [];
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
 
@@ -1440,16 +1436,18 @@ class Doofinder extends Module
             'sector' => '',
         ];
 
+
         foreach ($languages as $lang) {
             foreach ($currencies as $cur) {
                 if ($cur['deleted'] == 1) {
                     continue;
                 }
                 $ciso = $cur['iso_code'];
+                $lang_code = $lang['language_code'];
                 $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $store_data['search_engines'][] = [
                     'name' => $shop['name'] . ' | Lang:' . $lang['iso_code'] . ' Currency:' . strtoupper($ciso),
-                    'language' => $lang['language_code'],
+                    'language' => $lang_code,
                     'currency' => $ciso,
                     'site_url' => $shop_url,
                     'stopwords' => false,
@@ -1472,8 +1470,10 @@ class Doofinder extends Module
                         ],
                     ],
                 ];
+                $callbacksUrls[$lang_code][$ciso] = $this->getProcessCallbackUrl();
             }
         }
+        $store_data['callback_urls'] = $callbacksUrls;
 
         $json_store_data = json_encode($store_data);
         $this->debug('Create Store Start');
@@ -1709,5 +1709,10 @@ class Doofinder extends Module
         $isMobile = Context::getContext()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
+    }
+
+    private function getProcessCallbackUrl()
+    {
+        return Context::getContext()->link->getModuleLink('doofinder', 'callback', array());
     }
 }
