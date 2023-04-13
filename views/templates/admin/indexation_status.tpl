@@ -38,9 +38,8 @@
 <script>
     $( ".close" ).on( "click", function() {
         $(".doofinder-indexation-status").css("display", "none");
-        var adminToken = "{$admin_token}";
-        $.post("index.php?controller=DoofinderAdmin&token=" + adminToken + "&ajax=1&action=UpdateConfigurationField", function( data ) {
-            console.log(data)
+        var adminURL = "{$admin_url}";
+        $.post(adminURL, function( data ) {
         });
     });
 </script>

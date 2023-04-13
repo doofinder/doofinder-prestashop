@@ -12,16 +12,10 @@ class DoofinderAdminController extends ModuleAdminController
         $this->module = Module::getInstanceByName('doofinder');
         $this->bootstrap = true;
         $this->lang = false;
-
         parent::__construct();
     }
 
-    public function init()
-    {
-        exit;
-    }
-
-    public function displayAjax()
+    public function displayAjaxUpdateConfigurationField()
     {
         $action = Tools::getValue('action');
         if (!empty($action) && method_exists($this, 'ajaxProcess' . $action)) {

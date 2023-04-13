@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] =
 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] =
@@ -95,7 +95,7 @@ $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459
 $_MODULE['<{doofinder}prestashop>indexation_status_b1d48d617a09cbe4e68eb72c83dea83d'] =
 'El feed de productos está siendo procesado. Dependiendo del tamaño del catálogo de productos de la tienda, este proceso puede llevar unos minutos';
 $_MODULE['<{doofinder}prestashop>indexation_status_e0dba0265fde532f75126eab6fedb8a8'] =
-'Es posible que sus productos no aparezcan correctamente actualizados en lso resultados hasta que el proceso no haya finalizado.';
+'Es posible que sus productos no aparezcan correctamente actualizados en los resultados hasta que el proceso no haya finalizado.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] =
 'Se ha producido un error durante la instalación. Por favor, contacta con nuestro equipo  de soporte a través de';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] =

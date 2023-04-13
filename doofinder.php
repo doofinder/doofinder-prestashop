@@ -245,8 +245,8 @@ class Doofinder extends Module
 
             $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
             if (empty($feed_indexed)) {
-                $admin_token = Tools::getAdminTokenLite('AdminModules');
-                $this->context->smarty->assign('admin_token', $admin_token);
+                $controller_url = $this->context->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1&action=UpdateConfigurationField';
+                $this->context->smarty->assign('admin_url', $controller_url);
                 $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
             }
 
