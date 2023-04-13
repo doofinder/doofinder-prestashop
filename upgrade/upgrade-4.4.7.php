@@ -30,20 +30,21 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_4_4_7($module)
 {
     Configuration::updateGlobalValue('DF_FEED_INDEXED', true);
-    return installTabs()
+
+    return installTabs();
 }
 
 function installTabs()
-    {
-        $tab = new Tab();
-        $tab->active = 0;
-        $tab->class_name = 'DoofinderAdmin';
-        $tab->name = array();
-        foreach (Language::getLanguages() as $lang) {
-            $tab->name[$lang['id_lang']] = $this->trans('Doofinder admin controller', array(), 'Modules.Doofinder.Admin', $lang['locale']);
-        }
-        $tab->id_parent = 0;
-        $tab->module = $this->name;
-
-        return $tab->save();
+{
+    $tab = new Tab();
+    $tab->active = 0;
+    $tab->class_name = 'DoofinderAdmin';
+    $tab->name = [];
+    foreach (Language::getLanguages() as $lang) {
+        $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
     }
+    $tab->id_parent = 0;
+    $tab->module = $this->name;
+
+    return $tab->save();
+}
