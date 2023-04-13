@@ -38,14 +38,8 @@
 <script>
     $( ".close" ).on( "click", function() {
         $(".doofinder-indexation-status").css("display", "none");
-
         var adminToken = "{$admin_token}";
-        /*var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'index.php?controller=DoofinderAdminController&token=' + adminToken + '&ajax=1&action=UpdateConfigurationField', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send();*/
-
-        $.post("index.php?controller=DoofinderAdminController&token=" + adminToken + "&ajax=1&action=UpdateConfigurationField", function( data ) {
+        $.post("index.php?controller=DoofinderAdmin&token=" + adminToken + "&ajax=1&action=UpdateConfigurationField", function( data ) {
             console.log(data)
         });
     });
