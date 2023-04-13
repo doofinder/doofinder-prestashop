@@ -66,6 +66,7 @@ class Doofinder extends Module
     {
         return parent::install()
             && $this->installDb()
+            && $this->installTabs()
             && $this->registerHook('displayHeader')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
@@ -100,6 +101,7 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
+            && $this->uninstallTabs()
             && $this->deleteConfigVars()
             && $this->uninstallDb();
     }
@@ -1722,5 +1724,32 @@ class Doofinder extends Module
         $isMobile = Context::getContext()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
+    }
+
+    private function installTabs()
+    {
+        $tab = new Tab();
+        $tab->active = 0;
+        $tab->class_name = 'DoofinderAdmin';
+        $tab->name = [];
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = $this->trans('Doofinder admin controller', [], 'Modules.Doofinder.Admin', $lang['locale']);
+        }
+        $tab->id_parent = 0;
+        $tab->module = $this->name;
+
+        return $tab->save();
+    }
+
+    private function uninstallTabs()
+    {
+        $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
+        if (!$tabId) {
+            return true;
+        }
+
+        $tab = new Tab($tabId);
+
+        return $tab->delete();
     }
 }
