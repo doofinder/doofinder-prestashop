@@ -66,6 +66,7 @@ class Doofinder extends Module
     {
         return parent::install()
             && $this->installDb()
+            && $this->installTabs()
             && $this->registerHook('displayHeader')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
@@ -100,6 +101,7 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
+            && $this->uninstallTabs()
             && $this->deleteConfigVars()
             && $this->uninstallDb();
     }
@@ -151,6 +153,7 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC',
+            'DF_FEED_INDEXED',
         ];
 
         $hashid_vars = array_column(
@@ -238,9 +241,14 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
+            $callback_url = Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
+
+            $this->context->controller->warnings[] = $callback_url;
             $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
             if (empty($feed_indexed)) {
                 $admin_token = Tools::getAdminTokenLite('AdminModules');
+                $this->context->controller->warnings[] = $admin_token;
+
                 $this->context->smarty->assign('admin_token', $admin_token);
                 $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
             }
@@ -1512,6 +1520,17 @@ class Doofinder extends Module
     }
 
     /**
+     * Get Process Callback URL
+
+     *
+     * @return string
+     */
+    private function getProcessCallbackUrl()
+    {
+        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
+    }
+
+    /**
      * Set the default values in the configuration
      *
      * @param int $shopGroupId
@@ -1710,8 +1729,30 @@ class Doofinder extends Module
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
     }
 
-    private function getProcessCallbackUrl()
+    private function installTab()
     {
-        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
+        $tab = new Tab();
+        $tab->active = 0;
+        $tab->class_name = 'DoofinderAdmin';
+        $tab->name = [];
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = $this->trans('Doofinder admin controller', [], 'Modules.Doofinder.Admin', $lang['locale']);
+        }
+        $tab->id_parent = 0;
+        $tab->module = $this->name;
+
+        return $tab->save();
+    }
+
+    private function uninstallTab()
+    {
+        $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
+        if (!$tabId) {
+            return true;
+        }
+
+        $tab = new Tab($tabId);
+
+        return $tab->delete();
     }
 }
