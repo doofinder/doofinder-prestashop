@@ -1731,7 +1731,7 @@ class Doofinder extends Module
         $tab->class_name = 'DoofinderAdmin';
         $tab->name = [];
         foreach (Language::getLanguages() as $lang) {
-            $tab->name[$lang['id_lang']] = $this->trans('Doofinder admin controller', [], 'Modules.Doofinder.Admin', $lang['locale']);
+            $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
         }
         $tab->id_parent = 0;
         $tab->module = $this->name;
