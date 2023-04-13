@@ -242,13 +242,9 @@ class Doofinder extends Module
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
             $callback_url = Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
-
-            $this->context->controller->warnings[] = $callback_url;
             $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
             if (empty($feed_indexed)) {
                 $admin_token = Tools::getAdminTokenLite('AdminModules');
-                $this->context->controller->warnings[] = $admin_token;
-
                 $this->context->smarty->assign('admin_token', $admin_token);
                 $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
             }
@@ -1729,7 +1725,7 @@ class Doofinder extends Module
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
     }
 
-    private function installTab()
+    private function installTabs()
     {
         $tab = new Tab();
         $tab->active = 0;
@@ -1744,7 +1740,7 @@ class Doofinder extends Module
         return $tab->save();
     }
 
-    private function uninstallTab()
+    private function uninstallTabs()
     {
         $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
         if (!$tabId) {
