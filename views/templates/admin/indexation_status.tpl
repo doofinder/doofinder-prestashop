@@ -53,15 +53,13 @@
             data: {},
             dataType: "json",
             success: function(response) {
-                console.log(response)
-            if (response.success) {
-                // Hacer algo en caso de éxito
-                return;
-            }
-            setTimeout(checkFeed, 5000); // Llamar a la función de nuevo en 5 segundos
+                if (response.success) {
+                    return;
+                }
+                setTimeout(checkFeed, 5000);
             },
             error: function() {
-                setTimeout(checkFeed, 5000); // Llamar a la función de nuevo en 5 segundos
+                setTimeout(checkFeed, 5000);
             }
         });
     }
