@@ -54,6 +54,7 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
+                    $(".doofinder-indexation-status").css("display", "none");
                     return;
                 }
                 setTimeout(checkFeed, 5000);
