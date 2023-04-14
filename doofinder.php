@@ -106,7 +106,6 @@ class Doofinder extends Module
             && $this->uninstallDb();
     }
 
-
     /**
      * Remove module-dependent configuration variables
      *
