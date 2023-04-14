@@ -1,10 +1,10 @@
 <div class="doofinder-indexation-status" style="margin-top: 2em; margin-bottom: 2em; background-color: #e2e2e2;">
     <div class="row" >
-        <div class="col-xs-10" style="margin-left: 1em background-color: #e2e2e2; border-bottom: none;">
+        <div class="col-xs-10" style="margin-left: 1em; margin-top: 1em; background-color: #e2e2e2; border-bottom: none;">
             <h3 style="margin: 0; background-color: #e2e2e2; border-bottom: none;">{l s='Doofinder Indexation Status' mod='doofinder'}</h3>
         </div>
-        <div class="col-xs-2" style="">
-            <button type="button" class="close" aria-label="Close" style="font-size: 3em;">
+        <div class="col-xs-1 pull-right" style="margin-right: 1em;">
+            <button type="button" class="close pull-right" aria-label="Close" style="font-size: 3em;">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
