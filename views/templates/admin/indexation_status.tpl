@@ -36,10 +36,34 @@
 </style>
 
 <script>
+    var checkFeedUrl = "{$check_feed_url}";
+
     $( ".close" ).on( "click", function() {
         $(".doofinder-indexation-status").css("display", "none");
-        var adminURL = "{$admin_url}";
-        $.post(adminURL, function( data ) {
-        });
+        var updateFeedUrl = "{$update_feed_url}";
+        $.post(updateFeedUrl, function( data ) {});
     });
+
+    checkFeed();
+
+    function checkFeed() {
+        $.ajax({
+            url: checkFeedUrl,
+            type: "POST",
+            data: {},
+            dataType: "json",
+            success: function(response) {
+                console.log(response)
+            if (response.success) {
+                // Hacer algo en caso de éxito
+                return;
+            }
+            setTimeout(checkFeed, 5000); // Llamar a la función de nuevo en 5 segundos
+            },
+            error: function() {
+                setTimeout(checkFeed, 5000); // Llamar a la función de nuevo en 5 segundos
+            }
+        });
+    }
+    
 </script>

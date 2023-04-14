@@ -67,7 +67,6 @@ class Doofinder extends Module
         return parent::install()
             && $this->installDb()
             && $this->installTabs()
-            && $this->installConfigVars()
             && $this->registerHook('displayHeader')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
@@ -107,11 +106,6 @@ class Doofinder extends Module
             && $this->uninstallDb();
     }
 
-    public function installConfigVars()
-    {
-        return Configuration::updateValue('DF_SHOW_LAYER', true)
-        && Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true);
-    }
 
     /**
      * Remove module-dependent configuration variables
@@ -250,8 +244,9 @@ class Doofinder extends Module
         if ($configured) {
             $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
             if (empty($feed_indexed)) {
-                $controller_url = $this->context->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1&action=UpdateConfigurationField';
-                $this->context->smarty->assign('admin_url', $controller_url);
+                $controller_url = $this->context->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1';
+                $this->context->smarty->assign('update_feed_url', $controller_url . '&action=UpdateConfigurationField');
+                $this->context->smarty->assign('check_feed_url', $controller_url . '&action=CheckConfigurationField');
                 $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
             }
 

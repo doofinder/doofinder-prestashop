@@ -30,8 +30,6 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_4_4_7($module)
 {
     return Configuration::updateGlobalValue('DF_FEED_INDEXED', true)
-    && Configuration::updateValue('DF_SHOW_LAYER', true)
-    && Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true)
     && installTabs();
 }
 
