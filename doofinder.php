@@ -67,6 +67,7 @@ class Doofinder extends Module
         return parent::install()
             && $this->installDb()
             && $this->installTabs()
+            && $this->installConfigVars()
             && $this->registerHook('displayHeader')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
@@ -104,6 +105,12 @@ class Doofinder extends Module
             && $this->uninstallTabs()
             && $this->deleteConfigVars()
             && $this->uninstallDb();
+    }
+
+    public function installConfigVars()
+    {
+        return Configuration::updateValue('DF_SHOW_LAYER', true)
+        && Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true);
     }
 
     /**
