@@ -33,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.4.6';
+    const VERSION = '4.4.7';
     const YES = 1;
     const NO = 0;
 
@@ -41,12 +41,11 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.4.6';
+        $this->version = '4.4.7';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
         $this->bootstrap = true;
-
         parent::__construct();
 
         $this->displayName = $this->l('Doofinder');
@@ -67,6 +66,7 @@ class Doofinder extends Module
     {
         return parent::install()
             && $this->installDb()
+            && $this->installTabs()
             && $this->registerHook('displayHeader')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
@@ -101,6 +101,7 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
+            && $this->uninstallTabs()
             && $this->deleteConfigVars()
             && $this->uninstallDb();
     }
@@ -152,6 +153,7 @@ class Doofinder extends Module
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC',
+            'DF_FEED_INDEXED',
         ];
 
         $hashid_vars = array_column(
@@ -239,6 +241,14 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
+            $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
+            if (empty($feed_indexed)) {
+                $controller_url = $this->context->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1';
+                $this->context->smarty->assign('update_feed_url', $controller_url . '&action=UpdateConfigurationField');
+                $this->context->smarty->assign('check_feed_url', $controller_url . '&action=CheckConfigurationField');
+                $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
+            }
+
             $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_administration_panel.tpl');
             $output .= $this->renderFormDataFeed($adv);
             if ($adv) {
@@ -1415,6 +1425,7 @@ class Doofinder extends Module
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
         $installationID = null;
+        $callbacksUrls = [];
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
 
@@ -1433,10 +1444,11 @@ class Doofinder extends Module
                     continue;
                 }
                 $ciso = $cur['iso_code'];
+                $lang_code = $lang['language_code'];
                 $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $store_data['search_engines'][] = [
                     'name' => $shop['name'] . ' | Lang:' . $lang['iso_code'] . ' Currency:' . strtoupper($ciso),
-                    'language' => $lang['language_code'],
+                    'language' => $lang_code,
                     'currency' => $ciso,
                     'site_url' => $shop_url,
                     'stopwords' => false,
@@ -1459,8 +1471,10 @@ class Doofinder extends Module
                         ],
                     ],
                 ];
+                $callbacksUrls[$lang_code][$ciso] = $this->getProcessCallbackUrl();
             }
         }
+        $store_data['callback_urls'] = $callbacksUrls;
 
         $json_store_data = json_encode($store_data);
         $this->debug('Create Store Start');
@@ -1497,6 +1511,17 @@ class Doofinder extends Module
             echo $response->response;
             exit;
         }
+    }
+
+    /**
+     * Get Process Callback URL
+
+     *
+     * @return string
+     */
+    private function getProcessCallbackUrl()
+    {
+        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
     }
 
     /**
@@ -1696,5 +1721,32 @@ class Doofinder extends Module
         $isMobile = Context::getContext()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
+    }
+
+    private function installTabs()
+    {
+        $tab = new Tab();
+        $tab->active = 0;
+        $tab->class_name = 'DoofinderAdmin';
+        $tab->name = [];
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
+        }
+        $tab->id_parent = 0;
+        $tab->module = $this->name;
+
+        return $tab->save();
+    }
+
+    private function uninstallTabs()
+    {
+        $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
+        if (!$tabId) {
+            return true;
+        }
+
+        $tab = new Tab($tabId);
+
+        return $tab->delete();
     }
 }

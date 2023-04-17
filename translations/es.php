@@ -80,10 +80,22 @@ $_MODULE['<{doofinder}prestashop>configure_db5eb84117d06047c97c9a0191b5fffe'] =
 'Soporte';
 $_MODULE['<{doofinder}prestashop>configure_9b6545e4cea9b4ad4979d41bb9170e2b'] =
 'Avanzado';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_86bbc77fd75ac02c21b84a37b260eadd'] =
+'Panel de administración';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_23693319f4ed79081952f04729017d15'] =
+'Configurar Doofinder en mi tienda';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_f6e6bc175f0485d397ee4c1d45c1d01e'] =
+'Accede al panel de Doofinder y descubre todas las funcionalidades para aumentar tus ventas.';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_e77e4aaa7a0d7df358c2f9a8276bee7d'] =
+'Ir al panel de Doofinder';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_08c1cf7707bb72744cd07192c8580580'] =
 'URLs de los feeds para usar en el Dashboard de Doofinder';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459fc2615'] =
 'URL del feed de datos para';
+$_MODULE['<{doofinder}prestashop>indexation_status_b1d48d617a09cbe4e68eb72c83dea83d'] =
+'El feed de productos está siendo procesado. Dependiendo del tamaño del catálogo de productos de la tienda, este proceso puede llevar unos minutos';
+$_MODULE['<{doofinder}prestashop>indexation_status_e0dba0265fde532f75126eab6fedb8a8'] =
+'Es posible que sus productos no aparezcan correctamente actualizados en los resultados hasta que el proceso no haya finalizado.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] =
 'Se ha producido un error durante la instalación. Por favor, contacta con nuestro equipo  de soporte a través de';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] =
@@ -144,11 +156,3 @@ $_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] 
 'Puedes depurar o desactivar varias opciones en la pestaña de opciones avanzadas oculta  del módulo. Precaución: ¡Usar solo si eres un usuario experimentado!';
 $_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] =
 'Activar la pestaña de opciones Avanzadas';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_86bbc77fd75ac02c21b84a37b260eadd'] =
-'Panel de adminsitración';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_23693319f4ed79081952f04729017d15'] =
-'Configurar Doofinder en mi tienda';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_f6e6bc175f0485d397ee4c1d45c1d01e'] =
-'Accede al panel de Doofinder y descubre todas las funcionalidades para aumentar tus ventas.';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_e77e4aaa7a0d7df358c2f9a8276bee7d'] =
-'Ir al panel de Doofinder';
