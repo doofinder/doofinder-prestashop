@@ -1,3 +1,4 @@
+<?php
 /**
  * NOTICE OF LICENSE
  *
@@ -11,7 +12,6 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-<?php
 
 class DoofinderCallbackModuleFrontController extends ModuleFrontController
 {
