@@ -314,8 +314,6 @@ class Doofinder extends Module
      */
     protected function getConfigFormSearchLayer()
     {
-        $currencies = Currency::getCurrencies();
-
         $inputs = [
             [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -361,8 +359,8 @@ class Doofinder extends Module
     {
         $fields = [];
         $fields['DF_INSTALLATION_ID'] = Configuration::get('DF_INSTALLATION_ID');
-        $fields['DF_SHOW_LAYER'] = Configuration::get('DF_SHOW_LAYER', true);
-        $fields['DF_SHOW_LAYER_MOBILE'] = Configuration::get('DF_SHOW_LAYER_MOBILE', true);
+        $fields['DF_SHOW_LAYER'] = Configuration::get('DF_SHOW_LAYER', null, null, null, true);
+        $fields['DF_SHOW_LAYER_MOBILE'] = Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
 
         return $fields;
     }
@@ -1693,8 +1691,8 @@ class Doofinder extends Module
 
     private function searchLayerMustBeInitialized()
     {
-        $displayMobile = Configuration::get('DF_SHOW_LAYER_MOBILE', true);
-        $displayDesktop = Configuration::get('DF_SHOW_LAYER', true);
+        $displayMobile = Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
+        $displayDesktop = Configuration::get('DF_SHOW_LAYER', null, null, null, true);
         $isMobile = Context::getContext()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
