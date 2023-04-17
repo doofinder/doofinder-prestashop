@@ -12,7 +12,6 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 class DoofinderCallbackModuleFrontController extends ModuleFrontController
 {
     public function postProcess()
