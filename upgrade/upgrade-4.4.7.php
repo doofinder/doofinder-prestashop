@@ -43,7 +43,7 @@ function installTabs()
         $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
     }
     $tab->id_parent = 0;
-    $tab->module = $this->name;
+    $tab->module = 'doofinder';
 
     return $tab->save();
 }
