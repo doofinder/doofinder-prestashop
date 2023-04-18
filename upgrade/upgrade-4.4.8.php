@@ -27,7 +27,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_4_4_7($module)
+function upgrade_module_4_4_8($module)
 {
     return Configuration::updateGlobalValue('DF_FEED_INDEXED', true)
     && installTabs();
@@ -43,7 +43,7 @@ function installTabs()
         $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
     }
     $tab->id_parent = 0;
-    $tab->module = $this->name;
+    $tab->module = 'doofinder';
 
     return $tab->save();
 }
