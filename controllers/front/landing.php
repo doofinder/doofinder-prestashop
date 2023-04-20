@@ -47,7 +47,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         parent::initContent();
 
-        if(!version_compare(_PS_VERSION_, '1.7', '<') === true) {
+        if (!version_compare(_PS_VERSION_, '1.7', '<') === true) {
             $assembler = new ProductAssembler($this->context);
             $presenterFactory = new ProductPresenterFactory($this->context);
             $presentationSettings = $presenterFactory->getPresentationSettings();
@@ -87,16 +87,16 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
                     'description' => $this->landing_data['description'],
                     'meta_title' => $this->landing_data['meta_title'],
                     'meta_description' => $this->landing_data['meta_description'],
-                    'nobots' => $this->landing_data['index'] ? false : true
+                    'nobots' => $this->landing_data['index'] ? false : true,
                 ]
             );
 
-            $this->addCSS(array(
-                _THEME_CSS_DIR_.'category.css'     => 'all',
-                _THEME_CSS_DIR_.'product_list.css' => 'all',
-            ));
-        
-           $this->setTemplate('landing16.tpl');
+            $this->addCSS([
+                _THEME_CSS_DIR_ . 'category.css' => 'all',
+                _THEME_CSS_DIR_ . 'product_list.css' => 'all',
+            ]);
+
+            $this->setTemplate('landing16.tpl');
         }
     }
 
