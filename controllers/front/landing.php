@@ -47,37 +47,57 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         parent::initContent();
 
-        $assembler = new ProductAssembler($this->context);
-        $presenterFactory = new ProductPresenterFactory($this->context);
-        $presentationSettings = $presenterFactory->getPresentationSettings();
-        $presenter = new ProductListingPresenter(
-            new ImageRetriever(
-                $this->context->link
-            ),
-            $this->context->link,
-            new PriceFormatter(),
-            new ProductColorsRetriever(),
-            $this->context->getTranslator()
-        );
-
-        $products = [];
-        foreach ($this->products as $productDetail) {
-            $products[] = $presenter->present(
-                $presentationSettings,
-                $assembler->assembleProduct($productDetail),
-                $this->context->language
+        if(!version_compare(_PS_VERSION_, '1.7', '<') === true) {
+            $assembler = new ProductAssembler($this->context);
+            $presenterFactory = new ProductPresenterFactory($this->context);
+            $presentationSettings = $presenterFactory->getPresentationSettings();
+            $presenter = new ProductListingPresenter(
+                new ImageRetriever(
+                    $this->context->link
+                ),
+                $this->context->link,
+                new PriceFormatter(),
+                new ProductColorsRetriever(),
+                $this->context->getTranslator()
             );
+
+            $products = [];
+            foreach ($this->products as $productDetail) {
+                $products[] = $presenter->present(
+                    $presentationSettings,
+                    $assembler->assembleProduct($productDetail),
+                    $this->context->language
+                );
+            }
+
+            $this->context->smarty->assign(
+                [
+                    'products' => $products,
+                    'title' => $this->landing_data['title'],
+                    'description' => $this->landing_data['description'],
+                ]
+            );
+
+            $this->setTemplate('module:doofinder/views/templates/front/landing.tpl');
+        } else {
+            $this->context->smarty->assign(
+                [
+                    'search_products' => $this->products,
+                    'title' => $this->landing_data['title'],
+                    'description' => $this->landing_data['description'],
+                    'meta_title' => $this->landing_data['meta_title'],
+                    'meta_description' => $this->landing_data['meta_description'],
+                    'nobots' => $this->landing_data['index'] ? false : true
+                ]
+            );
+
+            $this->addCSS(array(
+                _THEME_CSS_DIR_.'category.css'     => 'all',
+                _THEME_CSS_DIR_.'product_list.css' => 'all',
+            ));
+        
+           $this->setTemplate('landing16.tpl');
         }
-
-        $this->context->smarty->assign(
-            [
-                'products' => $products,
-                'title' => $this->landing_data['title'],
-                'description' => $this->landing_data['description'],
-            ]
-        );
-
-        $this->setTemplate('module:doofinder/views/templates/front/landing.tpl');
     }
 
     /**
@@ -91,6 +111,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         $page['meta']['title'] = $this->landing_data['meta_title'];
         $page['meta']['description'] = $this->landing_data['meta_description'];
+        $page['meta']['robots'] = $this->landing_data['index'] ? 'index' : 'noindex';
 
         return $page;
     }
@@ -109,6 +130,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
                 'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas quis vestibulum elit. Proin eleifend mattis mattis. Morbi iaculis varius leo, ullamcorper vestibulum enim tempor et. Aliquam tincidunt orci eu dolor auctor, eget semper lectus rutrum. Suspendisse augue dolor, facilisis vitae feugiat sed, euismod in turpis. Fusce ullamcorper condimentum pellentesque. Fusce sodales eget justo convallis fermentum. Fusce laoreet a odio iaculis suscipit. Nunc ut sollicitudin velit. Fusce feugiat est scelerisque scelerisque porttitor. Pellentesque in lacinia velit. Etiam finibus pretium orci non auctor. Curabitur lacinia sapien vel convallis condimentum.',
                 'meta_title' => 'meta title test',
                 'meta_description' => 'meta_description_test',
+                'index' => false,
                 'query' => $name,
             ];
 
