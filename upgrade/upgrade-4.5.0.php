@@ -30,7 +30,8 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_4_5_0($module)
 {
     return installDb() &&
-        $module->registerHook('moduleRoutes');
+        $module->registerHook('moduleRoutes') &&
+        $module->setSearchEnginesByConfig();
 }
 
 function installDb()
@@ -39,11 +40,10 @@ function installDb()
         '
         CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_landing` (
                 `name` VARCHAR(45) NOT NULL,
-                `id_shop` INT(10) UNSIGNED NOT NULL,
-                `id_lang` INT(10) UNSIGNED NOT NULL,
+                `hashid` VARCHAR(45) NOT NULL,
                 `data` TEXT NOT NULL,
                 `date_upd` DATETIME NOT NULL,
-                PRIMARY KEY (`name`, `id_shop`, `id_lang`)
+                PRIMARY KEY (`name`, `hashid`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
     );
 }

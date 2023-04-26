@@ -5,6 +5,8 @@ use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\ProductListingPresenter;
 
+require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_api_landing.php';
+
 class DoofinderLandingModuleFrontController extends ModuleFrontController
 {
     public $products = [];
@@ -24,7 +26,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         $landing_name = Tools::getValue('landing_name');
 
-        $this->landing_data = $this->getLandingData($landing_name, $this->context->shop->id, $this->context->language->id);
+        $this->landing_data = $this->getLandingData($landing_name, $this->context->shop->id, $this->context->language->id, $this->context->currency->id);
 
         if (!$this->landing_data) {
             Tools::redirect('index.php?controller=404');
@@ -116,38 +118,54 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
         return $page;
     }
 
-    private function getLandingData($name, $id_shop, $id_lang)
+    private function getLandingData($name, $id_shop, $id_lang, $id_currency)
     {
-        $cache = $this->getLandingCache($name, $id_shop, $id_lang);
+        $hashid = $this->module->getHashId($id_lang, $id_currency);
+        $cache = $this->getLandingCache($name, $hashid);
 
         if ($cache && !$this->refreshCache($cache)) {
             return json_decode($cache['data'], true);
         } else {
-            // $response -> petición a la API Doofinder()
+            $response = $this->getApiCall($name, $hashid);
 
-            $response = [
-                'title' => 'title test 2',
-                'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas quis vestibulum elit. Proin eleifend mattis mattis. Morbi iaculis varius leo, ullamcorper vestibulum enim tempor et. Aliquam tincidunt orci eu dolor auctor, eget semper lectus rutrum. Suspendisse augue dolor, facilisis vitae feugiat sed, euismod in turpis. Fusce ullamcorper condimentum pellentesque. Fusce sodales eget justo convallis fermentum. Fusce laoreet a odio iaculis suscipit. Nunc ut sollicitudin velit. Fusce feugiat est scelerisque scelerisque porttitor. Pellentesque in lacinia velit. Etiam finibus pretium orci non auctor. Curabitur lacinia sapien vel convallis condimentum.',
-                'meta_title' => 'meta title test',
-                'meta_description' => 'meta_description_test',
-                'index' => false,
-                'query' => $name,
+            if (!$response) {
+                $this->setLandingCache($name, $hashid, null);
+            }
+
+            return false;
+
+            $data = [
+                'title' => $response['title'],
+                'description' => $response['description'],
+                'meta_title' => $response['meta_title'],
+                'meta_description' => $response['meta_description'],
+                'index' => $response['index'],
+                'query' => $response['query'],
             ];
 
-            $this->setLandingCache($name, $id_shop, $id_lang, json_encode($response));
+            $this->setLandingCache($name, $hashid, json_encode($data));
 
             return $response;
         }
     }
 
-    private function setLandingCache($name, $id_shop, $id_lang, $data)
+    private function getApiCall($name, $hashid)
+    {
+        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
+        $region = Configuration::get('DF_REGION');
+
+        $api = new DoofinderApiLanding($hashid, $apikey, $region);
+
+        return $api->getLanding($name);
+    }
+
+    private function setLandingCache($name, $hashid, $data)
     {
         return Db::getInstance()->insert(
             'doofinder_landing',
             [
                 'name' => pSQL($name),
-                'id_shop' => $id_shop,
-                'id_lang' => $id_lang,
+                'hashid' => pSQL($hashid),
                 'data' => $data,
                 'date_upd' => date('Y-m-d H:i:s'),
             ],
@@ -157,12 +175,12 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
         );
     }
 
-    private function getLandingCache($name, $id_shop, $id_lang)
+    private function getLandingCache($name, $hashid)
     {
         return Db::getInstance()->getRow(
             '
             SELECT * FROM ' . _DB_PREFIX_ . "doofinder_landing 
-            WHERE name = '" . pSQL($name) . "' AND id_shop = " . (int) $id_shop . ' AND id_lang = ' . (int) $id_lang
+            WHERE name = '" . pSQL($name) . "' AND hashid = '" . pSQL($hashid) . "'"
         );
     }
 
