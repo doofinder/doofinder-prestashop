@@ -46,7 +46,6 @@ class Doofinder extends Module
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
         $this->bootstrap = true;
-
         parent::__construct();
 
         $this->displayName = $this->l('Doofinder');
@@ -67,6 +66,7 @@ class Doofinder extends Module
     {
         return parent::install()
             && $this->installDb()
+            && $this->installTabs()
             && $this->registerHook('displayHeader')
             && $this->registerHook('moduleRoutes')
             && $this->registerHook('actionProductSave')
@@ -112,6 +112,7 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
+            && $this->uninstallTabs()
             && $this->deleteConfigVars()
             && $this->uninstallDb();
     }
@@ -156,12 +157,15 @@ class Doofinder extends Module
             'DF_GS_MPN_FIELD',
             'DF_GS_PRICES_USE_TAX',
             'DF_INSTALLATION_ID',
+            'DF_SHOW_LAYER',
+            'DF_SHOW_LAYER_MOBILE',
             'DF_REGION',
             'DF_RESTART_OV',
             'DF_SHOW_PRODUCT_FEATURES',
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC',
+            'DF_FEED_INDEXED',
         ];
 
         $hashid_vars = array_column(
@@ -232,6 +236,8 @@ class Doofinder extends Module
 
         $output = $msg;
         $oldPS = false;
+        $this->context->controller->addJS($this->_path . 'views/js/admin-panel.js');
+
         if (_PS_VERSION_ < 1.6) {
             $oldPS = true;
             $this->context->controller->addJS($this->_path . 'views/js/plugins/bootstrap.min.js');
@@ -271,6 +277,15 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
         if ($configured) {
+            $feed_indexed = Configuration::get('DF_FEED_INDEXED', false);
+            if (empty($feed_indexed)) {
+                $controller_url = $this->context->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1';
+                $this->context->smarty->assign('update_feed_url', $controller_url . '&action=UpdateConfigurationField');
+                $this->context->smarty->assign('check_feed_url', $controller_url . '&action=CheckConfigurationField');
+                $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/indexation_status.tpl');
+            }
+
+            $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_administration_panel.tpl');
             $output .= $this->renderFormDataFeed($adv);
             if ($adv) {
                 $output .= $this->renderFormAdvanced();
@@ -345,21 +360,32 @@ class Doofinder extends Module
      */
     protected function getConfigFormSearchLayer()
     {
-        $currencies = Currency::getCurrencies();
-
-        $inputs[] = [
-            'type' => 'text',
-            'label' => $this->l('Doofinder Installation ID'),
-            'name' => 'DF_INSTALLATION_ID',
-            'desc' => $this->l('INSTALLATION_ID_EXPLANATION'),
-            'lang' => false,
+        $inputs = [
+            [
+                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                'label' => $this->l('Doofinder search layer'),
+                'name' => 'DF_SHOW_LAYER',
+                'is_bool' => true,
+                'values' => $this->getBooleanFormValue(),
+            ], [
+                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                'label' => $this->l('Doofinder search layer in mobile version'),
+                'name' => 'DF_SHOW_LAYER_MOBILE',
+                'is_bool' => true,
+                'values' => $this->getBooleanFormValue(),
+            ], [
+                'type' => 'text',
+                'label' => $this->l('Doofinder Store ID'),
+                'name' => 'DF_INSTALLATION_ID',
+                'desc' => $this->l('INSTALLATION_ID_EXPLANATION'),
+                'lang' => false,
+            ],
         ];
 
         return [
             'form' => [
                 'legend' => [
                     'title' => $this->l('Search Layer'),
-                    'icon' => 'icon-cogs',
                 ],
                 'input' => $inputs,
                 'submit' => [
@@ -378,8 +404,9 @@ class Doofinder extends Module
     protected function getConfigFormValuesSearchLayer()
     {
         $fields = [];
-
         $fields['DF_INSTALLATION_ID'] = Configuration::get('DF_INSTALLATION_ID');
+        $fields['DF_SHOW_LAYER'] = Configuration::get('DF_SHOW_LAYER', null, null, null, true);
+        $fields['DF_SHOW_LAYER_MOBILE'] = Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
 
         return $fields;
     }
@@ -419,7 +446,6 @@ class Doofinder extends Module
 
         if (!$this->showNewShopForm(Context::getContext()->shop)) {
             $html .= $helper->generateForm([$this->getConfigFormDataFeed()]);
-
             // Search layer form
             $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
@@ -442,52 +468,41 @@ class Doofinder extends Module
             'form' => [
                 'legend' => [
                     'title' => $this->l('Data Feed'),
-                    'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Display Prices in Data Feed'),
+                        'label' => $this->l('Index product prices'),
+                        'desc' => $this->l('If you activate this option you will be able to show the prices of each product in the search results.'),
                         'name' => 'DF_GS_DISPLAY_PRICES',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Display Prices With Taxes'),
+                        'label' => $this->l('Show product prices including taxes'),
+                        'desc' => $this->l('If you activate this option, the price of the products that will be displayed will be inclusive of taxes.'),
                         'name' => 'DF_GS_PRICES_USE_TAX',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Export full categories path in the feed'),
+                        'label' => $this->l('Index the full path of the product category'),
                         'name' => 'DF_FEED_FULL_PATH',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => 'select',
-                        'label' => $this->l('Include product variations in feed'),
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->l('Index product attribute combinations'),
                         'name' => 'DF_SHOW_PRODUCT_VARIATIONS',
-                        'options' => [
-                            'query' => [
-                                [
-                                    'id' => '0',
-                                    'name' => $this->l('No, only product'),
-                                ],
-                                [
-                                    'id' => '1',
-                                    'name' => $this->l('Yes, Include each variations'),
-                                ],
-                            ],
-                            'id' => 'id',
-                            'name' => 'name',
-                        ],
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->l('Attribute Groups'),
+                        'label' => $this->l('Define which combinations of product attributes you want to index for'),
                         'name' => 'DF_GROUP_ATTRIBUTES_SHOWN',
                         'multiple' => true,
                         'options' => [
@@ -498,7 +513,7 @@ class Doofinder extends Module
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->l('Include product features in feed'),
+                        'label' => $this->l('Index customized product features'),
                         'name' => 'DF_SHOW_PRODUCT_FEATURES',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
@@ -529,7 +544,7 @@ class Doofinder extends Module
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->l('Process changed products'),
+                        'label' => $this->l('Automatically process product changes'),
                         'desc' => $this->l('Configure when registered product changes are sent to Doofinder'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => [
@@ -742,6 +757,7 @@ class Doofinder extends Module
         foreach (array_keys($form_values) as $key) {
             $postKey = str_replace(['[', ']'], '', $key);
             $value = Tools::getValue($postKey);
+
             if (isset($form_values[$key]['real_config'])) {
                 $postKey = $form_values[$key]['real_config'];
             }
@@ -752,7 +768,6 @@ class Doofinder extends Module
                 Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', 0);
             }
             $value = trim($value);
-
             Configuration::updateValue($postKey, $value);
         }
 
@@ -815,11 +830,13 @@ class Doofinder extends Module
      */
     public function hookHeader($params)
     {
-        $this->configureHookCommon($params);
-        if (Configuration::get('DF_ENABLED_V9')) {
-            return $this->displayScriptLiveLayer();
-        } else {
-            return $this->displayScriptV7();
+        if ($this->searchLayerMustBeInitialized()) {
+            $this->configureHookCommon($params);
+            if (Configuration::get('DF_ENABLED_V9')) {
+                return $this->displayScriptLiveLayer();
+            } else {
+                return $this->displayScriptV7();
+            }
         }
     }
 
@@ -1446,6 +1463,7 @@ class Doofinder extends Module
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
         $installationID = null;
+        $callbacksUrls = [];
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
 
@@ -1464,10 +1482,11 @@ class Doofinder extends Module
                     continue;
                 }
                 $ciso = $cur['iso_code'];
+                $lang_code = $lang['language_code'];
                 $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $store_data['search_engines'][] = [
                     'name' => $shop['name'] . ' | Lang:' . $lang['iso_code'] . ' Currency:' . strtoupper($ciso),
-                    'language' => $lang['language_code'],
+                    'language' => $lang_code,
                     'currency' => $ciso,
                     'site_url' => $shop_url,
                     'stopwords' => false,
@@ -1490,8 +1509,10 @@ class Doofinder extends Module
                         ],
                     ],
                 ];
+                $callbacksUrls[$lang_code][$ciso] = $this->getProcessCallbackUrl();
             }
         }
+        $store_data['callback_urls'] = $callbacksUrls;
 
         $json_store_data = json_encode($store_data);
         $this->debug('Create Store Start');
@@ -1529,6 +1550,17 @@ class Doofinder extends Module
             echo $response->response;
             exit;
         }
+    }
+
+    /**
+     * Get Process Callback URL
+
+     *
+     * @return string
+     */
+    private function getProcessCallbackUrl()
+    {
+        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
     }
 
     /**
@@ -1719,5 +1751,41 @@ class Doofinder extends Module
         );
 
         return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
+    }
+
+    private function searchLayerMustBeInitialized()
+    {
+        $displayMobile = Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
+        $displayDesktop = Configuration::get('DF_SHOW_LAYER', null, null, null, true);
+        $isMobile = Context::getContext()->isMobile();
+
+        return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
+    }
+
+    private function installTabs()
+    {
+        $tab = new Tab();
+        $tab->active = 0;
+        $tab->class_name = 'DoofinderAdmin';
+        $tab->name = [];
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
+        }
+        $tab->id_parent = 0;
+        $tab->module = $this->name;
+
+        return $tab->save();
+    }
+
+    private function uninstallTabs()
+    {
+        $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
+        if (!$tabId) {
+            return true;
+        }
+
+        $tab = new Tab($tabId);
+
+        return $tab->delete();
     }
 }

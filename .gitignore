@@ -12,3 +12,4 @@ test_doofinder.php
 vendor/
 composer.lock
 .php-cs-fixer.dist.php
+.php-cs-fixer.cache

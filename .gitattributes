@@ -6,3 +6,4 @@
 /\.travis\.yml        export-ignore
 /build\.sh            export-ignore
 /\.github		      export-ignore
+/prestashop_architecture\.md	export-ignore
