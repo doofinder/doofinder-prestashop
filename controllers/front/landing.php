@@ -50,56 +50,66 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
         parent::initContent();
 
         if (!version_compare(_PS_VERSION_, '1.7', '<') === true) {
-            $assembler = new ProductAssembler($this->context);
-            $presenterFactory = new ProductPresenterFactory($this->context);
-            $presentationSettings = $presenterFactory->getPresentationSettings();
-            $presenter = new ProductListingPresenter(
-                new ImageRetriever(
-                    $this->context->link
-                ),
-                $this->context->link,
-                new PriceFormatter(),
-                new ProductColorsRetriever(),
-                $this->context->getTranslator()
-            );
-
-            $products = [];
-            foreach ($this->products as $productDetail) {
-                $products[] = $presenter->present(
-                    $presentationSettings,
-                    $assembler->assembleProduct($productDetail),
-                    $this->context->language
-                );
-            }
-
-            $this->context->smarty->assign(
-                [
-                    'products' => $products,
-                    'title' => $this->landing_data['title'],
-                    'description' => $this->landing_data['description'],
-                ]
-            );
-
-            $this->setTemplate('module:doofinder/views/templates/front/landing.tpl');
+            $this->renderProductList();
         } else {
-            $this->context->smarty->assign(
-                [
-                    'search_products' => $this->products,
-                    'title' => $this->landing_data['title'],
-                    'description' => $this->landing_data['description'],
-                    'meta_title' => $this->landing_data['meta_title'],
-                    'meta_description' => $this->landing_data['meta_description'],
-                    'nobots' => $this->landing_data['index'] ? false : true,
-                ]
-            );
-
-            $this->addCSS([
-                _THEME_CSS_DIR_ . 'category.css' => 'all',
-                _THEME_CSS_DIR_ . 'product_list.css' => 'all',
-            ]);
-
-            $this->setTemplate('landing16.tpl');
+            $this->renderProductList16();
         }
+    }
+
+    private function renderProductList()
+    {
+        $assembler = new ProductAssembler($this->context);
+        $presenterFactory = new ProductPresenterFactory($this->context);
+        $presentationSettings = $presenterFactory->getPresentationSettings();
+        $presenter = new ProductListingPresenter(
+            new ImageRetriever(
+                $this->context->link
+            ),
+            $this->context->link,
+            new PriceFormatter(),
+            new ProductColorsRetriever(),
+            $this->context->getTranslator()
+        );
+
+        $products = [];
+        foreach ($this->products as $productDetail) {
+            $products[] = $presenter->present(
+                $presentationSettings,
+                $assembler->assembleProduct($productDetail),
+                $this->context->language
+            );
+        }
+
+        $this->context->smarty->assign(
+            [
+                'products' => $products,
+                'title' => $this->landing_data['title'],
+                'description' => $this->landing_data['description'],
+            ]
+        );
+
+        $this->setTemplate('module:doofinder/views/templates/front/landing.tpl');
+    }
+
+    private function renderProductList16()
+    {
+        $this->context->smarty->assign(
+            [
+                'search_products' => $this->products,
+                'title' => $this->landing_data['title'],
+                'description' => $this->landing_data['description'],
+                'meta_title' => $this->landing_data['meta_title'],
+                'meta_description' => $this->landing_data['meta_description'],
+                'nobots' => $this->landing_data['index'] ? false : true,
+            ]
+        );
+
+        $this->addCSS([
+            _THEME_CSS_DIR_ . 'category.css' => 'all',
+            _THEME_CSS_DIR_ . 'product_list.css' => 'all',
+        ]);
+
+        $this->setTemplate('landing16.tpl');
     }
 
     /**
@@ -130,9 +140,9 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
             if (!$response) {
                 $this->setLandingCache($name, $hashid, null);
-            }
 
-            return false;
+                return false;
+            }
 
             $data = [
                 'title' => $response['title'],
@@ -190,10 +200,6 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         $diff_min = (time() - $last_exec_ts) / 60;
 
-        if ($diff_min > self::TTL_CACHE) {
-            return true;
-        }
-
-        return false;
+        return $diff_min > self::TTL_CACHE;
     }
 }
