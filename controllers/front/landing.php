@@ -49,7 +49,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         parent::initContent();
 
-        if (!version_compare(_PS_VERSION_, '1.7', '<') === true) {
+        if (version_compare(_PS_VERSION_, '1.7', '>=')) {
             $this->renderProductList();
         } else {
             $this->renderProductList16();
