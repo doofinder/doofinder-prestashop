@@ -33,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.4.8';
+    const VERSION = '4.5.0';
     const YES = 1;
     const NO = 0;
 
@@ -41,7 +41,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.4.8';
+        $this->version = '4.5.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -68,6 +68,7 @@ class Doofinder extends Module
             && $this->installDb()
             && $this->installTabs()
             && $this->registerHook('displayHeader')
+            && $this->registerHook('moduleRoutes')
             && $this->registerHook('actionProductSave')
             && $this->registerHook('actionProductDelete');
     }
@@ -90,7 +91,17 @@ class Doofinder extends Module
                 PRIMARY KEY (`id_doofinder_product`),
                 CONSTRAINT uc_shop_product UNIQUE KEY (id_shop,id_product)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
-        );
+        )
+            && Db::getInstance()->execute(
+                '
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_landing` (
+                `name` VARCHAR(45) NOT NULL,
+                `hashid` VARCHAR(45) NOT NULL,
+                `data` TEXT NOT NULL,
+                `date_upd` DATETIME NOT NULL,
+                PRIMARY KEY (`name`, `hashid`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
+            );
     }
 
     /**
@@ -137,6 +148,7 @@ class Doofinder extends Module
             'DF_FACETS_TOKEN',
             'DF_FEATURES_SHOWN',
             'DF_FEED_FULL_PATH',
+            'DF_FEED_INDEXED',
             'DF_FEED_MAINCATEGORY_PATH',
             'DF_GROUP_ATTRIBUTES_SHOWN',
             'DF_GS_DESCRIPTION_TYPE',
@@ -178,7 +190,31 @@ class Doofinder extends Module
      */
     public function uninstallDb()
     {
-        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`');
+        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`')
+            && Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
+    }
+
+    /**
+     * Add controller routes
+     *
+     * @return array
+     */
+    public function hookModuleRoutes()
+    {
+        return [
+            'module-doofinder-landing' => [
+                'controller' => 'landing',
+                'rule' => 'df/{landing_name}',
+                'keywords' => [
+                    'landing_name' => ['regexp' => '[_a-zA-Z0-9_-]+', 'param' => 'landing_name'],
+                ],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'landing',
+                ],
+            ],
+        ];
     }
 
     /**
@@ -1338,7 +1374,7 @@ class Doofinder extends Module
     /**
      * Update the hashid of the search engines of the store in the configuration
      *
-     * @return void
+     * @return true
      */
     public function setSearchEnginesByConfig()
     {
@@ -1354,6 +1390,8 @@ class Doofinder extends Module
                 Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
             }
         }
+
+        return true;
     }
 
     /**
@@ -1499,6 +1537,7 @@ class Doofinder extends Module
                 $this->debug("Set installation ID: $installationID");
                 Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
                 Configuration::updateValue('DF_ENABLED_V9', true, false, $shopGroupId, $shopId);
+                $this->setSearchEnginesByConfig();
             } else {
                 $this->debug('Invalid installation ID');
                 exit('ko');
@@ -1624,7 +1663,7 @@ class Doofinder extends Module
      *
      * @return string
      */
-    protected function getHashId($id_lang, $id_currency)
+    public function getHashId($id_lang, $id_currency)
     {
         $curr_iso = strtoupper($this->getIsoCodeById($id_currency));
         $lang = new Language($id_lang);
