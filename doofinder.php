@@ -1625,6 +1625,31 @@ class Doofinder extends Module
     }
 
     /**
+     * Get the language associated with a search engine
+     *
+     * @param bool $hashid
+     *
+     * @return bool|int
+     */
+    public function getLanguageByHashid($hashid)
+    {
+        $result = Db::getInstance()->getValue('
+            SELECT name
+            FROM ' . _DB_PREFIX_ . 'configuration
+            WHERE name like "DF_HASHID_%" and value = "' . pSQL($hashid) . '";
+        ');
+
+        if ($result) {
+            $key = str_replace('DF_HASHID_', '', $result);
+            $iso_code = explode('_', $key)[1];
+
+            return (int) Language::getIdByLocale($iso_code);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Get the ISO of a currency
      *
      * @param int $id currency ID
