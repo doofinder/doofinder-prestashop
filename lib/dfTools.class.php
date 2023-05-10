@@ -801,6 +801,30 @@ class DfTools
         return $flat ? implode(CATEGORY_SEPARATOR, $categories) : $categories;
     }
 
+    public function getCategories($idLang, $active = true)
+    {
+        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
+            '
+            SELECT c.id_category
+            FROM `' . _DB_PREFIX_ . 'category` c
+            ' . Shop::addSqlAssociation('category', 'c') . '
+            LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` cl ON c.`id_category` = cl.`id_category`' . Shop::addSqlRestrictionOnLang('cl') . '
+            WHERE id_parent != 0
+            ' . ($idLang ? 'AND `id_lang` = ' . (int) $idLang : '') . '
+            ' . ($active ? 'AND `active` = 1' : '') . '
+            ' . (!$idLang ? 'GROUP BY c.id_category' : '')
+        );
+
+        return array_column($result, 'id_category');
+    }
+
+    public function getCmsPages($idLang, $id_shop, $active = true)
+    {
+        $result = CMS::getCMSPages($idLang, null, $active, $id_shop);
+
+        return array_column($result, 'id_cms');
+    }
+
     //
     // Text Tools
     //
@@ -1172,5 +1196,19 @@ class DfTools
     public static function escapeSlashes($string)
     {
         return $string = str_replace('/', '//', $string);
+    }
+
+    public static function validateSecurityToken($dfsec_hash)
+    {
+        $doofinder_api_key = Configuration::get('DF_API_KEY');
+        if (!empty($doofinder_api_key) && $dfsec_hash != $doofinder_api_key) {
+            header('HTTP/1.1 403 Forbidden', true, 403);
+            $msgError = 'Forbidden access.'
+                . ' Maybe security token missed.'
+                . ' Please check on your doofinder module'
+                . ' configuration page the new URL'
+                . ' for your feed';
+            exit($msgError);
+        }
     }
 }
