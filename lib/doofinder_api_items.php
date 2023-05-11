@@ -17,23 +17,24 @@ require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 const API_URL = 'https://{region}-admin.doofinder.com';
 const API_VERSION = '2';
 
-class DoofinderApiProducts
+class DoofinderApiItems
 {
-    public function __construct($hashid, $api_key, $region)
+    public function __construct($hashid, $api_key, $region, $type = 'product')
     {
         $this->hashid = $hashid;
         $this->api_key = $api_key;
         $this->api_url = str_replace('{region}', $region, API_URL);
+        $this->type = $type;
     }
 
     /**
-     * Make a request to the API to update the specified products
+     * Make a request to the API to update the specified items
      *
-     * @param array Product data
+     * @param array items data
      */
     public function updateBulk($payload)
     {
-        $endpoint = '/plugins/prestashop/' . $this->hashid . '/product_update';
+        $endpoint = '/plugins/prestashop/' . $this->hashid . '/' . $this->type . '/product_update';
 
         $url = $this->api_url . $endpoint;
 
@@ -41,13 +42,13 @@ class DoofinderApiProducts
     }
 
     /**
-     * Make a request to the API to delete the specified products
+     * Make a request to the API to delete the specified items
      *
-     * @param array Product ids
+     * @param array items ids
      */
     public function deleteBulk($payload)
     {
-        $endpoint = '/plugins/prestashop/' . $this->hashid . '/product_delete';
+        $endpoint = '/plugins/prestashop/' . $this->hashid . '/' . $this->type . '/product_delete';
 
         $url = $this->api_url . $endpoint;
 
