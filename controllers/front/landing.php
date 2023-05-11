@@ -134,7 +134,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
         $cache = $this->getLandingCache($name, $hashid);
 
         if ($cache && !$this->refreshCache($cache)) {
-            return json_decode($cache['data'], true);
+            return unserialize($cache['data']);
         } else {
             $response = $this->getApiCall($name, $hashid);
 
@@ -153,7 +153,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
                 'query' => $response['query'],
             ];
 
-            $this->setLandingCache($name, $hashid, json_encode($data));
+            $this->setLandingCache($name, $hashid, serialize($data));
 
             return $response;
         }
