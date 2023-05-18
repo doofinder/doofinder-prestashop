@@ -33,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.6.2';
+    const VERSION = '4.6.4';
     const YES = 1;
     const NO = 0;
 
@@ -41,7 +41,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.6.2';
+        $this->version = '4.6.4';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -231,7 +231,6 @@ class Doofinder extends Module
      */
     public function getContent()
     {
-        $this->processItemQueue(1);
         $stop = $this->getWarningMultishopHtml();
         if ($stop) {
             return $stop;
@@ -1169,9 +1168,9 @@ class Doofinder extends Module
                 $builder->setCmsPages($cms_pages);
                 $payload = $builder->build();
 
-                $this->updateItemsApi($hashid, 'cms', $payload);
+                $this->updateItemsApi($hashid, 'page', $payload);
             } elseif ($action == 'delete') {
-                $this->deleteItemsApi($hashid, 'cms', $cms_pages);
+                $this->deleteItemsApi($hashid, 'page', $cms_pages);
             }
         }
     }
@@ -1203,7 +1202,7 @@ class Doofinder extends Module
                 $builder->setCategories($categories);
                 $payload = $builder->build();
 
-                $this->updateItemsApi($hashid, 'category', $categories);
+                $this->updateItemsApi($hashid, 'category', $payload);
             } elseif ($action == 'delete') {
                 $this->deleteItemsApi($hashid, 'category', $categories);
             }
@@ -1217,7 +1216,7 @@ class Doofinder extends Module
         $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
         $region = Configuration::get('DF_REGION');
 
-        $api = new DoofinderApiItems($hashid, $apikey, $region, $type, $type);
+        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
         $response = $api->updateBulk($payload);
 
         if (isset($response['error']) && !empty($response['error'])) {

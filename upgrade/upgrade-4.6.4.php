@@ -27,9 +27,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_4_6_2($module)
+function upgrade_module_4_6_4($module)
 {
-    return installDb() &&
+    return installDb_4_6_4() &&
         $module->registerHook('actionObjectCmsAddAfter') &&
         $module->registerHook('actionObjectCmsUpdateAfter') &&
         $module->registerHook('actionObjectCmsDeleteAfter') &&
@@ -38,7 +38,7 @@ function upgrade_module_4_6_2($module)
         $module->registerHook('actionObjectCategoryDeleteAfter');
 }
 
-function installDb()
+function installDb_4_6_4()
 {
     Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`');
 
