@@ -981,7 +981,7 @@ class Doofinder extends Module
             $this->addItemQueue($object, $id_object, $id_shop, $action);
 
             if ($this->allowProcessItemsQueue()) {
-                // $this->processItemQueue($id_shop);
+                $this->processItemQueue($id_shop);
             }
         }
     }
@@ -1074,7 +1074,7 @@ class Doofinder extends Module
             }
         }
 
-        // $this->deleteItemsQueue($id_shop);
+        $this->deleteItemsQueue($id_shop);
     }
 
     /**
