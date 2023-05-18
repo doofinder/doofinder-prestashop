@@ -921,7 +921,7 @@ class Doofinder extends Module
     }
 
     /**
-     * @hook actionObjectCmsUpdateAfter ProductCore
+     * @hook actionObjectCmsUpdateAfter ObjectModelCore
      */
     public function hookActionObjectCmsUpdateAfter($params)
     {
@@ -930,7 +930,7 @@ class Doofinder extends Module
     }
 
     /**
-     * @hook actionObjectCmsDeleteAfter ProductCore
+     * @hook actionObjectCmsDeleteAfter ObjectModelCore
      */
     public function hookActionObjectCmsDeleteAfter($params)
     {
@@ -948,7 +948,7 @@ class Doofinder extends Module
     }
 
     /**
-     * @hook actionObjectCategoryUpdateAfter ProductCore
+     * @hook actionObjectCategoryUpdateAfter ObjectModelCore
      */
     public function hookActionObjectCategoryUpdateAfter($params)
     {
@@ -957,7 +957,7 @@ class Doofinder extends Module
     }
 
     /**
-     * @hook actionObjectCategoryDeleteAfter ProductCore
+     * @hook actionObjectCategoryDeleteAfter ObjectModelCore
      */
     public function hookActionObjectCategoryDeleteAfter($params)
     {
