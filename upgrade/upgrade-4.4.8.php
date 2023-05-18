@@ -30,10 +30,10 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_4_4_8($module)
 {
     return Configuration::updateGlobalValue('DF_FEED_INDEXED', true)
-    && installTabs();
+    && installTabs_4_4_8();
 }
 
-function installTabs()
+function installTabs_4_4_8()
 {
     $tab = new Tab();
     $tab->active = 0;

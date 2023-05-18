@@ -29,12 +29,12 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_4_2_0($module)
 {
-    return installDb() &&
+    return installDb_4_2_0() &&
         $module->registerHook('actionProductSave') &&
         $module->registerHook('actionProductDelete');
 }
 
-function installDb()
+function installDb_4_2_0()
 {
     return Db::getInstance()->execute(
         '
