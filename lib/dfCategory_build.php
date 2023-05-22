@@ -56,7 +56,7 @@ class DfCategoryBuild
 
         $c = [];
 
-        $c['id'] = $category->id;
+        $c['id'] = (string) $category->id;
         $c['title'] = dfTools::cleanString($category->name);
         $c['description'] = dfTools::cleanString($category->description);
         $c['meta_title'] = dfTools::cleanString($category->meta_title);

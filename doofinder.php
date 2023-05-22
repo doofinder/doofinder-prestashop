@@ -33,7 +33,7 @@ class Doofinder extends Module
 
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.6.3';
+    const VERSION = '4.6.4';
     const YES = 1;
     const NO = 0;
 
@@ -41,7 +41,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.6.3';
+        $this->version = '4.6.4';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -70,7 +70,13 @@ class Doofinder extends Module
             && $this->registerHook('displayHeader')
             && $this->registerHook('moduleRoutes')
             && $this->registerHook('actionProductSave')
-            && $this->registerHook('actionProductDelete');
+            && $this->registerHook('actionProductDelete')
+            && $this->registerHook('actionObjectCmsAddAfter')
+            && $this->registerHook('actionObjectCmsUpdateAfter')
+            && $this->registerHook('actionObjectCmsDeleteAfter')
+            && $this->registerHook('actionObjectCategoryAddAfter')
+            && $this->registerHook('actionObjectCategoryUpdateAfter')
+            && $this->registerHook('actionObjectCategoryDeleteAfter');
     }
 
     /**
@@ -82,14 +88,15 @@ class Doofinder extends Module
     {
         return Db::getInstance()->execute(
             '
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_product` (
-                `id_doofinder_product` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_updates` (
+                `id_doofinder_update` INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_shop` INT(10) UNSIGNED NOT NULL,
-                `id_product` INT(10) UNSIGNED NOT NULL,
+                `object` varchar(45) NOT NULL,
+                `id_object` INT(10) UNSIGNED NOT NULL,
                 `action` VARCHAR(45) NOT NULL,
                 `date_upd` DATETIME NOT NULL,
-                PRIMARY KEY (`id_doofinder_product`),
-                CONSTRAINT uc_shop_product UNIQUE KEY (id_shop,id_product)
+                PRIMARY KEY (`id_doofinder_update`),
+                CONSTRAINT uc_shop_update UNIQUE KEY (id_shop,object,id_object)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
         )
             && Db::getInstance()->execute(
@@ -190,7 +197,7 @@ class Doofinder extends Module
      */
     public function uninstallDb()
     {
-        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_product`')
+        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_updates`')
             && Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
     }
 
@@ -891,15 +898,8 @@ class Doofinder extends Module
      */
     public function hookActionProductSave($params)
     {
-        if (Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
-            $action = $params['product']->active ? 'update' : 'delete';
-            $id_shop = $this->context->shop->id;
-            $this->addProductQueue($params['id_product'], $id_shop, $action);
-
-            if ($this->allowProcessProductsQueue()) {
-                $this->processProductQueue($id_shop);
-            }
-        }
+        $action = $params['product']->active ? 'update' : 'delete';
+        $this->proccessHookUpdateOnSave('product', $params['id_product'], $action);
     }
 
     /**
@@ -907,12 +907,81 @@ class Doofinder extends Module
      */
     public function hookActionProductDelete($params)
     {
+        $this->proccessHookUpdateOnSave('product', $params['id_product'], 'delete');
+    }
+
+    /**
+     * @hook actionObjectCmsAddAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsAddAfter($params)
+    {
+        if ($params['object']->active) {
+            $this->proccessHookUpdateOnSave('cms', $params['object']->id, 'update');
+        }
+    }
+
+    /**
+     * @hook actionObjectCmsUpdateAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsUpdateAfter($params)
+    {
+        $action = $params['object']->active ? 'update' : 'delete';
+        $this->proccessHookUpdateOnSave('cms', $params['object']->id, $action);
+    }
+
+    /**
+     * @hook actionObjectCmsDeleteAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsDeleteAfter($params)
+    {
+        $this->proccessHookUpdateOnSave('cms', $params['object']->id, 'delete');
+    }
+
+    /**
+     * @hook actionObjectCategoryAddAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryAddAfter($params)
+    {
+        if ($params['object']->active) {
+            $this->proccessHookUpdateOnSave('category', $params['object']->id, 'update');
+        }
+    }
+
+    /**
+     * @hook actionObjectCategoryUpdateAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryUpdateAfter($params)
+    {
+        $action = $params['object']->active ? 'update' : 'delete';
+        $this->proccessHookUpdateOnSave('category', $params['object']->id, $action);
+    }
+
+    /**
+     * @hook actionObjectCategoryDeleteAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryDeleteAfter($params)
+    {
+        $this->proccessHookUpdateOnSave('cms', $params['object']->id, 'delete');
+    }
+
+    /**
+     * Queue the item for update on save
+     *
+     * @param string $object
+     * @param int $id_object
+     * @param string $action
+     *
+     * @return void
+     */
+    public function proccessHookUpdateOnSave($object, $id_object, $action)
+    {
         if (Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
             $id_shop = $this->context->shop->id;
-            $this->addProductQueue($params['id_product'], $id_shop, 'delete');
 
-            if ($this->allowProcessProductsQueue()) {
-                $this->processProductQueue($id_shop);
+            $this->addItemQueue($object, $id_object, $id_shop, $action);
+
+            if ($this->allowProcessItemsQueue()) {
+                $this->processItemQueue($id_shop);
             }
         }
     }
@@ -922,7 +991,7 @@ class Doofinder extends Module
      *
      * @return bool
      */
-    public function allowProcessProductsQueue()
+    public function allowProcessItemsQueue()
     {
         if (Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
             $last_exec = Configuration::get('DF_UPDATE_ON_SAVE_LAST_EXEC', null, null, null, 0);
@@ -953,21 +1022,23 @@ class Doofinder extends Module
     }
 
     /**
-     * Add a product to the update on save queue
+     * Add a item to the update on save queue
      *
-     * @param int $id_product
+     * @param string $object
+     * @param int $id_object
      * @param int $id_shop
      * @param string $action
      *
      * @return void
      */
-    public function addProductQueue($id_product, $id_shop, $action)
+    public function addItemQueue($object, $id_object, $id_shop, $action)
     {
         Db::getInstance()->insert(
-            'doofinder_product',
+            'doofinder_updates',
             [
                 'id_shop' => $id_shop,
-                'id_product' => $id_product,
+                'object' => $object,
+                'id_object' => $id_object,
                 'action' => $action,
                 'date_upd' => date('Y-m-d H:i:s'),
             ],
@@ -978,61 +1049,63 @@ class Doofinder extends Module
     }
 
     /**
-     * Process queued products from update on save to send to API
+     * Process queued items from update on save to send to API
      *
      * @param int $id_shop
      *
      * @return void
      */
-    public function processProductQueue($id_shop)
+    public function processItemQueue($id_shop)
     {
         $this->setExecUpdateOnSave();
-
-        $products_update = $this->getProductsQueue($id_shop);
-        $products_delete = $this->getProductsQueue($id_shop, 'delete');
 
         $languages = Language::getLanguages(true, $id_shop);
         $currencies = Currency::getCurrenciesByIdShop($id_shop);
 
-        foreach ($languages as $language) {
-            foreach ($currencies as $currency) {
-                $this->sendProductsApi($products_update, $id_shop, $language['id_lang'], $currency['id_currency']);
-                $this->sendProductsApi($products_delete, $id_shop, $language['id_lang'], $currency['id_currency'], 'delete');
+        foreach (['product', 'cms', 'category'] as $type) {
+            $items_update = $this->getItemsQueue($id_shop, $type, 'update');
+            $items_delete = $this->getItemsQueue($id_shop, $type, 'delete');
+
+            foreach ($languages as $language) {
+                foreach ($currencies as $currency) {
+                    $this->{'send' . $type . 'Api'}($items_update, $id_shop, $language['id_lang'], $currency['id_currency']);
+                    $this->{'send' . $type . 'Api'}($items_delete, $id_shop, $language['id_lang'], $currency['id_currency'], 'delete');
+                }
             }
         }
 
-        $this->deleteProductQueue($id_shop);
+        $this->deleteItemsQueue($id_shop);
     }
 
     /**
-     * Get queued products from update on save
+     * Get queued items from update on save
      *
      * @param int $id_shop
      * @param string $action
      *
      * @return array
      */
-    public function getProductsQueue($id_shop, $action = 'update')
+    public function getItemsQueue($id_shop, $type, $action = 'update')
     {
-        $products = Db::getInstance()->executeS(
+        $items = Db::getInstance()->executeS(
             '
-            SELECT id_product FROM ' . _DB_PREFIX_ . "doofinder_product 
-            WHERE action = '" . pSQL($action) . "' AND id_shop = " . (int) $id_shop
+            SELECT id_object FROM ' . _DB_PREFIX_ . "doofinder_updates
+            WHERE object = '" . pSQL($type) . "' AND action = '" . pSQL($action) . "' AND id_shop = " . (int) $id_shop
         );
 
-        return array_column($products, 'id_product');
+        return array_column($items, 'id_object');
     }
 
     /**
-     * Remove queued products from update on save
+     * Remove queued items from update on save
      *
      * @param int $id_shop
      *
      * @return void
      */
-    public function deleteProductQueue($id_shop)
+    public function deleteItemsQueue($id_shop)
     {
-        Db::getInstance()->execute('DELETE from ' . _DB_PREFIX_ . 'doofinder_product WHERE id_shop = ' . (int) $id_shop);
+        Db::getInstance()->execute('DELETE from ' . _DB_PREFIX_ . 'doofinder_updates WHERE id_shop = ' . (int) $id_shop);
     }
 
     /**
@@ -1046,40 +1119,123 @@ class Doofinder extends Module
      *
      * @return void
      */
-    public function sendProductsApi($products, $id_shop, $id_lang, $id_currency, $action = 'update')
+    public function sendProductApi($products, $id_shop, $id_lang, $id_currency, $action = 'update')
     {
         if (empty($products)) {
             return;
         }
 
-        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
-        $region = Configuration::get('DF_REGION');
-
         $hashid = $this->getHashId($id_lang, $id_currency);
 
         if ($hashid) {
-            require_once dirname(__FILE__) . '/lib/dfProduct_build.php';
-            require_once dirname(__FILE__) . '/lib/doofinder_api_products.php';
-
             if ($action == 'update') {
+                require_once dirname(__FILE__) . '/lib/dfProduct_build.php';
                 $builder = new DfProductBuild($id_shop, $id_lang, $id_currency);
                 $builder->setProducts($products);
                 $payload = $builder->build();
 
-                $api = new DoofinderApiProducts($hashid, $apikey, $region);
-                $response = $api->updateBulk($payload);
-
-                if (isset($response['error']) && !empty($response['error'])) {
-                    $this->debug(json_encode($response['error']));
-                }
+                $this->updateItemsApi($hashid, 'product', $payload);
             } elseif ($action == 'delete') {
-                $api = new DoofinderApiProducts($hashid, $apikey, $region);
-                $response = $api->deleteBulk(json_encode($products));
-
-                if (isset($response['error']) && !empty($response['error'])) {
-                    $this->debug(json_encode($response['error']));
-                }
+                $this->deleteItemsApi($hashid, 'product', $cms_pages);
             }
+        }
+    }
+
+    /**
+     * Update cms pages in doofinder using the API
+     *
+     * @param array $cms_pages
+     * @param int $id_shop
+     * @param int $id_lang
+     * @param int $id_currency
+     * @param string $action
+     *
+     * @return void
+     */
+    public function sendCmsApi($cms_pages, $id_shop, $id_lang, $id_currency, $action = 'update')
+    {
+        if (empty($cms_pages)) {
+            return;
+        }
+
+        $hashid = $this->getHashId($id_lang, $id_currency);
+
+        if ($hashid) {
+            if ($action == 'update') {
+                require_once dirname(__FILE__) . '/lib/dfCms_build.php';
+
+                $builder = new DfCmsBuild($id_shop, $id_lang);
+                $builder->setCmsPages($cms_pages);
+                $payload = $builder->build();
+
+                $this->updateItemsApi($hashid, 'page', $payload);
+            } elseif ($action == 'delete') {
+                $this->deleteItemsApi($hashid, 'page', $cms_pages);
+            }
+        }
+    }
+
+    /**
+     * Update categores in doofinder using the API
+     *
+     * @param array $categories
+     * @param int $id_shop
+     * @param int $id_lang
+     * @param int $id_currency
+     * @param string $action
+     *
+     * @return void
+     */
+    public function sendCategoryApi($categories, $id_shop, $id_lang, $id_currency, $action = 'update')
+    {
+        if (empty($categories)) {
+            return;
+        }
+
+        $hashid = $this->getHashId($id_lang, $id_currency);
+
+        if ($hashid) {
+            if ($action == 'update') {
+                require_once dirname(__FILE__) . '/lib/dfCategory_build.php';
+
+                $builder = new DfCategoryBuild($id_shop, $id_lang);
+                $builder->setCategories($categories);
+                $payload = $builder->build();
+
+                $this->updateItemsApi($hashid, 'category', $payload);
+            } elseif ($action == 'delete') {
+                $this->deleteItemsApi($hashid, 'category', $categories);
+            }
+        }
+    }
+
+    private function updateItemsApi($hashid, $type, $payload)
+    {
+        require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
+
+        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
+        $region = Configuration::get('DF_REGION');
+
+        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
+        $response = $api->updateBulk($payload);
+
+        if (isset($response['error']) && !empty($response['error'])) {
+            $this->debug(json_encode($response['error']));
+        }
+    }
+
+    private function deleteItemsApi($hashid, $type, $payload)
+    {
+        require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
+
+        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
+        $region = Configuration::get('DF_REGION');
+
+        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
+        $response = $api->deleteBulk(json_encode($payload));
+
+        if (isset($response['error']) && !empty($response['error'])) {
+            $this->debug(json_encode($response['error']));
         }
     }
 

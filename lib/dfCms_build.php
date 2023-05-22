@@ -55,7 +55,7 @@ class DfCmsBuild
         $cms = new CMS($id_cms, $this->id_lang, $this->id_shop);
 
         $c = [];
-        $c['id'] = $cms->id;
+        $c['id'] = (string) $cms->id;
         $c['title'] = dfTools::cleanString($cms->meta_title);
         $c['description'] = dfTools::cleanString($cms->meta_description);
         $c['meta_title'] = dfTools::cleanString($cms->meta_title);
