@@ -31,13 +31,13 @@ class Doofinder extends Module
     public $ps_layered_full_tree = true;
     public $searchBanner = false;
 
-    // Feel free to change this value to your own local env or ngrok 
-    const DOOMANAGER_URL = 'https://admin.doofinder.com/';
-    const GS_SHORT_DESCRIPTION = 1;
-    const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.6.4';
-    const YES = 1;
-    const NO = 0;
+    // Feel free to change this value to your own local env or ngrok
+    public const DOOMANAGER_URL = 'https://admin.doofinder.com/';
+    public const GS_SHORT_DESCRIPTION = 1;
+    public const GS_LONG_DESCRIPTION = 2;
+    public const VERSION = '4.6.4';
+    public const YES = 1;
+    public const NO = 0;
 
     public function __construct()
     {
