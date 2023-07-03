@@ -1563,15 +1563,9 @@ class Doofinder extends Module
         // Require only on this function to not overload memory with not needed classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST(true, 3);
-        $result = $client->get(sprintf('%s/auth/login', DOOMANAGER_URL));
-        if (
-            $result && $result->originalResponse && isset($result->headers['code'])
-            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200)
-        ) {
-            return true;
-        } else {
-            return false;
-        }
+        $result = $client->get(sprintf('%s/auth/login', self::DOOMANAGER_URL));
+        return $result && $result->originalResponse && isset($result->headers['code'])
+            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
     }
 
     /**
