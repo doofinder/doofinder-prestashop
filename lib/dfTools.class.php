@@ -606,7 +606,7 @@ class DfTools
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
-    protected static $root_category_ids = null;
+    protected static $root_category_ids;
     protected static $cached_category_paths = [];
 
     /**

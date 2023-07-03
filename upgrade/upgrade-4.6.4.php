@@ -29,13 +29,13 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_4_6_4($module)
 {
-    return installDb_4_6_4() &&
-        $module->registerHook('actionObjectCmsAddAfter') &&
-        $module->registerHook('actionObjectCmsUpdateAfter') &&
-        $module->registerHook('actionObjectCmsDeleteAfter') &&
-        $module->registerHook('actionObjectCategoryAddAfter') &&
-        $module->registerHook('actionObjectCategoryUpdateAfter') &&
-        $module->registerHook('actionObjectCategoryDeleteAfter');
+    return installDb_4_6_4()
+        && $module->registerHook('actionObjectCmsAddAfter')
+        && $module->registerHook('actionObjectCmsUpdateAfter')
+        && $module->registerHook('actionObjectCmsDeleteAfter')
+        && $module->registerHook('actionObjectCategoryAddAfter')
+        && $module->registerHook('actionObjectCategoryUpdateAfter')
+        && $module->registerHook('actionObjectCategoryDeleteAfter');
 }
 
 function installDb_4_6_4()

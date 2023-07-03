@@ -127,9 +127,9 @@ $cfg_group_attributes_shown = explode(',', dfTools::cfg($shop->id, 'DF_GROUP_ATT
 
 $limit_group_attributes = false;
 if (
-    isset($cfg_group_attributes_shown) &&
-    count($cfg_group_attributes_shown) > 0 &&
-    $cfg_group_attributes_shown[0] !== ''
+    isset($cfg_group_attributes_shown)
+    && count($cfg_group_attributes_shown) > 0
+    && $cfg_group_attributes_shown[0] !== ''
 ) {
     $group_attributes = AttributeGroup::getAttributesGroups($lang->id);
     $group_attributes_slug = [];
@@ -208,9 +208,9 @@ if ($cfg_product_features) {
     $all_feature_keys = dfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
 
     if (
-        isset($cfg_features_shown) &&
-        count($cfg_features_shown) > 0 &&
-        $cfg_features_shown[0] !== ''
+        isset($cfg_features_shown)
+        && count($cfg_features_shown) > 0
+        && $cfg_features_shown[0] !== ''
     ) {
         $feature_keys = dfTools::getSelectedFeatures($all_feature_keys, $cfg_features_shown);
     } else {
@@ -263,9 +263,9 @@ foreach ($rows as $row) {
         // ID, TITLE, LINK
 
         if (
-            $cfg_product_variations == 1 &&
-            isset($row['id_product_attribute']) &&
-            (int) $row['id_product_attribute'] > 0
+            $cfg_product_variations == 1
+            && isset($row['id_product_attribute'])
+            && (int) $row['id_product_attribute'] > 0
         ) {
             // ID
             echo 'VAR-' . $row['id_product_attribute'] . TXT_SEPARATOR;
@@ -338,8 +338,8 @@ foreach ($rows as $row) {
         // IMAGE LINK
 
         if (
-            $cfg_product_variations == 1 && isset($row['id_product_attribute']) &&
-            (int) $row['id_product_attribute'] > 0
+            $cfg_product_variations == 1 && isset($row['id_product_attribute'])
+            && (int) $row['id_product_attribute'] > 0
         ) {
             $cover = Product::getCover($row['id_product_attribute']);
             $id_image = dfTools::getVariationImg(
