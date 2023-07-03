@@ -35,7 +35,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.6.4';
+    const VERSION = '4.6.5';
     const YES = 1;
     const NO = 0;
 
