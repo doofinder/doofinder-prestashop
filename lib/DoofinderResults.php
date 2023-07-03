@@ -18,12 +18,12 @@ class DoofinderResults
     const NOTFOUND = 'notfound';    // no account with the provided hashid found
     const EXHAUSTED = 'exhausted';  // the account has reached its query limit
 
-    private $properties = null;
-    private $results = null;
-    private $facets = null;
-    private $filter = null;
-    private $banner = null;
-    public $status = null;
+    private $properties;
+    private $results;
+    private $facets;
+    private $filter;
+    private $banner;
+    public $status;
 
     /**
      * Constructor

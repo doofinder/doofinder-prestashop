@@ -31,20 +31,20 @@ class DoofinderApi
     const DEFAULT_API_VERSION = '5';
     const VERSION = '5.2.3';
 
-    private $api_key = null; // user API_KEY
-    private $hashid = null; // hashid of the doofinder account
-    private $apiVersion = null;
-    private $url = null;
-    private $results = null;
-    private $query = null;
+    private $api_key; // user API_KEY
+    private $hashid; // hashid of the doofinder account
+    private $apiVersion;
+    private $url;
+    private $results;
+    private $query;
     private $search_options = [];  // assoc. array with doofinder options to be sent as request parameters
     private $page = 1; // the page of the search results we're at
-    private $queryName = null; // the name of the last successfull query made
-    private $lastQuery = null; // the last successfull query made
-    private $total = null; // total number of results obtained
-    private $maxScore = null;
+    private $queryName; // the name of the last successfull query made
+    private $lastQuery; // the last successfull query made
+    private $total; // total number of results obtained
+    private $maxScore;
     private $paramsPrefix = self::DEFAULT_PARAMS_PREFIX;
-    private $serializationArray = null;
+    private $serializationArray;
     private $queryParameter = 'query'; // the parameter used for querying
     private $allowedParameters = ['page', 'rpp', 'timeout', 'types', 'filter', 'query_name', 'transformer'];
     // request parameters that doofinder handle
