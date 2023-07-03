@@ -29,9 +29,9 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_4_2_0($module)
 {
-    return installDb_4_2_0() &&
-        $module->registerHook('actionProductSave') &&
-        $module->registerHook('actionProductDelete');
+    return installDb_4_2_0()
+        && $module->registerHook('actionProductSave')
+        && $module->registerHook('actionProductDelete');
 }
 
 function installDb_4_2_0()

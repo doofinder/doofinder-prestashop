@@ -1710,7 +1710,6 @@ class Doofinder extends Module
 
     /**
      * Get Process Callback URL
-
      *
      * @return string
      */

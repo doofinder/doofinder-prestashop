@@ -29,9 +29,9 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_4_5_0($module)
 {
-    return installDb_4_5_0() &&
-        $module->registerHook('moduleRoutes') &&
-        $module->setSearchEnginesByConfig();
+    return installDb_4_5_0()
+        && $module->registerHook('moduleRoutes')
+        && $module->setSearchEnginesByConfig();
 }
 
 function installDb_4_5_0()

@@ -18,10 +18,10 @@ class EasyREST
     public $originalResponse = '';
 
     public $method = 'GET';
-    public $params = null;
-    private $contentType = null;
-    private $httpHeaders = null;
-    private $file = null;
+    public $params;
+    private $contentType;
+    private $httpHeaders;
+    private $file;
 
     public function __construct($followLocation = true)
     {
