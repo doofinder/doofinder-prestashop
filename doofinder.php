@@ -32,12 +32,12 @@ class Doofinder extends Module
     public $searchBanner = false;
 
     // Feel free to change this value to your own local env or ngrok
-    private const DOOMANAGER_URL = 'https://admin.doofinder.com/';
-    private const GS_SHORT_DESCRIPTION = 1;
-    private const GS_LONG_DESCRIPTION = 2;
-    private const VERSION = '4.6.4';
-    private const YES = 1;
-    private const NO = 0;
+    const DOOMANAGER_URL = 'https://admin.doofinder.com';
+    const GS_SHORT_DESCRIPTION = 1;
+    const GS_LONG_DESCRIPTION = 2;
+    const VERSION = '4.6.4';
+    const YES = 1;
+    const NO = 0;
 
     public function __construct()
     {
@@ -1563,7 +1563,7 @@ class Doofinder extends Module
         // Require only on this function to not overload memory with not needed classes
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST(true, 3);
-        $result = $client->get(sprintf('%sauth/login', DOOMANAGER_URL));
+        $result = $client->get(sprintf('%s/auth/login', DOOMANAGER_URL));
         if (
             $result && $result->originalResponse && isset($result->headers['code'])
             && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200)
