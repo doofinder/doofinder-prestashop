@@ -15,6 +15,15 @@
 <div class="panel">
 	<div class="doofinder-content">
 		<div class="row">
+			<div class="col-12">
+				<p style="font-size:8px;">
+				{if $checkConnection}
+					<span class="connection-ball green"></span> {l s='Connection with Doofinder successful.' mod='doofinder'}
+				{else}
+					<span class="connection-ball red"></span> {l s='You cannot connect with Doofinder. Please contact your server provider to check your web server internet connection or firewall.' mod='doofinder'}
+				{/if}
+				</p>
+			</div>
 			<div class="bootstrap message-popup" style="display:none;">
 				<div class="module_warning alert alert-warning">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>

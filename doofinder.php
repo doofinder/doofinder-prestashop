@@ -31,9 +31,11 @@ class Doofinder extends Module
     public $ps_layered_full_tree = true;
     public $searchBanner = false;
 
+    // Feel free to change this value to your own local env or ngrok
+    const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.6.4';
+    const VERSION = '4.6.5';
     const YES = 1;
     const NO = 0;
 
@@ -41,7 +43,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.6.4';
+        $this->version = '4.6.5';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -277,6 +279,7 @@ class Doofinder extends Module
         $this->context->smarty->assign('configured', $configured);
         $this->context->smarty->assign('is_new_shop', $is_new_shop);
         $this->context->smarty->assign('shop_id', $shop_id);
+        $this->context->smarty->assign('checkConnection', $this->checkOutsideConnection());
         $this->context->smarty->assign('tokenAjax', Tools::encrypt('doofinder-ajax'));
         $this->context->smarty->assign('skipurl', $skipurl);
         $this->context->smarty->assign('paramsPopup', $paramsPopup);
@@ -1548,6 +1551,22 @@ class Doofinder extends Module
         }
 
         return true;
+    }
+
+    /**
+     * Checks the connection with DooManager
+     *
+     * @return bool
+     */
+    public function checkOutsideConnection()
+    {
+        // Require only on this function to not overload memory with not needed classes
+        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+        $client = new EasyREST(true, 3);
+        $result = $client->get(sprintf('%s/auth/login', self::DOOMANAGER_URL));
+
+        return $result && $result->originalResponse && isset($result->headers['code'])
+            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
     }
 
     /**
