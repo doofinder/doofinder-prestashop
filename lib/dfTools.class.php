@@ -513,7 +513,7 @@ class DfTools
         p.upc AS upc,
         p.reference AS reference,
         p.supplier_reference AS supplier_reference,
-        IF(isnull(pa.id_product), null , pas.default_on) AS df_group_leader,
+        0 AS df_group_leader,
         pl.name,
         pl.description,
         pl.description_short,
@@ -557,9 +557,68 @@ class DfTools
         __IS_ACTIVE__
         __VISIBILITY__
         __PRODUCT_IDS__
+        AND pa.id_product_attribute is not null
       GROUP BY pa.id_product_attribute, p.id_product
-      ORDER BY
+      UNION
+      SELECT
+        ps.id_product,
+        ps.show_price,
+        0,
+        null AS variation_reference,
+        null AS variation_supplier_reference,
+        null AS variation_mpn,
+        null AS variation_ean13,
+        null AS variation_upc,
+        null AS variation_image_id,
+        __ID_CATEGORY_DEFAULT__,
+        m.name AS manufacturer,
+        p.__MPN__ AS mpn,
+        p.ean13 AS ean13,
+        p.isbn,
+        p.upc,
+        p.reference,
+        p.supplier_reference,
+        1 AS df_group_leader,
+        pl.name,
+        pl.description,
+        pl.description_short,
+        pl.meta_title,
+        pl.meta_keywords,
+        pl.meta_description,
+        GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
+        pl.link_rewrite,
+        cl.link_rewrite AS cat_link_rew,
+        im.id_image,
+        ps.available_for_order,
+        sa.out_of_stock,
+        sa.quantity as stock_quantity
+      FROM
+        _DB_PREFIX_product p
+        INNER JOIN _DB_PREFIX_product_shop ps
+          ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
+        LEFT JOIN _DB_PREFIX_product_lang pl
+          ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
+        LEFT JOIN _DB_PREFIX_manufacturer m
+          ON (p.id_manufacturer = m.id_manufacturer)
+        LEFT JOIN _DB_PREFIX_category_lang cl
+          ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
+        LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
+          ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
+        LEFT JOIN (_DB_PREFIX_tag tag 
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
+          ON (pt.id_product = p.id_product)
+        LEFT JOIN _DB_PREFIX_stock_available sa
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 
+            AND (sa.id_shop = _ID_SHOP_ OR 
+            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
+      WHERE
+        __IS_ACTIVE__
+        __VISIBILITY__
+        __PRODUCT_IDS__
+      GROUP BY
         p.id_product
+      ORDER BY
+        id_product
     ";
 
         if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
