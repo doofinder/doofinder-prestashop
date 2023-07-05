@@ -80,7 +80,7 @@ class DfProductBuild
         $p = [];
 
         $p['id'] = $this->getId($product);
-        $p['title'] = dfTools::cleanString($product['name']);
+        $p['title'] = $this->getTitle($product);
         $p['link'] = $this->getLink($product);
         $p['description'] = dfTools::cleanString($product['description_short']);
         $p['alternate_description'] = dfTools::cleanString($product['description']);
@@ -121,13 +121,14 @@ class DfProductBuild
 
         if ($this->product_variations) {
             $p['item_group_id'] = $this->getItemGroupId($product);
+            $p['group_id'] = $this->getItemGroupId($product);
 
             $p['variation_reference'] = $product['variation_reference'];
             $p['variation_supplier_reference'] = $product['variation_supplier_reference'];
             $p['variation_mpn'] = $product['variation_mpn'];
             $p['variation_ean13'] = $product['variation_ean13'];
             $p['variation_upc'] = $product['variation_upc'];
-            $p['df_group_leader'] = (!is_null($product['df_group_leader']) ? true : false);
+            $p['df_group_leader'] = (!is_null($product['df_group_leader'] && $product['df_group_leader']) ? true : false);
 
             $attributes = $this->getAttributes($product);
 
@@ -144,6 +145,19 @@ class DfProductBuild
         }
 
         return $product['id_product'];
+    }
+
+    private function getTitle($product)
+    {
+        $title = dfTools::cleanString($product['name']);
+
+        if ($this->haveVariations($product)) {
+            $attributes = array_values($this->getAttributes($product));
+
+            return $title . (count($attributes) ? ' (' . implode(', ', $attributes) . ')' : '');
+        }
+
+        return $title;
     }
 
     private function getItemGroupId($product)

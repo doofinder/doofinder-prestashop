@@ -281,10 +281,10 @@ foreach ($rows as $row) {
             );
 
             $variation_attributes = array_filter($variation_attributes, function ($var) {
-                return ($var != null || $var != '');
+                return $var != null || $var != '';
             });
 
-            echo $product_title . (count($variation_attributes) ? " (" . implode(', ', $variation_attributes) . ")" :  "") . TXT_SEPARATOR;
+            echo $product_title . (count($variation_attributes) ? ' (' . implode(', ', $variation_attributes) . ')' : '') . TXT_SEPARATOR;
             echo dfTools::cleanURL(
                 $context->link->getProductLink(
                     (int) $row['id_product'],
