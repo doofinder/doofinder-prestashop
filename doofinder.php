@@ -1214,6 +1214,10 @@ class Doofinder extends Module
 
     private function updateItemsApi($hashid, $type, $payload)
     {
+        if (empty($payload)) {
+            return;
+        }
+
         require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
 
         $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
@@ -1229,6 +1233,10 @@ class Doofinder extends Module
 
     private function deleteItemsApi($hashid, $type, $payload)
     {
+        if (empty($payload)) {
+            return;
+        }
+
         require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
 
         $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
