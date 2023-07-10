@@ -274,17 +274,7 @@ foreach ($rows as $row) {
             echo $row['id_product'] . TXT_SEPARATOR;
             // TITLE
             $product_title = dfTools::cleanString($row['name']);
-            $variation_attributes = dfTools::getAttributesForProductVariation(
-                $row['id_product_attribute'],
-                $lang->id,
-                $attribute_keys
-            );
-
-            $variation_attributes = array_filter($variation_attributes, function ($var) {
-                return $var != null || $var != '';
-            });
-
-            echo $product_title . (count($variation_attributes) ? ' (' . implode(', ', $variation_attributes) . ')' : '') . TXT_SEPARATOR;
+            echo $product_title . TXT_SEPARATOR;
             echo dfTools::cleanURL(
                 $context->link->getProductLink(
                     (int) $row['id_product'],

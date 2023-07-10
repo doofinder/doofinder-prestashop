@@ -80,7 +80,7 @@ class DfProductBuild
         $p = [];
 
         $p['id'] = $this->getId($product);
-        $p['title'] = $this->getTitle($product);
+        $p['title'] = dfTools::cleanString($product['name']);
         $p['link'] = $this->getLink($product);
         $p['description'] = dfTools::cleanString($product['description_short']);
         $p['alternate_description'] = dfTools::cleanString($product['description']);
@@ -145,19 +145,6 @@ class DfProductBuild
         }
 
         return $product['id_product'];
-    }
-
-    private function getTitle($product)
-    {
-        $title = dfTools::cleanString($product['name']);
-
-        if ($this->haveVariations($product)) {
-            $attributes = array_values($this->getAttributes($product));
-
-            return $title . (count($attributes) ? ' (' . implode(', ', $attributes) . ')' : '');
-        }
-
-        return $title;
     }
 
     private function getItemGroupId($product)
