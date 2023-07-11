@@ -748,6 +748,9 @@ class Doofinder extends Module
         $formUpdated = '';
         $messages = '';
 
+        if ((bool) Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
+            $this->invokeReindexing();
+        }
         if (((bool) Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesDataFeed());
             $formUpdated = 'data_feed_tab';
@@ -789,8 +792,10 @@ class Doofinder extends Module
                 Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 15);
             }
 
-            $msg = $this->l('IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.');
-            $messages .= $this->displayWarningCtm($msg);
+            $msg = sprintf('<p>%1$s</p><p><form method="post" action=""><button type="submit" class="btn btn-primary" name="submitDoofinderModuleLaunchReindexing">%2$s</button></form></p>', $this->l('You\'ve just changed a data feed option. In order to
+                    apply these changes effectively, bear in mind that the indices must be
+                    indexed again.'), $this->l('Launch reindexing'));
+            $messages .= $this->displayWarningCtm($msg, false, true);
         }
 
         if (!empty($formUpdated)) {
@@ -1931,22 +1936,22 @@ class Doofinder extends Module
         }
     }
 
-    private function displayErrorCtm($error, $link = false)
+    private function displayErrorCtm($error, $link = false, $raw = false)
     {
-        return $this->displayGeneralMsg($error, 'error', 'danger', $link);
+        return $this->displayGeneralMsg($error, 'error', 'danger', $link, $raw);
     }
 
-    private function displayWarningCtm($warning, $link = false)
+    private function displayWarningCtm($warning, $link = false, $raw = false)
     {
-        return $this->displayGeneralMsg($warning, 'warning', 'warning', $link);
+        return $this->displayGeneralMsg($warning, 'warning', 'warning', $link, $raw);
     }
 
-    private function displayConfirmationCtm($string, $link = false)
+    private function displayConfirmationCtm($string, $link = false, $raw = false)
     {
-        return $this->displayGeneralMsg($string, 'confirmation', 'success', $link);
+        return $this->displayGeneralMsg($string, 'confirmation', 'success', $link, $raw);
     }
 
-    private function displayGeneralMsg($string, $type, $alert, $link = false)
+    private function displayGeneralMsg($string, $type, $alert, $link = false, $raw = false)
     {
         $this->context->smarty->assign(
             [
@@ -1954,6 +1959,7 @@ class Doofinder extends Module
                 'd_type_alert' => $alert,
                 'd_message' => $string,
                 'd_link' => $link,
+                'd_raw' => $raw,
             ]
         );
 
@@ -1994,5 +2000,34 @@ class Doofinder extends Module
         $tab = new Tab($tabId);
 
         return $tab->delete();
+    }
+
+    private function invokeReindexing()
+    {
+        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+        $api_key = Configuration::get('DF_AI_APIKEY');
+        $region = Configuration::get('DF_REGION');
+        $api_key = $region . '-' . $api_key;
+        $installation_id = Configuration::get('DF_INSTALLATION_ID');
+        $client = new EasyREST();
+        $json_data = json_encode(['query' => 'mutation { process_store_feeds(id: "' . $installation_id . '", callback_url: "' . $this->getProcessCallbackUrl() . '") { id }}']);
+        $response = $client->post(
+            self::DOOMANAGER_URL . '/api/v1/graphql.json',
+            $json_data,
+            false,
+            false,
+            'application/json',
+            ['Authorization: Token ' . $api_key]
+        );
+        if (empty($response) || empty($response->response)) {
+            return;
+        }
+        $response_array = json_decode($response->response, true);
+        if (empty($response_array)) {
+            return;
+        }
+        if (200 === $response->getResponseCode() && empty($response_array['errors'])) {
+            Configuration::updateValue('DF_FEED_INDEXED', false);
+        }
     }
 }
