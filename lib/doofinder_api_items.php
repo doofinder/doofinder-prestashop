@@ -19,7 +19,6 @@ const API_VERSION = '2';
 
 class DoofinderApiItems
 {
-
     private $hashid;
     private $api_key;
     private $api_url;
