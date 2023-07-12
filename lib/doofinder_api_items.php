@@ -19,6 +19,12 @@ const API_VERSION = '2';
 
 class DoofinderApiItems
 {
+
+    private $hashid;
+    private $api_key;
+    private $api_url;
+    private $type;
+
     public function __construct($hashid, $api_key, $region, $type = 'product')
     {
         $this->hashid = $hashid;
@@ -55,6 +61,24 @@ class DoofinderApiItems
         return $this->post($url, $payload);
     }
 
+    /**
+     * Make a request to the API to reprocess all the feeds
+     *
+     * @param array items ids
+     */
+    public function invokeReindexing()
+    {
+        $installation_id = Configuration::get('DF_INSTALLATION_ID');
+        $json_data = json_encode(['query' => 'mutation { process_store_feeds(id: "' . $installation_id . '", callback_url: "' . $this->getProcessCallbackUrl() . '") { id }}']);
+        $response = $this->post($this->api_url . '/api/v1/graphql.json', $json_data);
+        if (empty($response)) {
+            return;
+        }
+        if (empty($response_array['errors'])) {
+            Configuration::updateValue('DF_FEED_INDEXED', false);
+        }
+    }
+
     private function post($url, $payload)
     {
         $client = new EasyREST();
@@ -69,5 +93,15 @@ class DoofinderApiItems
         );
 
         return json_decode($response->response, true);
+    }
+
+    /**
+     * Get Process Callback URL
+     *
+     * @return string
+     */
+    private function getProcessCallbackUrl()
+    {
+        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
     }
 }

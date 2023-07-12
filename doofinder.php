@@ -749,7 +749,12 @@ class Doofinder extends Module
         $messages = '';
 
         if ((bool) Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
-            $this->invokeReindexing();
+            require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
+            $api_key = Configuration::get('DF_AI_APIKEY');
+            $region = Configuration::get('DF_REGION');
+            $api_key = $region . '-' . $api_key;
+            $api = new DoofinderApiItems(null, $api_key, $region);
+            $api->invokeReindexing();
         }
         if (((bool) Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesDataFeed());
@@ -2000,34 +2005,5 @@ class Doofinder extends Module
         $tab = new Tab($tabId);
 
         return $tab->delete();
-    }
-
-    private function invokeReindexing()
-    {
-        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
-        $api_key = Configuration::get('DF_AI_APIKEY');
-        $region = Configuration::get('DF_REGION');
-        $api_key = $region . '-' . $api_key;
-        $installation_id = Configuration::get('DF_INSTALLATION_ID');
-        $client = new EasyREST();
-        $json_data = json_encode(['query' => 'mutation { process_store_feeds(id: "' . $installation_id . '", callback_url: "' . $this->getProcessCallbackUrl() . '") { id }}']);
-        $response = $client->post(
-            self::DOOMANAGER_URL . '/api/v1/graphql.json',
-            $json_data,
-            false,
-            false,
-            'application/json',
-            ['Authorization: Token ' . $api_key]
-        );
-        if (empty($response) || empty($response->response)) {
-            return;
-        }
-        $response_array = json_decode($response->response, true);
-        if (empty($response_array)) {
-            return;
-        }
-        if (200 === $response->getResponseCode() && empty($response_array['errors'])) {
-            Configuration::updateValue('DF_FEED_INDEXED', false);
-        }
     }
 }
