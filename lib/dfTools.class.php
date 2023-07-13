@@ -413,6 +413,30 @@ class DfTools
     }
 
     /**
+     * Get attributes name
+     *
+     * @param array attributes ids
+     * @param int Language ID
+     *
+     * @return array
+     */
+    public static function getAttributesName($attributes_ids, $id_lang)
+    {
+        $sql = '
+            SELECT pag.id_attribute_group, pagl.name
+            FROM _DB_PREFIX_attribute_group pag 
+            LEFT JOIN _DB_PREFIX_attribute_group_lang pagl ON pag.id_attribute_group = pagl.id_attribute_group  AND pagl.id_lang = _ID_LANG_
+            WHERE pag.id_attribute_group IN (' . implode(',', $attributes_ids) . ')
+            ';
+
+        $sql = self::prepareSQL($sql, [
+            '_ID_LANG_' => (int) pSQL($id_lang),
+        ]);
+
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+    }
+
+    /**
      * Returns the products available for a language
      *
      * @param int language ID
@@ -858,6 +882,53 @@ class DfTools
         }
 
         return $flat ? implode(CATEGORY_SEPARATOR, $categories) : $categories;
+    }
+
+    /**
+     * Check if product has variants
+     *
+     * @param int product ID
+     *
+     * @return int
+     */
+    public static function hasAttributes($id_product)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            '
+            SELECT COUNT(*)
+            FROM `' . _DB_PREFIX_ . 'product_attribute` pa
+            ' . Shop::addSqlAssociation('product_attribute', 'pa') . '
+            WHERE pa.`id_product` = ' . (int) $id_product
+        );
+    }
+
+    /**
+     * Check if product has attributes
+     *
+     * @param int product ID
+     * @param string attribute groups IDs
+     *
+     * @return array
+     */
+    public static function hasProductAttributes($id_product, $attribute_groups_id)
+    {
+        if (!$attribute_groups_id) {
+            return false;
+        }
+
+        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
+            '
+            SELECT a.id_attribute_group 
+            FROM `' . _DB_PREFIX_ . 'product` p
+            LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa ON p.id_product = pa.id_product
+            LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON pa.id_product_attribute = pac.id_product_attribute 
+            LEFT JOIN `' . _DB_PREFIX_ . 'attribute` a ON pac.id_attribute = a.id_attribute 
+            WHERE p.id_product = ' . pSQL($id_product) . ' AND id_attribute_group IN ( ' . pSQL($attribute_groups_id) . ')
+            GROUP BY a.id_attribute_group 
+            '
+        );
+
+        return array_column($result, 'id_attribute_group');
     }
 
     public function getCategories($idLang, $active = true)

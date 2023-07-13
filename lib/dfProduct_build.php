@@ -133,6 +133,8 @@ class DfProductBuild
             $attributes = $this->getAttributes($product);
 
             $p = array_merge($p, $attributes);
+
+            $p['df_variants_information'] = $this->getVariantsInformation($product);
         }
 
         return $p;
@@ -351,6 +353,21 @@ class DfProductBuild
         }
 
         return false;
+    }
+
+    private function getVariantsInformation($product)
+    {
+        if (dfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {
+            $product_attributes = dfTools::hasProductAttributes($product['id_product'], $this->attributes_shown);
+
+            $attributes = dfTools::getAttributesName($product_attributes, $this->id_lang);
+
+            $names = array_column($attributes, 'name');
+
+            return array_map([$this, 'slugify'], $names);
+        }
+
+        return [];
     }
 
     private function slugify($text)

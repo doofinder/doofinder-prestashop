@@ -1139,7 +1139,7 @@ class Doofinder extends Module
 
                 $this->updateItemsApi($hashid, 'product', $payload);
             } elseif ($action == 'delete') {
-                $this->deleteItemsApi($hashid, 'product', $cms_pages);
+                $this->deleteItemsApi($hashid, 'product', $products);
             }
         }
     }
