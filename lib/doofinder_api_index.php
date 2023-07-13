@@ -15,49 +15,30 @@
 require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 
 const API_URL = 'https://{region}-admin.doofinder.com';
-const API_VERSION = '2';
+const API_VERSION = '1';
 
-class DoofinderApiItems
+class DoofinderApiIndex
 {
-    private $hashid;
     private $api_key;
     private $api_url;
-    private $type;
 
-    public function __construct($hashid, $api_key, $region, $type = 'product')
+    public function __construct($api_key, $region)
     {
-        $this->hashid = $hashid;
         $this->api_key = $api_key;
         $this->api_url = str_replace('{region}', $region, API_URL);
-        $this->type = $type;
     }
 
     /**
-     * Make a request to the API to update the specified items
+     * Make a request to the API to reprocess all the feeds
      *
-     * @param array items data
+     * @param string $installation_id
+     * @param string $callback_url
      */
-    public function updateBulk($payload)
+    public function invokeReindexing($installation_id, $callback_url = '')
     {
-        $endpoint = '/plugins/prestashop/' . $this->hashid . '/' . $this->type . '/product_update';
+        $json_data = json_encode(['query' => 'mutation { process_store_feeds(id: "' . $installation_id . '", callback_url: "' . $callback_url . '") { id }}']);
 
-        $url = $this->api_url . $endpoint;
-
-        return $this->post($url, $payload);
-    }
-
-    /**
-     * Make a request to the API to delete the specified items
-     *
-     * @param array items ids
-     */
-    public function deleteBulk($payload)
-    {
-        $endpoint = '/plugins/prestashop/' . $this->hashid . '/' . $this->type . '/product_delete';
-
-        $url = $this->api_url . $endpoint;
-
-        return $this->post($url, $payload);
+        return $this->post(sprintf('%1$s/api/v%2$s/graphql.json', $this->api_url, API_VERSION), $json_data);
     }
 
     private function post($url, $payload)

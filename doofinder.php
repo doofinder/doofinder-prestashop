@@ -35,7 +35,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.0';
+    const VERSION = '4.6.6';
     const YES = 1;
     const NO = 0;
 
@@ -43,7 +43,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.0';
+        $this->version = '4.6.6';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -749,12 +749,7 @@ class Doofinder extends Module
         $messages = '';
 
         if ((bool) Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
-            require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
-            $api_key = Configuration::get('DF_AI_APIKEY');
-            $region = Configuration::get('DF_REGION');
-            $api_key = $region . '-' . $api_key;
-            $api = new DoofinderApiItems(null, $api_key, $region);
-            $api->invokeReindexing();
+            $this->indexApiInvokeReindexing();
         }
         if (((bool) Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesDataFeed());
@@ -1258,6 +1253,28 @@ class Doofinder extends Module
         if (isset($response['error']) && !empty($response['error'])) {
             $this->debug(json_encode($response['error']));
         }
+    }
+
+    private function indexApiInvokeReindexing()
+    {
+        require_once dirname(__FILE__) . '/lib/doofinder_api_index.php';
+
+        $region = Configuration::get('DF_REGION');
+        $api_key = $region . '-' . Configuration::get('DF_AI_APIKEY');
+        $api = new DoofinderApiIndex($api_key, $region);
+        $response = $api->invokeReindexing(Configuration::get('DF_INSTALLATION_ID'), $this->getProcessCallbackUrl());
+        if (empty($response)) {
+            $this->debug('Empty response from invoke reindexing');
+
+            return;
+        }
+        if (!empty($response['errors'])) {
+            $this->debug(json_encode($response['errors']));
+
+            return;
+        }
+
+        Configuration::updateValue('DF_FEED_INDEXED', false);
     }
 
     /**
