@@ -1260,7 +1260,7 @@ class Doofinder extends Module
         require_once dirname(__FILE__) . '/lib/doofinder_api_index.php';
 
         $region = Configuration::get('DF_REGION');
-        $api_key = $region . '-' . Configuration::get('DF_AI_APIKEY');
+        $api_key = Configuration::get('DF_API_KEY');
         $api = new DoofinderApiIndex($api_key, $region);
         $response = $api->invokeReindexing(Configuration::get('DF_INSTALLATION_ID'), $this->getProcessCallbackUrl());
         if (empty($response)) {
