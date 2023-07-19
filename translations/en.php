@@ -72,8 +72,8 @@ $_MODULE['<{doofinder}prestashop>doofinder_170246e7e517d7cd317e3a6ae3ebcb4c'] =
 'To debug if your server has symptoms of connection problems';
 $_MODULE['<{doofinder}prestashop>doofinder_48c07cbd1f0f4b03d59befc3e72e9b87'] =
 'Save Internal Search Options';
-$_MODULE['<{doofinder}prestashop>doofinder_cf16f453ffe06542502e7c295119d841'] =
-'You\'ve just changed a data feed option. In order to apply these changes effectively, bear in mind that the indices must be indexed again.';
+$_MODULE['<{doofinder}prestashop>doofinder_fcea235fdf24a526070153f5b60355f4'] =
+'You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.';
 $_MODULE['<{doofinder}prestashop>doofinder_2378c5bcb7b183304da2a2b94262f024'] =
 'Launch reindexing';
 $_MODULE['<{doofinder}prestashop>doofinder_039b452cd9646bf1a60dd09146311ee7'] =

@@ -793,7 +793,7 @@ class Doofinder extends Module
             }
 
             $msg = sprintf('<p>%1$s</p><p><form method="post" action=""><button type="submit" class="btn btn-primary" name="submitDoofinderModuleLaunchReindexing">%2$s</button></form></p>',
-                $this->l('You\'ve just changed a data feed option. In order to apply these changes effectively, bear in mind that the indices must be indexed again.'),
+                $this->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'),
                 $this->l('Launch reindexing'));
             $messages .= $this->displayWarningCtm($msg, false, true);
         }
