@@ -12,6 +12,8 @@ $_MODULE['<{doofinder}prestashop>doofinder_4b87741739092ad3d8ebedd16f51b8fa'] =
 'Capa de búsqueda de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_51c17cc3a1f109327c91c2bab0e21962'] =
 'Capa de búsqueda de Doofinder en versión móvil';
+$_MODULE['<{doofinder}prestashop>doofinder_79958197e198decc81fe8357f5e18a56'] =
+'Store ID de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_a0d5c74d196e9447e43b5d35875172dd'] =
 'Puedes encontrar este identificador en nuestro Panel de Control, dentro del menú superior etiquetado como \"Live Layer\"';
 $_MODULE['<{doofinder}prestashop>doofinder_652f52b24a21bd5ff556daeb1c23e304'] =
@@ -54,6 +56,10 @@ $_MODULE['<{doofinder}prestashop>doofinder_9dfc5d5738312210c3c75e68a468691d'] =
 'Opciones Avanzadas';
 $_MODULE['<{doofinder}prestashop>doofinder_e0daaf59114081fac112928e638c8d85'] =
 'Doofinder Api Key';
+$_MODULE['<{doofinder}prestashop>doofinder_f447ac856e7e72435904956e3b15f433'] =
+'Región';
+$_MODULE['<{doofinder}prestashop>doofinder_c01ae558981823abcbd1489ac81f6fc9'] =
+'Habilitar layer v9 (Livelayer)';
 $_MODULE['<{doofinder}prestashop>doofinder_f4f6f81745dcb96aaf1cd38461ba2356'] =
 'Modo depuración. Escribe logs de información en el fichero doofinder.log';
 $_MODULE['<{doofinder}prestashop>doofinder_b0939b990335e5c6a8f76fa5c81835b3'] =
@@ -66,8 +72,10 @@ $_MODULE['<{doofinder}prestashop>doofinder_170246e7e517d7cd317e3a6ae3ebcb4c'] =
 'Para depurar si tu servidor tiene problemas de conexión';
 $_MODULE['<{doofinder}prestashop>doofinder_48c07cbd1f0f4b03d59befc3e72e9b87'] =
 'Guardar opciones de búsqueda interna';
-$_MODULE['<{doofinder}prestashop>doofinder_db4ebb37c2d0e8b5a5d821b487b8ba62'] =
-'SI HAS CAMBIADO ALGO EN LAS OPCIONES DE EXPORTACIÓN DE TU FEED, RECUERDA QUE  DEBES REPROCESARLO';
+$_MODULE['<{doofinder}prestashop>doofinder_fcea235fdf24a526070153f5b60355f4'] =
+'Acabas de cambiar una opción del feed de datos. Es posible que para aplicar estos cambios de manera efectiva sea necesario volver a procesar el índice.';
+$_MODULE['<{doofinder}prestashop>doofinder_2378c5bcb7b183304da2a2b94262f024'] =
+'Lanzar reindexación';
 $_MODULE['<{doofinder}prestashop>doofinder_039b452cd9646bf1a60dd09146311ee7'] =
 'La configuración se guardó correctamente.';
 $_MODULE['<{doofinder}prestashop>doofinder_00d23a76e43b46dae9ec7aa9dcbebb32'] =
@@ -76,6 +84,8 @@ $_MODULE['<{doofinder}prestashop>doofinder_b9f5c797ebbf55adccdd8539a65a0241'] =
 'Desactivado';
 $_MODULE['<{doofinder}prestashop>configure_ba0801f239c99cb689010161d3ee1471'] =
 'Comenzando';
+$_MODULE['<{doofinder}prestashop>configure_8cd892b7b97ef9489ae4479d3f4ef0fc'] =
+'tienda';
 $_MODULE['<{doofinder}prestashop>configure_db5eb84117d06047c97c9a0191b5fffe'] =
 'Soporte';
 $_MODULE['<{doofinder}prestashop>configure_9b6545e4cea9b4ad4979d41bb9170e2b'] =
@@ -92,10 +102,16 @@ $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_08c1cf7707bb72744cd07192c8
 'URLs de los feeds para usar en el Dashboard de Doofinder';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459fc2615'] =
 'URL del feed de datos para';
+$_MODULE['<{doofinder}prestashop>indexation_status_51160de843c8d9ed5564f4f26208c02e'] =
+'Estado de la indexación de Doofinder';
 $_MODULE['<{doofinder}prestashop>indexation_status_b1d48d617a09cbe4e68eb72c83dea83d'] =
 'El feed de productos está siendo procesado. Dependiendo del tamaño del catálogo de productos de la tienda, este proceso puede llevar unos minutos';
 $_MODULE['<{doofinder}prestashop>indexation_status_e0dba0265fde532f75126eab6fedb8a8'] =
 'Es posible que sus productos no aparezcan correctamente actualizados en los resultados hasta que el proceso no haya finalizado.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_6b866b4e92effe404fd83e7a7885ad19'] =
+'Éxito al conectar con Doofinder.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_deed258a0a8c1f5382450930479ac0fd'] =
+'No puedes conectarte con Doofinder. Ponte en contacto con tu proveedor de servidor para verificar la conexión a Internet o el firewall de tu servidor web.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] =
 'Se ha producido un error durante la instalación. Por favor, contacta con nuestro equipo  de soporte a través de';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] =
@@ -108,6 +124,8 @@ $_MODULE['<{doofinder}prestashop>onboarding_tab_44665e4612000577ba603412b3aa25b2
 'Dando el último toque mágico final...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_659ae688646b0c710802028d1bbc2812'] =
 'Recargando la página, por favor espere...';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_c594c7071a3f319fc4db4fa2a6e83f5b'] =
+'Crear esta tienda en Doofinder';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_7edaed702d94d2c7807d20d662c7067a'] =
 'Ya tengo cuenta';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_4d6db8d5a88bb9c3e6b55bce672e0dd9'] =

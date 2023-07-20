@@ -56,6 +56,10 @@ $_MODULE['<{doofinder}prestashop>doofinder_9dfc5d5738312210c3c75e68a468691d'] =
 'Advanced Options';
 $_MODULE['<{doofinder}prestashop>doofinder_e0daaf59114081fac112928e638c8d85'] =
 'Doofinder Api Key';
+$_MODULE['<{doofinder}prestashop>doofinder_f447ac856e7e72435904956e3b15f433'] =
+'Region';
+$_MODULE['<{doofinder}prestashop>doofinder_c01ae558981823abcbd1489ac81f6fc9'] =
+'Enable v9 layer (Livelayer)';
 $_MODULE['<{doofinder}prestashop>doofinder_f4f6f81745dcb96aaf1cd38461ba2356'] =
 'Debug Mode. Write info logs in doofinder.log file';
 $_MODULE['<{doofinder}prestashop>doofinder_b0939b990335e5c6a8f76fa5c81835b3'] =
@@ -68,8 +72,10 @@ $_MODULE['<{doofinder}prestashop>doofinder_170246e7e517d7cd317e3a6ae3ebcb4c'] =
 'To debug if your server has symptoms of connection problems';
 $_MODULE['<{doofinder}prestashop>doofinder_48c07cbd1f0f4b03d59befc3e72e9b87'] =
 'Save Internal Search Options';
-$_MODULE['<{doofinder}prestashop>doofinder_db4ebb37c2d0e8b5a5d821b487b8ba62'] =
-'IF YOU HAVE CHANGED ANYTHING IN YOUR DATA FEED SETTINGS, REMEMBER YOU MUST REPROCESS.';
+$_MODULE['<{doofinder}prestashop>doofinder_fcea235fdf24a526070153f5b60355f4'] =
+'You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.';
+$_MODULE['<{doofinder}prestashop>doofinder_2378c5bcb7b183304da2a2b94262f024'] =
+'Launch reindexing';
 $_MODULE['<{doofinder}prestashop>doofinder_039b452cd9646bf1a60dd09146311ee7'] =
 'Settings updated!';
 $_MODULE['<{doofinder}prestashop>doofinder_00d23a76e43b46dae9ec7aa9dcbebb32'] =
@@ -78,14 +84,34 @@ $_MODULE['<{doofinder}prestashop>doofinder_b9f5c797ebbf55adccdd8539a65a0241'] =
 'Disabled';
 $_MODULE['<{doofinder}prestashop>configure_ba0801f239c99cb689010161d3ee1471'] =
 'On Boarding';
+$_MODULE['<{doofinder}prestashop>configure_8cd892b7b97ef9489ae4479d3f4ef0fc'] =
+'store';
 $_MODULE['<{doofinder}prestashop>configure_db5eb84117d06047c97c9a0191b5fffe'] =
 'Support';
 $_MODULE['<{doofinder}prestashop>configure_9b6545e4cea9b4ad4979d41bb9170e2b'] =
 'Advanced';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_86bbc77fd75ac02c21b84a37b260eadd'] =
+'Administration panel';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_23693319f4ed79081952f04729017d15'] =
+'Config Doofinder in my shop';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_f6e6bc175f0485d397ee4c1d45c1d01e'] =
+'Access the Doofinder dashboard and discover all the functionalities to increase your sales.';
+$_MODULE['<{doofinder}prestashop>configure_administration_panel_e77e4aaa7a0d7df358c2f9a8276bee7d'] =
+'Go to Doofinder dashboard';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_08c1cf7707bb72744cd07192c8580580'] =
 'Feed URLs to use on Doofinder Admin panel';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459fc2615'] =
 'Data feed URL for';
+$_MODULE['<{doofinder}prestashop>indexation_status_51160de843c8d9ed5564f4f26208c02e'] =
+'Doofinder Indexation Status';
+$_MODULE['<{doofinder}prestashop>indexation_status_b1d48d617a09cbe4e68eb72c83dea83d'] =
+'The product feed is being processed. Depending on the size of the product catalog in the store, this process may take a few minutes.';
+$_MODULE['<{doofinder}prestashop>indexation_status_e0dba0265fde532f75126eab6fedb8a8'] =
+'Your products may not appear correctly updated in the search results until the process has been completed.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_6b866b4e92effe404fd83e7a7885ad19'] =
+'Connection with Doofinder successful.';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_deed258a0a8c1f5382450930479ac0fd'] =
+'You cannot connect with Doofinder. Please contact your server provider to check your web server internet connection or firewall.';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_a4a6b90012834c7cb676c674bf621993'] =
 'An error occurred during the installation process. Please contact our support team on';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_747e44b01e24ca919d59438ae296b448'] =
@@ -98,6 +124,8 @@ $_MODULE['<{doofinder}prestashop>onboarding_tab_44665e4612000577ba603412b3aa25b2
 'Giving a final magic touch...';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_659ae688646b0c710802028d1bbc2812'] =
 'Reloading page, please wait...';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_c594c7071a3f319fc4db4fa2a6e83f5b'] =
+'Create this shop in Doofinder';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_7edaed702d94d2c7807d20d662c7067a'] =
 'I have an account';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_4d6db8d5a88bb9c3e6b55bce672e0dd9'] =
@@ -146,11 +174,3 @@ $_MODULE['<{doofinder}prestashop>support_tab_b763aef56692ba323859e536109dc72b'] 
 'You can debug or disable some options on the hidden advanced tab of the module.  Caution: Use only if you are a experienced user!!';
 $_MODULE['<{doofinder}prestashop>support_tab_9e2ef841576ac1430c782db2206ca6a6'] =
 'Enable advanced module tab options';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_86bbc77fd75ac02c21b84a37b260eadd'] =
-'Administration panel';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_23693319f4ed79081952f04729017d15'] =
-'Config Doofinder in my shop';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_f6e6bc175f0485d397ee4c1d45c1d01e'] =
-'Access the Doofinder dashboard and discover all the functionalities to increase your sales.';
-$_MODULE['<{doofinder}prestashop>configure_administration_panel_e77e4aaa7a0d7df358c2f9a8276bee7d'] =
-'Go to Doofinder dashboard';
