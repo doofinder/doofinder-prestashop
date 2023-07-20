@@ -12,7 +12,7 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-define('CATEGORY_SEPARATOR', '%%');
+define('CATEGORY_SEPARATOR', ' %% ');
 define('CATEGORY_TREE_SEPARATOR', '>');
 define('TXT_SEPARATOR', '|');
 
