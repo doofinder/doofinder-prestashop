@@ -524,12 +524,12 @@ foreach ($rows as $row) {
                 $lang->id,
                 $attribute_keys
             );
+            echo TXT_SEPARATOR;
             if (dfTools::hasAttributes($row['id_product']) && !$row['id_product_attribute']) {
-                echo TXT_SEPARATOR;
                 $product_attributes = dfTools::hasProductAttributes($row['id_product'], dfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
                 $attributes = dfTools::getAttributesName($product_attributes, $lang->id);
-                $attribute_keys = array_column($attributes, 'name');
-                echo implode('%%', array_map('slugify', $attribute_keys));
+                $variants_keys = array_column($attributes, 'name');
+                echo implode('%%', array_map('slugify', $variants_keys));
             }
             foreach ($variation_attributes as $attribute) {
                 echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
