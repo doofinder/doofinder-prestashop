@@ -121,17 +121,20 @@ class DfProductBuild
 
         if ($this->product_variations) {
             $p['item_group_id'] = $this->getItemGroupId($product);
+            $p['group_id'] = $this->getItemGroupId($product);
 
             $p['variation_reference'] = $product['variation_reference'];
             $p['variation_supplier_reference'] = $product['variation_supplier_reference'];
             $p['variation_mpn'] = $product['variation_mpn'];
             $p['variation_ean13'] = $product['variation_ean13'];
             $p['variation_upc'] = $product['variation_upc'];
-            $p['df_group_leader'] = (!is_null($product['df_group_leader']) ? true : false);
+            $p['df_group_leader'] = (!is_null($product['df_group_leader'] && $product['df_group_leader']) ? true : false);
 
             $attributes = $this->getAttributes($product);
 
             $p = array_merge($p, $attributes);
+
+            $p['df_variants_information'] = $this->getVariantsInformation($product);
         }
 
         return $p;
@@ -350,6 +353,21 @@ class DfProductBuild
         }
 
         return false;
+    }
+
+    private function getVariantsInformation($product)
+    {
+        if (dfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {
+            $product_attributes = dfTools::hasProductAttributes($product['id_product'], $this->attributes_shown);
+
+            $attributes = dfTools::getAttributesName($product_attributes, $this->id_lang);
+
+            $names = array_column($attributes, 'name');
+
+            return array_map([$this, 'slugify'], $names);
+        }
+
+        return [];
     }
 
     private function slugify($text)

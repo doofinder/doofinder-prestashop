@@ -191,6 +191,7 @@ if ($cfg_product_variations == 1) {
     $header[] = 'variation_ean13';
     $header[] = 'variation_upc';
     $header[] = 'df_group_leader';
+    $header[] = 'df_variants_information';
     $attribute_keys = dfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
     $alt_attribute_keys = [];
     foreach ($attribute_keys as $key) {
@@ -523,6 +524,13 @@ foreach ($rows as $row) {
                 $lang->id,
                 $attribute_keys
             );
+            echo TXT_SEPARATOR;
+            if (dfTools::hasAttributes($row['id_product']) && !$row['id_product_attribute']) {
+                $product_attributes = dfTools::hasProductAttributes($row['id_product'], dfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
+                $attributes = dfTools::getAttributesName($product_attributes, $lang->id);
+                $variants_keys = array_column($attributes, 'name');
+                echo implode('%%', array_map('slugify', $variants_keys));
+            }
             foreach ($variation_attributes as $attribute) {
                 echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
             }
