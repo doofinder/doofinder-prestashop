@@ -32,7 +32,7 @@ class DoofinderApiLanding
      */
     public function getLanding($slug)
     {
-        $endpoint = '/plugins/landing/' . $this->hashid . '/' . $slug;
+        $endpoint = '/plugins/landing_new/' . $this->hashid . '/' . $slug;
 
         $url = $this->api_url . $endpoint;
 
