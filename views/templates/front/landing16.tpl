@@ -14,8 +14,17 @@
 
 
 {include file="$tpl_dir./errors.tpl"}
-<h1 class="page-heading product-listing">{$title|escape:'html':'UTF-8'}</h1>
-<div class="block-category-inner">
-    <div id="category-description" class="text-muted">{$description|escape:'html':'UTF-8'}</div>
+<h1 class="page-heading product-listing text-center">{$title|escape:'html':'UTF-8'}</h1>
+<div>
+    {foreach $blocks as $block}
+        {if $block['products']|count}
+            <div class="df-block-above main-page-indent">
+                {$block['above']|cleanHtml nofilter}
+            </div>
+            {include file="$tpl_dir./product-list.tpl" products=$block['products']}
+            <div class="df-block-below main-page-indent">
+                {$block['below']|cleanHtml nofilter}
+            </div>
+        {/if}
+    {/foreach}
 </div>
-{include file="$tpl_dir./product-list.tpl" products=$search_products}
