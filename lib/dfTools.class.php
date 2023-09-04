@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -518,7 +519,7 @@ class DfTools
         p.id_product
     ";
 
-        $sql_variations = '
+        $sql_variations = "
       SELECT
         ps.id_product,
         ps.show_price,
@@ -533,7 +534,7 @@ class DfTools
         m.name AS manufacturer,
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
-        ' . $isbn . "
+        $isbn
         p.upc AS upc,
         p.reference AS reference,
         p.supplier_reference AS supplier_reference,
@@ -598,7 +599,7 @@ class DfTools
         m.name AS manufacturer,
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
-        p.isbn,
+        $isbn
         p.upc,
         p.reference,
         p.supplier_reference,
