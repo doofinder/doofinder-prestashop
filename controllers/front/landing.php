@@ -44,11 +44,11 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=404');
         }
 
-        foreach ($this->landing_data['blocks'] as $block) {
+        foreach ($this->landing_data['blocks'] as &$block) {
             if ($products_result = $this->module->searchOnApi($block['query'], 1, self::RESULTS)) {
-                $this->products[] = $products_result['result'];
+                $block['products'] = $products_result['result'];
             } else {
-                $this->products[] = [];
+                $block['products'] = [];
             }
         }
     }
@@ -87,18 +87,16 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             $this->context->getTranslator()
         );
 
-        $blocks_count = 0;
-        foreach ($this->products as $product) {
+        foreach ($this->landing_data['blocks'] as &$block) {
             $products = [];
-            foreach ($product as $productDetail) {
+            foreach ($block['products'] as $productDetail) {
                 $products[] = $presenter->present(
                     $presentationSettings,
                     $assembler->assembleProduct($productDetail),
                     $this->context->language
                 );
             }
-            $this->landing_data['blocks'][$blocks_count]['products'] = $products;
-            ++$blocks_count;
+            $block['products'] = $products;
         }
 
         $this->context->smarty->assign(
@@ -188,7 +186,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
             $this->setLandingCache($name, $hashid, base64_encode(json_encode($data)));
 
-            return $response;
+            return $data;
         }
     }
 
