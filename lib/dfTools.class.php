@@ -519,7 +519,7 @@ class DfTools
         p.id_product
     ";
 
-    $sql_variations = "
+        $sql_variations = "
       SELECT
         ps.id_product,
         ps.show_price,
