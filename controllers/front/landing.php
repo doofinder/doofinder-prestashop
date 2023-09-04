@@ -87,17 +87,18 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             $this->context->getTranslator()
         );
 
-        $products_length = count($this->products);
-        for ($i = 0; $i < $products_length; ++$i) {
+        $blocks_count = 0;
+        foreach ($this->products as $product) {
             $products = [];
-            foreach ($this->products[$i] as $productDetail) {
+            foreach ($product as $productDetail) {
                 $products[] = $presenter->present(
                     $presentationSettings,
                     $assembler->assembleProduct($productDetail),
                     $this->context->language
                 );
             }
-            $this->landing_data['blocks'][$i]['products'] = $products;
+            $this->landing_data['blocks'][$blocks_count]['products'] = $products;
+            ++$blocks_count;
         }
 
         $this->context->smarty->assign(
