@@ -67,26 +67,26 @@ class DfTools
     // SQL Queries
 
     /**
-     * Returns an array of image size names to be used in a <select> box.
+     * Returns an array of image size names to be used in a <select> box. Array (assoc) with the value of each key as value for it
      *
-     * @return array (assoc) with the value of each key as value for it
+     * @return array
      */
     public static function getAvailableImageSizes()
     {
         $sizes = [];
         $sql = "
-      SELECT
-        `name` AS DF_GS_IMAGE_SIZE,
-        `name`
-      FROM
-        `_DB_PREFIX_image_type`
-      WHERE
-        `products` = 1
-      ORDER BY
-        CASE
-            WHEN name = 'home_default' THEN '1'
-        END DESC;
-    ";
+        SELECT
+            `name` AS DF_GS_IMAGE_SIZE,
+            `name`
+        FROM
+            `_DB_PREFIX_image_type`
+        WHERE
+            `products` = 1
+        ORDER BY
+            CASE
+                WHEN name = 'home_default' THEN '1'
+            END DESC;
+        ";
 
         foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $size) {
             $sizes[$size['DF_GS_IMAGE_SIZE']] = $size;

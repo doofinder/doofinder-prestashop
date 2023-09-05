@@ -16,29 +16,34 @@
 
 {block name='content'}
     <div class="container">
-        <section class="page_content mb-1">
+        <section class="page_content mb-1 card card-block">
             <div id="js-product-list-header">
-                <div class="block-category card card-block">
-                    <h1 class="h1">{$title|escape:'html':'UTF-8'}</h1>
-                    <div class="block-category-inner">
-                        <div id="category-description" class="text-muted">{$description|escape:'html':'UTF-8'}</div>
-                    </div>
+                <div class="mb-2 mt-2">
+                    <h1 class="h1 text-center text-xs-center">{$title|escape:'html':'UTF-8'}</h1>
                 </div>
             </div>
 
             <section id="products">
-                {if $products|count}
-                    {include file="catalog/_partials/productlist.tpl" products=$products cssClass="row" productClass="col-xs-6 col-xl-3"}
-                {else}
-                    <div id="js-product-list">
-                      {capture assign="errorContent"}
-                        <h4>{l s='No products available yet' d='Shop.Theme.Catalog'}</h4>
-                        <p>{l s='Stay tuned! More products will be shown here as they are added.' d='Shop.Theme.Catalog'}</p>
-                      {/capture}
+                {foreach $blocks as $block}
+                    {if $block['products']|count}
+                        <div class="mb-1 mt-2 df-block-above">
+                            {$block['above']|cleanHtml nofilter}
+                        </div>
+                        {include file="catalog/_partials/productlist.tpl" products=$block['products'] cssClass="row" productClass="col-xs-6 col-xl-3"}
+                        <div class="mb-2 mt-1 df-block-below">
+                            {$block['below']|cleanHtml nofilter}
+                        </div>
+                    {else}
+                        <div id="js-product-list">
+                        {capture assign="errorContent"}
+                            <h4>{l s='No products available yet' d='Shop.Theme.Catalog'}</h4>
+                            <p>{l s='Stay tuned! More products will be shown here as they are added.' d='Shop.Theme.Catalog'}</p>
+                        {/capture}
 
-                      {include file='errors/not-found.tpl' errorContent=$errorContent}
-                    </div>
-                {/if}
+                        {include file='errors/not-found.tpl' errorContent=$errorContent}
+                        </div>
+                    {/if}
+                {/foreach}
             </section>
         </section>
     </div>

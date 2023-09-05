@@ -44,8 +44,12 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=404');
         }
 
-        if ($products_result = $this->module->searchOnApi($this->landing_data['query'], 1, self::RESULTS)) {
-            $this->products = $products_result['result'];
+        foreach ($this->landing_data['blocks'] as &$block) {
+            if ($products_result = $this->module->searchOnApi($block['query'], 1, self::RESULTS)) {
+                $block['products'] = $products_result['result'];
+            } else {
+                $block['products'] = [];
+            }
         }
     }
 
@@ -83,20 +87,22 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             $this->context->getTranslator()
         );
 
-        $products = [];
-        foreach ($this->products as $productDetail) {
-            $products[] = $presenter->present(
-                $presentationSettings,
-                $assembler->assembleProduct($productDetail),
-                $this->context->language
-            );
+        foreach ($this->landing_data['blocks'] as &$block) {
+            $products = [];
+            foreach ($block['products'] as $productDetail) {
+                $products[] = $presenter->present(
+                    $presentationSettings,
+                    $assembler->assembleProduct($productDetail),
+                    $this->context->language
+                );
+            }
+            $block['products'] = $products;
         }
 
         $this->context->smarty->assign(
             [
-                'products' => $products,
+                'blocks' => $this->landing_data['blocks'],
                 'title' => $this->landing_data['title'],
-                'description' => $this->landing_data['description'],
             ]
         );
 
@@ -107,9 +113,8 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
     {
         $this->context->smarty->assign(
             [
-                'search_products' => $this->products,
+                'blocks' => $this->landing_data['blocks'],
                 'title' => $this->landing_data['title'],
-                'description' => $this->landing_data['description'],
                 'meta_title' => $this->landing_data['meta_title'],
                 'meta_description' => $this->landing_data['meta_description'],
                 'nobots' => $this->landing_data['index'] ? false : true,
@@ -158,16 +163,26 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
             $data = [
                 'title' => $response['title'],
-                'description' => $response['description'],
                 'meta_title' => $response['meta_title'],
                 'meta_description' => $response['meta_description'],
                 'index' => $response['index'],
-                'query' => $response['query'],
             ];
+
+            if (is_array($response['blocks']) && count($response['blocks']) > 0) {
+                $data['blocks'] = [];
+                foreach ($response['blocks'] as $block) {
+                    $data['blocks'][] = [
+                        'above' => base64_decode($block['above']),
+                        'below' => base64_decode($block['below']),
+                        'position' => $block['position'],
+                        'query' => $block['query'],
+                    ];
+                }
+            }
 
             $this->setLandingCache($name, $hashid, base64_encode(json_encode($data)));
 
-            return $response;
+            return $data;
         }
     }
 
