@@ -11,22 +11,38 @@ services:
       MYSQL_PASSWORD: prestashop
       MYSQL_ROOT_PASSWORD: prestashop
     ports:
-      - 3308:3306
-    container_name: local-prestashop-mysql
+      - 3311:3306
+    container_name: local-prestashop-1.7-mysql
 
   prestashop:
     depends_on:
       - db
     image: prestashop/prestashop:1.7
     ports:
-      - 9000:80
-      - 443:443
+      - 9011:80
+      - 9445:443
     environment:
       PS_DB_HOST: db:3306
       PS_DB_USER: prestashop
       PS_DB_PASSWORD: prestashop
     volumes:
       - ./html:/var/www/html
-    container_name: local-web-prestashop
+    container_name: local-web-prestashop-1.7
+    
+    # PhpMyAdmin container    
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    container_name: local-prestashop-1.7-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: prestashop
+      PMA_PASSWORD: prestashop
+    ports:
+      - 8094:80
+    links:
+      - db
 volumes:
   data:
