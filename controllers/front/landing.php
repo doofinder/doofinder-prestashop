@@ -111,10 +111,6 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
     private function renderProductList16()
     {
-        $products_length = count($this->products);
-        for ($i = 0; $i < $products_length; ++$i) {
-            $this->landing_data['blocks'][$i]['products'] = $this->products[$i];
-        }
         $this->context->smarty->assign(
             [
                 'blocks' => $this->landing_data['blocks'],
