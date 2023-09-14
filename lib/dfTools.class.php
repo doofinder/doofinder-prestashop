@@ -460,7 +460,7 @@ class DfTools
         if (dfTools::versionGte('1.7.0.0')) {
             $isbn = 'p.isbn,';
             if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-                $isbn = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
+                $isbn_pa = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
             }
         }
 
@@ -533,7 +533,7 @@ class DfTools
         m.name AS manufacturer,
         p.__MPN__ AS mpn,
         p.ean13 AS ean13,
-        $isbn
+        $isbn_pa
         p.upc AS upc,
         p.reference AS reference,
         p.supplier_reference AS supplier_reference,
