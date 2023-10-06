@@ -470,7 +470,7 @@ class DfTools
         ps.show_price,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        p.__MPN__ AS mpn,
+        p.mpn AS mpn,
         p.ean13 AS ean13,
         ' . $isbn . "
         p.upc,
@@ -525,13 +525,13 @@ class DfTools
         pa.id_product_attribute,
         pa.reference AS variation_reference,
         pa.supplier_reference AS variation_supplier_reference,
-        pa.__MPN__ AS variation_mpn,
+        pa.mpn AS variation_mpn,
         pa.ean13 AS variation_ean13,
         pa.upc AS variation_upc,
         pa_im.id_image AS variation_image_id,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        p.__MPN__ AS mpn,
+        p.mpn AS mpn,
         p.ean13 AS ean13,
         $isbn_pa
         p.upc AS upc,
@@ -596,7 +596,7 @@ class DfTools
         null AS variation_image_id,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        p.__MPN__ AS mpn,
+        p.mpn AS mpn,
         p.ean13 AS ean13,
         $isbn
         p.upc,
@@ -649,8 +649,6 @@ class DfTools
             $sql = $sql_variations;
         }
 
-        $mpn_field = dfTools::cfg($id_shop, 'DF_GS_MPN_FIELD', 'reference');
-
         // MIN: 1.5.0.9
         $id_category_default = self::versionGte('1.5.0.9') ? 'ps.id_category_default' : 'p.id_category_default';
         // MIN: 1.5.1.0
@@ -676,7 +674,6 @@ class DfTools
             '_ID_LANG_' => (int) pSQL($id_lang),
             '_ID_SHOP_' => (int) pSQL($id_shop),
             '_ID_SHOPGROUP_' => (int) pSQL($Shop->id_shop_group),
-            '__MPN__' => (string) pSQL($mpn_field),
             '_IMS_COVER_' => (string) pSQL($ims_cover),
             '__ID_CATEGORY_DEFAULT__' => (int) pSQL($id_category_default),
             '__IS_ACTIVE__' => (string) pSQL($is_active),
