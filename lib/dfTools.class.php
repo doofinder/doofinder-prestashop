@@ -687,9 +687,8 @@ class DfTools
             '__ID_CATEGORY_DEFAULT__' => (int) pSQL($id_category_default),
             '__IS_ACTIVE__' => (string) pSQL($is_active),
             '__VISIBILITY__' => (string) pSQL($visibility),
-            '__PRODUCT_IDS__' => (string) pSQL($product_ids),
+            '__PRODUCT_IDS__' => (string) pSQL($product_ids)
         ]);
-
         $sql = str_replace("\'", "'", $sql);
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
