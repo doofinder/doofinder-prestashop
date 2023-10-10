@@ -1849,7 +1849,6 @@ class Doofinder extends Module
         ');
 
         if ($result) {
-
             $key = str_replace('DF_HASHID_', '', $result);
             $iso_code = explode('_', $key)[1];
 
