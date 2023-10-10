@@ -35,7 +35,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.4';
+    const VERSION = '4.7.5';
     const YES = 1;
     const NO = 0;
 
@@ -43,7 +43,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.4';
+        $this->version = '4.7.5';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -163,7 +163,6 @@ class Doofinder extends Module
             'DF_GS_DESCRIPTION_TYPE',
             'DF_GS_DISPLAY_PRICES',
             'DF_GS_IMAGE_SIZE',
-            'DF_GS_MPN_FIELD',
             'DF_GS_PRICES_USE_TAX',
             'DF_INSTALLATION_ID',
             'DF_SHOW_LAYER',
@@ -1795,7 +1794,6 @@ class Doofinder extends Module
         Configuration::updateValue('DF_REGION', $region, false, $shopGroupId, $shopId);
         Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $shopGroupId, $shopId);
         Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', self::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_GS_MPN_FIELD', 'reference', false, $shopGroupId, $shopId);
         Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
         Configuration::updateValue('DF_GS_IMAGE_SIZE', key(dfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
     }
