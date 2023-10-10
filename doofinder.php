@@ -35,7 +35,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.5';
+    const VERSION = '4.7.6';
     const YES = 1;
     const NO = 0;
 
@@ -43,7 +43,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.5';
+        $this->version = '4.7.6';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1446,7 +1446,7 @@ class Doofinder extends Module
             }
             $db = Db::getInstance(_PS_USE_SQL_SLAVE_);
             $id_lang = $context->language->id;
-            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock, 
+            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock,
                 IFNULL(stock.quantity, 0) as quantity,
                 pl.`description_short`, pl.`available_now`,
                 pl.`available_later`, pl.`link_rewrite`, pl.`name`,
@@ -1491,10 +1491,10 @@ class Doofinder extends Module
                         SELECT i.id_image, P.id_product, P.id_product_attribute
                             from
                             (
-                            select 
-                                pa.id_product, 
+                            select
+                                pa.id_product,
                                 pa.id_product_attribute,
-                                paic.id_attribute,min(i.position) 
+                                paic.id_attribute,min(i.position)
                                 as min_position
                             from ' . _DB_PREFIX_ . 'product_attribute pa
                              inner join ' . _DB_PREFIX_ . 'product_attribute_image pai
@@ -1502,13 +1502,13 @@ class Doofinder extends Module
                              inner join  ' . _DB_PREFIX_ . 'product_attribute_combination paic
                                on pai.id_product_attribute = paic.id_product_attribute
                              inner join ' . _DB_PREFIX_ . 'image i
-                               on pai.id_image = i.id_image   
+                               on pai.id_image = i.id_image
                             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
                             ) as P
                             inner join ' . _DB_PREFIX_ . 'image i
                              on i.id_product = P.id_product and i.position =  P.min_position
-                    ) 
-                    AS ipa ON p.`id_product` = ipa.`id_product` 
+                    )
+                    AS ipa ON p.`id_product` = ipa.`id_product`
                     AND pai.`id_product_attribute` = ipa.`id_product_attribute`' : '')
                 . ' WHERE p.`id_product` IN (' . pSQL($product_pool) . ') ' .
                 (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
@@ -1850,10 +1850,37 @@ class Doofinder extends Module
             $key = str_replace('DF_HASHID_', '', $result);
             $iso_code = explode('_', $key)[1];
 
-            return (int) Language::getIdByLocale($iso_code);
+            return (int) $this->getIdByLocale($iso_code);
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns language id from locale
+     *
+     * @param string $locale Locale IETF language tag
+     * @param bool $noCache
+     *
+     * @return int|false|null
+     */
+    public function getIdByLocale($locale, $noCache = false)
+    {
+        $key = 'Language::getIdByLocale_' . $locale;
+        if ($noCache || !Cache::isStored($key)) {
+            $idLang = Db::getInstance()
+                ->getValue(
+                    'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
+                    WHERE `locale` = \'' . pSQL(strtolower($locale)) . '\'
+                    OR `language_code` = \'' . pSQL(strtolower($locale)) . '\''
+                );
+
+            Cache::store($key, $idLang);
+
+            return $idLang;
+        }
+
+        return Cache::retrieve($key);
     }
 
     /**
