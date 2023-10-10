@@ -689,6 +689,7 @@ class DfTools
             '__VISIBILITY__' => (string) pSQL($visibility),
             '__PRODUCT_IDS__' => (string) pSQL($product_ids)
         ]);
+
         $sql = str_replace("\'", "'", $sql);
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
