@@ -184,7 +184,7 @@ class DfTools
           ON (fl.id_feature = fs.id_feature AND fl.id_lang = _ID_LANG_)
 
       WHERE
-        fs.id_shop = _ID_SHOP_ 
+        fs.id_shop = _ID_SHOP_
     ';
 
         $sql = self::prepareSQL($sql, [
@@ -220,7 +220,7 @@ class DfTools
           ON (agl.id_attribute_group = ags.id_attribute_group AND agl.id_lang = _ID_LANG_)
 
       WHERE
-        ags.id_shop = _ID_SHOP_ 
+        ags.id_shop = _ID_SHOP_
     ';
 
         $sql = self::prepareSQL($sql, [
@@ -258,9 +258,9 @@ class DfTools
              inner join  _DB_PREFIX_product_attribute_combination paic
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
-               on pai.id_image = i.id_image   
-            where pa.id_product = ' . (int) pSQL($id_product) . ' 
-                and pa.id_product_attribute = ' . (int) pSQL($id_product_attribute) . '      
+               on pai.id_image = i.id_image
+            where pa.id_product = ' . (int) pSQL($id_product) . '
+                and pa.id_product_attribute = ' . (int) pSQL($id_product_attribute) . '
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -424,7 +424,7 @@ class DfTools
     {
         $sql = '
             SELECT pag.id_attribute_group, pagl.name
-            FROM _DB_PREFIX_attribute_group pag 
+            FROM _DB_PREFIX_attribute_group pag
             LEFT JOIN _DB_PREFIX_attribute_group_lang pagl ON pag.id_attribute_group = pagl.id_attribute_group  AND pagl.id_lang = _ID_LANG_
             WHERE pag.id_attribute_group IN (' . implode(',', $attributes_ids) . ')
             ';
@@ -464,13 +464,22 @@ class DfTools
             }
         }
 
+        $mpn = 'p.reference as mpn,';
+        $mpn_pa = 'pa.reference AS variation_mpn,';
+        if (dfTools::versionGte('1.7.7.0')) {
+            $mpn = 'p.mpn AS mpn,';
+            if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+                $mpn_pa = 'pa.mpn AS variation_mpn,';
+            }
+        }
+
         $sql = '
       SELECT
         ps.id_product,
         ps.show_price,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        p.mpn AS mpn,
+        ' . $mpn . '
         p.ean13 AS ean13,
         ' . $isbn . "
         p.upc,
@@ -501,12 +510,12 @@ class DfTools
           ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT JOIN (_DB_PREFIX_tag tag 
+        LEFT JOIN (_DB_PREFIX_tag tag
             INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 
-            AND (sa.id_shop = _ID_SHOP_ OR 
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
+            AND (sa.id_shop = _ID_SHOP_ OR
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
         __IS_ACTIVE__
@@ -525,13 +534,13 @@ class DfTools
         pa.id_product_attribute,
         pa.reference AS variation_reference,
         pa.supplier_reference AS variation_supplier_reference,
-        pa.mpn AS variation_mpn,
+        $mpn_pa
         pa.ean13 AS variation_ean13,
         pa.upc AS variation_upc,
         pa_im.id_image AS variation_image_id,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        p.mpn AS mpn,
+        $mpn
         p.ean13 AS ean13,
         $isbn_pa
         p.upc AS upc,
@@ -563,19 +572,19 @@ class DfTools
           ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT OUTER JOIN _DB_PREFIX_product_attribute pa 
+        LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
           ON (p.id_product = pa.id_product)
-        LEFT JOIN _DB_PREFIX_product_attribute_shop pas 
-          ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)  
-        LEFT JOIN _DB_PREFIX_product_attribute_image pa_im 
+        LEFT JOIN _DB_PREFIX_product_attribute_shop pas
+          ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)
+        LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
-        LEFT JOIN (_DB_PREFIX_tag tag 
+        LEFT JOIN (_DB_PREFIX_tag tag
             INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product 
-            AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute) 
-            AND (sa.id_shop = _ID_SHOP_ OR 
+          ON (p.id_product = sa.id_product
+            AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute)
+            AND (sa.id_shop = _ID_SHOP_ OR
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
         __IS_ACTIVE__
@@ -596,7 +605,7 @@ class DfTools
         null AS variation_image_id,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        p.mpn AS mpn,
+        $mpn
         p.ean13 AS ean13,
         $isbn
         p.upc,
@@ -628,12 +637,12 @@ class DfTools
           ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT JOIN (_DB_PREFIX_tag tag 
+        LEFT JOIN (_DB_PREFIX_tag tag
             INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 
-            AND (sa.id_shop = _ID_SHOP_ OR 
+          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
+            AND (sa.id_shop = _ID_SHOP_ OR
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
       WHERE
         __IS_ACTIVE__
@@ -732,7 +741,7 @@ class DfTools
         cl.name
       FROM
         _DB_PREFIX_category_lang cl INNER JOIN _DB_PREFIX_category parent
-          ON (parent.id_category = cl.id_category) 
+          ON (parent.id_category = cl.id_category)
         INNER JOIN _DB_PREFIX_category_shop cs ON (cs.id_category = parent.id_category),
         _DB_PREFIX_category node
       WHERE
@@ -915,13 +924,13 @@ class DfTools
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
             '
-            SELECT a.id_attribute_group 
+            SELECT a.id_attribute_group
             FROM `' . _DB_PREFIX_ . 'product` p
             LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa ON p.id_product = pa.id_product
-            LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON pa.id_product_attribute = pac.id_product_attribute 
-            LEFT JOIN `' . _DB_PREFIX_ . 'attribute` a ON pac.id_attribute = a.id_attribute 
+            LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON pa.id_product_attribute = pac.id_product_attribute
+            LEFT JOIN `' . _DB_PREFIX_ . 'attribute` a ON pac.id_attribute = a.id_attribute
             WHERE p.id_product = ' . pSQL($id_product) . ' AND id_attribute_group IN ( ' . pSQL($attribute_groups_id) . ')
-            GROUP BY a.id_attribute_group 
+            GROUP BY a.id_attribute_group
             '
         );
 
