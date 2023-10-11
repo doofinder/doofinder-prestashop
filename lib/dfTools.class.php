@@ -16,6 +16,10 @@ define('CATEGORY_SEPARATOR', ' %% ');
 define('CATEGORY_TREE_SEPARATOR', '>');
 define('TXT_SEPARATOR', '|');
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 class DfTools
 {
     // http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
