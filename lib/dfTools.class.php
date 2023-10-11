@@ -16,6 +16,10 @@ define('CATEGORY_SEPARATOR', ' %% ');
 define('CATEGORY_TREE_SEPARATOR', '>');
 define('TXT_SEPARATOR', '|');
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 class DfTools
 {
     // http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
@@ -464,22 +468,13 @@ class DfTools
             }
         }
 
-        $mpn = 'p.reference as mpn,';
-        $mpn_pa = 'pa.reference AS variation_mpn,';
-        if (dfTools::versionGte('1.7.7.0')) {
-            $mpn = 'p.mpn AS mpn,';
-            if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-                $mpn_pa = 'pa.mpn AS variation_mpn,';
-            }
-        }
-
         $sql = '
       SELECT
         ps.id_product,
         ps.show_price,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        ' . $mpn . '
+        p.mpn AS mpn,
         p.ean13 AS ean13,
         ' . $isbn . "
         p.upc,
@@ -534,13 +529,13 @@ class DfTools
         pa.id_product_attribute,
         pa.reference AS variation_reference,
         pa.supplier_reference AS variation_supplier_reference,
-        $mpn_pa
+        pa.mpn AS variation_mpn,
         pa.ean13 AS variation_ean13,
         pa.upc AS variation_upc,
         pa_im.id_image AS variation_image_id,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        $mpn
+        p.mpn AS mpn,
         p.ean13 AS ean13,
         $isbn_pa
         p.upc AS upc,
@@ -605,7 +600,7 @@ class DfTools
         null AS variation_image_id,
         __ID_CATEGORY_DEFAULT__,
         m.name AS manufacturer,
-        $mpn
+        p.mpn AS mpn,
         p.ean13 AS ean13,
         $isbn
         p.upc,
