@@ -23,6 +23,10 @@
  * - taxes:      Boolean. Apply taxes to prices. Default true.
  * - prices:     Boolean. Display Prices. Default true.
  */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 @set_time_limit(3600 * 2);
 
 require_once dirname(__FILE__) . '/../../../config/config.inc.php';

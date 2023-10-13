@@ -9,6 +9,10 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 class EasyREST
 {
     private $curl;
