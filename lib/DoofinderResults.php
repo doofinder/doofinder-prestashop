@@ -11,6 +11,10 @@
  * - getProperty : get single property of the search results (rpp, page, etc....)
  * - getResults: get an array with the results
  */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 class DoofinderResults
 {
     // doofinder status

@@ -19,10 +19,6 @@ if (!class_exists('dfTools')) {
     require_once dirname(__FILE__) . '/lib/dfTools.class.php';
 }
 
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-
 class Doofinder extends Module
 {
     protected $html = '';

@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 global $_MODULE;
 $_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] =
