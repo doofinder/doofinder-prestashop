@@ -12,9 +12,11 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!defined('_PS_VERSION_')) {
+
+ if (!defined('_PS_VERSION_')) {
     exit;
 }
+
 require_once dirname(__FILE__) . '/../../config/config.inc.php';
 
 if (Module::isInstalled('doofinder') && Module::isEnabled('doofinder')) {
