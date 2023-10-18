@@ -788,9 +788,10 @@ class Doofinder extends Module
                 Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 15);
             }
 
-            $msg = sprintf('<p>%1$s</p><p><form method="post" action=""><button type="submit" class="btn btn-primary" name="submitDoofinderModuleLaunchReindexing">%2$s</button></form></p>',
-                $this->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'),
-                $this->l('Launch reindexing'));
+            $this->context->smarty->assign('text_data_changed', $this->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'));
+            $this->context->smarty->assign('text_reindex', $this->l('Launch reindexing'));
+            $msg = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/reindex.tpl');
+            
             $messages .= $this->displayWarningCtm($msg, false, true);
         }
 
@@ -1957,11 +1958,8 @@ class Doofinder extends Module
     {
         $stop = false;
         if (Shop::getContext() == Shop::CONTEXT_GROUP || Shop::getContext() == Shop::CONTEXT_ALL) {
-            $stopMsg = 'You cannot manage Doofinder from a "All Shops"'
-                . ' or a "Group Shop" context, select directly the shop you want to edit';
-            $stop = '<p class="alert alert-warning">' .
-                $this->l($stopMsg) .
-                '</p>';
+            $this->context->smarty->assign('text_one_shop', $this->l('You cannot manage Doofinder from a "All Shops" or a "Group Shop" context, select directly the shop you want to edit'));
+            $stop = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/message_manage_one_shop.tpl');
         }
 
         return $stop;
