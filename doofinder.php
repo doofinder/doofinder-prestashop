@@ -790,7 +790,7 @@ class Doofinder extends Module
 
             $this->context->smarty->assign('text_data_changed', $this->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'));
             $this->context->smarty->assign('text_reindex', $this->l('Launch reindexing'));
-            $msg = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/reindex.tpl');    
+            $msg = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/reindex.tpl');
             $messages .= $this->displayWarningCtm($msg, false, true);
         }
 
