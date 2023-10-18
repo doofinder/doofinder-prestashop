@@ -12,7 +12,6 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 if (!class_exists('dfTools')) {
     require_once dirname(__FILE__) . '/dfTools.class.php';
 }

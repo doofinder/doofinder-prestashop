@@ -18,7 +18,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-
 if (Tools::isSubmit('landing')) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         return Db::getInstance()->delete('doofinder_landing');
