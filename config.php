@@ -12,12 +12,12 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+require_once dirname(__FILE__) . '/../../config/config.inc.php';
+require_once dirname(__FILE__) . '/../../init.php';
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-require_once dirname(__FILE__) . '/../../config/config.inc.php';
-require_once dirname(__FILE__) . '/../../init.php';
 
 $context = Context::getContext();
 

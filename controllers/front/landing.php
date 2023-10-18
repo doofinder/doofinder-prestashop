@@ -17,11 +17,11 @@ use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\ProductListingPresenter;
 
+require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_api_landing.php';
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_api_landing.php';
 
 class DoofinderLandingModuleFrontController extends ModuleFrontController
 {

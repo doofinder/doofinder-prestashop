@@ -12,13 +12,14 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
 @set_time_limit(3600 * 2);
 
 require_once dirname(__FILE__) . '/../../../config/config.inc.php';
 require_once dirname(__FILE__) . '/../lib/dfCms_build.php';
+
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
