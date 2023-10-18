@@ -12,11 +12,11 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+require_once dirname(__FILE__) . '/../../config/config.inc.php';
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-require_once dirname(__FILE__) . '/../../config/config.inc.php';
 
 switch (Tools::getValue('type')) {
     case 'category':

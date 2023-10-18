@@ -12,11 +12,11 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
 
 class DoofinderLayerApi
 {

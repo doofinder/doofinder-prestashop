@@ -23,15 +23,15 @@
  * - taxes:      Boolean. Apply taxes to prices. Default true.
  * - prices:     Boolean. Display Prices. Default true.
  */
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-
 @set_time_limit(3600 * 2);
 
 require_once dirname(__FILE__) . '/../../../config/config.inc.php';
 require_once dirname(__FILE__) . '/../../../init.php';
 require_once dirname(__FILE__) . '/../doofinder.php';
+
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
