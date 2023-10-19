@@ -11,4 +11,4 @@
 * @copyright Doofinder
 * @license   GPLv3
 *}
-<p class="alert alert-warning">{$text_one_shop}</p>
+<p class="alert alert-warning">{$text_one_shop|escape:'htmlall':'UTF-8'}</p>
