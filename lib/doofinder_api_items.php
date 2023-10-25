@@ -18,8 +18,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-const API_URL = 'https://{region}-admin.doofinder.com';
-const API_VERSION = '2';
+const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiItems
 {
@@ -38,7 +37,7 @@ class DoofinderApiItems
      */
     public function updateBulk($payload)
     {
-        $endpoint = '/plugins/prestashop/' . $this->hashid . '/' . $this->type . '/product_update';
+        $endpoint = '/item/' . $this->hashid . '/' . $this->type . '?platform=prestashop&action=update';
 
         $url = $this->api_url . $endpoint;
 
@@ -52,7 +51,7 @@ class DoofinderApiItems
      */
     public function deleteBulk($payload)
     {
-        $endpoint = '/plugins/prestashop/' . $this->hashid . '/' . $this->type . '/product_delete';
+        $endpoint = '/item/' . $this->hashid . '/' . $this->type . '?platform=prestashop&action=delete';
 
         $url = $this->api_url . $endpoint;
 
