@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.14';
+    const VERSION = '4.7.15';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.14';
+        $this->version = '4.7.15';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1847,7 +1847,7 @@ class Doofinder extends Module
             $key = str_replace('DF_HASHID_', '', $result);
             $iso_code = explode('_', $key)[1];
 
-            return (int) $this->getIdByLocale($iso_code);
+            return (int) $this->getLanguageIdByLocale($iso_code);
         } else {
             return false;
         }
@@ -1857,27 +1857,17 @@ class Doofinder extends Module
      * Returns language id from locale
      *
      * @param string $locale Locale IETF language tag
-     * @param bool $noCache
      *
      * @return int|false|null
      */
-    public function getIdByLocale($locale, $noCache = false)
+    public function getLanguageIdByLocale($locale)
     {
-        $key = 'Language::getIdByLocale_' . $locale;
-        if ($noCache || !Cache::isStored($key)) {
-            $idLang = Db::getInstance()
-                ->getValue(
-                    'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
-                    WHERE `locale` = \'' . pSQL(strtolower($locale)) . '\'
-                    OR `language_code` = \'' . pSQL(strtolower($locale)) . '\''
-                );
-
-            Cache::store($key, $idLang);
-
-            return $idLang;
-        }
-
-        return Cache::retrieve($key);
+        return Db::getInstance()
+            ->getValue(
+                'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
+                WHERE `locale` = \'' . pSQL(strtolower($locale)) . '\'
+                OR `language_code` = \'' . pSQL(strtolower($locale)) . '\''
+            );
     }
 
     /**
