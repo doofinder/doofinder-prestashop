@@ -29,7 +29,7 @@
                         <div class="mb-1 mt-2 df-block-above">
                             {$block['above']|cleanHtml nofilter}
                         </div>
-                        {include file="catalog/_partials/productlist.tpl" products=$block['products'] cssClass="row" productClass="col-xs-6 col-xl-3"}
+                        {include file="module:doofinder/views/templates/front/catalog/_partials/productlist.tpl" products=$block['products'] cssClass="row" productClass="col-xs-6 col-xl-3"}
                         <div class="mb-2 mt-1 df-block-below">
                             {$block['below']|cleanHtml nofilter}
                         </div>
