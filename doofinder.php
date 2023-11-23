@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.16';
+    const VERSION = '4.7.17';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.16';
+        $this->version = '4.7.17';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1662,14 +1662,12 @@ class Doofinder extends Module
         require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST();
         $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
-        $admin_endpoint = Configuration::getGlobalValue('DF_AI_ADMIN_ENDPOINT');
         $languages = Language::getLanguages(true, $shop['id_shop']);
         $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
         $installationID = null;
-        $callbacksUrls = [];
 
         $this->setDefaultShopConfig($shopGroupId, $shopId);
 
@@ -1678,8 +1676,8 @@ class Doofinder extends Module
             'name' => $shop['name'],
             'platform' => 'prestashop',
             'primary_language' => $primary_lang->language_code,
+            'site_url' => $shop_url,
             'search_engines' => [],
-            'sector' => '',
         ];
 
         foreach ($languages as $lang) {
@@ -1691,41 +1689,20 @@ class Doofinder extends Module
                 $lang_code = $lang['language_code'];
                 $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $store_data['search_engines'][] = [
-                    'name' => $shop['name'] . ' | Lang:' . $lang['iso_code'] . ' Currency:' . strtoupper($ciso),
                     'language' => $lang_code,
                     'currency' => $ciso,
-                    'site_url' => $shop_url,
-                    'stopwords' => false,
-                    'datatypes' => [
-                        [
-                            'name' => 'product',
-                            'preset' => 'product',
-                            'datasources' => [
-                                [
-                                    'options' => [
-                                        'url' => $feed_url,
-                                    ],
-                                    'type' => 'file',
-                                ],
-                            ],
-                            'options' => [
-                                'exclude_out_of_stock_items' => false,
-                                'group_variants' => false,
-                            ],
-                        ],
-                    ],
+                    'feed_url' => $feed_url,
+                    'callback_url' => $this->getProcessCallbackUrl(),
                 ];
-                $callbacksUrls[$lang_code][$ciso] = $this->getProcessCallbackUrl();
             }
         }
-        $store_data['callback_urls'] = $callbacksUrls;
 
         $json_store_data = json_encode($store_data);
         $this->debug('Create Store Start');
         $this->debug(print_r($store_data, true));
 
         $response = $client->post(
-            'https://' . $admin_endpoint . '/plugins/create-store',
+            $this->getInstallUrl(Configuration::getGlobalValue('DF_REGION')),
             $json_store_data,
             false,
             false,
@@ -2031,5 +2008,10 @@ class Doofinder extends Module
         $tab = new Tab($tabId);
 
         return $tab->delete();
+    }
+
+    private function getInstallUrl($region)
+    {
+        return str_replace('{region}', $region, 'https://{region}-plugins.doofinder.com/install');
     }
 }
