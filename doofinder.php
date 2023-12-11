@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.17';
+    const VERSION = '4.7.18';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.17';
+        $this->version = '4.7.18';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1720,6 +1720,8 @@ class Doofinder extends Module
                 $this->debug("Set installation ID: $installationID");
                 Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
                 Configuration::updateValue('DF_ENABLED_V9', true, false, $shopGroupId, $shopId);
+                Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
+                Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true, false, $shopGroupId, $shopId);
                 $this->setSearchEnginesByConfig();
             } else {
                 $this->debug('Invalid installation ID');
