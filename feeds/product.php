@@ -416,9 +416,9 @@ foreach ($rows as $row) {
                 $shop->id
             );
             $allow_oosp = Product::isAvailableWhenOutOfStock($row['out_of_stock']);
-            echo($available && ($stock > 0 || $allow_oosp) ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
+            echo ($available && ($stock > 0 || $allow_oosp) ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
         } else {
-            echo($available ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
+            echo ($available ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
         }
 
         // BRAND
@@ -481,7 +481,7 @@ foreach ($rows as $row) {
                 $product_price = false;
                 $onsale_price = false;
             }
-            echo($product_price ? Tools::convertPrice(
+            echo ($product_price ? Tools::convertPrice(
                 $product_price,
                 $currency
             ) : '') . TXT_SEPARATOR;
@@ -508,7 +508,7 @@ foreach ($rows as $row) {
                 $product_price = false;
                 $onsale_price = false;
             }
-            echo($product_price ? Tools::convertPrice($product_price, $currency) : '') . TXT_SEPARATOR;
+            echo ($product_price ? Tools::convertPrice($product_price, $currency) : '') . TXT_SEPARATOR;
             echo ($product_price && $onsale_price && $product_price != $onsale_price) ?
                 Tools::convertPrice($onsale_price, $currency) : '';
         }
