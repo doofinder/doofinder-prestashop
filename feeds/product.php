@@ -23,7 +23,9 @@
  * - taxes:      Boolean. Apply taxes to prices. Default true.
  * - prices:     Boolean. Display Prices. Default true.
  */
-@set_time_limit(3600 * 2);
+if (function_exists('set_time_limit')) {
+    @set_time_limit(3600 * 2);
+}
 
 require_once dirname(__FILE__) . '/../../../config/config.inc.php';
 require_once dirname(__FILE__) . '/../../../init.php';
