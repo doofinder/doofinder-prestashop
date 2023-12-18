@@ -12,7 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-@set_time_limit(3600 * 2);
+if (function_exists('set_time_limit')) {
+    @set_time_limit(3600 * 2);
+}
 
 require_once dirname(__FILE__) . '/../../../config/config.inc.php';
 require_once dirname(__FILE__) . '/../lib/dfCategory_build.php';
