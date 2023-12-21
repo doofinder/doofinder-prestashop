@@ -1066,6 +1066,10 @@ class DfTools
 
     public static function cleanString($text)
     {
+        if (is_null($text)) {
+            return null;
+        }
+
         $text = preg_replace('/[^\P{C}]+/u', ' ', $text);
         $text = str_replace(TXT_SEPARATOR, '-', $text);
         $text = str_replace(["\t", "\r", "\n"], ' ', $text);
@@ -1088,12 +1092,12 @@ class DfTools
     {
         $forbidden = ['-'];
 
-        return str_replace($forbidden, '', $text);
+        return self::str_replace($forbidden, '', $text);
     }
 
     public static function splitReferences($text)
     {
-        return preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
+        return self::preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
     }
 
     //
@@ -1335,7 +1339,7 @@ class DfTools
 
     public static function escapeSlashes($string)
     {
-        return $string = str_replace('/', '//', $string);
+        return $string = self::str_replace('/', '//', $string);
     }
 
     public static function validateSecurityToken($dfsec_hash)
@@ -1350,5 +1354,15 @@ class DfTools
                 . ' for your feed';
             exit($msgError);
         }
+    }
+
+    public static function str_replace($search, $replace, $subject)
+    {
+        return is_null($subject) ? null : str_replace('/', '//', $subject);
+    }
+
+    public static function preg_replace($pattern, $replacement, $subject)
+    {
+        return is_null($subject) ? null : preg_replace($pattern, $replacement, $subject);
     }
 }
