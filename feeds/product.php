@@ -448,7 +448,7 @@ foreach ($rows as $row) {
         echo dfTools::splitReferences($product_title) . TXT_SEPARATOR;
 
         // TAGS
-        echo str_replace(',', '/', dfTools::cleanString(dfTools::escapeSlashes($row['tags'])));
+        echo dfTools::str_replace(',', '/', dfTools::cleanString(dfTools::escapeSlashes($row['tags'])));
 
         // ISBN
         if (dfTools::versionGte('1.7.0.0')) {
@@ -536,9 +536,13 @@ foreach ($rows as $row) {
             echo TXT_SEPARATOR;
             if (dfTools::hasAttributes($row['id_product']) && !$row['id_product_attribute']) {
                 $product_attributes = dfTools::hasProductAttributes($row['id_product'], dfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
-                $attributes = dfTools::getAttributesName($product_attributes, $lang->id);
-                $variants_keys = array_column($attributes, 'name');
-                echo implode('%%', array_map('slugify', $variants_keys));
+                if ($product_attributes) {
+                    $attributes = dfTools::getAttributesName($product_attributes, $lang->id);
+                    $variants_keys = array_column($attributes, 'name');
+                    echo implode('%%', array_map('slugify', $variants_keys));
+                } else {
+                    echo '';
+                }
             }
             foreach ($variation_attributes as $attribute) {
                 echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
