@@ -1260,7 +1260,7 @@ class Doofinder extends Module
         $api_key = Configuration::get('DF_API_KEY');
         $api = new DoofinderApiIndex($api_key, $region);
         $response = $api->invokeReindexing(Configuration::get('DF_INSTALLATION_ID'), $this->getProcessCallbackUrl());
-        if ($response['status'] != 200) {
+        if (empty($response) || $response['status'] !== 200) {
             $this->debug('Error while invoking reindexing: ' . json_encode($response));
 
             return;
