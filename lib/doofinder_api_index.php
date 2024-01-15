@@ -40,9 +40,9 @@ class DoofinderApiIndex
      */
     public function invokeReindexing($installation_id, $callback_url = '')
     {
-        $api_endpoint = $this->api_url . "/process-feed";
-        $json_data = json_encode(['store_id' =>  $installation_id, 'callback_url' => $callback_url]);
-        
+        $api_endpoint = $this->api_url . '/process-feed';
+        $json_data = json_encode(['store_id' => $installation_id, 'callback_url' => $callback_url]);
+
         return $this->post($api_endpoint, $json_data);
     }
 

@@ -57,7 +57,7 @@ class DoofinderLayerApi
             'application/json',
             ['Authorization: Token ' . $api_key]
         );
-        
+
         return json_decode($response->response, true);
     }
 }
