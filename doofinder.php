@@ -1252,7 +1252,7 @@ class Doofinder extends Module
         }
     }
 
-    public function indexApiInvokeReindexing()
+    private function indexApiInvokeReindexing()
     {
         require_once dirname(__FILE__) . '/lib/doofinder_api_index.php';
 
