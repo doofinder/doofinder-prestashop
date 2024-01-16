@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -45,28 +46,18 @@ class DoofinderLayerApi
 
     public static function getInstallationData($installationID, $api_key, $region = 'eu1')
     {
-        $api_endpoint = 'https://' . $region . '-admin.doofinder.com/api/v1/graphql.json';
-        $query = '
-            query {
-                installation_by_id(id: "' . $installationID . '")
-                {
-                    id
-                    name
-                    config
-                }
-            }
-        ';
+        $api_endpoint = 'https://' . $region . '-plugins.doofinder.com/installations/' . $installationID;
 
         $client = new EasyREST();
-        $response = $client->post(
+        $response = $client->get(
             $api_endpoint,
-            json_encode(['query' => $query]),
+            null,
             false,
             false,
             'application/json',
             ['Authorization: Token ' . $api_key]
         );
 
-        return json_decode($response->response, true)['data']['installation_by_id'][0];
+        return json_decode($response->response, true);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -18,8 +19,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-const API_URL = 'https://{region}-admin.doofinder.com';
-const API_VERSION = '1';
+const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiIndex
 {
@@ -33,16 +33,17 @@ class DoofinderApiIndex
     }
 
     /**
-     * Make a request to the API to reprocess all the feeds
+     * Make a request to the plugins API to reprocess all the feeds
      *
      * @param string $installation_id
      * @param string $callback_url
      */
     public function invokeReindexing($installation_id, $callback_url = '')
     {
-        $json_data = json_encode(['query' => 'mutation { process_store_feeds(id: "' . $installation_id . '", callback_url: "' . $callback_url . '") { id }}']);
+        $api_endpoint = $this->api_url . '/process-feed';
+        $json_data = json_encode(['store_id' => $installation_id, 'callback_url' => $callback_url]);
 
-        return $this->post(sprintf('%1$s/api/v%2$s/graphql.json', $this->api_url, API_VERSION), $json_data);
+        return $this->post($api_endpoint, $json_data);
     }
 
     private function post($url, $payload)
