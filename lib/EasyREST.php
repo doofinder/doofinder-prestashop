@@ -391,7 +391,7 @@ class EasyREST
      */
     public static function get(
         $url,
-        array $params = null,
+        $params = null,
         $user = null,
         $pwd = null,
         $contentType = 'multipart/form-data',

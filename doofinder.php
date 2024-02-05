@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.21';
+    const VERSION = '4.7.22';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.21';
+        $this->version = '4.7.22';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1975,7 +1975,10 @@ class Doofinder extends Module
     {
         $displayMobile = Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
         $displayDesktop = Configuration::get('DF_SHOW_LAYER', null, null, null, true);
-        $isMobile = Context::getContext()->isMobile();
+        $context = Context::getContext();
+        // In certain older PrestaShop 1.6 versions, the 'isMobile' method may not be directly available within the context.
+        // To address this, we check for the method's existence and, if absent, fall back on the 'getMobileDetect' version as an alternative.
+        $isMobile = method_exists($context, 'isMobile') ? $context->isMobile() : $context->getMobileDetect()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
     }
