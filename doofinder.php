@@ -1975,7 +1975,10 @@ class Doofinder extends Module
     {
         $displayMobile = Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
         $displayDesktop = Configuration::get('DF_SHOW_LAYER', null, null, null, true);
-        $isMobile = Context::getContext()->isMobile();
+        $context = Context::getContext();
+        // In certain older PrestaShop 1.6 versions, the 'isMobile' method may not be directly available within the context.
+        // To address this, we check for the method's existence and, if absent, fall back on the 'getMobileDetect' version as an alternative.
+        $isMobile = method_exists($context, "isMobile") ? $context->isMobile() : $context->getMobileDetect()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
     }
