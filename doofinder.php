@@ -1978,7 +1978,7 @@ class Doofinder extends Module
         $context = Context::getContext();
         // In certain older PrestaShop 1.6 versions, the 'isMobile' method may not be directly available within the context.
         // To address this, we check for the method's existence and, if absent, fall back on the 'getMobileDetect' version as an alternative.
-        $isMobile = method_exists($context, "isMobile") ? $context->isMobile() : $context->getMobileDetect()->isMobile();
+        $isMobile = method_exists($context, 'isMobile') ? $context->isMobile() : $context->getMobileDetect()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
     }
