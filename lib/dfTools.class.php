@@ -488,7 +488,7 @@ class DfTools
         ' . $isbn . "
         p.upc,
         p.reference,
-        p.supplier_reference,
+        psp.product_supplier_reference AS supplier_reference,
         pl.name,
         pl.description,
         pl.description_short,
@@ -521,6 +521,8 @@ class DfTools
           ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
             AND (sa.id_shop = _ID_SHOP_ OR
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
+        LEFT JOIN _DB_PREFIX_product_supplier psp
+          ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
@@ -537,7 +539,7 @@ class DfTools
         ps.show_price,
         pa.id_product_attribute,
         pa.reference AS variation_reference,
-        pa.supplier_reference AS variation_supplier_reference,
+        psp.product_supplier_reference AS variation_supplier_reference,
         $mpn_pa
         pa.ean13 AS variation_ean13,
         pa.upc AS variation_upc,
@@ -578,6 +580,8 @@ class DfTools
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
           ON (p.id_product = pa.id_product)
+        LEFT JOIN _DB_PREFIX_product_supplier psp
+          ON (p.id_product = psp.id_product AND pa.id_product_attribute = psp.id_product_attribute)
         LEFT JOIN _DB_PREFIX_product_attribute_shop pas
           ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
@@ -602,7 +606,7 @@ class DfTools
         ps.show_price,
         0,
         null AS variation_reference,
-        null AS variation_supplier_reference,
+        psp.product_supplier_reference AS variation_supplier_reference,
         null AS variation_mpn,
         null AS variation_ean13,
         null AS variation_upc,
@@ -648,6 +652,8 @@ class DfTools
           ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
             AND (sa.id_shop = _ID_SHOP_ OR
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
+        LEFT JOIN _DB_PREFIX_product_supplier psp
+          ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
