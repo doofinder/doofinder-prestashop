@@ -106,6 +106,8 @@ if (!$shop->id) {
 // CONFIG
 $lang = dfTools::getLanguageFromRequest();
 $context->language = $lang;
+$country = Configuration::get('PS_COUNTRY_DEFAULT');
+$context->country = new Country($country);
 $currency = dfTools::getCurrencyForLanguageFromRequest($lang);
 
 $cfg_short_description = (dfTools::cfg(
