@@ -16,7 +16,19 @@ To choose the prestashop version, in the container image change:
 - **prestashop/prestashop:1.7** for version 1.7
 - **prestashop/prestashop:latest** for the latest available version of prestashop
 
-Once the environment is installed, move the module files to `/modules/doofinder`.
+You can now visit `localhost:9000` to start the prestashop installation
+To install prestashop, follow the steps in the wizard.
+Notice that when asked to configure the database connection you should use the following fields as are defined in the `docker-compos.yml`
+- url: `local-prestashop-mysql`
+- database: `prestashop`
+- user: `prestashop`
+- password: `prestashop`
+
+Remember to test the database connection to confirm is working.
+
+After the installation is finished you should remove the install folder to start using the app.
+`docker-compose exec prestashop rm -r install`
+
 ## How to install
 
 The easiest way of installing the plugin is downloading it from our [support page](http://www.doofinder.com/support). If you want to download it from this page, you can download the latest release from the tags section, but you will have to prepare the module `.zip` file prior to installing it.

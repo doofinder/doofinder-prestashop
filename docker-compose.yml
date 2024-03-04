@@ -22,11 +22,14 @@ services:
       - 9000:80
       - 443:443
     environment:
+      APACHE_RUN_USER: '#1000'
+      APACHE_RUN_GROUP: '#1000'
       PS_DB_HOST: db:3306
       PS_DB_USER: prestashop
       PS_DB_PASSWORD: prestashop
     volumes:
       - ./html:/var/www/html
+      - ./:/var/www/html/modules/doofinder
     container_name: local-web-prestashop
 volumes:
   data:
