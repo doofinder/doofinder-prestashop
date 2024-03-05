@@ -49,7 +49,7 @@ $_MODULE['<{doofinder}prestashop>doofinder_90dce1b992114b5c7ab37ee99ea195ec'] =
 $_MODULE['<{doofinder}prestashop>doofinder_435374cdbc1c2cf3b63e9775cbedd00a'] =
 'Procesar automáticamente las modificaciones de los productos';
 $_MODULE['<{doofinder}prestashop>doofinder_c2cad3c344198599b69e25634315170d'] =
-'Configurar cuándo se envían los cambios de productos registrados a Doofinder';
+'Configurar cuándo se envían los cambios de productos a Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_48bf14c419a1d441412510faf39c326d'] =
 'Cada día';
 $_MODULE['<{doofinder}prestashop>doofinder_643bd9766a482fed97aff60a7a4f1b3b'] =
