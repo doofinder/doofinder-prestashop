@@ -179,7 +179,7 @@ if ($cfg_product_variations == 1) {
 }
 $header = array_merge($header, [
     'title', 'link', 'description', 'alternate_description',
-    'meta_keywords', 'meta_title', 'meta_description', 'image_link',
+    'meta_keywords', 'meta_title', 'meta_description', 'image_link', 'main_category',
     'categories', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
     'supplier_reference', 'extra_title_1', 'extra_title_2', 'tags',
 ]);
@@ -402,6 +402,9 @@ foreach ($rows as $row) {
                 )
             ) . TXT_SEPARATOR;
         }
+
+        // MAIN CATEGORY
+        echo dfTools::cleanString($row['main_category']) . TXT_SEPARATOR;
 
         // PRODUCT CATEGORIES
         echo dfTools::getCategoriesForProductIdAndLanguage(

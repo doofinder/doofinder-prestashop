@@ -18,7 +18,7 @@ To choose the prestashop version, in the container image change:
 
 You can now visit `localhost:9000` to start the prestashop installation
 To install prestashop, follow the steps in the wizard.
-Notice that when asked to configure the database connection you should use the following fields as are defined in the `docker-compos.yml`
+Notice that when asked to configure the database connection you should use the following fields as are defined in the `docker-compose.yml`
 - url: `local-prestashop-mysql`
 - database: `prestashop`
 - user: `prestashop`
