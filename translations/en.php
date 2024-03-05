@@ -47,9 +47,9 @@ $_MODULE['<{doofinder}prestashop>doofinder_ebe75aa799359b32559a09eae8594835'] =
 $_MODULE['<{doofinder}prestashop>doofinder_90dce1b992114b5c7ab37ee99ea195ec'] =
 'Product Image Size';
 $_MODULE['<{doofinder}prestashop>doofinder_435374cdbc1c2cf3b63e9775cbedd00a'] =
-'Automatically process product modifications';
+'Automatically process modified products';
 $_MODULE['<{doofinder}prestashop>doofinder_c2cad3c344198599b69e25634315170d'] =
-'Configure when product changes are sent to Doofinder';
+'Configure how often changes will be sent to Doofinder. It will only be executed if there are changes.';
 $_MODULE['<{doofinder}prestashop>doofinder_48bf14c419a1d441412510faf39c326d'] =
 'Every day';
 $_MODULE['<{doofinder}prestashop>doofinder_643bd9766a482fed97aff60a7a4f1b3b'] =

@@ -550,8 +550,8 @@ class Doofinder extends Module
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->l('Automatically process product modifications'),
-                        'desc' => $this->l('Configure when product changes are sent to Doofinder'),
+                        'label' => $this->l('Automatically process modified products'),
+                        'desc' => $this->l('Configure how often changes will be sent to Doofinder. It will only be executed if there are changes.'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => [
                             'query' => [
