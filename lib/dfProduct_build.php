@@ -92,6 +92,7 @@ class DfProductBuild
         $p['meta_title'] = dfTools::cleanString($product['meta_title']);
         $p['meta_description'] = dfTools::cleanString($product['meta_description']);
         $p['image_link'] = $this->getImageLink($product);
+        $p['main_category'] = dfTools::cleanString($product['main_category']);
         $p['categories'] = dfTools::getCategoriesForProductIdAndLanguage(
             $product['id_product'],
             $this->id_lang,

@@ -481,7 +481,8 @@ class DfTools
       SELECT
         ps.id_product,
         ps.show_price,
-        __ID_CATEGORY_DEFAULT__,
+        cl.name as main_category,
+        __ID_CATEGORY_DEFAULT_FIELD__,
         m.name AS manufacturer,
         ' . $mpn . '
         p.ean13 AS ean13,
@@ -511,7 +512,7 @@ class DfTools
         LEFT JOIN _DB_PREFIX_manufacturer m
           ON (p.id_manufacturer = m.id_manufacturer)
         LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
+          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT JOIN (_DB_PREFIX_tag tag
@@ -544,7 +545,8 @@ class DfTools
         pa.ean13 AS variation_ean13,
         pa.upc AS variation_upc,
         pa_im.id_image AS variation_image_id,
-        __ID_CATEGORY_DEFAULT__,
+        cl.name as main_category,
+        __ID_CATEGORY_DEFAULT_FIELD__,
         m.name AS manufacturer,
         $mpn
         p.ean13 AS ean13,
@@ -575,7 +577,7 @@ class DfTools
         LEFT JOIN _DB_PREFIX_manufacturer m
           ON (p.id_manufacturer = m.id_manufacturer)
         LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
+          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
@@ -611,7 +613,8 @@ class DfTools
         null AS variation_ean13,
         null AS variation_upc,
         null AS variation_image_id,
-        __ID_CATEGORY_DEFAULT__,
+        cl.name as main_category,
+        __ID_CATEGORY_DEFAULT_FIELD__ as id_category_default,
         m.name AS manufacturer,
         $mpn
         p.ean13 AS ean13,
@@ -642,7 +645,7 @@ class DfTools
         LEFT JOIN _DB_PREFIX_manufacturer m
           ON (p.id_manufacturer = m.id_manufacturer)
         LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (p.id_category_default = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
+          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT JOIN (_DB_PREFIX_tag tag
@@ -694,7 +697,7 @@ class DfTools
             '_ID_SHOP_' => (int) pSQL($id_shop),
             '_ID_SHOPGROUP_' => (int) pSQL($Shop->id_shop_group),
             '_IMS_COVER_' => (string) pSQL($ims_cover),
-            '__ID_CATEGORY_DEFAULT__' => (int) pSQL($id_category_default),
+            '__ID_CATEGORY_DEFAULT_FIELD__' => (string) pSQL($id_category_default),
             '__IS_ACTIVE__' => (string) pSQL($is_active),
             '__VISIBILITY__' => (string) pSQL($visibility),
             '__PRODUCT_IDS__' => (string) pSQL($product_ids),
