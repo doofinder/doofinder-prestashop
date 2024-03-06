@@ -555,11 +555,15 @@ class Doofinder extends Module
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'options' => [
                             'query' => [
+                                5 => ['id' => 5, 'name' => sprintf($this->l('Each %s minutes'), '5')],
+                                15 => ['id' => 15, 'name' => sprintf($this->l('Each %s minutes'), '15')],
+                                30 => ['id' => 30, 'name' => sprintf($this->l('Each %s minutes'), '30')],
+                                60 => ['id' => 60, 'name' => $this->l('Each hour')],
+                                120 => ['id' => 120, 'name' => sprintf($this->l('Each %s hours'), '2')],
+                                360 => ['id' => 360, 'name' => sprintf($this->l('Each %s hours'), '6')],
+                                720 => ['id' => 720, 'name' => sprintf($this->l('Each %s hours'), '12')],
+                                1440 => ['id' => 1440, 'name' => $this->l('Once a day')],
                                 0 => ['id' => 0, 'name' => $this->l('Disabled')],
-                                90 => ['id' => 90, 'name' => sprintf($this->l('Every %s minutes'), '90')],
-                                60 => ['id' => 60, 'name' => sprintf($this->l('Every %s minutes'), '60')],
-                                30 => ['id' => 30, 'name' => sprintf($this->l('Every %s minutes'), '30')],
-                                15 => ['id' => 15, 'name' => sprintf($this->l('Every %s minutes'), '15')],
                             ],
                             'id' => 'id',
                             'name' => 'name',
@@ -784,8 +788,8 @@ class Doofinder extends Module
             if ((bool) Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
                 $this->setSearchEnginesByConfig();
             }
-            if (Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') && (int) Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') < 15) {
-                Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 15);
+            if (Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') && (int) Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') < 5) {
+                Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 5);
             }
 
             $this->context->smarty->assign('text_data_changed', $this->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'));
