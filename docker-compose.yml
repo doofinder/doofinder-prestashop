@@ -11,7 +11,7 @@ services:
       MYSQL_PASSWORD: prestashop
       MYSQL_ROOT_PASSWORD: prestashop
     ports:
-      - 3308:3306
+      - 3311:3306
     container_name: local-prestashop-mysql
 
   prestashop:
@@ -19,7 +19,7 @@ services:
       - db
     image: prestashop/prestashop:1.7
     ports:
-      - 9000:80
+      - 9011:80
       - 443:443
     environment:
       APACHE_RUN_USER: '#1000'

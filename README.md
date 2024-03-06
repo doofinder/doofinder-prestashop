@@ -7,8 +7,8 @@ Plugin that allows to configure the [Doofinder](http://www.doofinder.com) search
 For a local installation of a prestashop environment use `docker-compose up -d`. 
 This installation brings: 
 
-- **a mysql container** for the database (on port 3308)
-- **a prestashop container** (in which you can choose the version to install) on port 9000
+- **a mysql container** for the database (on port 3311)
+- **a prestashop container** (in which you can choose the version to install) on port 9011
 
 To choose the prestashop version, in the container image change:
 
@@ -16,7 +16,7 @@ To choose the prestashop version, in the container image change:
 - **prestashop/prestashop:1.7** for version 1.7
 - **prestashop/prestashop:latest** for the latest available version of prestashop
 
-You can now visit `localhost:9000` to start the prestashop installation
+You can now visit `localhost:9011` to start the prestashop installation
 To install prestashop, follow the steps in the wizard.
 Notice that when asked to configure the database connection you should use the following fields as are defined in the `docker-compose.yml`
 - url: `local-prestashop-mysql`
