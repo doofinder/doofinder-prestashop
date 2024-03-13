@@ -45,7 +45,9 @@
         cartToken        : "{$static_token|escape:'htmlall':'UTF-8'}",
         productID        : checkIfCartItemHasVariation(event.detail) ? event.detail.grouping_id : event.detail.item_id,
         customizationID  : checkIfCartItemHasVariation(event.detail) ? sanitizeVariationID(event.detail.item_id) : 0,   /* If there are no combinations, the value will be 0 */
-        cuantity         : event.detail.amount,
+        quantity         : event.detail.amount,
+        statusPromise    : event.detail.statusPromise,
+        itemLink         : event.detail.link
       });
     });
   </script>
