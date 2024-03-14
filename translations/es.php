@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Agregue un motor de búsqueda inteligente a su comercio electrónico en 5 minutos y sin programación';
 $_MODULE['<{doofinder}prestashop>doofinder_e499922a91899a55af0659f1f4772e6a'] = '¿Estás seguro? Esto no cancelará tu cuenta con Doofinder';
