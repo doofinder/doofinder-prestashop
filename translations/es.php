@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Agregue un motor de búsqueda inteligente a su comercio electrónico en 5 minutos y sin programación';
 $_MODULE['<{doofinder}prestashop>doofinder_e499922a91899a55af0659f1f4772e6a'] = '¿Estás seguro? Esto no cancelará tu cuenta con Doofinder';
@@ -44,7 +44,7 @@ $_MODULE['<{doofinder}prestashop>doofinder_fcea235fdf24a526070153f5b60355f4'] = 
 $_MODULE['<{doofinder}prestashop>doofinder_2378c5bcb7b183304da2a2b94262f024'] = 'Lanzar reindexación';
 $_MODULE['<{doofinder}prestashop>doofinder_039b452cd9646bf1a60dd09146311ee7'] = 'La configuración se guardó correctamente.';
 $_MODULE['<{doofinder}prestashop>doofinder_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Activado';
-$_MODULE['<{doofinder}prestashop>doofinder_a2a597c8d95368f54daeda1af4e06d87'] = 'You cannot manage Doofinder from a \'All Shops\' or a \'Group Shop\' context, select directly the shop you want to edit	';
+$_MODULE['<{doofinder}prestashop>doofinder_a2a597c8d95368f54daeda1af4e06d87'] = 'No puedes gestionar Doofinder desde un contexto de « Todas las tiendas » o « Grupo de tiendas », selecciona directamente la tienda que deseas editar.';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_08c1cf7707bb72744cd07192c8580580'] = 'URLs de los feeds para usar en el Dashboard de Doofinder';
 $_MODULE['<{doofinder}prestashop>feed_url_partial_tab_c2052eaf6f39b73a2c74240459fc2615'] = 'URL del feed de datos para';
 $_MODULE['<{doofinder}prestashop>support_tab_4c1fee9a2c61bba0f4bbcab7c99948de'] = '¿Necesitas ayuda para configurar tu motor de búsqueda?';
