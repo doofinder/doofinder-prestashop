@@ -4,7 +4,7 @@ services:
   db:
     image: mysql:5.7
     volumes:
-      - data:/var/lib/mysql
+      - prestashop-db:/var/lib/mysql
     environment:
       MYSQL_DATABASE: prestashop
       MYSQL_USER: prestashop
