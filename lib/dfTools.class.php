@@ -461,6 +461,7 @@ class DfTools
         $Shop = new Shop($id_shop);
 
         $isbn = '';
+        $isbn_pa = '';
         if (dfTools::versionGte('1.7.0.0')) {
             $isbn = 'p.isbn,';
             if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
@@ -1039,6 +1040,7 @@ class DfTools
         $text = trim($text);
         $text = preg_replace("/\r|\n/", '', $text);
         $text = explode('?', $text);
+        $text = str_replace(TXT_SEPARATOR, '%7C', $text);
 
         $baseUrl = [];
         foreach (explode('/', $text[0]) as $part) {
@@ -1080,12 +1082,12 @@ class DfTools
         }
 
         $text = preg_replace('/[^\P{C}]+/u', ' ', $text);
-        $text = str_replace(TXT_SEPARATOR, '-', $text);
         $text = str_replace(["\t", "\r", "\n"], ' ', $text);
         $text = self::stripHtml($text);
         $text = preg_replace('/\s+/', ' ', $text);
         $text = trim($text);
         $text = preg_replace('/^["\']+/', '', $text); // remove first quotes
+        $text = str_replace(TXT_SEPARATOR, '&#124;', $text);
 
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
