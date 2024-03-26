@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 /*
  * Accepted parameters:
@@ -30,10 +33,6 @@ if (function_exists('set_time_limit')) {
 require_once dirname(__FILE__) . '/../../../config/config.inc.php';
 require_once dirname(__FILE__) . '/../../../init.php';
 require_once dirname(__FILE__) . '/../doofinder.php';
-
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
 
 dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
