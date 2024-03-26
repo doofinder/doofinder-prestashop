@@ -1082,13 +1082,12 @@ class DfTools
         }
 
         $text = preg_replace('/[^\P{C}]+/u', ' ', $text);
-        $text = str_replace(TXT_SEPARATOR, '%7C', $text);
         $text = str_replace(["\t", "\r", "\n"], ' ', $text);
         $text = self::stripHtml($text);
         $text = preg_replace('/\s+/', ' ', $text);
         $text = trim($text);
         $text = preg_replace('/^["\']+/', '', $text); // remove first quotes
-
+        $text = str_replace(TXT_SEPARATOR, "&#124;", $text);
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
 
