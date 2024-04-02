@@ -30,6 +30,7 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./:/var/www/html/modules/doofinder
+      - ./html/ignore-folder-html-loop:/var/www/html/modules/doofinder/html
     container_name: local-web-prestashop
 volumes:
-  data:
+  prestashop-db:
