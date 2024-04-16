@@ -1402,7 +1402,7 @@ class Doofinder extends Module
             $product_pool_attributes = [];
             $product_pool_ids = [];
             foreach ($dfResultsArray as $entry) {
-                if (in_array($entry['type'], array("product", "products"))) {
+                if (in_array($entry['type'], ['product', 'products'])) {
                     if (strpos($entry['id'], 'VAR-') === false) {
                         $product_pool_ids[] = (int) pSQL($entry['id']);
                     } else {
