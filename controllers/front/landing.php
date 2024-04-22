@@ -192,7 +192,8 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
     private function getApiCall($name, $hashid)
     {
-        $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
+        $apikey = explode('-', Configuration::get('DF_API_KEY'));
+        $apikey = end($apikey);
         $region = Configuration::get('DF_REGION');
 
         $api = new DoofinderApiLanding($hashid, $apikey, $region);
