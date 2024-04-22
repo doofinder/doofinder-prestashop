@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.27';
+    const VERSION = '4.7.28';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.27';
+        $this->version = '4.7.28';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1402,7 +1402,8 @@ class Doofinder extends Module
             $product_pool_attributes = [];
             $product_pool_ids = [];
             foreach ($dfResultsArray as $entry) {
-                if ($entry['type'] == 'product') {
+                // For unknown reasons, it can sometimes be defined as 'products' in plural
+                if (in_array($entry['type'], ['product', 'products'])) {
                     if (strpos($entry['id'], 'VAR-') === false) {
                         $product_pool_ids[] = (int) pSQL($entry['id']);
                     } else {
@@ -1840,11 +1841,14 @@ class Doofinder extends Module
      */
     public function getLanguageIdByLocale($locale)
     {
+        $sanitized_locale = pSQL(strtolower($locale));
+
         return Db::getInstance()
             ->getValue(
                 'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
-                WHERE `locale` = \'' . pSQL(strtolower($locale)) . '\'
-                OR `language_code` = \'' . pSQL(strtolower($locale)) . '\''
+                WHERE `locale` = \'' . $sanitized_locale . '\'
+                OR `language_code` = \'' . $sanitized_locale . '\'
+                OR `iso_code` = \'' . $sanitized_locale . '\''
             );
     }
 
