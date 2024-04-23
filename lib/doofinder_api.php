@@ -64,20 +64,13 @@ class DoofinderApi
      *                             -'apiVersion' (default: '4')=> the api of the search server to query
      *                             -'restrictedRequest'(default: $_REQUEST):  =>restrict request object
      *                             to look for params when unserializing. either 'get' or 'post'
-     *
-     * @throws DoofinderException if $hashid is not a md5 hash or api is no 4, 3.0 or 1.0
      */
     public function __construct($hashid, $api_key, $fromParams = false, $init_options = [])
     {
         $zone_key_array = explode('-', $api_key);
-
-        if (2 === count($zone_key_array)) {
-            $this->api_key = $zone_key_array[1];
-            $this->zone = $zone_key_array[0];
-            $this->url = 'https://' . $this->zone . self::URL_SUFFIX;
-        } else {
-            throw new DoofinderException('API Key is no properly set.');
-        }
+        $this->api_key = end($zone_key_array);
+        $this->zone = Configuration::get('DF_REGION');
+        $this->url = 'https://' . $this->zone . self::URL_SUFFIX;
 
         if (array_key_exists('prefix', $init_options)) {
             $this->paramsPrefix = $init_options['prefix'];

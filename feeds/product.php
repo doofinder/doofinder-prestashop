@@ -30,8 +30,16 @@ if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
 }
 
-require_once dirname(__FILE__) . '/../../../config/config.inc.php';
-require_once dirname(__FILE__) . '/../../../init.php';
+$root_path = dirname(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))));
+$config_file_path = $root_path . '/config/config.inc.php';
+if (file_exists($config_file_path)) {
+    require_once $config_file_path;
+    require_once $root_path . '/init.php';
+} else {
+    require_once dirname(__FILE__) . '/../../../config/config.inc.php';
+    require_once dirname(__FILE__) . '/../../../init.php';
+}
+
 require_once dirname(__FILE__) . '/../doofinder.php';
 
 dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
