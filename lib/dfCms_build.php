@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 if (!class_exists('dfTools')) {
-    require_once dirname(__FILE__) . '/dfTools.class.php';
+    require_once 'dfTools.class.php';
 }
 
 if (!defined('_PS_VERSION_')) {

@@ -614,5 +614,5 @@ class DoofinderApi
     }
 }
 
-include_once dirname(__FILE__) . '/DoofinderResults.php';
-include_once dirname(__FILE__) . '/DoofinderException.php';
+include_once 'DoofinderResults.php';
+include_once 'DoofinderException.php';

@@ -35,12 +35,12 @@ $config_file_path = $root_path . '/config/config.inc.php';
 if (file_exists($config_file_path)) {
     require_once $config_file_path;
     require_once $root_path . '/init.php';
+    require_once dirname(dirname($_SERVER['SCRIPT_FILENAME'])) . '/doofinder.php';
 } else {
     require_once dirname(__FILE__) . '/../../../config/config.inc.php';
     require_once dirname(__FILE__) . '/../../../init.php';
+    require_once dirname(__FILE__) . '/../doofinder.php';
 }
-
-require_once dirname(__FILE__) . '/../doofinder.php';
 
 dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
@@ -169,7 +169,7 @@ if ($debug) {
 }
 
 if ($cfg_debug) {
-    error_log("Starting feed.\n", 3, dirname(__FILE__) . '/doofinder.log');
+    error_log("Starting feed.\n", 3, 'doofinder.log');
 }
 
 // OUTPUT

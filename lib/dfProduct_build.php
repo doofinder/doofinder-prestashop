@@ -17,7 +17,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 if (!class_exists('dfTools')) {
-    require_once dirname(__FILE__) . '/lib/dfTools.class.php';
+    require_once 'lib/dfTools.class.php';
 }
 
 class DfProductBuild
