@@ -20,11 +20,11 @@ $root_path = dirname(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))));
 $config_file_path = $root_path . '/config/config.inc.php';
 if (file_exists($config_file_path)) {
     require_once $config_file_path;
+    require_once dirname(dirname($_SERVER['SCRIPT_FILENAME'])) . '/lib/dfCategory_build.php';
 } else {
     require_once dirname(__FILE__) . '/../../../config/config.inc.php';
+    require_once dirname(__FILE__) . '/../lib/dfCms_build.php';
 }
-
-require_once dirname(__FILE__) . '/../lib/dfCms_build.php';
 
 if (!defined('_PS_VERSION_')) {
     exit;

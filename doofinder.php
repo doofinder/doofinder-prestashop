@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 if (!class_exists('dfTools')) {
-    require_once dirname(__FILE__) . '/lib/dfTools.class.php';
+    require_once 'lib/dfTools.class.php';
 }
 
 if (!defined('_PS_VERSION_')) {
@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.30';
+    const VERSION = '4.7.31';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.30';
+        $this->version = '4.7.31';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -825,6 +825,10 @@ class Doofinder extends Module
         if (empty($df_querySelector)) {
             $df_querySelector = '#search_query_top';
         }
+        $self_path = dirname($_SERVER['SCRIPT_FILENAME']);
+        if (!is_dir($self_path)) {
+            $self_path = dirname(__FILE__);
+        }
         $this->smarty->assign([
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => Tools::strtolower($lang),
@@ -833,7 +837,7 @@ class Doofinder extends Module
             'productLinks' => $this->productLinks,
             'search_engine_id' => $search_engine_id,
             'df_region' => $df_region,
-            'self' => dirname(__FILE__),
+            'self' => $self_path,
             'df_another_params' => $params,
             'installation_ID' => $installation_ID,
             'currency' => $currency,
@@ -890,7 +894,11 @@ class Doofinder extends Module
         $cssVS = (int) Configuration::get('DF_CSS_VS');
         $file = 'doofinder_custom_' . $this->context->shop->id . '_vs_' . $cssVS . '.css';
         if ($extraCSS) {
-            if (file_exists(dirname(__FILE__) . '/views/css/' . $file)) {
+            $file_path = dirname($_SERVER['SCRIPT_FILENAME']) . '/views/css/' . $file;
+            if (!file_exists($file_path)) {
+                $file_path = dirname(__FILE__) . '/views/css/' . $file;
+            }
+            if (file_exists($file_path)) {
                 $this->context->controller->addCSS(
                     $this->_path . 'views/css/' . $file,
                     'all'
@@ -1137,7 +1145,7 @@ class Doofinder extends Module
 
         if ($hashid) {
             if ($action == 'update') {
-                require_once dirname(__FILE__) . '/lib/dfProduct_build.php';
+                require_once 'lib/dfProduct_build.php';
                 $builder = new DfProductBuild($id_shop, $id_lang, $id_currency);
                 $builder->setProducts($products);
                 $payload = $builder->build();
@@ -1170,7 +1178,7 @@ class Doofinder extends Module
 
         if ($hashid) {
             if ($action == 'update') {
-                require_once dirname(__FILE__) . '/lib/dfCms_build.php';
+                require_once 'lib/dfCms_build.php';
 
                 $builder = new DfCmsBuild($id_shop, $id_lang);
                 $builder->setCmsPages($cms_pages);
@@ -1204,7 +1212,7 @@ class Doofinder extends Module
 
         if ($hashid) {
             if ($action == 'update') {
-                require_once dirname(__FILE__) . '/lib/dfCategory_build.php';
+                require_once 'lib/dfCategory_build.php';
 
                 $builder = new DfCategoryBuild($id_shop, $id_lang);
                 $builder->setCategories($categories);
@@ -1223,7 +1231,7 @@ class Doofinder extends Module
             return;
         }
 
-        require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
+        require_once 'lib/doofinder_api_items.php';
 
         $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
         $region = Configuration::get('DF_REGION');
@@ -1242,7 +1250,7 @@ class Doofinder extends Module
             return;
         }
 
-        require_once dirname(__FILE__) . '/lib/doofinder_api_items.php';
+        require_once 'lib/doofinder_api_items.php';
 
         $apikey = explode('-', Configuration::get('DF_API_KEY'))[1];
         $region = Configuration::get('DF_REGION');
@@ -1257,7 +1265,7 @@ class Doofinder extends Module
 
     private function indexApiInvokeReindexing()
     {
-        require_once dirname(__FILE__) . '/lib/doofinder_api_index.php';
+        require_once 'lib/doofinder_api_index.php';
 
         $region = Configuration::get('DF_REGION');
         $api_key = Configuration::get('DF_API_KEY');
@@ -1282,7 +1290,7 @@ class Doofinder extends Module
     public function testDoofinderApi($onlyOneLang = false)
     {
         if (!class_exists('DoofinderApi')) {
-            include_once dirname(__FILE__) . '/lib/doofinder_api.php';
+            include_once 'lib/doofinder_api.php';
         }
         $result = false;
         $messages = '';
@@ -1373,7 +1381,7 @@ class Doofinder extends Module
             $fail = false;
             try {
                 if (!class_exists('DoofinderApi')) {
-                    include_once dirname(__FILE__) . '/lib/doofinder_api.php';
+                    include_once 'lib/doofinder_api.php';
                 }
                 $df = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
                 $queryParams = [
@@ -1943,9 +1951,12 @@ class Doofinder extends Module
 
     private function debug($message)
     {
-        $debug = Configuration::get('DF_DEBUG', null);
+        $current_path = dirname($_SERVER['SCRIPT_FILENAME']);
+        if (!is_dir($current_path)) {
+            $current_path = dirname(__FILE__);
+        }
         if (isset($debug) && $debug) {
-            error_log("$message\n", 3, dirname(__FILE__) . '/doofinder.log');
+            error_log("$message\n", 3, $current_path . '/doofinder.log');
         }
     }
 

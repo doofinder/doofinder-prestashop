@@ -26,15 +26,15 @@ if (!defined('_PS_VERSION_')) {
 
 switch (Tools::getValue('type')) {
     case 'category':
-        require dirname(__FILE__) . '/feeds/category.php';
+        require 'feeds/category.php';
         break;
 
     case 'page':
-        require dirname(__FILE__) . '/feeds/cms.php';
+        require 'feeds/cms.php';
         break;
 
     case 'product':
     default:
-        require dirname(__FILE__) . '/feeds/product.php';
+        require 'feeds/product.php';
         break;
 }
