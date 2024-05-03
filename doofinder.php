@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.7.31';
+    const VERSION = '4.7.32';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.7.31';
+        $this->version = '4.7.32';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -1689,8 +1689,11 @@ class Doofinder extends Module
         ];
 
         foreach ($languages as $lang) {
+            if ($lang['active'] == 0) {
+                continue;
+            }
             foreach ($currencies as $cur) {
-                if ($cur['deleted'] == 1) {
+                if ($cur['deleted'] == 1 || $cur['active'] == 0) {
                     continue;
                 }
                 $ciso = $cur['iso_code'];
