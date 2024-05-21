@@ -18,7 +18,7 @@ let doofinderManageCart = (cartOptions) => {
 
     let id_product_attribute;
     if (cartOptions.productID.includes('VAR-')) {
-        id_product_attribute = entry.id.replace('VAR-', '');
+        id_product_attribute = cartOptions.productID.replace('VAR-', '');
     } else {
         id_product_attribute = cartOptions.productID;
     }
