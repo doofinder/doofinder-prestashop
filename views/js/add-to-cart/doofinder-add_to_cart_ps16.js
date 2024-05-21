@@ -15,6 +15,8 @@
 //implementation of "add to cart" functionality for prestashop 1.6.x
 
 let doofinderManageCart = (cartOptions) => {
+
+    let id_product_attribute;
     if (cartOptions.productID.includes('VAR-')) {
         id_product_attribute = entry.id.replace('VAR-', '');
     } else {

@@ -50,6 +50,7 @@ let dfAddToCart = (cartOptions) => {
         value   : cartOptions.customizationID
     });
 
+    let id_product_attribute;
     if (cartOptions.productID.includes('VAR-')) {
         id_product_attribute = entry.id.replace('VAR-', '');
     } else {
