@@ -15,5 +15,11 @@
 //implementation of "add to cart" functionality for prestashop 1.6.x
 
 let doofinderManageCart = (cartOptions) => {
-    ajaxCart.add(cartOptions.productID, cartOptions.customizationID, undefined, undefined, cartOptions.quantity);
+    if (cartOptions.productID.includes('VAR-')) {
+        id_product_attribute = entry.id.replace('VAR-', '');
+    } else {
+        id_product_attribute = cartOptions.productID;
+    }
+
+    ajaxCart.add(id_product_attribute, cartOptions.customizationID, undefined, undefined, cartOptions.quantity);
 }

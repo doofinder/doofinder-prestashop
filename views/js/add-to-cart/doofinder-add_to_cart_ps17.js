@@ -50,11 +50,17 @@ let dfAddToCart = (cartOptions) => {
         value   : cartOptions.customizationID
     });
 
+    if (cartOptions.productID.includes('VAR-')) {
+        id_product_attribute = entry.id.replace('VAR-', '');
+    } else {
+        id_product_attribute = cartOptions.productID;
+    }
+
     let productInput = document.createElement("input");
     Object.assign(productInput, {
         type    : "hidden",
         name    : "id_product",
-        value   : cartOptions.productID
+        value   : id_product_attribute
     });
 
     let tokenInput = document.createElement("input");
