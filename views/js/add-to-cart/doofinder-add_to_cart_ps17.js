@@ -23,6 +23,17 @@ class DoofinderAddToCartError extends Error {
 //implementation of "add to cart" functionality for prestashop 1.7.x
 
 let dfAddToCart = (cartOptions) => {
+
+    let id_product_cart;
+    let id_customization;
+    if (cartOptions.productID.includes('VAR-')) {
+        id_product_cart = cartOptions.group_id;
+        id_customization = cartOptions.productID.replace('VAR-', ''); 
+    } else {
+        id_product_cart = cartOptions.productID;
+        id_customization = cartOptions.customizationID;
+    }
+
     /**
      * 1º create the necessary form to add to cart with the required inputs.
      * (the "name" attribute of the inputs is necessary to trigger the event that prestashop uses natively
@@ -47,21 +58,14 @@ let dfAddToCart = (cartOptions) => {
     Object.assign(productAttributeInput, {
         type    : "hidden",
         name    : "id_product_attribute",
-        value   : cartOptions.customizationID
+        value   : id_customization
     });
-
-    let id_product_attribute;
-    if (cartOptions.productID.includes('VAR-')) {
-        id_product_attribute = cartOptions.productID.replace('VAR-', '');
-    } else {
-        id_product_attribute = cartOptions.productID;
-    }
 
     let productInput = document.createElement("input");
     Object.assign(productInput, {
         type    : "hidden",
         name    : "id_product",
-        value   : id_product_attribute
+        value   : id_product_cart
     });
 
     let tokenInput = document.createElement("input");
@@ -87,6 +91,7 @@ let dfAddToCart = (cartOptions) => {
     document.body.appendChild(form);
 
     if (typeof prestashop !== 'undefined' && typeof cartOptions.statusPromise !== 'undefined') {
+
         // It's triggered everytime the cart is updated.
         prestashop.on('updateCart', function (event) {
             // This should be trigger only if the cart has been updated from the layer. Otherwise, the statusPromise will be undefined.

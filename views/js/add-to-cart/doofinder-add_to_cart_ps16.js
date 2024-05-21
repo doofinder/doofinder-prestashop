@@ -16,12 +16,15 @@
 
 let doofinderManageCart = (cartOptions) => {
 
-    let id_product_attribute;
+    let id_product_cart;
+    let id_customization;
     if (cartOptions.productID.includes('VAR-')) {
-        id_product_attribute = cartOptions.productID.replace('VAR-', '');
+        id_product_cart = cartOptions.group_id;
+        id_customization = cartOptions.productID.replace('VAR-', ''); 
     } else {
-        id_product_attribute = cartOptions.productID;
+        id_product_cart = cartOptions.productID;
+        id_customization = cartOptions.customizationID;
     }
 
-    ajaxCart.add(id_product_attribute, cartOptions.customizationID, undefined, undefined, cartOptions.quantity);
+    ajaxCart.add(id_product_cart, id_customization, undefined, undefined, cartOptions.quantity);
 }

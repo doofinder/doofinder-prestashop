@@ -47,7 +47,8 @@
         customizationID  : checkIfCartItemHasVariation(event.detail) ? sanitizeVariationID(event.detail.item_id) : 0,   /* If there are no combinations, the value will be 0 */
         quantity         : event.detail.amount,
         statusPromise    : event.detail.statusPromise,
-        itemLink         : event.detail.link
+        itemLink         : event.detail.link,
+        group_id         : event.detail.group_id
       });
     });
   </script>
