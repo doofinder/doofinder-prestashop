@@ -1393,11 +1393,13 @@ class DfTools
             if (key_exists($product_id, $min_prices_by_product_id)) {
                 $current_min_prices = $min_prices_by_product_id[$product_id];
 
-                // Even though, in order to track the minimum, we can only focus on
-                // the sales price, we still need both prices of the variant
-                // in order to properly and consistenly populate the price of
-                // the parent to show the proper price vs sale_price when searching
-                // in the layer
+                /*
+                Even though, in order to track the minimum, we can only focus on
+                the sales price, we still need both prices of the variant
+                in order to properly and consistenly populate the price of
+                the parent to show the proper price vs sale_price when searching
+                in the layer
+                */
                 if ($variant_onsale_price < $current_min_prices['onsale_price']) {
                     $min_prices_by_product_id[$product_id]['price'] = $variant_price;
                     $min_prices_by_product_id[$product_id]['onsale_price'] = $variant_onsale_price;
@@ -1412,7 +1414,7 @@ class DfTools
 
     public static function is_parent($product)
     {
-        return isset($product['id_product_attribute']) && (int) $product['id_product_attribute'] === 0;
+        return isset($product['id_product_attribute']) && is_numeric($product['id_product_attribute']) && (int) $product['id_product_attribute'] === 0;
     }
 
     public static function get_price($product_id, $include_taxes, $variant_id = null)
