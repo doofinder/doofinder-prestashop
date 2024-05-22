@@ -24,14 +24,14 @@ class DoofinderAddToCartError extends Error {
 
 let dfAddToCart = (cartOptions) => {
 
-    let id_product_cart;
-    let id_customization;
+    let IdProductCart;
+    let IdCustomization;
     if (cartOptions.productID.includes('VAR-')) {
-        id_product_cart = cartOptions.group_id;
-        id_customization = cartOptions.productID.replace('VAR-', ''); 
+        IdProductCart = cartOptions.group_id;
+        IdCustomization = cartOptions.productID.replace('VAR-', ''); 
     } else {
-        id_product_cart = cartOptions.productID;
-        id_customization = cartOptions.customizationID;
+        IdProductCart = cartOptions.productID;
+        IdCustomization = cartOptions.customizationID;
     }
 
     /**
@@ -58,14 +58,14 @@ let dfAddToCart = (cartOptions) => {
     Object.assign(productAttributeInput, {
         type    : "hidden",
         name    : "id_product_attribute",
-        value   : id_customization
+        value   : IdCustomization
     });
 
     let productInput = document.createElement("input");
     Object.assign(productInput, {
         type    : "hidden",
         name    : "id_product",
-        value   : id_product_cart
+        value   : IdProductCart
     });
 
     let tokenInput = document.createElement("input");
