@@ -1395,8 +1395,8 @@ class DfTools
 
                 /*
                 Even though, in order to track the minimum, we can only focus on
-                the sales price, we still need both prices of the variant
-                in order to properly and consistenly populate the price of
+                the sale price, we still need both prices of the variant
+                in order to properly and consistently populate the price of
                 the parent to show the proper price vs sale_price when searching
                 in the layer
                 */
