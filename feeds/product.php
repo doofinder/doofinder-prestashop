@@ -277,6 +277,10 @@ $rows = dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $
 if (!empty($extra_rows)) {
     $rows = array_merge_by_id_product($rows, $extra_rows);
 }
+
+// In case there is no need to display prices, avoid calculating the mins by variant
+$min_prices_by_product_id = $cfg_display_prices ? dfTools::get_min_variant_prices($rows, $cfg_prices_w_taxes) : [];
+
 foreach ($rows as $row) {
     if ((int) $row['id_product'] > 0) {
         // ID, TITLE, LINK
@@ -473,24 +477,14 @@ foreach ($rows as $row) {
         echo dfTools::cleanString($row['stock_quantity']);
 
         // PRODUCT PRICE & ON SALE PRICE
+        $product_id = $row['id_product'];
+
         if ($cfg_display_prices && $cfg_product_variations !== 1) {
             echo TXT_SEPARATOR;
 
-            $product_price = Product::getPriceStatic(
-                $row['id_product'],
-                $cfg_prices_w_taxes,
-                null,
-                6,
-                null,
-                false,
-                false
-            );
-            $onsale_price = Product::getPriceStatic(
-                $row['id_product'],
-                $cfg_prices_w_taxes,
-                null,
-                6
-            );
+            $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes);
+            $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes);
+
             if (!$row['show_price']) {
                 $product_price = false;
                 $onsale_price = false;
@@ -503,21 +497,22 @@ foreach ($rows as $row) {
                 ? Tools::convertPrice($onsale_price, $currency) : '';
         } elseif ($cfg_display_prices && $cfg_product_variations == 1) {
             echo TXT_SEPARATOR;
-            $product_price = Product::getPriceStatic(
-                $row['id_product'],
-                $cfg_prices_w_taxes,
-                $row['id_product_attribute'],
-                6,
-                null,
-                false,
-                false
-            );
-            $onsale_price = Product::getPriceStatic(
-                $row['id_product'],
-                $cfg_prices_w_taxes,
-                $row['id_product_attribute'],
-                6
-            );
+
+            $variant_id = $row['id_product_attribute'];
+
+            $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes, $variant_id);
+            $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes, $variant_id);
+
+            // The parent product should have as price the lowest ones of the
+            // variants (combinations) if there are any
+            if (dfTools::is_parent($row) && key_exists($product_id, $min_prices_by_product_id)) {
+                $min_variant_prices = $min_prices_by_product_id[$product_id];
+
+                if ($min_variant_prices['onsale_price'] < $onsale_price) {
+                    $product_price = $min_variant_prices['price'];
+                    $onsale_price = $min_variant_prices['onsale_price'];
+                }
+            }
             if (!$row['show_price']) {
                 $product_price = false;
                 $onsale_price = false;
