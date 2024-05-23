@@ -50,7 +50,6 @@
 
     doofinderApp('config', 'currency', {$currency|escape:'htmlall':'UTF-8'});
     doofinderApp('config', 'language', {$lang|escape:'htmlall':'UTF-8'});
-    doofinderApp('config', 'zone', {$df_region|escape:'htmlall':'UTF-8'});
   </script>
 
   <script
