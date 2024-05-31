@@ -951,7 +951,7 @@ class DfTools
         return array_column($result, 'id_attribute_group');
     }
 
-    public function getCategories($idLang, $active = true)
+    public static function getCategories($idLang, $active = true)
     {
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
             '
@@ -968,7 +968,7 @@ class DfTools
         return array_column($result, 'id_category');
     }
 
-    public function getCmsPages($idLang, $id_shop, $active = true)
+    public static function getCmsPages($idLang, $id_shop, $active = true)
     {
         $result = CMS::getCMSPages($idLang, null, $active, $id_shop);
 
