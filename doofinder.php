@@ -1686,6 +1686,7 @@ class Doofinder extends Module
             'primary_language' => $primary_lang->language_code,
             'site_url' => $shop_url,
             'search_engines' => [],
+            'plugin_version' => $this->version
         ];
 
         foreach ($languages as $lang) {
