@@ -310,10 +310,10 @@ class DfProductBuild
         foreach (dfTools::getFeaturesForProduct($product['id_product'], $this->id_lang, $keys) as $key => $values) {
             if (count($values) > 1) {
                 foreach ($values as $value) {
-                    $features[strtolower($key)][] = dfTools::cleanString($value);
+                    $features[$this->slugify($key)][] = dfTools::cleanString($value);
                 }
             } else {
-                $features[strtolower($key)] = dfTools::cleanString($values[0]);
+                $features[$this->slugify($key)] = dfTools::cleanString($values[0]);
             }
         }
 
