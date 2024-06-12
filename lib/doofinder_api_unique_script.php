@@ -34,7 +34,7 @@ class DoofinderApiUniqueScript
      * Make a request to the API to SET unique script flag to notify the migration of this customer
      *
      * This function does not require any parameters.
-     * 
+     *
      * @return mixed The response from the API request
      */
     public function set_unique_script_flag()
