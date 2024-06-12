@@ -35,6 +35,7 @@ class DoofinderApiUniqueScript
      *
      * This function does not require any parameters.
      * 
+     * 
      * @return mixed The response from the API request
      */
     public function set_unique_script_flag()

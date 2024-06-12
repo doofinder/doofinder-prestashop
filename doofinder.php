@@ -2044,7 +2044,6 @@ class Doofinder extends Module
     private function checkAndSetScriptFlag()
     {
         if (Configuration::get('DF_UNIQUE_SCRIPT') === false && class_exists('DoofinderApiUniqueScript')) {
-
             $installtaion_id = Configuration::get('DF_INSTALLATION_ID');
             $region = Configuration::get('DF_REGION');
             $api_key = Configuration::get('DF_API_KEY');
