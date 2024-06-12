@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -30,15 +31,15 @@ class DoofinderApiUniqueScript
     }
 
     /**
-    * Make a request to the API to SET unique script flag to notify the migration of this customer
-    *
-    * This function does not require any parameters.
-    * 
-    * @return mixed The response from the API request
-    */
+     * Make a request to the API to SET unique script flag to notify the migration of this customer
+     *
+     * This function does not require any parameters.
+     * 
+     * @return mixed The response from the API request
+     */
     public function set_unique_script_flag()
     {
-        $endpoint = '/prestashop/migrate-unique-script' ;
+        $endpoint = '/prestashop/migrate-unique-script';
 
         $url = $this->api_url . $endpoint;
 
@@ -63,7 +64,6 @@ class DoofinderApiUniqueScript
             'application/json',
             ['Authorization: Token ' . $this->$apikey]
         );
-
 
         return json_decode($response->response, true);
     }

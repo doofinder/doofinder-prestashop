@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -2054,12 +2055,12 @@ class Doofinder extends Module
 
             if (!$response) {
                 Configuration::updateValue('DF_UNIQUE_SCRIPT', false);
-    
+
                 return false;
             }
 
             Configuration::updateValue('DF_UNIQUE_SCRIPT', true);
-    
+
             return true;
         }
     }
