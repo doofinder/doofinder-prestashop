@@ -32,7 +32,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.8.1';
+    const VERSION = '4.8.2';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +40,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.8.1';
+        $this->version = '4.8.2';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -302,6 +302,8 @@ class Doofinder extends Module
         }
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_footer.tpl');
+
+        $this->checkAndSetScriptFlag();
 
         return $output;
     }
@@ -2036,5 +2038,29 @@ class Doofinder extends Module
     private function getInstallUrl($region)
     {
         return str_replace('{region}', $region, 'https://{region}-plugins.doofinder.com/install');
+    }
+
+    private function checkAndSetScriptFlag()
+    {
+        if (Configuration::get('DF_UNIQUE_SCRIPT') === false && class_exists('DoofinderApiUniqueScript')) {
+
+            $installtaion_id = Configuration::get('DF_INSTALLATION_ID');
+            $region = Configuration::get('DF_REGION');
+            $api_key = Configuration::get('DF_API_KEY');
+
+            $apiModule = new DoofinderApiUniqueScript($installtaion_id, $region, $api_key);
+
+            $response = $apiModule->set_unique_script_flag();
+
+            if (!$response) {
+                Configuration::updateValue('DF_UNIQUE_SCRIPT', false);
+    
+                return false;
+            }
+
+            Configuration::updateValue('DF_UNIQUE_SCRIPT', true);
+    
+            return true;
+        }
     }
 }
