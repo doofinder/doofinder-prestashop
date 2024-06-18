@@ -2038,5 +2038,4 @@ class Doofinder extends Module
     {
         return str_replace('{region}', $region, 'https://{region}-plugins.doofinder.com/install');
     }
-
 }

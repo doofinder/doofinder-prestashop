@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 2007-2022 PrestaShop SA and Contributors
  *
@@ -36,5 +37,5 @@ function upgrade_module_4_8_2($module)
     $apiModule = new DoofinderApiUniqueScript($installtaionId, $region, $apiKey);
     $apiModule->set_unique_script_flag();
 
-    return Configuration::updateValue('DF_UNIQUE_SCRIPT', true);  
+    return Configuration::updateValue('DF_UNIQUE_SCRIPT', true);
 }
