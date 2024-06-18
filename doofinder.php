@@ -304,8 +304,6 @@ class Doofinder extends Module
 
         $output .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure_footer.tpl');
 
-        $this->checkAndSetScriptFlag();
-
         return $output;
     }
 
@@ -2041,26 +2039,4 @@ class Doofinder extends Module
         return str_replace('{region}', $region, 'https://{region}-plugins.doofinder.com/install');
     }
 
-    private function checkAndSetScriptFlag()
-    {
-        if (Configuration::get('DF_UNIQUE_SCRIPT') === false && class_exists('DoofinderApiUniqueScript')) {
-            $installtaion_id = Configuration::get('DF_INSTALLATION_ID');
-            $region = Configuration::get('DF_REGION');
-            $api_key = Configuration::get('DF_API_KEY');
-
-            $apiModule = new DoofinderApiUniqueScript($installtaion_id, $region, $api_key);
-
-            $response = $apiModule->set_unique_script_flag();
-
-            if (!$response) {
-                Configuration::updateValue('DF_UNIQUE_SCRIPT', false);
-
-                return false;
-            }
-
-            Configuration::updateValue('DF_UNIQUE_SCRIPT', true);
-
-            return true;
-        }
-    }
 }
