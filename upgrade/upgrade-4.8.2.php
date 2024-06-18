@@ -30,11 +30,11 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_4_8_2($module)
 {
-    $installtaionId = Configuration::get('DF_INSTALLATION_ID');
+    $installationId = Configuration::get('DF_INSTALLATION_ID');
     $region = Configuration::get('DF_REGION');
     $apiKey = Configuration::get('DF_API_KEY');
 
-    $apiModule = new DoofinderApiUniqueScript($installtaionId, $region, $apiKey);
+    $apiModule = new DoofinderApiUniqueScript($installationId, $region, $apiKey);
     $apiModule->set_unique_script_flag();
 
     return Configuration::updateValue('DF_UNIQUE_SCRIPT', true);

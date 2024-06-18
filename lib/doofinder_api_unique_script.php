@@ -23,9 +23,9 @@ const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiUniqueScript
 {
-    public function __construct($installtaionId, $region, $apiKey)
+    public function __construct($installationId, $region, $apiKey)
     {
-        $this->installtaionId = $installtaionId;
+        $this->installationId = $installationId;
         $this->api_key = $apiKey;
         $this->api_url = str_replace('{region}', $region, API_URL);
     }
@@ -51,7 +51,7 @@ class DoofinderApiUniqueScript
         $client = new EasyREST();
 
         $body = [
-            'installation_id' => $this->installtaionId,
+            'installation_id' => $this->installationId,
         ];
 
         $json_store_data = json_encode($body);
