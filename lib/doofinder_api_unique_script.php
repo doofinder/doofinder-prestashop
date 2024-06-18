@@ -62,7 +62,7 @@ class DoofinderApiUniqueScript
             false,
             false,
             'application/json',
-            ['Authorization: Token ' . $this->$apiKey]
+            ['Authorization: Token ' . $this->apiKey]
         );
 
         return json_decode($response->response, true);
