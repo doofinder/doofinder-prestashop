@@ -1379,6 +1379,8 @@ class DfTools
 
     public static function get_min_variant_prices($products, $include_taxes)
     {
+        $context = Context::getContext();
+
         $min_prices_by_product_id = [];
         foreach ($products as $product) {
             if (self::is_parent($product)) {
@@ -1403,9 +1405,12 @@ class DfTools
                 if ($variant_onsale_price < $current_min_prices['onsale_price']) {
                     $min_prices_by_product_id[$product_id]['price'] = $variant_price;
                     $min_prices_by_product_id[$product_id]['onsale_price'] = $variant_onsale_price;
+                    $min_prices_by_product_id[$product_id]['link'] = self::get_variant_url($product, $context);
                 }
             } else {
-                $min_prices_by_product_id[$product_id] = ['price' => $variant_price, 'onsale_price' => $variant_onsale_price];
+                $min_prices_by_product_id[$product_id] = ['price' => $variant_price,
+                    'onsale_price' => $variant_onsale_price,
+                    'link' => self::get_variant_url($product, $context)];
             }
         }
 
@@ -1437,6 +1442,24 @@ class DfTools
             $include_taxes,
             $variant_id,
             6
+        );
+    }
+
+    private static function get_variant_url($product, $context)
+    {
+        return self::cleanURL(
+            $context->link->getProductLink(
+                (int) $product['id_product'],
+                $product['link_rewrite'],
+                $product['cat_link_rew'],
+                $product['ean13'],
+                $lang->id,
+                $shop->id,
+                (int) $product['id_product_attribute'],
+                $cfg_mod_rewrite,
+                false,
+                true
+            )
         );
     }
 }

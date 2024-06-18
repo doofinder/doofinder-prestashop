@@ -279,9 +279,14 @@ if (!empty($extra_rows)) {
 }
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$min_prices_by_product_id = $cfg_display_prices ? dfTools::get_min_variant_prices($rows, $cfg_prices_w_taxes) : [];
+$min_price_variant_by_product_id = $cfg_display_prices ? dfTools::get_min_variant_prices($rows, $cfg_prices_w_taxes) : [];
 
 foreach ($rows as $row) {
+    $product_id = $row['id_product'];
+    $variant_id = $row['id_product_attribute'];
+    $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes, $variant_id);
+    $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes, $variant_id);
+
     if ((int) $row['id_product'] > 0) {
         // ID, TITLE, LINK
 
@@ -325,7 +330,8 @@ foreach ($rows as $row) {
             // TITLE
             $product_title = dfTools::cleanString($row['name']);
             echo $product_title . TXT_SEPARATOR;
-            echo dfTools::cleanURL(
+
+            $parent_url = dfTools::cleanURL(
                 $context->link->getProductLink(
                     (int) $row['id_product'],
                     $row['link_rewrite'],
@@ -336,7 +342,15 @@ foreach ($rows as $row) {
                     0,
                     $cfg_mod_rewrite
                 )
-            ) . TXT_SEPARATOR;
+            );
+
+            if (key_exists($product_id, $min_price_variant_by_product_id) && !empty($min_price_variant_by_product_id[$product_id])) {
+                $min_variant = $min_price_variant_by_product_id[$product_id];
+                echo $min_variant['onsale_price'] < $onsale_price ? $min_price_variant_by_product_id[$product_id]['link'] : $parent_url;
+            } else {
+                echo $parent_url;
+            }
+            echo TXT_SEPARATOR;
         }
 
         // DESCRIPTION
@@ -477,7 +491,6 @@ foreach ($rows as $row) {
         echo dfTools::cleanString($row['stock_quantity']);
 
         // PRODUCT PRICE & ON SALE PRICE
-        $product_id = $row['id_product'];
 
         if ($cfg_display_prices && $cfg_product_variations !== 1) {
             echo TXT_SEPARATOR;
@@ -497,20 +510,14 @@ foreach ($rows as $row) {
                 ? Tools::convertPrice($onsale_price, $currency) : '';
         } elseif ($cfg_display_prices && $cfg_product_variations == 1) {
             echo TXT_SEPARATOR;
-
-            $variant_id = $row['id_product_attribute'];
-
-            $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes, $variant_id);
-            $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes, $variant_id);
-
             // The parent product should have as price the lowest ones of the
             // variants (combinations) if there are any
-            if (dfTools::is_parent($row) && key_exists($product_id, $min_prices_by_product_id)) {
-                $min_variant_prices = $min_prices_by_product_id[$product_id];
+            if (dfTools::is_parent($row) && key_exists($product_id, $min_price_variant_by_product_id)) {
+                $min_variant = $min_price_variant_by_product_id[$product_id];
 
-                if ($min_variant_prices['onsale_price'] < $onsale_price) {
-                    $product_price = $min_variant_prices['price'];
-                    $onsale_price = $min_variant_prices['onsale_price'];
+                if ($min_variant['onsale_price'] < $onsale_price) {
+                    $product_price = $min_variant['price'];
+                    $onsale_price = $min_variant['onsale_price'];
                 }
             }
             if (!$row['show_price']) {
