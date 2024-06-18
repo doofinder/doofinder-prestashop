@@ -26,8 +26,8 @@ class DoofinderApiUniqueScript
     public function __construct($installationId, $region, $apiKey)
     {
         $this->installationId = $installationId;
-        $this->api_key = $apiKey;
-        $this->api_url = str_replace('{region}', $region, API_URL);
+        $this->apiKey = $apiKey;
+        $this->apiUrl = str_replace('{region}', $region, API_URL);
     }
 
     /**
@@ -41,7 +41,7 @@ class DoofinderApiUniqueScript
     {
         $endpoint = '/prestashop/migrate-unique-script';
 
-        $url = $this->api_url . $endpoint;
+        $url = $this->apiUrl . $endpoint;
 
         return $this->post($url);
     }
