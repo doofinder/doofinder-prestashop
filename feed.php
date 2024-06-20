@@ -14,7 +14,7 @@
  */
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $config_file_path = $root_path . '/config/config.inc.php';
-if (file_exists($config_file_path)) {
+if (@file_exists($config_file_path)) {
     require_once $config_file_path;
 } else {
     require_once dirname(__FILE__) . '/../../config/config.inc.php';
