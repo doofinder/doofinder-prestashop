@@ -4,23 +4,23 @@ services:
   db:
     image: mysql:5.7
     volumes:
-      - prestashop-db:/var/lib/mysql
+      - prestashop-8.1-db:/var/lib/mysql
     environment:
       MYSQL_DATABASE: prestashop
       MYSQL_USER: prestashop
       MYSQL_PASSWORD: prestashop
       MYSQL_ROOT_PASSWORD: prestashop
     ports:
-      - 3311:3306
-    container_name: local-prestashop-mysql
+      - 3313:3306
+    container_name: local-prestashop-8.1-mysql
 
   prestashop:
     depends_on:
       - db
-    image: prestashop/prestashop:1.7
+    image: prestashop/prestashop:latest
     ports:
-      - 9011:80
-      - 443:443
+      - 9012:80
+      - 9446:443
     environment:
       APACHE_RUN_USER: '#1000'
       APACHE_RUN_GROUP: '#1000'
@@ -31,6 +31,6 @@ services:
       - ./html:/var/www/html
       - ./:/var/www/html/modules/doofinder
       - ./html/ignore-folder-html-loop:/var/www/html/modules/doofinder/html
-    container_name: local-web-prestashop
+    container_name: local-web-prestashop-8.1
 volumes:
-  prestashop-db:
+  prestashop-8.1-db:

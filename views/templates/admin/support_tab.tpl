@@ -32,13 +32,13 @@
 			<div class="col-md-12">
 				<dl>
 					<dt>&middot; {l s='Understand how the product feed works to display results in the Doofinder search layer' mod='doofinder'}</dt>
-					<dd><a href="https://support.doofinder.com/getting-started/the-product-data-feed.html" target="_blank">Visitar página</a></dd>
+					<dd><a href="https://support.doofinder.com/managing-data/the-product-data-feed.html" target="_blank">Visitar página</a></dd>
 					
 					<dt>&middot; {l s='How to add information in the Doofinder search layer' mod='doofinder'}</dt>
 					<dd><a href="https://support.doofinder.com/layers/appearance.html" target="_blank">Visitar página</a></dd>
 					
 					<dt>&middot; {l s='How to configure the search layer filters' mod='doofinder'}</dt>
-					<dd><a href="https://support.doofinder.com/managing-results/facets-configuration" target="_blank">Visitar página</a></dd>
+					<dd><a href="https://support.doofinder.com/managing-results/filters-configuration" target="_blank">Visitar página</a></dd>
 
 					<dt>&middot; {l s='Learn the basics about Live Layer' mod='doofinder' mod='doofinder'}</dt>
 					<dd><a href="https://support.doofinder.com/layers/live-layer-basics.html" target="_blank">Visitar página</a></dd>
