@@ -1714,7 +1714,7 @@ class Doofinder extends Module
         $this->debug(print_r($store_data, true));
 
         $response = $client->post(
-            $this->getInstallUrl(Configuration::getGlobalValue('DF_REGION')),
+            $this->getInstallUrl(Configuration::get('DF_REGION')),
             $json_store_data,
             false,
             false,
