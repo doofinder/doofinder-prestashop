@@ -22,7 +22,6 @@ if (!defined('_PS_VERSION_')) {
  * - limit:      Max results in this request.
  * - offset:     Zero-based position to start getting results.
  * - language:   Language ISO code, like "es" or "en"
- * - currency:   Currency ISO code, like "EUR" or "GBP"
  * - taxes:      Boolean. Apply taxes to prices. Default true.
  * - prices:     Boolean. Display Prices. Default true.
  */
@@ -115,7 +114,7 @@ $lang = dfTools::getLanguageFromRequest();
 $context->language = $lang;
 $country = Configuration::get('PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
-$currency = dfTools::getCurrencyForLanguageFromRequest($lang);
+$currencies = Currency::getCurrenciesByIdShop($context->shop->id);
 
 $cfg_short_description = (dfTools::cfg(
     $shop->id,
@@ -198,8 +197,7 @@ if (dfTools::versionGte('1.7.0.0')) {
 $header[] = 'stock_quantity';
 
 if ($cfg_display_prices) {
-    $header[] = 'price';
-    $header[] = 'sale_price';
+    $header[] = 'prices';
 }
 
 if ($cfg_product_variations == 1) {
@@ -498,16 +496,18 @@ foreach ($rows as $row) {
             $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes);
             $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes);
 
-            if (!$row['show_price']) {
-                $product_price = false;
-                $onsale_price = false;
+            $prices = [];
+
+            if ($row['show_price']) {
+                foreach ($currencies as $currency) {
+                    if ($currency["deleted"] == 0 && $currency["active"] == 1) {
+                        $prices[$currency["iso_code"]]["price"] = Tools::convertPrice($product_price, $currency);
+                        $prices[$currency["iso_code"]]["sale_price"] = Tools::convertPrice($onsale_price, $currency);
+                    }
+                }
             }
-            echo ($product_price ? Tools::convertPrice(
-                $product_price,
-                $currency
-            ) : '') . TXT_SEPARATOR;
-            echo ($product_price && $onsale_price && $product_price != $onsale_price)
-                ? Tools::convertPrice($onsale_price, $currency) : '';
+
+            echo json_encode($prices) . TXT_SEPARATOR;
         } elseif ($cfg_display_prices && $cfg_product_variations == 1) {
             echo TXT_SEPARATOR;
             // The parent product should have as price the lowest ones of the
@@ -520,13 +520,19 @@ foreach ($rows as $row) {
                     $onsale_price = $min_variant['onsale_price'];
                 }
             }
-            if (!$row['show_price']) {
-                $product_price = false;
-                $onsale_price = false;
+
+            $prices = [];
+
+            if ($row['show_price']) {
+                foreach ($currencies as $currency) {
+                    if ($currency["deleted"] == 0 && $currency["active"] == 1) {
+                        $prices[$currency["iso_code"]]["price"] = Tools::convertPrice($product_price, $currency);
+                        $prices[$currency["iso_code"]]["sale_price"] = Tools::convertPrice($onsale_price, $currency);
+                    }
+                }
             }
-            echo ($product_price ? Tools::convertPrice($product_price, $currency) : '') . TXT_SEPARATOR;
-            echo ($product_price && $onsale_price && $product_price != $onsale_price) ?
-                Tools::convertPrice($onsale_price, $currency) : '';
+
+            echo json_encode($prices) . TXT_SEPARATOR;
         }
 
         if ($cfg_product_variations == 1) {

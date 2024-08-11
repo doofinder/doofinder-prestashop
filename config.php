@@ -62,6 +62,7 @@ $prices_with_taxes = (bool) Configuration::get('DF_GS_PRICES_USE_TAX');
 
 foreach (Language::getLanguages(true, $context->shop->id) as $lang) {
     $lang = Tools::strtoupper($lang['iso_code']);
+    //TODO: Is this still needed?
     $currency = dfTools::getCurrencyForLanguage($lang);
 
     $languages[] = $lang;

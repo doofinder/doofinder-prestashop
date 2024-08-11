@@ -1171,6 +1171,7 @@ class DfTools
      *
      * @return Currency
      */
+    //TODO: Is this still used?
     public static function getCurrencyForLanguage($code)
     {
         $optname = 'DF_GS_CURRENCY_' . strtoupper($code);
@@ -1256,6 +1257,7 @@ class DfTools
      *
      * @return string URL
      */
+    //TODO: Is this still needed?
     public static function getFeedURL($langIsoCode)
     {
         $currency = self::getCurrencyForLanguage($langIsoCode);

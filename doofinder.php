@@ -328,18 +328,16 @@ class Doofinder extends Module
      *
      * @param int $shop_id
      * @param int $language
-     * @param int $currency
      *
      * @return string
      */
-    protected function buildFeedUrl($shop_id, $language, $currency)
+    protected function buildFeedUrl($shop_id, $language)
     {
         $shop_url = $this->getShopURL($shop_id);
 
         return $shop_url . ltrim('modules/' . $this->name, DIRECTORY_SEPARATOR)
             . '/feed.php?'
-            . 'currency=' . Tools::strtoupper($currency)
-            . '&language=' . Tools::strtoupper($language)
+            . 'language=' . Tools::strtoupper($language)
             . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
     }
 
@@ -642,15 +640,11 @@ class Doofinder extends Module
     {
         $urls = [];
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            foreach (Currency::getCurrencies() as $cur) {
-                $currencyIso = Tools::strtoupper($cur['iso_code']);
-                $langIso = Tools::strtoupper($lang['iso_code']);
-                $urls[] = [
-                    'url' => $this->buildFeedUrl($this->context->shop->id, $langIso, $currencyIso),
-                    'lang' => $langIso,
-                    'currency' => $currencyIso,
-                ];
-            }
+            $langIso = Tools::strtoupper($lang['iso_code']);
+            $urls[] = [
+                'url' => $this->buildFeedUrl($this->context->shop->id, $langIso),
+                'lang' => $langIso
+            ];
         }
         $this->context->smarty->assign('df_feed_urls', $urls);
 
@@ -817,7 +811,7 @@ class Doofinder extends Module
     {
         $lang = Tools::strtoupper($this->context->language->language_code);
         $currency = Tools::strtoupper($this->context->currency->iso_code);
-        $search_engine_id = Configuration::get('DF_HASHID_' . $currency . '_' . $lang);
+        $search_engine_id = Configuration::get('DF_HASHID_' . $lang);
         $df_region = Configuration::get('DF_REGION');
         $script = Configuration::get('DOOFINDER_SCRIPT_' . $lang);
         $extra_css = Configuration::get('DF_EXTRA_CSS');
@@ -1076,17 +1070,14 @@ class Doofinder extends Module
         $this->setExecUpdateOnSave();
 
         $languages = Language::getLanguages(true, $id_shop);
-        $currencies = Currency::getCurrenciesByIdShop($id_shop);
 
         foreach (['product', 'cms', 'category'] as $type) {
             $items_update = $this->getItemsQueue($id_shop, $type, 'update');
             $items_delete = $this->getItemsQueue($id_shop, $type, 'delete');
 
             foreach ($languages as $language) {
-                foreach ($currencies as $currency) {
-                    $this->{'send' . $type . 'Api'}($items_update, $id_shop, $language['id_lang'], $currency['id_currency']);
-                    $this->{'send' . $type . 'Api'}($items_delete, $id_shop, $language['id_lang'], $currency['id_currency'], 'delete');
-                }
+                $this->{'send' . $type . 'Api'}($items_update, $id_shop, $language['id_lang']);
+                $this->{'send' . $type . 'Api'}($items_delete, $id_shop, $language['id_lang'], 'delete');
             }
         }
 
@@ -1130,23 +1121,22 @@ class Doofinder extends Module
      * @param array $products
      * @param int $id_shop
      * @param int $id_lang
-     * @param int $id_currency
      * @param string $action
      *
      * @return void
      */
-    public function sendProductApi($products, $id_shop, $id_lang, $id_currency, $action = 'update')
+    public function sendProductApi($products, $id_shop, $id_lang, $action = 'update')
     {
         if (empty($products)) {
             return;
         }
 
-        $hashid = $this->getHashId($id_lang, $id_currency);
+        $hashid = $this->getHashId($id_lang);
 
         if ($hashid) {
             if ($action == 'update') {
                 require_once 'lib/dfProduct_build.php';
-                $builder = new DfProductBuild($id_shop, $id_lang, $id_currency);
+                $builder = new DfProductBuild($id_shop, $id_lang);
                 $builder->setProducts($products);
                 $payload = $builder->build();
 
@@ -1163,18 +1153,17 @@ class Doofinder extends Module
      * @param array $cms_pages
      * @param int $id_shop
      * @param int $id_lang
-     * @param int $id_currency
      * @param string $action
      *
      * @return void
      */
-    public function sendCmsApi($cms_pages, $id_shop, $id_lang, $id_currency, $action = 'update')
+    public function sendCmsApi($cms_pages, $id_shop, $id_lang, $action = 'update')
     {
         if (empty($cms_pages)) {
             return;
         }
 
-        $hashid = $this->getHashId($id_lang, $id_currency);
+        $hashid = $this->getHashId($id_lang);
 
         if ($hashid) {
             if ($action == 'update') {
@@ -1197,18 +1186,17 @@ class Doofinder extends Module
      * @param array $categories
      * @param int $id_shop
      * @param int $id_lang
-     * @param int $id_currency
      * @param string $action
      *
      * @return void
      */
-    public function sendCategoryApi($categories, $id_shop, $id_lang, $id_currency, $action = 'update')
+    public function sendCategoryApi($categories, $id_shop, $id_lang, $action = 'update')
     {
         if (empty($categories)) {
             return;
         }
 
-        $hashid = $this->getHashId($id_lang, $id_currency);
+        $hashid = $this->getHashId($id_lang);
 
         if ($hashid) {
             if ($action == 'update') {
@@ -1294,11 +1282,10 @@ class Doofinder extends Module
         }
         $result = false;
         $messages = '';
-        $currency = Tools::strtoupper(Context::getContext()->currency->iso_code);
         foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
                 $lang_iso = Tools::strtoupper($lang['iso_code']);
-                $hash_id = Configuration::get('DF_HASHID_' . $currency . '_' . $lang_iso);
+                $hash_id = Configuration::get('DF_HASHID_' . $lang_iso);
                 $api_key = Configuration::get('DF_API_KEY');
                 if ($hash_id && $api_key) {
                     try {
@@ -1370,7 +1357,7 @@ class Doofinder extends Module
         if (isset($debug) && $debug) {
             $this->debug('Search On API Start');
         }
-        $hash_id = $this->getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
+        $hash_id = $this->getHashId(Context::getContext()->language->id);
         $api_key = Configuration::get('DF_API_KEY');
         $show_variations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         if ((int) $show_variations !== 1) {
@@ -1583,10 +1570,10 @@ class Doofinder extends Module
 
         $data = DoofinderLayerApi::getInstallationData($installationID, $api_key, $region);
 
-        foreach ($data['config']['search_engines'] as $lang => $currencies) {
-            foreach ($currencies as $currency => $hashid) {
-                Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
-            }
+        //TODO: Adapt when the information returned by the installation is more
+        //refined
+        foreach ($data['config']['search_engines'] as $lang => $hashid) {
+          Configuration::updateValue('DF_HASHID_' . strtoupper($lang), $hashid);
         }
 
         return true;
@@ -1671,7 +1658,6 @@ class Doofinder extends Module
         $client = new EasyREST();
         $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
         $languages = Language::getLanguages(true, $shop['id_shop']);
-        $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
         $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
@@ -1693,20 +1679,18 @@ class Doofinder extends Module
             if ($lang['active'] == 0) {
                 continue;
             }
-            foreach ($currencies as $cur) {
-                if ($cur['deleted'] == 1 || $cur['active'] == 0) {
-                    continue;
-                }
-                $ciso = $cur['iso_code'];
-                $lang_code = $lang['language_code'];
-                $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
-                $store_data['search_engines'][] = [
-                    'language' => $lang_code,
-                    'currency' => $ciso,
-                    'feed_url' => $feed_url,
-                    'callback_url' => $this->getProcessCallbackUrl(),
-                ];
-            }
+
+        //TODO: Send maybe addiontal information. As we want to make it
+        // as dynamic as possible and because the information of the currencies
+        // can be obtained at the moment of indexing, we probably don't need
+        // to specify the currency
+            $lang_code = $lang['language_code'];
+            $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code']);
+            $store_data['search_engines'][] = [
+                'language' => $lang_code,
+                'feed_url' => $feed_url,
+                'callback_url' => $this->getProcessCallbackUrl(),
+            ];
         }
 
         $json_store_data = json_encode($store_data);
@@ -1835,9 +1819,7 @@ class Doofinder extends Module
         ');
 
         if ($result) {
-            $key = str_replace('DF_HASHID_', '', $result);
-            $iso_code_parts = explode('_', $key);
-            $iso_code = end($iso_code_parts);
+            $is_code = str_replace('DF_HASHID_', '', $result);
 
             return (int) $this->getLanguageIdByLocale($iso_code);
         } else {
@@ -1899,20 +1881,18 @@ class Doofinder extends Module
      * Get the configuration key for the language and currency corresponding to the hashid
      *
      * @param int $id_lang
-     * @param int $id_currency
      *
      * @return string
      */
-    public function getHashId($id_lang, $id_currency)
+    public function getHashId($id_lang)
     {
-        $curr_iso = strtoupper($this->getIsoCodeById($id_currency));
         $lang = new Language($id_lang);
 
-        $hashid_key = 'DF_HASHID_' . $curr_iso . '_' . strtoupper($lang->language_code);
+        $hashid_key = 'DF_HASHID_' . strtoupper($lang->language_code);
         $hashid = Configuration::get($hashid_key);
 
         if (!$hashid) {
-            $hashid_key = 'DF_HASHID_' . $curr_iso . '_' . strtoupper($this->getLanguageCode($lang->language_code));
+            $hashid_key = 'DF_HASHID_' . strtoupper($this->getLanguageCode($lang->language_code));
             $hashid = Configuration::get($hashid_key);
         }
 
