@@ -65,6 +65,6 @@ class DoofinderInstallation
             return false;
         }
 
-        return @$decode_response['apt?'];
+        return @$decode_response['valid?'];
     }
 }
