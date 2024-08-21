@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -373,13 +374,15 @@ class Doofinder extends Module
                 'name' => 'DF_SHOW_LAYER',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
-            ], [
+            ],
+            [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                 'label' => $this->l('Doofinder search layer in mobile version'),
                 'name' => 'DF_SHOW_LAYER_MOBILE',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
-            ], [
+            ],
+            [
                 'type' => 'text',
                 'label' => $this->l('Doofinder Store ID'),
                 'name' => 'DF_INSTALLATION_ID',
@@ -471,7 +474,7 @@ class Doofinder extends Module
      */
     protected function getConfigFormDataFeed($apt_update_on_save = false)
     {
-        if($apt_update_on_save){
+        if ($apt_update_on_save) {
             $disabled = false;
             $query = [
                 5 => ['id' => 5, 'name' => sprintf($this->l('Each %s minutes'), '5')],
@@ -1417,7 +1420,8 @@ class Doofinder extends Module
                     'timeout' => $timeout,
                     'types' => [
                         'product',
-                    ], 'transformer' => 'basic',
+                    ],
+                    'transformer' => 'basic',
                 ];
                 if ($query_name) {
                     $queryParams['query_name'] = $query_name;

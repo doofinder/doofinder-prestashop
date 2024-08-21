@@ -31,9 +31,8 @@ class DoofinderApiSearchEngine
         $this->api_url = str_replace('{region}', $region, API_URL);
     }
 
-
     /**
-     * Make a request to the plugins API to to check that the update on save is suitable
+     * Make a request to the plugins API to to check that the update on save is apt
      *
      * @param string $installation_id
      * @param string $callback_url
