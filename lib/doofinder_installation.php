@@ -20,7 +20,7 @@ if (!defined('_PS_VERSION_')) {
 
 const API_URL = 'https://{region}-plugins.doofinder.com';
 
-class DoofinderApiSearchEngine
+class DoofinderInstallation
 {
     private $api_key;
     private $api_url;
@@ -32,14 +32,14 @@ class DoofinderApiSearchEngine
     }
 
     /**
-     * Make a request to the plugins API to to check that the update on save is apt
+     * Make a request to the plugins API to to check that the update on save is valid
      *
      * @param string $installation_id
      * @param string $callback_url
      */
-    public function apt_update_on_save($installation_id)
+    public function is_valid_update_on_save($installation_id)
     {
-        $api_endpoint = $this->api_url . '/' . $installation_id . '/apt-update-on-save';
+        $api_endpoint = $this->api_url . '/' . $installation_id . '/validate-update-on-save';
 
         return $this->get($api_endpoint);
     }
@@ -57,6 +57,14 @@ class DoofinderApiSearchEngine
             ['Authorization: Token ' . $this->api_key]
         );
 
-        return json_decode($response->response, true);
+        $decode_response = json_decode($response->response, true);
+
+        if (empty($decode_response) || $decode_response['status'] !== 200) {
+            $this->debug('Error checking search engines: ' . json_encode($decode_response));
+
+            return false;
+        }
+
+        return @$decode_response['apt?'];
     }
 }

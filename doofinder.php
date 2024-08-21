@@ -454,8 +454,8 @@ class Doofinder extends Module
         ];
 
         if (!$this->showNewShopForm(Context::getContext()->shop)) {
-            $apt_update_on_save = $this->apt_update_on_save();
-            $html .= $helper->generateForm([$this->getConfigFormDataFeed($apt_update_on_save)]);
+            $valid_update_on_save = $this->is_valid_update_on_save();
+            $html .= $helper->generateForm([$this->getConfigFormDataFeed($valid_update_on_save)]);
             // Search layer form
             $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
@@ -472,9 +472,9 @@ class Doofinder extends Module
      *
      * @return array
      */
-    protected function getConfigFormDataFeed($apt_update_on_save = false)
+    protected function getConfigFormDataFeed($valid_update_on_save = false)
     {
-        if ($apt_update_on_save) {
+        if ($valid_update_on_save) {
             $disabled = false;
             $query = [
                 5 => ['id' => 5, 'name' => sprintf($this->l('Each %s minutes'), '5')],
@@ -1295,21 +1295,14 @@ class Doofinder extends Module
         Configuration::updateValue('DF_FEED_INDEXED', false);
     }
 
-    private function apt_update_on_save()
+    private function is_valid_update_on_save()
     {
         require_once 'lib/doofinder_api_search_engine.php';
 
         $region = Configuration::get('DF_REGION');
         $api_key = Configuration::get('DF_API_KEY');
-        $api = new DoofinderApiSearchEngine($api_key, $region);
-        $response = $api->apt_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
-        if (empty($response) || $response['status'] !== 200) {
-            $this->debug('Error checking search engines: ' . json_encode($response));
-
-            return false;
-        }
-
-        return @$response['apt?'];
+        $api = new DoofinderInstallation($api_key, $region);
+        return $api->is_valid_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
     }
 
     /**
