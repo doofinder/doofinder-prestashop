@@ -493,6 +493,7 @@ class Doofinder extends Module
                 0 => ['id' => 0, 'name' => $this->l('Disabled')],
             ];
         }
+        
         return [
             'form' => [
                 'legend' => [
