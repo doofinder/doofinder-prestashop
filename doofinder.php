@@ -1302,8 +1302,15 @@ class Doofinder extends Module
         $region = Configuration::get('DF_REGION');
         $api_key = Configuration::get('DF_API_KEY');
         $api = new DoofinderInstallation($api_key, $region);
+        $decode_response = $api->is_valid_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
 
-        return $api->is_valid_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
+        if (empty($decode_response) || $decode_response['status'] !== 200) {
+            $this->debug('Error checking search engines: ' . json_encode($decode_response));
+
+            return false;
+        }
+
+        return @$decode_response['valid?'];
     }
 
     /**
@@ -1448,7 +1455,7 @@ class Doofinder extends Module
                         }
                         $id_product = Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
                             'SELECT id_product FROM ' . _DB_PREFIX_ . 'product_attribute'
-                                . ' WHERE id_product_attribute = ' . (int) pSQL($id_product_attribute)
+                            . ' WHERE id_product_attribute = ' . (int) pSQL($id_product_attribute)
                         );
                         $product_pool_ids[] = ((!empty($id_product)) ? (int) pSQL($id_product) : 0);
                     }
@@ -1494,10 +1501,10 @@ class Doofinder extends Module
                     DATE_SUB(
                         NOW(),
                         INTERVAL ' . (Validate::isUnsignedInt(Configuration::get('PS_NB_DAYS_NEW_PRODUCT'))
-                    ? Configuration::get('PS_NB_DAYS_NEW_PRODUCT') : 20) . ' DAY
+                ? Configuration::get('PS_NB_DAYS_NEW_PRODUCT') : 20) . ' DAY
                     )
                 ) > 0 new' . (Combination::isFeatureActive() ?
-                    ', MAX(product_attribute_shop.minimal_quantity) AS product_attribute_minimal_quantity' : '') . '
+                ', MAX(product_attribute_shop.minimal_quantity) AS product_attribute_minimal_quantity' : '') . '
                 FROM ' . _DB_PREFIX_ . 'product p
                 ' . Shop::addSqlAssociation('product', 'p') . '
                 INNER JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (
@@ -1506,7 +1513,7 @@ class Doofinder extends Module
                 . (Combination::isFeatureActive() ? ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa
                     ON (p.`id_product` = pa.`id_product`)
                     ' . Shop::addSqlAssociation('product_attribute', 'pa', false, ($show_variations) ? '' :
-                    ' product_attribute_shop.default_on = 1') . '
+                            ' product_attribute_shop.default_on = 1') . '
                     ' . Product::sqlStock('p', 'product_attribute_shop', false, $context->shop) :
                     Product::sqlStock('p', 'product', false, Context::getContext()->shop)) . '
                 LEFT JOIN `' . _DB_PREFIX_ . 'manufacturer` m ON m.`id_manufacturer` = p.`id_manufacturer`

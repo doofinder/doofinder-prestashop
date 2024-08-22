@@ -57,14 +57,6 @@ class DoofinderInstallation
             ['Authorization: Token ' . $this->api_key]
         );
 
-        $decode_response = json_decode($response->response, true);
-
-        if (empty($decode_response) || $decode_response['status'] !== 200) {
-            $this->debug('Error checking search engines: ' . json_encode($decode_response));
-
-            return false;
-        }
-
-        return @$decode_response['valid?'];
+        return json_decode($response->response, true);
     }
 }
