@@ -1297,7 +1297,7 @@ class Doofinder extends Module
 
     private function is_valid_update_on_save()
     {
-        require_once 'lib/doofinder_api_search_engine.php';
+        require_once 'lib/doofinder_installation.php';
 
         $region = Configuration::get('DF_REGION');
         $api_key = Configuration::get('DF_API_KEY');
