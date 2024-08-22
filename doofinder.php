@@ -1304,7 +1304,7 @@ class Doofinder extends Module
         $api = new DoofinderInstallation($api_key, $region);
         $decode_response = $api->is_valid_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
 
-        if (empty($decode_response) || $decode_response['status'] !== 200) {
+        if (empty($decode_response)) {
             $this->debug('Error checking search engines: ' . json_encode($decode_response));
 
             Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 0);
