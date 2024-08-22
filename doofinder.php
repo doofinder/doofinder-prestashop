@@ -1307,6 +1307,8 @@ class Doofinder extends Module
         if (empty($decode_response) || $decode_response['status'] !== 200) {
             $this->debug('Error checking search engines: ' . json_encode($decode_response));
 
+            Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 0);
+
             return false;
         }
 
