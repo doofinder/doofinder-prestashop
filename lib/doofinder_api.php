@@ -32,7 +32,7 @@ class DoofinderApi
     const DEFAULT_TIMEOUT = 10000;
     const DEFAULT_RPP = 10;
     const DEFAULT_PARAMS_PREFIX = 'dfParam_';
-    const DEFAULT_API_VERSION = '5';
+    const DEFAULT_API_VERSION = '6';
     const VERSION = '5.2.3';
 
     private $api_key; // user API_KEY
