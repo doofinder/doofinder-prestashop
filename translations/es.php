@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Agregue un motor de búsqueda inteligente a su comercio electrónico en 5 minutos y sin programación';
 $_MODULE['<{doofinder}prestashop>doofinder_e499922a91899a55af0659f1f4772e6a'] = '¿Estás seguro? Esto no cancelará tu cuenta con Doofinder';
@@ -28,7 +28,7 @@ $_MODULE['<{doofinder}prestashop>doofinder_bbf76abf65b7e5530ebf33b0f8a666c9'] = 
 $_MODULE['<{doofinder}prestashop>doofinder_ebe75aa799359b32559a09eae8594835'] = 'Seleccionar las características que serán mostradas en el feed';
 $_MODULE['<{doofinder}prestashop>doofinder_90dce1b992114b5c7ab37ee99ea195ec'] = 'Tamaño de la imagen de producto';
 $_MODULE['<{doofinder}prestashop>doofinder_ae29d32626c4da07fe58def585bbc283'] = 'Procesar automáticamente los productos modificados';
-$_MODULE['<{doofinder}prestashop>doofinder_acc697e9b9f3dae4b46e08fc16374b06'] = 'Esta acción solo se ejecutará si hay cambios. Si le aparece el campo deshabilitado, es debido a que está haciendo un uso en los índices que no está soportado por el procesamiento automático de productos modificados.';
+$_MODULE['<{doofinder}prestashop>doofinder_acc697e9b9f3dae4b46e08fc16374b06'] = 'Esta acción solo se ejecutará si hay cambios. Si le aparece el campo deshabilitado, es debido a que está haciendo un uso en los índices que no está soportado por el procesamiento automático de productos modificados.';
 $_MODULE['<{doofinder}prestashop>doofinder_836f443d97d58d8ec45b18fd574c8933'] = 'Guardar opciones del feed';
 $_MODULE['<{doofinder}prestashop>doofinder_9dfc5d5738312210c3c75e68a468691d'] = 'Opciones Avanzadas';
 $_MODULE['<{doofinder}prestashop>doofinder_e0daaf59114081fac112928e638c8d85'] = 'Doofinder Api Key';
