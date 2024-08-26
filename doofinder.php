@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -32,7 +33,7 @@ class Doofinder extends Module
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.8.6';
+    const VERSION = '4.8.7';
     const YES = 1;
     const NO = 0;
 
@@ -40,7 +41,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.8.6';
+        $this->version = '4.8.7';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -373,13 +374,15 @@ class Doofinder extends Module
                 'name' => 'DF_SHOW_LAYER',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
-            ], [
+            ],
+            [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                 'label' => $this->l('Doofinder search layer in mobile version'),
                 'name' => 'DF_SHOW_LAYER_MOBILE',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
-            ], [
+            ],
+            [
                 'type' => 'text',
                 'label' => $this->l('Doofinder Store ID'),
                 'name' => 'DF_INSTALLATION_ID',
@@ -451,7 +454,8 @@ class Doofinder extends Module
         ];
 
         if (!$this->showNewShopForm(Context::getContext()->shop)) {
-            $html .= $helper->generateForm([$this->getConfigFormDataFeed()]);
+            $valid_update_on_save = $this->is_valid_update_on_save();
+            $html .= $helper->generateForm([$this->getConfigFormDataFeed($valid_update_on_save)]);
             // Search layer form
             $helper->tpl_vars['fields_value'] = $this->getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
@@ -468,8 +472,28 @@ class Doofinder extends Module
      *
      * @return array
      */
-    protected function getConfigFormDataFeed()
+    protected function getConfigFormDataFeed($valid_update_on_save = false)
     {
+        if ($valid_update_on_save) {
+            $disabled = false;
+            $query = [
+                5 => ['id' => 5, 'name' => sprintf($this->l('Each %s minutes'), '5')],
+                15 => ['id' => 15, 'name' => sprintf($this->l('Each %s minutes'), '15')],
+                30 => ['id' => 30, 'name' => sprintf($this->l('Each %s minutes'), '30')],
+                60 => ['id' => 60, 'name' => $this->l('Each hour')],
+                120 => ['id' => 120, 'name' => sprintf($this->l('Each %s hours'), '2')],
+                360 => ['id' => 360, 'name' => sprintf($this->l('Each %s hours'), '6')],
+                720 => ['id' => 720, 'name' => sprintf($this->l('Each %s hours'), '12')],
+                1440 => ['id' => 1440, 'name' => $this->l('Once a day')],
+                0 => ['id' => 0, 'name' => $this->l('Disabled')],
+            ];
+        } else {
+            $disabled = true;
+            $query = [
+                0 => ['id' => 0, 'name' => $this->l('Disabled')],
+            ];
+        }
+
         return [
             'form' => [
                 'legend' => [
@@ -551,20 +575,11 @@ class Doofinder extends Module
                     [
                         'type' => 'select',
                         'label' => $this->l('Automatically process modified products'),
-                        'desc' => $this->l('Configure how often changes will be sent to Doofinder. It will only be executed if there are changes.'),
+                        'desc' => $this->l('This action will only be executed if there are changes. If you see the field disabled, it is because you are making a usage in the indexes that is not supported by the automatic processing of modified products.'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
+                        'disabled' => $disabled,
                         'options' => [
-                            'query' => [
-                                5 => ['id' => 5, 'name' => sprintf($this->l('Each %s minutes'), '5')],
-                                15 => ['id' => 15, 'name' => sprintf($this->l('Each %s minutes'), '15')],
-                                30 => ['id' => 30, 'name' => sprintf($this->l('Each %s minutes'), '30')],
-                                60 => ['id' => 60, 'name' => $this->l('Each hour')],
-                                120 => ['id' => 120, 'name' => sprintf($this->l('Each %s hours'), '2')],
-                                360 => ['id' => 360, 'name' => sprintf($this->l('Each %s hours'), '6')],
-                                720 => ['id' => 720, 'name' => sprintf($this->l('Each %s hours'), '12')],
-                                1440 => ['id' => 1440, 'name' => $this->l('Once a day')],
-                                0 => ['id' => 0, 'name' => $this->l('Disabled')],
-                            ],
+                            'query' => $query,
                             'id' => 'id',
                             'name' => 'name',
                         ],
@@ -1280,6 +1295,26 @@ class Doofinder extends Module
         Configuration::updateValue('DF_FEED_INDEXED', false);
     }
 
+    private function is_valid_update_on_save()
+    {
+        require_once 'lib/doofinder_installation.php';
+
+        $region = Configuration::get('DF_REGION');
+        $api_key = Configuration::get('DF_API_KEY');
+        $api = new DoofinderInstallation($api_key, $region);
+        $decode_response = $api->is_valid_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
+
+        if (empty($decode_response)) {
+            $this->debug('Error checking search engines: ' . json_encode($decode_response));
+
+            Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 0);
+
+            return false;
+        }
+
+        return @$decode_response['valid?'];
+    }
+
     /**
      * Perform an API connection test
      *
@@ -1389,7 +1424,8 @@ class Doofinder extends Module
                     'timeout' => $timeout,
                     'types' => [
                         'product',
-                    ], 'transformer' => 'basic',
+                    ],
+                    'transformer' => 'basic',
                 ];
                 if ($query_name) {
                     $queryParams['query_name'] = $query_name;
@@ -1421,7 +1457,7 @@ class Doofinder extends Module
                         }
                         $id_product = Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
                             'SELECT id_product FROM ' . _DB_PREFIX_ . 'product_attribute'
-                                . ' WHERE id_product_attribute = ' . (int) pSQL($id_product_attribute)
+                            . ' WHERE id_product_attribute = ' . (int) pSQL($id_product_attribute)
                         );
                         $product_pool_ids[] = ((!empty($id_product)) ? (int) pSQL($id_product) : 0);
                     }
@@ -1467,10 +1503,10 @@ class Doofinder extends Module
                     DATE_SUB(
                         NOW(),
                         INTERVAL ' . (Validate::isUnsignedInt(Configuration::get('PS_NB_DAYS_NEW_PRODUCT'))
-                    ? Configuration::get('PS_NB_DAYS_NEW_PRODUCT') : 20) . ' DAY
+                ? Configuration::get('PS_NB_DAYS_NEW_PRODUCT') : 20) . ' DAY
                     )
                 ) > 0 new' . (Combination::isFeatureActive() ?
-                    ', MAX(product_attribute_shop.minimal_quantity) AS product_attribute_minimal_quantity' : '') . '
+                ', MAX(product_attribute_shop.minimal_quantity) AS product_attribute_minimal_quantity' : '') . '
                 FROM ' . _DB_PREFIX_ . 'product p
                 ' . Shop::addSqlAssociation('product', 'p') . '
                 INNER JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (
@@ -1479,7 +1515,7 @@ class Doofinder extends Module
                 . (Combination::isFeatureActive() ? ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa
                     ON (p.`id_product` = pa.`id_product`)
                     ' . Shop::addSqlAssociation('product_attribute', 'pa', false, ($show_variations) ? '' :
-                    ' product_attribute_shop.default_on = 1') . '
+                            ' product_attribute_shop.default_on = 1') . '
                     ' . Product::sqlStock('p', 'product_attribute_shop', false, $context->shop) :
                     Product::sqlStock('p', 'product', false, Context::getContext()->shop)) . '
                 LEFT JOIN `' . _DB_PREFIX_ . 'manufacturer` m ON m.`id_manufacturer` = p.`id_manufacturer`
