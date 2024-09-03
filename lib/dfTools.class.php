@@ -1408,9 +1408,11 @@ class DfTools
                     $min_prices_by_product_id[$product_id]['link'] = self::get_variant_url($product, $context);
                 }
             } else {
-                $min_prices_by_product_id[$product_id] = ['price' => $variant_price,
+                $min_prices_by_product_id[$product_id] = [
+                    'price' => $variant_price,
                     'onsale_price' => $variant_onsale_price,
-                    'link' => self::get_variant_url($product, $context)];
+                    'link' => self::get_variant_url($product, $context)
+                ];
             }
         }
 
