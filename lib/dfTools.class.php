@@ -456,7 +456,7 @@ class DfTools
         $id_shop,
         $limit = false,
         $offset = false,
-        $ids = null,
+        $ids = null
     ) {
         $Shop = new Shop($id_shop);
 
