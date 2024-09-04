@@ -395,7 +395,7 @@ class EasyREST
         $user = null,
         $pwd = null,
         $contentType = 'multipart/form-data',
-        $httpHeaders = null,
+        $httpHeaders = null
     ) {
         return self::call('GET', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
