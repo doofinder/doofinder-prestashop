@@ -1384,14 +1384,8 @@ class Doofinder extends Module
      *
      * @return array
      */
-    public function searchOnApi(
-        $string,
-        $page = 1,
-        $page_size = 12,
-        $timeout = 8000,
-        $filters = null,
-        $return_facets = false
-    ) {
+    public function searchOnApi($string,$page = 1, $page_size = 12, $timeout = 8000, $filters = null, $return_facets = false)
+    {
         $page_size = (int) $page_size;
         if (!$page_size) {
             $page_size = Configuration::get('PS_PRODUCTS_PER_PAGE');

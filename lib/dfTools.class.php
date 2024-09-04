@@ -451,13 +451,8 @@ class DfTools
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getAvailableProductsForLanguage(
-        $id_lang,
-        $id_shop,
-        $limit = false,
-        $offset = false,
-        $ids = null
-    ) {
+    public static function getAvailableProductsForLanguage($id_lang, $id_shop, $limit = false, $offset = false, $ids = null)
+    {
         $Shop = new Shop($id_shop);
 
         $isbn = '';
