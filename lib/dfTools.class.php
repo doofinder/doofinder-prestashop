@@ -456,7 +456,7 @@ class DfTools
         $id_shop,
         $limit = false,
         $offset = false,
-        $ids = null
+        $ids = null,
     ) {
         $Shop = new Shop($id_shop);
 
@@ -1411,7 +1411,7 @@ class DfTools
                 $min_prices_by_product_id[$product_id] = [
                     'price' => $variant_price,
                     'onsale_price' => $variant_onsale_price,
-                    'link' => self::get_variant_url($product, $context)
+                    'link' => self::get_variant_url($product, $context),
                 ];
             }
         }

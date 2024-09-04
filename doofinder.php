@@ -1390,7 +1390,7 @@ class Doofinder extends Module
         $page_size = 12,
         $timeout = 8000,
         $filters = null,
-        $return_facets = false
+        $return_facets = false,
     ) {
         $page_size = (int) $page_size;
         if (!$page_size) {
