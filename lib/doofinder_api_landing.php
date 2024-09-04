@@ -18,7 +18,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-const API_URL = 'https://{region}-admin.doofinder.com';
+const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiLanding
 {
@@ -32,11 +32,11 @@ class DoofinderApiLanding
     /**
      * Make a request to the API to get landing data
      *
-     * @param array Product data
+     * @param string Name from Landing
      */
     public function getLanding($slug)
     {
-        $endpoint = '/plugins/landing_new/' . $this->hashid . '/' . $slug;
+        $endpoint = "/landing/{$this->hashid}/$slug";
 
         $url = $this->api_url . $endpoint;
 
