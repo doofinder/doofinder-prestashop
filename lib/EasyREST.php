@@ -416,7 +416,7 @@ class EasyREST
         $user = null,
         $pwd = null,
         $contentType = 'multipart/form-data',
-        $httpHeaders = null,
+        $httpHeaders = null
     ) {
         return self::call('DELETE', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
@@ -441,7 +441,7 @@ class EasyREST
         $user = null,
         $pwd = null,
         $contentType = null,
-        $httpHeaders = null,
+        $httpHeaders = null
     ) {
         return self::createClient($url)
             ->setParameters($body)
