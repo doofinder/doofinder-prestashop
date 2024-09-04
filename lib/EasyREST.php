@@ -352,14 +352,8 @@ class EasyREST
      *
      * @return EasyREST
      */
-    public static function post(
-        $url,
-        $params = null,
-        $user = null,
-        $pwd = null,
-        $contentType = 'multipart/form-data',
-        $httpHeaders = null
-    ) {
+    public static function post($url, $params = null, $user = null, $pwd = null, $contentType = 'multipart/form-data', $httpHeaders = null)
+    {
         return self::call('POST', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
@@ -389,14 +383,7 @@ class EasyREST
      *
      * @return EasyREST
      */
-    public static function get(
-        $url,
-        $params = null,
-        $user = null,
-        $pwd = null,
-        $contentType = 'multipart/form-data',
-        $httpHeaders = null
-    ) {
+    public static function get($url, $params = null, $user = null, $pwd = null, $contentType = 'multipart/form-data', $httpHeaders = null) {
         return self::call('GET', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
 
@@ -434,15 +421,8 @@ class EasyREST
      *
      * @return EasyREST
      */
-    public static function call(
-        $method,
-        $url,
-        $body,
-        $user = null,
-        $pwd = null,
-        $contentType = null,
-        $httpHeaders = null
-    ) {
+    public static function call($method, $url, $body, $user = null, $pwd = null, $contentType = null, $httpHeaders = null)
+    {
         return self::createClient($url)
             ->setParameters($body)
             ->setMethod($method)
