@@ -42,7 +42,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
         $landing_name = Tools::getValue('landing_name');
 
-        $this->landing_data = $this->getLandingData($landing_name, $this->context->shop->id, $this->context->language->id, $this->context->currency->id);
+        $this->landing_data = $this->getLandingData($landing_name, $this->context->shop->id, $this->context->language->id);
 
         if (!$this->landing_data) {
             Tools::redirect('index.php?controller=404');
@@ -149,9 +149,9 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
         return $page;
     }
 
-    private function getLandingData($name, $id_shop, $id_lang, $id_currency)
+    private function getLandingData($name, $id_shop, $id_lang)
     {
-        $hashid = $this->module->getHashId($id_lang, $id_currency);
+        $hashid = $this->module->getHashId($id_lang);
         $cache = $this->getLandingCache($name, $hashid);
 
         if ($cache && !$this->refreshCache($cache)) {

@@ -48,6 +48,8 @@
     {/literal}
 
     // Custom personalization:
+
+    //TODO: Adapt in case the layer needs a different format
     doofinderApp("config", "language", "{$lang|escape:'htmlall':'UTF-8'}");
     doofinderApp("config", "currency", "{$currency|escape:'htmlall':'UTF-8'}");
   </script>

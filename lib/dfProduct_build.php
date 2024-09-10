@@ -22,11 +22,10 @@ if (!class_exists('dfTools')) {
 
 class DfProductBuild
 {
-    public function __construct($id_shop, $id_lang, $id_currency)
+    public function __construct($id_shop, $id_lang)
     {
         $this->id_shop = $id_shop;
         $this->id_lang = $id_lang;
-        $this->id_currency = $id_currency;
     }
 
     /**
@@ -116,8 +115,7 @@ class DfProductBuild
         }
 
         if ($this->display_prices) {
-            $p['price'] = $this->getPrice($product);
-            $p['sale_price'] = $this->getPrice($product, true);
+            $p['prices'] = json_encode($this->getPrices($product));
         }
 
         if ($this->show_product_features) {
@@ -264,10 +262,13 @@ class DfProductBuild
         }
     }
 
-    private function getPrice($product, $salePrice = false)
+    private function getPrices($product)
     {
+        $prices = [];
+        $currencies = Currency::getCurrenciesByIdShop($this->id_shop);
+
         if (!$product['show_price']) {
-            return false;
+            return $prices;
         }
 
         if ($this->product_variations) {
@@ -286,19 +287,23 @@ class DfProductBuild
             false
         );
 
-        if (!$salePrice) {
-            return $product_price ? Tools::convertPrice($product_price, $this->id_currency) : null;
-        } else {
-            $onsale_price = Product::getPriceStatic(
-                $product['id_product'],
-                $this->use_tax,
-                $id_product_attribute,
-                6
-            );
+        $onsale_price = Product::getPriceStatic(
+            $product['id_product'],
+            $this->use_tax,
+            $id_product_attribute,
+            6
+        );
 
-            return ($product_price && $onsale_price && $product_price != $onsale_price)
-                ? Tools::convertPrice($onsale_price, $this->id_currency) : null;
+        $prices = [];
+
+        foreach ($currencies as $currency) {
+            if ($currency["deleted"] == 0 && $currency["active"] == 1) {
+                $prices[$currency["iso_code"]]["price"] = Tools::convertPrice($product_price, $currency);
+                $prices[$currency["iso_code"]]["sale_price"] = Tools::convertPrice($onsale_price, $currency);
+            }
         }
+
+        return $prices;
     }
 
     private function getFeatures($product)

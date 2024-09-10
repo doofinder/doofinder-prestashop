@@ -25,6 +25,7 @@ class DoofinderLayerApi
      * Since this API returns the default hashid if both currency and language do not match,
      * a check is made to see if the desired hashid is returned.
      */
+    //TODO: Is this needed?
     public static function getHashidByInstallationID($installationID, $currency, $language)
     {
         $client = new EasyREST();
