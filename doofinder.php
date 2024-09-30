@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -21,6 +20,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once 'autoloader.php';
+
+use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Lib\EasyREST;
+use PrestaShop\Module\Doofinder\Lib\SearchEngine;
+
 class Doofinder extends Module
 {
     protected $html = '';
@@ -29,17 +35,18 @@ class Doofinder extends Module
     public $ps_layered_full_tree = true;
     public $searchBanner = false;
 
-    // Feel free to change this value to your own local env or ngrok
-    const DOOMANAGER_URL = 'https://admin.doofinder.com';
-    const GS_SHORT_DESCRIPTION = 1;
-    const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.8.8';
-    const YES = 1;
-    const NO = 0;
+    // TODO (davidmolinacano): To be deleted after complete refactor.
+    const DOOMANAGER_URL = DoofinderConstants::DOOMANAGER_URL;
+    const GS_SHORT_DESCRIPTION = DoofinderConstants::GS_SHORT_DESCRIPTION;
+    const GS_LONG_DESCRIPTION = DoofinderConstants::GS_LONG_DESCRIPTION;
+    const VERSION = DoofinderConstants::VERSION;
+    const NAME = DoofinderConstants::NAME;
+    const YES = DoofinderConstants::YES;
+    const NO = DoofinderConstants::NO;
 
     public function __construct()
     {
-        $this->name = 'doofinder';
+        $this->name = DoofinderConstants::NAME;
         $this->tab = 'search_filter';
         $this->version = '4.8.8';
         $this->author = 'Doofinder (http://www.doofinder.com)';
@@ -53,8 +60,6 @@ class Doofinder extends Module
 
         $this->confirmUninstall = $this->l('Are you sure? This will not cancel your account in Doofinder service');
         $this->admin_template_dir = '../../../../modules/' . $this->name . '/views/templates/admin/';
-
-        $olderPS17 = (version_compare(_PS_VERSION_, '1.7', '<') === true);
     }
 
     /**
@@ -65,8 +70,8 @@ class Doofinder extends Module
     public function install()
     {
         return parent::install()
-            && $this->installDb()
-            && $this->installTabs()
+            && DoofinderInstallation::installDb()
+            && DoofinderInstallation::installTabs()
             && $this->registerHook('displayHeader')
             && $this->registerHook('moduleRoutes')
             && $this->registerHook('actionProductSave')
@@ -80,38 +85,6 @@ class Doofinder extends Module
     }
 
     /**
-     * Install the module database tables
-     *
-     * @return bool
-     */
-    public function installDb()
-    {
-        return Db::getInstance()->execute(
-            '
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_updates` (
-                `id_doofinder_update` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `id_shop` INT(10) UNSIGNED NOT NULL,
-                `object` varchar(45) NOT NULL,
-                `id_object` INT(10) UNSIGNED NOT NULL,
-                `action` VARCHAR(45) NOT NULL,
-                `date_upd` DATETIME NOT NULL,
-                PRIMARY KEY (`id_doofinder_update`),
-                CONSTRAINT uc_shop_update UNIQUE KEY (id_shop,object,id_object)
-            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
-        )
-            && Db::getInstance()->execute(
-                '
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_landing` (
-                `name` VARCHAR(45) NOT NULL,
-                `hashid` VARCHAR(45) NOT NULL,
-                `data` TEXT NOT NULL,
-                `date_upd` DATETIME NOT NULL,
-                PRIMARY KEY (`name`, `hashid`)
-            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
-            );
-    }
-
-    /**
      * Uninstall the module and its dependencies
      *
      * @return bool
@@ -119,85 +92,9 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
-            && $this->uninstallTabs()
-            && $this->deleteConfigVars()
-            && $this->uninstallDb();
-    }
-
-    /**
-     * Remove module-dependent configuration variables
-     *
-     * @return bool
-     */
-    public function deleteConfigVars()
-    {
-        $config_vars = [
-            'DF_AI_ADMIN_ENDPOINT',
-            'DF_AI_API_ENDPOINT',
-            'DF_AI_APIKEY',
-            'DF_API_KEY',
-            'DF_API_LAYER_DESCRIPTION',
-            'DF_CSS_VS',
-            'DF_CUSTOMEXPLODEATTR',
-            'DF_DEBUG',
-            'DF_DEBUG_CURL',
-            'DF_DSBL_AJAX_TKN',
-            'DF_DSBL_DFCKIE_JS',
-            'DF_DSBL_DFFAC_JS',
-            'DF_DSBL_DFLINK_JS',
-            'DF_DSBL_DFPAG_JS',
-            'DF_DSBL_FAC_CACHE',
-            'DF_DSBL_HTTPS_CURL',
-            'DF_EB_LAYER_DESCRIPTION',
-            'DF_ENABLED_V9',
-            'DF_ENABLE_HASH',
-            'DF_EXTRA_CSS',
-            'DF_FACETS_TOKEN',
-            'DF_FEATURES_SHOWN',
-            'DF_FEED_FULL_PATH',
-            'DF_FEED_INDEXED',
-            'DF_FEED_MAINCATEGORY_PATH',
-            'DF_GROUP_ATTRIBUTES_SHOWN',
-            'DF_GS_DESCRIPTION_TYPE',
-            'DF_GS_DISPLAY_PRICES',
-            'DF_GS_IMAGE_SIZE',
-            'DF_GS_PRICES_USE_TAX',
-            'DF_INSTALLATION_ID',
-            'DF_SHOW_LAYER',
-            'DF_SHOW_LAYER_MOBILE',
-            'DF_REGION',
-            'DF_RESTART_OV',
-            'DF_SHOW_PRODUCT_FEATURES',
-            'DF_SHOW_PRODUCT_VARIATIONS',
-            'DF_UPDATE_ON_SAVE_DELAY',
-            'DF_UPDATE_ON_SAVE_LAST_EXEC',
-            'DF_FEED_INDEXED',
-        ];
-
-        $hashid_vars = array_column(
-            Db::getInstance()->executeS('
-            SELECT name FROM ' . _DB_PREFIX_ . "configuration where name like 'DF_HASHID_%'"),
-            'name'
-        );
-
-        $config_vars = array_merge($config_vars, $hashid_vars);
-
-        foreach ($config_vars as $var) {
-            Configuration::deleteByName($var);
-        }
-
-        return true;
-    }
-
-    /**
-     * Removes the database tables from the module
-     *
-     * @return bool
-     */
-    public function uninstallDb()
-    {
-        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_updates`')
-            && Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
+            && DoofinderInstallation::uninstallTabs()
+            && DoofinderInstallation::deleteConfigVars()
+            && DoofinderInstallation::uninstallDb();
     }
 
     /**
@@ -322,26 +219,6 @@ class Doofinder extends Module
         $sql = 'SELECT id_configuration FROM ' . _DB_PREFIX_ . 'configuration WHERE name = \'DF_ENABLE_HASH\'';
 
         return Db::getInstance()->getValue($sql);
-    }
-
-    /**
-     * Build feed urls
-     *
-     * @param int $shop_id
-     * @param int $language
-     * @param int $currency
-     *
-     * @return string
-     */
-    protected function buildFeedUrl($shop_id, $language, $currency)
-    {
-        $shop_url = $this->getShopURL($shop_id);
-
-        return $shop_url . ltrim('modules/' . $this->name, DIRECTORY_SEPARATOR)
-            . '/feed.php?'
-            . 'currency=' . Tools::strtoupper($currency)
-            . '&language=' . Tools::strtoupper($language)
-            . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
     }
 
     /**
@@ -801,7 +678,7 @@ class Doofinder extends Module
 
         if ($formUpdated == 'data_feed_tab') {
             if ((bool) Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
-                $this->setSearchEnginesByConfig();
+                SearchEngine::setSearchEnginesByConfig();
             }
             if (Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') && (int) Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') < 5) {
                 Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 5);
@@ -1255,7 +1132,7 @@ class Doofinder extends Module
         $response = $api->updateBulk($payload);
 
         if (isset($response['error']) && !empty($response['error'])) {
-            $this->debug(json_encode($response['error']));
+            DoofinderConfig::debug(json_encode($response['error']));
         }
     }
 
@@ -1274,7 +1151,7 @@ class Doofinder extends Module
         $response = $api->deleteBulk(json_encode($payload));
 
         if (isset($response['error']) && !empty($response['error'])) {
-            $this->debug(json_encode($response['error']));
+            DoofinderConfig::debug(json_encode($response['error']));
         }
     }
 
@@ -1285,9 +1162,9 @@ class Doofinder extends Module
         $region = Configuration::get('DF_REGION');
         $api_key = Configuration::get('DF_API_KEY');
         $api = new DoofinderApiIndex($api_key, $region);
-        $response = $api->invokeReindexing(Configuration::get('DF_INSTALLATION_ID'), $this->getProcessCallbackUrl());
+        $response = $api->invokeReindexing(Configuration::get('DF_INSTALLATION_ID'), UrlManager::getProcessCallbackUrl());
         if (empty($response) || $response['status'] !== 200) {
-            $this->debug('Error while invoking reindexing: ' . json_encode($response));
+            DoofinderConfig::debug('Error while invoking reindexing: ' . json_encode($response));
 
             return;
         }
@@ -1297,15 +1174,13 @@ class Doofinder extends Module
 
     private function is_valid_update_on_save()
     {
-        require_once 'lib/doofinder_installation.php';
-
         $region = Configuration::get('DF_REGION');
         $api_key = Configuration::get('DF_API_KEY');
         $api = new DoofinderInstallation($api_key, $region);
-        $decode_response = $api->is_valid_update_on_save(Configuration::get('DF_INSTALLATION_ID'));
+        $decode_response = $api->isValidUpdateOnSave(Configuration::get('DF_INSTALLATION_ID'));
 
         if (empty($decode_response)) {
-            $this->debug('Error checking search engines: ' . json_encode($decode_response));
+            DoofinderConfig::debug('Error checking search engines: ' . json_encode($decode_response));
 
             Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 0);
 
@@ -1395,10 +1270,7 @@ class Doofinder extends Module
             $page = 1;
         }
         $query_name = Tools::getValue('df_query_name', false);
-        $debug = Configuration::get('DF_DEBUG');
-        if (isset($debug) && $debug) {
-            $this->debug('Search On API Start');
-        }
+        DoofinderConfig::debug('Search On API Start');
         $hash_id = $this->getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
         $api_key = Configuration::get('DF_API_KEY');
         $show_variations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
@@ -1464,9 +1336,7 @@ class Doofinder extends Module
                 $product_pool = '0';
             }
 
-            if (isset($debug) && $debug) {
-                $this->debug("Product Pool: $product_pool");
-            }
+            DoofinderConfig::debug("Product Pool: $product_pool");
 
             $product_pool_attributes = implode(',', $product_pool_attributes);
 
@@ -1476,9 +1346,7 @@ class Doofinder extends Module
                 $product_pool_attributes = '0';
             }
 
-            if (isset($debug) && $debug) {
-                $this->debug("Product Pool Attributes: $product_pool_attributes");
-            }
+            DoofinderConfig::debug("Product Pool Attributes: $product_pool_attributes");
             $db = Db::getInstance(_PS_USE_SQL_SLAVE_);
             $id_lang = $context->language->id;
             $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock,
@@ -1554,9 +1422,8 @@ class Doofinder extends Module
                 ' ORDER BY FIELD (p.`id_product`,' . pSQL($product_pool) . ') '
                 . (($show_variations) ? ' , FIELD (product_attribute_shop.`id_product_attribute`,'
                     . pSQL($product_pool_attributes) . ')' : '');
-            if (isset($debug) && $debug) {
-                $this->debug("SQL: $sql");
-            }
+
+            DoofinderConfig::debug("SQL: $sql");
 
             $result = $db->executeS($sql);
 
@@ -1600,39 +1467,14 @@ class Doofinder extends Module
     }
 
     /**
-     * Update the hashid of the search engines of the store in the configuration
-     *
-     * @return true
-     */
-    public function setSearchEnginesByConfig()
-    {
-        require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_layer_api.php';
-        $installationID = Configuration::get('DF_INSTALLATION_ID');
-        $api_key = Configuration::get('DF_API_KEY');
-        $region = Configuration::get('DF_REGION');
-
-        $data = DoofinderLayerApi::getInstallationData($installationID, $api_key, $region);
-
-        foreach ($data['config']['search_engines'] as $lang => $currencies) {
-            foreach ($currencies as $currency => $hashid) {
-                Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Checks the connection with DooManager
      *
      * @return bool
      */
     public function checkOutsideConnection()
     {
-        // Require only on this function to not overload memory with not needed classes
-        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
         $client = new EasyREST(true, 3);
-        $result = $client->get(sprintf('%s/auth/login', self::DOOMANAGER_URL));
+        $result = $client->get(sprintf('%s/auth/login', DoofinderConstants::DOOMANAGER_URL));
 
         return $result && $result->originalResponse && isset($result->headers['code'])
             && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
@@ -1662,175 +1504,6 @@ class Doofinder extends Module
 
             Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $sgid, $sid);
         }
-    }
-
-    /**
-     * Start the installation process
-     * If shop_id is null, install all shops
-     *
-     * @param int $shop_id
-     *
-     * @return void
-     */
-    public function autoinstaller($shop_id = null)
-    {
-        if (!empty($shop_id)) {
-            $shop = Shop::getShop($shop_id);
-            $this->createStore($shop);
-
-            return;
-        }
-
-        $shops = Shop::getShops();
-        foreach ($shops as $shop) {
-            $this->createStore($shop);
-        }
-    }
-
-    /**
-     * Create a store in Doofinder based on the Prestashop shop
-     *
-     * @param array $shop
-     *
-     * @return void
-     */
-    public function createStore($shop)
-    {
-        // Require only on this function to not overload memory with unneeded classes
-        require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
-        $client = new EasyREST();
-        $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
-        $languages = Language::getLanguages(true, $shop['id_shop']);
-        $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
-        $shopId = $shop['id_shop'];
-        $shopGroupId = $shop['id_shop_group'];
-        $primary_lang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
-        $installationID = null;
-
-        $this->setDefaultShopConfig($shopGroupId, $shopId);
-
-        $shop_url = $this->getShopURL($shopId);
-        $store_data = [
-            'name' => $shop['name'],
-            'platform' => 'prestashop',
-            'primary_language' => $primary_lang->language_code,
-            'site_url' => $shop_url,
-            'search_engines' => [],
-            'plugin_version' => $this->version,
-        ];
-
-        foreach ($languages as $lang) {
-            if ($lang['active'] == 0) {
-                continue;
-            }
-            foreach ($currencies as $cur) {
-                if ($cur['deleted'] == 1 || $cur['active'] == 0) {
-                    continue;
-                }
-                $ciso = $cur['iso_code'];
-                $lang_code = $lang['language_code'];
-                $feed_url = $this->buildFeedUrl($shopId, $lang['iso_code'], $ciso);
-                $store_data['search_engines'][] = [
-                    'language' => $lang_code,
-                    'currency' => $ciso,
-                    'feed_url' => $feed_url,
-                    'callback_url' => $this->getProcessCallbackUrl(),
-                ];
-            }
-        }
-
-        $json_store_data = json_encode($store_data);
-        $this->debug('Create Store Start');
-        $this->debug(print_r($store_data, true));
-
-        $response = $client->post(
-            $this->getInstallUrl(Configuration::get('DF_REGION')),
-            $json_store_data,
-            false,
-            false,
-            'application/json',
-            ['Authorization: Token ' . $apikey]
-        );
-
-        if ($response->getResponseCode() == 200) {
-            $response = json_decode($response->response, true);
-            $installationID = @$response['installation_id'];
-            $this->debug('Create Store response:');
-            $this->debug(print_r($response, true));
-
-            if ($installationID) {
-                $this->debug("Set installation ID: $installationID");
-                Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
-                Configuration::updateValue('DF_ENABLED_V9', true, false, $shopGroupId, $shopId);
-                Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
-                Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true, false, $shopGroupId, $shopId);
-                $this->setSearchEnginesByConfig();
-            } else {
-                $this->debug('Invalid installation ID');
-                exit('ko');
-            }
-        } else {
-            $error_msg = "Create Store failed with code {$response->getResponseCode()} and message '{$response->getResponseMessage()}'";
-            $response_msg = 'Response: ' . print_r($response->response, true);
-            $this->debug($error_msg);
-            $this->debug($response_msg);
-            echo $response->response;
-            exit;
-        }
-    }
-
-    /**
-     * Get Process Callback URL
-     *
-     * @return string
-     */
-    private function getProcessCallbackUrl()
-    {
-        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
-    }
-
-    /**
-     * Set the default values in the configuration
-     *
-     * @param int $shopGroupId
-     * @param int $shopId
-     *
-     * @return void
-     */
-    public function setDefaultShopConfig($shopGroupId, $shopId)
-    {
-        $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
-        $api_endpoint = Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
-        $api_endpoint_array = explode('-', $api_endpoint);
-        $region = $api_endpoint_array[0];
-
-        Configuration::updateValue('DF_ENABLE_HASH', true, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_GS_DISPLAY_PRICES', true, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_GS_PRICES_USE_TAX', true, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_FEED_FULL_PATH', true, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_REGION', $region, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', self::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
-        Configuration::updateValue('DF_GS_IMAGE_SIZE', key(dfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
-    }
-
-    /**
-     * Get store URL
-     *
-     * @param int $shop_id
-     *
-     * @return string
-     */
-    public function getShopURL($shop_id)
-    {
-        $shop = new Shop($shop_id);
-        $force_ssl = (Configuration::get('PS_SSL_ENABLED')
-            && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'));
-        $url = ($force_ssl) ? 'https://' . $shop->domain_ssl : 'http://' . $shop->domain;
-
-        return $url . $this->getShopBaseURI($shop);
     }
 
     /**
@@ -1978,22 +1651,6 @@ class Doofinder extends Module
         return $stop;
     }
 
-    private function getShopBaseURI($shop)
-    {
-        return $shop->physical_uri . $shop->virtual_uri;
-    }
-
-    private function debug($message)
-    {
-        $current_path = dirname($_SERVER['SCRIPT_FILENAME']);
-        if (!is_dir($current_path)) {
-            $current_path = dirname(__FILE__);
-        }
-        if (isset($debug) && $debug) {
-            error_log("$message\n", 3, $current_path . '/doofinder.log');
-        }
-    }
-
     private function displayErrorCtm($error, $link = false, $raw = false)
     {
         return $this->displayGeneralMsg($error, 'error', 'danger', $link, $raw);
@@ -2034,37 +1691,5 @@ class Doofinder extends Module
         $isMobile = method_exists($context, 'isMobile') ? $context->isMobile() : $context->getMobileDetect()->isMobile();
 
         return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
-    }
-
-    private function installTabs()
-    {
-        $tab = new Tab();
-        $tab->active = 0;
-        $tab->class_name = 'DoofinderAdmin';
-        $tab->name = [];
-        foreach (Language::getLanguages() as $lang) {
-            $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
-        }
-        $tab->id_parent = 0;
-        $tab->module = $this->name;
-
-        return $tab->save();
-    }
-
-    private function uninstallTabs()
-    {
-        $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
-        if (!$tabId) {
-            return true;
-        }
-
-        $tab = new Tab($tabId);
-
-        return $tab->delete();
-    }
-
-    private function getInstallUrl($region)
-    {
-        return str_replace('{region}', $region, 'https://{region}-plugins.doofinder.com/install');
     }
 }

@@ -23,15 +23,19 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-if (!defined('_PS_VERSION_')) {
+use PrestaShop\Module\Doofinder\Lib\SearchEngine;
+
+if (!defined('_PS_VERSION_') || !defined('_PS_MODULE_DIR_')) {
     exit;
 }
+
+require_once _PS_MODULE_DIR_ . 'doofinder/autoloader.php';
 
 function upgrade_module_4_5_0($module)
 {
     return installDb_4_5_0()
         && $module->registerHook('moduleRoutes')
-        && $module->setSearchEnginesByConfig();
+        && SearchEngine::setSearchEnginesByConfig();
 }
 
 function installDb_4_5_0()
