@@ -23,6 +23,8 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
+use Db;
 use PrestaShop\Module\Doofinder\Lib\SearchEngine;
 
 if (!defined('_PS_VERSION_') || !defined('_PS_MODULE_DIR_')) {
