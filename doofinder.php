@@ -552,7 +552,7 @@ class Doofinder extends Module
                 $currencyIso = Tools::strtoupper($cur['iso_code']);
                 $langIso = Tools::strtoupper($lang['iso_code']);
                 $urls[] = [
-                    'url' => UrlManager::buildFeedUrl($this->context->shop->id, $langIso, $currencyIso),
+                    'url' => UrlManager::getFeedUrl($this->context->shop->id, $langIso, $currencyIso),
                     'lang' => $langIso,
                     'currency' => $currencyIso,
                 ];

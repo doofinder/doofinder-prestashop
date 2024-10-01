@@ -154,7 +154,7 @@ class DoofinderInstallation
                 }
                 $ciso = $cur['iso_code'];
                 $langCode = $lang['language_code'];
-                $feedUrl = UrlManager::buildFeedUrl($shopId, $lang['iso_code'], $ciso);
+                $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $storeData['search_engines'][] = [
                     'language' => $langCode,
                     'currency' => $ciso,

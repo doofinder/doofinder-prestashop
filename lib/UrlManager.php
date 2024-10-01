@@ -49,7 +49,7 @@ class UrlManager
      *
      * @return string
      */
-    public static function buildFeedUrl($shopId, $language, $currency)
+    public static function getFeedUrl($shopId, $language, $currency)
     {
         $shopUrl = self::getShopURL($shopId);
 
