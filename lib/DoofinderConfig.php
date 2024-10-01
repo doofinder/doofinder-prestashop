@@ -27,13 +27,13 @@ class DoofinderConfig
 {
     public static function debug($message, $logFile = 'doofinder.log')
     {
-        $currentPath = dirname(dirname($_SERVER['SCRIPT_FILENAME']));
-        if (!is_dir($currentPath)) {
-            $currentPath = dirname(__FILE__);
+        if (!defined('_PS_MODULE_DIR_')) {
+            return;
         }
+
         $debug = \Configuration::get('DF_DEBUG');
         if (isset($debug) && $debug) {
-            error_log("$message\n", 3, $currentPath . '/' . $logFile);
+            error_log("$message\n", 3, _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . 'doofinder' . DIRECTORY_SEPARATOR . $logFile);
         }
     }
 

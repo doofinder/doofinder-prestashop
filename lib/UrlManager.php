@@ -23,18 +23,6 @@ class UrlManager
 {
     const API_URL = 'https://{region}-plugins.doofinder.com';
 
-    public static function debug($message, $logFile = 'doofinder.log')
-    {
-        $currentPath = dirname(dirname($_SERVER['SCRIPT_FILENAME']));
-        if (!is_dir($currentPath)) {
-            $currentPath = dirname(__FILE__);
-        }
-        $debug = \Configuration::get('DF_DEBUG');
-        if (isset($debug) && $debug) {
-            error_log("$message\n", 3, $currentPath . DIRECTORY_SEPARATOR . $logFile);
-        }
-    }
-
     /**
      * Get store URL
      *

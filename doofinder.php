@@ -22,7 +22,6 @@ if (!defined('_PS_VERSION_')) {
 
 require_once 'autoloader.php';
 
-use Db;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
@@ -122,6 +121,17 @@ class Doofinder extends Module
                 ],
             ],
         ];
+    }
+
+    /**
+     * Update the hashid of the search engines of the store in the configuration.
+     * It must be declared here too to be used by upgrade 4.5.0.
+     *
+     * @return true
+     */
+    public function setSearchEnginesByConfig()
+    {
+        return SearchEngine::setSearchEnginesByConfig();
     }
 
     /**

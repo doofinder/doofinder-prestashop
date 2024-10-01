@@ -135,7 +135,7 @@ class DoofinderInstallation
         DoofinderConfig::setDefaultShopConfig($shopGroupId, $shopId);
 
         $shopUrl = UrlManager::getShopURL($shopId);
-        $store_data = [
+        $storeData = [
             'name' => $shop['name'],
             'platform' => 'prestashop',
             'primary_language' => $primaryLang->language_code,
@@ -303,7 +303,7 @@ class DoofinderInstallation
      */
     public static function uninstallDb()
     {
-        return \Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_updates`')
-            && \Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
+        return \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_updates`')
+            && \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_landing`');
     }
 }

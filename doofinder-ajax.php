@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
+
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $config_file_path = $root_path . '/config/config.inc.php';
 if (@file_exists($config_file_path)) {
@@ -26,6 +29,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once 'autoloader.php';
+
 $doofinder = Module::getInstanceByName('doofinder');
 
 $check_api_key = Tools::getValue('check_api_key');
@@ -38,7 +43,7 @@ $shop_id = Tools::getValue('shop_id', null);
 if ($autoinstaller) {
     header('Content-Type:application/json; charset=utf-8');
     if (Tools::getValue('token') == Tools::encrypt('doofinder-ajax')) {
-        $doofinder->autoinstaller($shop_id);
+        DoofinderInstallation::autoinstaller($shop_id);
         echo json_encode(['success' => true]);
         exit;
     } else {
