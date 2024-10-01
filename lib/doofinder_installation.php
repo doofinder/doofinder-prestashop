@@ -66,7 +66,7 @@ class DoofinderInstallation
      */
     public static function installDb()
     {
-        return Db::getInstance()->execute(
+        return \Db::getInstance()->execute(
             '
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_updates` (
                 `id_doofinder_update` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -79,7 +79,7 @@ class DoofinderInstallation
                 CONSTRAINT uc_shop_update UNIQUE KEY (id_shop,object,id_object)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
         )
-            && Db::getInstance()->execute(
+            && \Db::getInstance()->execute(
                 '
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_landing` (
                 `name` VARCHAR(45) NOT NULL,
@@ -102,13 +102,13 @@ class DoofinderInstallation
     public static function autoinstaller($shop_id = null)
     {
         if (!empty($shop_id)) {
-            $shop = Shop::getShop($shop_id);
+            $shop = \Shop::getShop($shop_id);
             self::_createStore($shop);
 
             return;
         }
 
-        $shops = Shop::getShops();
+        $shops = \Shop::getShops();
         foreach ($shops as $shop) {
             self::_createStore($shop);
         }
@@ -124,12 +124,12 @@ class DoofinderInstallation
     private static function _createStore($shop)
     {
         $client = new EasyREST();
-        $apikey = Configuration::getGlobalValue('DF_AI_APIKEY');
-        $languages = Language::getLanguages(true, $shop['id_shop']);
-        $currencies = Currency::getCurrenciesByIdShop($shop['id_shop']);
+        $apikey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+        $languages = \Language::getLanguages(true, $shop['id_shop']);
+        $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
-        $primaryLang = new Language(Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
+        $primaryLang = new \Language(\Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
         $installationID = null;
 
         DoofinderConfig::setDefaultShopConfig($shopGroupId, $shopId);
@@ -154,7 +154,7 @@ class DoofinderInstallation
                 }
                 $ciso = $cur['iso_code'];
                 $langCode = $lang['language_code'];
-                $feedUrl = UrlManager::buildFeedUrl($shopId, $lang['iso_code'], $ciso, DoofinderConstants::NAME);
+                $feedUrl = UrlManager::buildFeedUrl($shopId, $lang['iso_code'], $ciso);
                 $storeData['search_engines'][] = [
                     'language' => $langCode,
                     'currency' => $ciso,
@@ -169,7 +169,7 @@ class DoofinderInstallation
         DoofinderConfig::debug(print_r($storeData, true));
 
         $response = $client->post(
-            UrlManager::getInstallUrl(Configuration::get('DF_REGION')),
+            UrlManager::getInstallUrl(\Configuration::get('DF_REGION')),
             $jsonStoreData,
             false,
             false,
@@ -185,10 +185,10 @@ class DoofinderInstallation
 
             if ($installationID) {
                 DoofinderConfig::debug("Set installation ID: $installationID");
-                Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
-                Configuration::updateValue('DF_ENABLED_V9', true, false, $shopGroupId, $shopId);
-                Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
-                Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true, false, $shopGroupId, $shopId);
+                \Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
+                \Configuration::updateValue('DF_ENABLED_V9', true, false, $shopGroupId, $shopId);
+                \Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
+                \Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true, false, $shopGroupId, $shopId);
                 SearchEngine::setSearchEnginesByConfig();
             } else {
                 DoofinderConfig::debug('Invalid installation ID');
@@ -206,11 +206,11 @@ class DoofinderInstallation
 
     public static function installTabs()
     {
-        $tab = new Tab();
+        $tab = new \Tab();
         $tab->active = 0;
         $tab->class_name = 'DoofinderAdmin';
         $tab->name = [];
-        foreach (Language::getLanguages() as $lang) {
+        foreach (\Language::getLanguages() as $lang) {
             $tab->name[$lang['id_lang']] = 'Doofinder admin controller';
         }
         $tab->id_parent = 0;
@@ -221,12 +221,12 @@ class DoofinderInstallation
 
     public static function uninstallTabs()
     {
-        $tabId = (int) Tab::getIdFromClassName('DoofinderAdmin');
+        $tabId = (int) \Tab::getIdFromClassName('DoofinderAdmin');
         if (!$tabId) {
             return true;
         }
 
-        $tab = new Tab($tabId);
+        $tab = new \Tab($tabId);
 
         return $tab->delete();
     }
@@ -282,7 +282,7 @@ class DoofinderInstallation
         ];
 
         $hashid_vars = array_column(
-            Db::getInstance()->executeS('
+            \Db::getInstance()->executeS('
             SELECT name FROM ' . _DB_PREFIX_ . "configuration where name like 'DF_HASHID_%'"),
             'name'
         );
@@ -290,7 +290,7 @@ class DoofinderInstallation
         $config_vars = array_merge($config_vars, $hashid_vars);
 
         foreach ($config_vars as $var) {
-            Configuration::deleteByName($var);
+            \Configuration::deleteByName($var);
         }
 
         return true;
@@ -303,7 +303,7 @@ class DoofinderInstallation
      */
     public static function uninstallDb()
     {
-        return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_updates`')
-            && Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
+        return \Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_updates`')
+            && \Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'doofinder_landing`');
     }
 }

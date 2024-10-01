@@ -19,6 +19,10 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+if (!class_exists('DoofinderLayerApi')) {
+    require_once 'doofinder_layer_api.php';
+}
+
 class SearchEngine
 {
     /**
@@ -29,15 +33,15 @@ class SearchEngine
     public static function setSearchEnginesByConfig()
     {
         require_once 'doofinder_layer_api.php';
-        $installationID = Configuration::get('DF_INSTALLATION_ID');
-        $apiKey = Configuration::get('DF_API_KEY');
-        $region = Configuration::get('DF_REGION');
+        $installationID = \Configuration::get('DF_INSTALLATION_ID');
+        $apiKey = \Configuration::get('DF_API_KEY');
+        $region = \Configuration::get('DF_REGION');
 
-        $data = DoofinderLayerApi::getInstallationData($installationID, $apiKey, $region);
+        $data = \DoofinderLayerApi::getInstallationData($installationID, $apiKey, $region);
 
         foreach ($data['config']['search_engines'] as $lang => $currencies) {
             foreach ($currencies as $currency => $hashid) {
-                Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
+                \Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
             }
         }
 

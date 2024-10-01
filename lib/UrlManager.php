@@ -29,7 +29,7 @@ class UrlManager
         if (!is_dir($currentPath)) {
             $currentPath = dirname(__FILE__);
         }
-        $debug = Configuration::get('DF_DEBUG');
+        $debug = \Configuration::get('DF_DEBUG');
         if (isset($debug) && $debug) {
             error_log("$message\n", 3, $currentPath . DIRECTORY_SEPARATOR . $logFile);
         }
@@ -44,9 +44,9 @@ class UrlManager
      */
     public static function getShopURL($shop_id)
     {
-        $shop = new Shop($shop_id);
-        $force_ssl = (Configuration::get('PS_SSL_ENABLED')
-            && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'));
+        $shop = new \Shop($shop_id);
+        $force_ssl = (\Configuration::get('PS_SSL_ENABLED')
+            && \Configuration::get('PS_SSL_ENABLED_EVERYWHERE'));
         $url = ($force_ssl) ? 'https://' . $shop->domain_ssl : 'http://' . $shop->domain;
 
         return $url . self::_getShopBaseURI($shop);
@@ -61,15 +61,15 @@ class UrlManager
      *
      * @return string
      */
-    public static function buildFeedUrl($shopId, $language, $currency, $moduleName)
+    public static function buildFeedUrl($shopId, $language, $currency)
     {
         $shopUrl = self::getShopURL($shopId);
 
-        return $shopUrl . ltrim('modules/' . $moduleName, DIRECTORY_SEPARATOR)
+        return $shopUrl . ltrim('modules/' . DoofinderConstants::NAME, DIRECTORY_SEPARATOR)
             . '/feed.php?'
-            . 'currency=' . Tools::strtoupper($currency)
-            . '&language=' . Tools::strtoupper($language)
-            . '&dfsec_hash=' . Configuration::get('DF_API_KEY');
+            . 'currency=' . \Tools::strtoupper($currency)
+            . '&language=' . \Tools::strtoupper($language)
+            . '&dfsec_hash=' . \Configuration::get('DF_API_KEY');
     }
 
     /**
@@ -79,7 +79,7 @@ class UrlManager
      */
     public static function getProcessCallbackUrl()
     {
-        return Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
+        return \Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
     }
 
     public static function getInstallUrl($region)

@@ -22,6 +22,10 @@ const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiUniqueScript
 {
+    private $installationId;
+    private $apiKey;
+    private $apiUrl;
+
     public function __construct($installationId, $region, $apiKey)
     {
         $this->installationId = $installationId;

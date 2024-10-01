@@ -22,6 +22,10 @@ const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiLanding
 {
+    private $hashid;
+    private $api_key;
+    private $api_url;
+
     public function __construct($hashid, $api_key, $region)
     {
         $this->hashid = $hashid;

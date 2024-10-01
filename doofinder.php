@@ -22,10 +22,13 @@ if (!defined('_PS_VERSION_')) {
 
 require_once 'autoloader.php';
 
+use Db;
+use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
 use PrestaShop\Module\Doofinder\Lib\EasyREST;
 use PrestaShop\Module\Doofinder\Lib\SearchEngine;
+use PrestaShop\Module\Doofinder\Lib\UrlManager;
 
 class Doofinder extends Module
 {
@@ -34,6 +37,7 @@ class Doofinder extends Module
     protected $productLinks = [];
     public $ps_layered_full_tree = true;
     public $searchBanner = false;
+    public $admin_template_dir = '';
 
     // TODO (davidmolinacano): To be deleted after complete refactor.
     const DOOMANAGER_URL = DoofinderConstants::DOOMANAGER_URL;
@@ -538,7 +542,7 @@ class Doofinder extends Module
                 $currencyIso = Tools::strtoupper($cur['iso_code']);
                 $langIso = Tools::strtoupper($lang['iso_code']);
                 $urls[] = [
-                    'url' => $this->buildFeedUrl($this->context->shop->id, $langIso, $currencyIso),
+                    'url' => UrlManager::buildFeedUrl($this->context->shop->id, $langIso, $currencyIso),
                     'lang' => $langIso,
                     'currency' => $currencyIso,
                 ];
