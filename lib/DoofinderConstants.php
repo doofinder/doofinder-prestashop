@@ -25,7 +25,7 @@ class DoofinderConstants
     const DOOMANAGER_URL = 'https://admin.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.8.8';
+    const VERSION = '4.8.9';
     const NAME = 'doofinder';
     const YES = 1;
     const NO = 0;
