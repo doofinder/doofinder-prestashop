@@ -49,11 +49,11 @@
 </style>
 
 <script>
-    var checkFeedUrl = "{$check_feed_url}";
+    var checkFeedUrl = "{$check_feed_url|escape:'javascript':'UTF-8'}";
 
     $( ".close" ).on( "click", function() {
         $(".doofinder-indexation-status").css("display", "none");
-        var updateFeedUrl = "{$update_feed_url}";
+        var updateFeedUrl = "{$update_feed_url|escape:'javascript':'UTF-8'}";
         $.post(updateFeedUrl, function( data ) {});
     });
 

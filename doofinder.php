@@ -49,7 +49,7 @@ class Doofinder extends Module
 
     public function __construct()
     {
-        $this->name = DoofinderConstants::NAME;
+        $this->name = 'doofinder';
         $this->tab = 'search_filter';
         $this->version = '4.8.9';
         $this->author = 'Doofinder (http://www.doofinder.com)';
