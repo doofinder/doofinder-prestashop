@@ -12,6 +12,7 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+use PrestaShop\Module\Doofinder\Lib\SearchEngine;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
@@ -151,7 +152,7 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 
     private function getLandingData($name, $id_shop, $id_lang, $id_currency)
     {
-        $hashid = $this->module->getHashId($id_lang, $id_currency);
+        $hashid = SearchEngine::getHashId($id_lang, $id_currency);
         $cache = $this->getLandingCache($name, $hashid);
 
         if ($cache && !$this->refreshCache($cache)) {
