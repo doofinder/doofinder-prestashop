@@ -11,6 +11,9 @@
  * - getProperty : get single property of the search results (rpp, page, etc....)
  * - getResults: get an array with the results
  */
+
+namespace PrestaShop\Module\Doofinder\Lib;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }

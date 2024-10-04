@@ -63,4 +63,31 @@ class DoofinderConfig
         \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(\dfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
     }
+
+    /**
+     * Save the information that Doofinder returns after login
+     *
+     * @param string $apikey
+     * @param string $apiEndpoint
+     * @param string $adminEndpoint
+     *
+     * @return void
+     */
+    public static function saveApiConfig($apikey, $apiEndpoint, $adminEndpoint)
+    {
+        \Configuration::updateGlobalValue('DF_AI_APIKEY', $apikey);
+        \Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $apiEndpoint);
+        \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
+
+        $api_endpoint_array = explode('-', $apiEndpoint);
+        $region = $api_endpoint_array[0];
+        $shops = \Shop::getShops();
+
+        foreach ($shops as $shop) {
+            $sid = $shop['id_shop'];
+            $sgid = $shop['id_shop_group'];
+
+            \Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $sgid, $sid);
+        }
+    }
 }

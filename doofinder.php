@@ -22,7 +22,8 @@ if (!defined('_PS_VERSION_')) {
 
 require_once 'autoloader.php';
 
-use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Lib\DoofinderAdminPanelView;
+use PrestaShop\Module\Doofinder\Lib\DoofinderApi;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
 use PrestaShop\Module\Doofinder\Lib\DoofinderScript;
@@ -43,7 +44,6 @@ class Doofinder extends Module
     public $hookManager;
 
     // TODO (davidmolinacano): To be deleted after complete refactor.
-    const DOOMANAGER_URL = DoofinderConstants::DOOMANAGER_URL;
     const GS_SHORT_DESCRIPTION = DoofinderConstants::GS_SHORT_DESCRIPTION;
     const GS_LONG_DESCRIPTION = DoofinderConstants::GS_LONG_DESCRIPTION;
     const VERSION = DoofinderConstants::VERSION;
@@ -97,6 +97,41 @@ class Doofinder extends Module
     }
 
     /**
+     * Sets the product links.
+     *
+     * @param array $productLinks
+     *
+     * @return void
+     */
+    public function setProductLinks($productLinks)
+    {
+        $this->productLinks = $productLinks;
+    }
+
+    /**
+     * Sets a specific product link by index name.
+     *
+     * @param string $indexName identifier of the link
+     * @param string $productLink
+     *
+     * @return void
+     */
+    public function setProductLinkByIndexName($indexName, $productLink)
+    {
+        $this->productLinks[$indexName] = $productLink;
+    }
+
+    /**
+     * Gets the product links.
+     *
+     * @return array
+     */
+    public function getProductLinks()
+    {
+        return $this->productLinks;
+    }
+
+    /**
      * Add controller routes
      *
      * @return array
@@ -124,7 +159,8 @@ class Doofinder extends Module
      */
     public function getContent()
     {
-        $stop = $this->getWarningMultishopHtml();
+        $adminPanelView = new DoofinderAdminPanelView($this);
+        $stop = $adminPanelView->getWarningMultishopHtml();
         if ($stop) {
             return $stop;
         }
@@ -652,9 +688,14 @@ class Doofinder extends Module
         if (((bool) Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesAdvanced());
             $formUpdated = 'advanced_tab';
-            $messages .= $this->testDoofinderApi();
+            $hash_id = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
+            $api_key = Configuration::get('DF_API_KEY');
+            $dfApi = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
+            $messages .= $dfApi->test([$this, 'l']);
             $this->context->smarty->assign('adv', 1);
         }
+
+        $adminPanelView = new DoofinderAdminPanelView($this);
 
         foreach (array_keys($form_values) as $key) {
             $postKey = str_replace(['[', ']'], '', $key);
@@ -684,11 +725,11 @@ class Doofinder extends Module
             $this->context->smarty->assign('text_data_changed', $this->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'));
             $this->context->smarty->assign('text_reindex', $this->l('Launch reindexing'));
             $msg = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/reindex.tpl');
-            $messages .= $this->displayWarningCtm($msg, false, true);
+            $messages .= $adminPanelView->displayWarningCtm($msg, false, true);
         }
 
         if (!empty($formUpdated)) {
-            $messages .= $this->displayConfirmationCtm($this->l('Settings updated!'));
+            $messages .= $adminPanelView->displayConfirmationCtm($this->l('Settings updated!'));
             $this->context->smarty->assign('formUpdatedToClick', $formUpdated);
         }
 
@@ -812,282 +853,6 @@ class Doofinder extends Module
     }
 
     /**
-     * Perform an API connection test
-     *
-     * @param bool $onlyOneLang
-     *
-     * @return bool|string
-     */
-    public function testDoofinderApi($onlyOneLang = false)
-    {
-        if (!class_exists('DoofinderApi')) {
-            include_once 'lib/doofinder_api.php';
-        }
-        $result = false;
-        $messages = '';
-        $currency = Tools::strtoupper(Context::getContext()->currency->iso_code);
-        foreach (Language::getLanguages(true, $this->context->shop->id) as $lang) {
-            if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
-                $lang_iso = Tools::strtoupper($lang['iso_code']);
-                $hash_id = Configuration::get('DF_HASHID_' . $currency . '_' . $lang_iso);
-                $api_key = Configuration::get('DF_API_KEY');
-                if ($hash_id && $api_key) {
-                    try {
-                        $df = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
-                        $dfOptions = $df->getOptions();
-                        if ($dfOptions) {
-                            $opt = json_decode($dfOptions, true);
-                            if ($opt['query_limit_reached']) {
-                                $msg = 'Error: Credentials OK but limit query reached for Search Engine - ';
-                                $messages .= $this->displayErrorCtm($this->l($msg) . $lang_iso);
-                            } else {
-                                $result = true;
-                                $msg = 'Connection succesful for Search Engine - ';
-                                $messages .= $this->displayConfirmationCtm($this->l($msg) . $lang_iso);
-                            }
-                        } else {
-                            $msg = 'Error: no connection for Search Engine - ';
-                            $messages .= $this->displayErrorCtm($this->l($msg) . $lang_iso);
-                        }
-                    } catch (DoofinderException $e) {
-                        $messages .= $this->displayErrorCtm($e->getMessage() . ' - Search Engine ' . $lang_iso);
-                    } catch (Exception $e) {
-                        $msg = $e->getMessage() . ' - Search Engine ';
-                        $messages .= $this->displayErrorCtm($msg . $lang_iso);
-                    }
-                } else {
-                    $msg = 'Empty Api Key or empty Search Engine - ';
-                    $messages .= $this->displayWarningCtm($this->l($msg) . $lang_iso);
-                }
-            }
-        }
-        if ($onlyOneLang) {
-            return $result;
-        } else {
-            return $messages;
-        }
-    }
-
-    /**
-     * Search Doofinder using the API
-     *
-     * @param string $string
-     * @param int $page
-     * @param int $page_size
-     * @param int $timeout
-     * @param array $filters
-     * @param bool $return_facets
-     *
-     * @return array
-     */
-    public function searchOnApi($string, $page = 1, $page_size = 12, $timeout = 8000, $filters = null, $return_facets = false)
-    {
-        $page_size = (int) $page_size;
-        if (!$page_size) {
-            $page_size = Configuration::get('PS_PRODUCTS_PER_PAGE');
-        }
-        $page = (int) $page;
-        if (!$page) {
-            $page = 1;
-        }
-        $query_name = Tools::getValue('df_query_name', false);
-        DoofinderConfig::debug('Search On API Start');
-        $hash_id = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
-        $api_key = Configuration::get('DF_API_KEY');
-        $show_variations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        if ((int) $show_variations !== 1) {
-            $show_variations = false;
-        }
-
-        if ($hash_id && $api_key) {
-            $fail = false;
-            try {
-                if (!class_exists('DoofinderApi')) {
-                    include_once 'lib/doofinder_api.php';
-                }
-                $df = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
-                $queryParams = [
-                    'rpp' => $page_size, // results per page
-                    'timeout' => $timeout,
-                    'types' => [
-                        'product',
-                    ],
-                    'transformer' => 'basic',
-                ];
-                if ($query_name) {
-                    $queryParams['query_name'] = $query_name;
-                }
-                if (!empty($filters)) {
-                    $queryParams['filter'] = $filters;
-                }
-                $dfResults = $df->query($string, $page, $queryParams);
-            } catch (Exception $e) {
-                $fail = true;
-            }
-
-            if ($fail || !$dfResults->isOk()) {
-                return false;
-            }
-
-            $dfResultsArray = $dfResults->getResults();
-            $product_pool_attributes = [];
-            $product_pool_ids = [];
-            foreach ($dfResultsArray as $entry) {
-                // For unknown reasons, it can sometimes be defined as 'products' in plural
-                if (in_array($entry['type'], ['product', 'products'])) {
-                    if (strpos($entry['id'], 'VAR-') === false) {
-                        $product_pool_ids[] = (int) pSQL($entry['id']);
-                    } else {
-                        $id_product_attribute = str_replace('VAR-', '', $entry['id']);
-                        if (!in_array($id_product_attribute, $product_pool_attributes)) {
-                            $product_pool_attributes[] = (int) pSQL($id_product_attribute);
-                        }
-                        $id_product = Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
-                            'SELECT id_product FROM ' . _DB_PREFIX_ . 'product_attribute'
-                            . ' WHERE id_product_attribute = ' . (int) pSQL($id_product_attribute)
-                        );
-                        $product_pool_ids[] = ((!empty($id_product)) ? (int) pSQL($id_product) : 0);
-                    }
-                }
-            }
-            $product_pool = implode(', ', $product_pool_ids);
-
-            // To avoid SQL errors.
-            if ($product_pool == '') {
-                $product_pool = '0';
-            }
-
-            DoofinderConfig::debug("Product Pool: $product_pool");
-
-            $product_pool_attributes = implode(',', $product_pool_attributes);
-
-            $context = Context::getContext();
-            // Avoids SQL Error
-            if ($product_pool_attributes == '') {
-                $product_pool_attributes = '0';
-            }
-
-            DoofinderConfig::debug("Product Pool Attributes: $product_pool_attributes");
-            $db = Db::getInstance(_PS_USE_SQL_SLAVE_);
-            $id_lang = $context->language->id;
-            $sql = 'SELECT p.*, product_shop.*, stock.out_of_stock,
-                IFNULL(stock.quantity, 0) as quantity,
-                pl.`description_short`, pl.`available_now`,
-                pl.`available_later`, pl.`link_rewrite`, pl.`name`,
-                ' . (Combination::isFeatureActive() && $show_variations ?
-                ' IF(ipa.`id_image` IS NULL OR ipa.`id_image` = 0, MAX(image_shop.`id_image`),ipa.`id_image`)'
-                . ' id_image, ' : 'i.id_image, ') . '
-                il.`legend`, m.`name` manufacturer_name '
-                . (Combination::isFeatureActive() ? (($show_variations) ?
-                    ', MAX(product_attribute_shop.`id_product_attribute`) id_product_attribute' :
-                    ', product_attribute_shop.`id_product_attribute` id_product_attribute') : '') . ',
-                DATEDIFF(
-                    p.`date_add`,
-                    DATE_SUB(
-                        NOW(),
-                        INTERVAL ' . (Validate::isUnsignedInt(Configuration::get('PS_NB_DAYS_NEW_PRODUCT'))
-                ? Configuration::get('PS_NB_DAYS_NEW_PRODUCT') : 20) . ' DAY
-                    )
-                ) > 0 new' . (Combination::isFeatureActive() ?
-                ', MAX(product_attribute_shop.minimal_quantity) AS product_attribute_minimal_quantity' : '') . '
-                FROM ' . _DB_PREFIX_ . 'product p
-                ' . Shop::addSqlAssociation('product', 'p') . '
-                INNER JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (
-                    p.`id_product` = pl.`id_product`
-                    AND pl.`id_lang` = ' . (int) pSQL($id_lang) . Shop::addSqlRestrictionOnLang('pl') . ') '
-                . (Combination::isFeatureActive() ? ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa
-                    ON (p.`id_product` = pa.`id_product`)
-                    ' . Shop::addSqlAssociation('product_attribute', 'pa', false, ($show_variations) ? '' :
-                            ' product_attribute_shop.default_on = 1') . '
-                    ' . Product::sqlStock('p', 'product_attribute_shop', false, $context->shop) :
-                    Product::sqlStock('p', 'product', false, Context::getContext()->shop)) . '
-                LEFT JOIN `' . _DB_PREFIX_ . 'manufacturer` m ON m.`id_manufacturer` = p.`id_manufacturer`
-                LEFT JOIN `' . _DB_PREFIX_ . 'image` i ON (i.`id_product` = p.`id_product` '
-                . ((Combination::isFeatureActive() && $show_variations) ? '' : 'AND i.cover=1') . ') '
-                . ((Combination::isFeatureActive() && $show_variations) ?
-                    ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_image` pai'
-                    . ' ON (pai.`id_product_attribute` = product_attribute_shop.`id_product_attribute`) ' : ' ')
-                . Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . '
-                LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il'
-                . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) pSQL($id_lang) . ') '
-                . (Combination::isFeatureActive() && $show_variations ?
-                    'LEFT JOIN (
-                        SELECT i.id_image, P.id_product, P.id_product_attribute
-                            from
-                            (
-                            select
-                                pa.id_product,
-                                pa.id_product_attribute,
-                                paic.id_attribute,min(i.position)
-                                as min_position
-                            from ' . _DB_PREFIX_ . 'product_attribute pa
-                             inner join ' . _DB_PREFIX_ . 'product_attribute_image pai
-                               on pai.id_product_attribute = pa.id_product_attribute
-                             inner join  ' . _DB_PREFIX_ . 'product_attribute_combination paic
-                               on pai.id_product_attribute = paic.id_product_attribute
-                             inner join ' . _DB_PREFIX_ . 'image i
-                               on pai.id_image = i.id_image
-                            group by pa.id_product, pa.id_product_attribute,paic.id_attribute
-                            ) as P
-                            inner join ' . _DB_PREFIX_ . 'image i
-                             on i.id_product = P.id_product and i.position =  P.min_position
-                    )
-                    AS ipa ON p.`id_product` = ipa.`id_product`
-                    AND pai.`id_product_attribute` = ipa.`id_product_attribute`' : '')
-                . ' WHERE p.`id_product` IN (' . pSQL($product_pool) . ') ' .
-                (($show_variations) ? ' AND (product_attribute_shop.`id_product_attribute` IS NULL'
-                    . ' OR product_attribute_shop.`id_product_attribute`'
-                    . ' IN (' . pSQL($product_pool_attributes) . ')) ' : '') .
-                ' GROUP BY product_shop.id_product '
-                . (($show_variations) ? ' ,  product_attribute_shop.`id_product_attribute` ' : '') .
-                ' ORDER BY FIELD (p.`id_product`,' . pSQL($product_pool) . ') '
-                . (($show_variations) ? ' , FIELD (product_attribute_shop.`id_product_attribute`,'
-                    . pSQL($product_pool_attributes) . ')' : '');
-
-            DoofinderConfig::debug("SQL: $sql");
-
-            $result = $db->executeS($sql);
-
-            if (!$result) {
-                return false;
-            } else {
-                if (version_compare(_PS_VERSION_, '1.7', '<') === true) {
-                    $result_properties = Product::getProductsProperties((int) $id_lang, $result);
-                    // To print the id and links in the javascript so I can register the clicks
-                    $this->productLinks = [];
-
-                    foreach ($result_properties as $rp) {
-                        $this->productLinks[$rp['link']] = $rp['id_product'];
-                    }
-                } else {
-                    $result_properties = $result;
-                }
-            }
-            $this->searchBanner = $dfResults->getBanner();
-
-            if ($return_facets) {
-                return [
-                    'doofinder_results' => $dfResultsArray,
-                    'total' => $dfResults->getProperty('total'),
-                    'result' => $result_properties,
-                    'facets' => $dfResults->getFacets(),
-                    'filters' => $df->getFilters(),
-                    'df_query_name' => $dfResults->getProperty('query_name'),
-                ];
-            }
-
-            return [
-                'doofinder_results' => $dfResultsArray,
-                'total' => $dfResults->getProperty('total'),
-                'result' => $result_properties,
-                'df_query_name' => $dfResults->getProperty('query_name'),
-            ];
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Checks the connection with DooManager
      *
      * @return bool
@@ -1095,52 +860,11 @@ class Doofinder extends Module
     public function checkOutsideConnection()
     {
         $client = new EasyREST(true, 3);
-        $result = $client->get(sprintf('%s/auth/login', DoofinderConstants::DOOMANAGER_URL));
+        $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
+        $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
 
         return $result && $result->originalResponse && isset($result->headers['code'])
             && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
-    }
-
-    /**
-     * Save the information that Doofinder returns after login
-     *
-     * @param string $apikey
-     * @param string $api_endpoint
-     * @param string $admin_endpoint
-     *
-     * @return void
-     */
-    public function saveApiData($apikey, $api_endpoint, $admin_endpoint)
-    {
-        Configuration::updateGlobalValue('DF_AI_APIKEY', $apikey);
-        Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $admin_endpoint);
-        Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $api_endpoint);
-
-        $api_endpoint_array = explode('-', $api_endpoint);
-        $region = $api_endpoint_array[0];
-        $shops = Shop::getShops();
-        foreach ($shops as $shop) {
-            $sid = $shop['id_shop'];
-            $sgid = $shop['id_shop_group'];
-
-            Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $sgid, $sid);
-        }
-    }
-
-    /**
-     * Check the connection to the API using the saved API KEY
-     *
-     * @param bool $text If the response is received as a string
-     *
-     * @return bool|string
-     */
-    public function checkApiKey($text = false)
-    {
-        $result = Db::getInstance()->getValue('SELECT id_configuration FROM ' . _DB_PREFIX_
-            . 'configuration WHERE name = "DF_API_KEY" AND (value IS NOT NULL OR value <> "")');
-        $return = (($result) ? 'OK' : 'KO');
-
-        return ($text) ? $return : $result;
     }
 
     /**
@@ -1204,46 +928,5 @@ class Doofinder extends Module
         ];
 
         return $option;
-    }
-
-    private function getWarningMultishopHtml()
-    {
-        $stop = false;
-        if (Shop::getContext() == Shop::CONTEXT_GROUP || Shop::getContext() == Shop::CONTEXT_ALL) {
-            $this->context->smarty->assign('text_one_shop', $this->l('You cannot manage Doofinder from a \'All Shops\' or a \'Group Shop\' context, select directly the shop you want to edit'));
-            $stop = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/message_manage_one_shop.tpl');
-        }
-
-        return $stop;
-    }
-
-    private function displayErrorCtm($error, $link = false, $raw = false)
-    {
-        return $this->displayGeneralMsg($error, 'error', 'danger', $link, $raw);
-    }
-
-    private function displayWarningCtm($warning, $link = false, $raw = false)
-    {
-        return $this->displayGeneralMsg($warning, 'warning', 'warning', $link, $raw);
-    }
-
-    private function displayConfirmationCtm($string, $link = false, $raw = false)
-    {
-        return $this->displayGeneralMsg($string, 'confirmation', 'success', $link, $raw);
-    }
-
-    private function displayGeneralMsg($string, $type, $alert, $link = false, $raw = false)
-    {
-        $this->context->smarty->assign(
-            [
-                'd_type_message' => $type,
-                'd_type_alert' => $alert,
-                'd_message' => $string,
-                'd_link' => $link,
-                'd_raw' => $raw,
-            ]
-        );
-
-        return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_msg.tpl');
     }
 }

@@ -12,13 +12,13 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Lib\DoofinderApiLanding;
 use PrestaShop\Module\Doofinder\Lib\SearchEngine;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\ProductListingPresenter;
-
-require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_api_landing.php';
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -28,6 +28,8 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
 {
     public $products = [];
     public $landing_data = [];
+    private $display_column_right;
+    private $display_column_left;
 
     const RESULTS = 48;
     const TTL_CACHE = 30;
@@ -49,9 +51,14 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=404');
         }
 
+        $hashid = SearchEngine::getHashId($this->context->language->id, $this->context->currency->id);
+        $apiKey = Configuration::get('DF_API_KEY');
+        $region = Configuration::get('DF_REGION');
+        $dfApiLanding = new DoofinderApiLanding($hashid, $apiKey, $region);
+
         foreach ($this->landing_data['blocks'] as &$block) {
-            if ($products_result = $this->module->searchOnApi($block['query'], 1, self::RESULTS)) {
-                $block['products'] = $products_result['result'];
+            if ($productsResult = $dfApiLanding->searchOnApi($block['query'], $this->module, 1, self::RESULTS)) {
+                $block['products'] = $productsResult['result'];
             } else {
                 $block['products'] = [];
             }

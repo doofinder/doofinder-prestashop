@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
+
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $config_file_path = $root_path . '/config/config.inc.php';
 if (@file_exists($config_file_path)) {
@@ -41,7 +44,7 @@ if ($autoinstallerToken) {
         $api_endpoint = Tools::getValue('api_endpoint');
         $admin_endpoint = Tools::getValue('admin_endpoint');
         if ($apiToken) {
-            $module->saveApiData($apiToken, $api_endpoint, $admin_endpoint);
+            DoofinderConfig::saveApiConfig($apiToken, $api_endpoint, $admin_endpoint);
         }
         echo json_encode(['success' => true]);
         exit;

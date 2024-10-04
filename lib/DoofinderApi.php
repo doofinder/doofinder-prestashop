@@ -15,6 +15,9 @@
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)
  */
+
+namespace PrestaShop\Module\Doofinder\Lib;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -28,7 +31,6 @@ class DoofinderApi
      * Returns a DoofinderResults object
      */
 
-    const URL_SUFFIX = '-search.doofinder.com';
     const DEFAULT_TIMEOUT = 10000;
     const DEFAULT_RPP = 10;
     const DEFAULT_PARAMS_PREFIX = 'dfParam_';
@@ -51,6 +53,8 @@ class DoofinderApi
     private $serializationArray;
     private $queryParameter = 'query'; // the parameter used for querying
     private $allowedParameters = ['page', 'rpp', 'timeout', 'types', 'filter', 'query_name', 'transformer'];
+    private $zone;
+    private $filter;
     // request parameters that doofinder handle
 
     /**
@@ -69,8 +73,8 @@ class DoofinderApi
     {
         $zone_key_array = explode('-', $api_key);
         $this->api_key = end($zone_key_array);
-        $this->zone = Configuration::get('DF_REGION');
-        $this->url = 'https://' . $this->zone . self::URL_SUFFIX;
+        $this->zone = \Configuration::get('DF_REGION');
+        $this->url = UrlManager::getRegionalUrl(DoofinderConstants::DOOPHOENIX_REGION_URL, $this->zone);
 
         if (array_key_exists('prefix', $init_options)) {
             $this->paramsPrefix = $init_options['prefix'];
@@ -164,14 +168,14 @@ class DoofinderApi
         curl_setopt($session, CURLOPT_RETURNTRANSFER, true); // Tell curl to return the response
         curl_setopt($session, CURLOPT_HTTPHEADER, $this->reqHeaders()); // Adding request headers
         // IF YOU MAKE REQUEST FROM LOCALHOST OR HAVE SERVER CERTIFICATE ISSUE
-        $disableSSLVerify = Configuration::get('DF_DSBL_HTTPS_CURL');
+        $disableSSLVerify = \Configuration::get('DF_DSBL_HTTPS_CURL');
         if ($disableSSLVerify) {
             curl_setopt($session, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($session, CURLOPT_SSL_VERIFYPEER, 0);
         }
         $response = curl_exec($session);
         $httpCode = curl_getinfo($session, CURLINFO_HTTP_CODE);
-        $debugCurlError = Configuration::get('DF_DEBUG_CURL');
+        $debugCurlError = \Configuration::get('DF_DEBUG_CURL');
         if ($debugCurlError) {
             echo curl_errno($session);
         }
@@ -594,6 +598,77 @@ class DoofinderApi
     }
 
     /**
+     * Perform an API connection test
+     *
+     * @param callable $translationFunction to be able to use an equivalent of $this->l() here
+     * @param bool $onlyOneLang
+     *
+     * @return bool|string
+     */
+    public function test($translationFunction, $onlyOneLang = false)
+    {
+        $result = false;
+        $messages = '';
+        $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
+        $context = \Context::getContext();
+        foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
+            if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
+                $lang_iso = \Tools::strtoupper($lang['iso_code']);
+                $hash_id = \Configuration::get('DF_HASHID_' . $currency . '_' . $lang_iso);
+                $api_key = \Configuration::get('DF_API_KEY');
+                if ($hash_id && $api_key) {
+                    try {
+                        $dfOptions = $this->getOptions();
+                        if ($dfOptions) {
+                            $opt = json_decode($dfOptions, true);
+                            if ($opt['query_limit_reached']) {
+                                $msg = $translationFunction('Error: Credentials OK but limit query reached for Search Engine - ') . $lang_iso;
+                                $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                            } else {
+                                $result = true;
+                                $msg = $translationFunction('Connection successful for Search Engine - ') . $lang_iso;
+                                $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
+                            }
+                        } else {
+                            $msg = $translationFunction('Error: no connection for Search Engine - ') . $lang_iso;
+                            $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                        }
+                    } catch (DoofinderException $e) {
+                        $messages .= DoofinderAdminPanelView::displayErrorCtm($e->getMessage() . ' - Search Engine ' . $lang_iso);
+                    } catch (\Exception $e) {
+                        $msg = $e->getMessage() . ' - Search Engine ';
+                        $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $lang_iso);
+                    }
+                } else {
+                    $msg = $translationFunction('Empty Api Key or empty Search Engine - ') . $lang_iso;
+                    $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                }
+            }
+        }
+        if ($onlyOneLang) {
+            return $result;
+        } else {
+            return $messages;
+        }
+    }
+
+    /**
+     * Check the connection to the API using the saved API KEY
+     *
+     * @param bool $text If the response is received as a string
+     *
+     * @return bool|string
+     */
+    public static function checkApiKey($text = false)
+    {
+        $result = \Db::getInstance()->getValue('SELECT id_configuration FROM ' . _DB_PREFIX_
+            . 'configuration WHERE name = "DF_API_KEY" AND (value IS NOT NULL OR value <> "")');
+        $statusText = (($result) ? 'OK' : 'KO');
+
+        return ($text) ? $statusText : $result;
+    }
+
+    /**
      * getFilterType
      * obtain the filter type (i.e. 'terms' or 'numeric range' from its conditions)
      *
@@ -613,6 +688,3 @@ class DoofinderApi
         return 'terms';
     }
 }
-
-include_once 'DoofinderResults.php';
-include_once 'DoofinderException.php';
