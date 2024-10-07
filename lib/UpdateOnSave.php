@@ -316,8 +316,8 @@ class UpdateOnSave
     public static function indexApiInvokeReindexing()
     {
         $region = \Configuration::get('DF_REGION');
-        $api_key = \Configuration::get('DF_API_KEY');
-        $api = new DoofinderApiIndex($api_key, $region);
+        $apiKey = \Configuration::get('DF_API_KEY');
+        $api = new DoofinderApiIndex($apiKey, $region);
         $response = $api->invokeReindexing(\Configuration::get('DF_INSTALLATION_ID'), UrlManager::getProcessCallbackUrl());
         if (empty($response) || 200 !== $response['status']) {
             DoofinderConfig::debug('Error while invoking reindexing: ' . json_encode($response));
@@ -339,18 +339,18 @@ class UpdateOnSave
     public static function isValid()
     {
         $region = \Configuration::get('DF_REGION');
-        $api_key = \Configuration::get('DF_API_KEY');
-        $api = new DoofinderInstallation($api_key, $region);
-        $decode_response = $api->isValidUpdateOnSave(\Configuration::get('DF_INSTALLATION_ID'));
+        $apiKey = \Configuration::get('DF_API_KEY');
+        $api = new DoofinderInstallation($apiKey, $region);
+        $decodeResponse = $api->isValidUpdateOnSave(\Configuration::get('DF_INSTALLATION_ID'));
 
-        if (empty($decode_response['valid?'])) {
-            DoofinderConfig::debug('Error checking search engines: ' . json_encode($decode_response));
+        if (empty($decodeResponse['valid?'])) {
+            DoofinderConfig::debug('Error checking search engines: ' . json_encode($decodeResponse));
 
             \Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 0);
 
             return false;
         }
 
-        return $decode_response['valid?'];
+        return $decodeResponse['valid?'];
     }
 }

@@ -688,9 +688,9 @@ class Doofinder extends Module
         if (((bool) Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesAdvanced());
             $formUpdated = 'advanced_tab';
-            $hash_id = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
-            $api_key = Configuration::get('DF_API_KEY');
-            $dfApi = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
+            $hashid = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
+            $apiKey = Configuration::get('DF_API_KEY');
+            $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
             $messages .= $dfApi->test([$this, 'l']);
             $this->context->smarty->assign('adv', 1);
         }
