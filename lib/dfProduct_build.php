@@ -46,11 +46,11 @@ class DfProductBuild
     /**
      * Set the products to be included in the payload
      *
-     * @param array Product ids
+     * @param array $arrayProducts Product ids
      */
-    public function setProducts($array_products)
+    public function setProducts($arrayProducts)
     {
-        $this->products = $array_products;
+        $this->products = $arrayProducts;
     }
 
     public function build()
@@ -120,7 +120,7 @@ class DfProductBuild
         $p['upc'] = DfTools::cleanString($product['upc']);
         $p['reference'] = DfTools::cleanString($product['reference']);
         $p['supplier_reference'] = DfTools::cleanString($product['supplier_reference']);
-        $p['extra_title_1'] = DfTools::cleanReferences($p['title']);
+        $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
         $p['tags'] = DfTools::cleanString($product['tags']);
         $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);

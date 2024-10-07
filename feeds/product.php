@@ -475,7 +475,7 @@ foreach ($rows as $row) {
         echo DfTools::cleanString($row['supplier_reference']) . DfTools::TXT_SEPARATOR;
 
         // EXTRA_TITLE_1
-        echo DfTools::cleanReferences($product_title) . DfTools::TXT_SEPARATOR;
+        echo $product_title . DfTools::TXT_SEPARATOR;
 
         // EXTRA_TITLE_2
         echo DfTools::splitReferences($product_title) . DfTools::TXT_SEPARATOR;
