@@ -29,15 +29,15 @@ class UpdateOnSave
     public static function allowProcessItemsQueue()
     {
         if (\Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
-            $last_exec = \Configuration::get('DF_UPDATE_ON_SAVE_LAST_EXEC', null, null, null, 0);
+            $lastExec = \Configuration::get('DF_UPDATE_ON_SAVE_LAST_EXEC', null, null, null, 0);
             $delay = (int) \Configuration::get('DF_UPDATE_ON_SAVE_DELAY', null, null, null, 30);
 
             if (is_int($delay)) {
-                $last_exec_ts = strtotime($last_exec);
+                $lastExecTs = strtotime($lastExec);
 
-                $diff_min = (time() - $last_exec_ts) / 60;
+                $diffMin = (time() - $lastExecTs) / 60;
 
-                if ($diff_min > $delay) {
+                if ($diffMin > $delay) {
                     return true;
                 }
             }
@@ -264,12 +264,10 @@ class UpdateOnSave
             return;
         }
 
-        require_once 'doofinder_api_items.php';
-
         $apikey = explode('-', \Configuration::get('DF_API_KEY'))[1];
         $region = \Configuration::get('DF_REGION');
 
-        $api = new \DoofinderApiItems($hashid, $apikey, $region, $type);
+        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
         $response = $api->updateBulk($payload);
 
         if (isset($response['error']) && !empty($response['error'])) {
@@ -295,12 +293,10 @@ class UpdateOnSave
             return;
         }
 
-        require_once 'doofinder_api_items.php';
-
         $apikey = explode('-', \Configuration::get('DF_API_KEY'))[1];
         $region = \Configuration::get('DF_REGION');
 
-        $api = new \DoofinderApiItems($hashid, $apikey, $region, $type);
+        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
         $response = $api->deleteBulk(json_encode($payload));
 
         if (isset($response['error']) && !empty($response['error'])) {
@@ -319,11 +315,9 @@ class UpdateOnSave
      */
     public static function indexApiInvokeReindexing()
     {
-        require_once 'doofinder_api_index.php';
-
         $region = \Configuration::get('DF_REGION');
         $api_key = \Configuration::get('DF_API_KEY');
-        $api = new \DoofinderApiIndex($api_key, $region);
+        $api = new DoofinderApiIndex($api_key, $region);
         $response = $api->invokeReindexing(\Configuration::get('DF_INSTALLATION_ID'), UrlManager::getProcessCallbackUrl());
         if (empty($response) || 200 !== $response['status']) {
             DoofinderConfig::debug('Error while invoking reindexing: ' . json_encode($response));

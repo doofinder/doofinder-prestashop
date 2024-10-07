@@ -52,14 +52,11 @@ class SearchEngine
      */
     public static function setSearchEnginesByConfig()
     {
-        if (!class_exists('DoofinderLayerApi')) {
-            require_once 'doofinder_layer_api.php';
-        }
         $installationID = \Configuration::get('DF_INSTALLATION_ID');
         $apiKey = \Configuration::get('DF_API_KEY');
         $region = \Configuration::get('DF_REGION');
 
-        $data = \DoofinderLayerApi::getInstallationData($installationID, $apiKey, $region);
+        $data = DoofinderLayerApi::getInstallationData($installationID, $apiKey, $region);
 
         foreach ($data['config']['search_engines'] as $lang => $currencies) {
             foreach ($currencies as $currency => $hashid) {
@@ -96,8 +93,8 @@ class SearchEngine
     {
         // $code is in the form of 'xx-YY' where xx is the language code
         // and 'YY' a country code identifying a variant of the language.
-        $lang_country = explode('-', $code);
+        $langCountry = explode('-', $code);
 
-        return $lang_country[0];
+        return $langCountry[0];
     }
 }

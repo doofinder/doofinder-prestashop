@@ -12,13 +12,12 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-use PrestaShop\Module\Doofinder\Lib\EasyREST;
+
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiUniqueScript
 {
@@ -30,7 +29,7 @@ class DoofinderApiUniqueScript
     {
         $this->installationId = $installationId;
         $this->apiKey = $apiKey;
-        $this->apiUrl = str_replace('{region}', $region, API_URL);
+        $this->apiUrl = UrlManager::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region);
     }
 
     /**
@@ -57,11 +56,11 @@ class DoofinderApiUniqueScript
             'installation_id' => $this->installationId,
         ];
 
-        $json_store_data = json_encode($body);
+        $jsonStoreData = json_encode($body);
 
         $response = $client->post(
             $url,
-            $json_store_data,
+            $jsonStoreData,
             false,
             false,
             'application/json',

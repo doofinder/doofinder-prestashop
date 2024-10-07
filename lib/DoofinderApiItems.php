@@ -12,26 +12,25 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-use PrestaShop\Module\Doofinder\Lib\EasyREST;
+
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-const API_URL = 'https://{region}-plugins.doofinder.com';
-
 class DoofinderApiItems
 {
     private $hashid;
-    private $api_key;
-    private $api_url;
+    private $apiKey;
+    private $apiUrl;
     private $type;
 
-    public function __construct($hashid, $api_key, $region, $type = 'product')
+    public function __construct($hashid, $apiKey, $region, $type = 'product')
     {
         $this->hashid = $hashid;
-        $this->api_key = $api_key;
-        $this->api_url = str_replace('{region}', $region, API_URL);
+        $this->apiKey = $apiKey;
+        $this->apiUrl = UrlManager::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region);
         $this->type = $type;
     }
 
@@ -44,7 +43,7 @@ class DoofinderApiItems
     {
         $endpoint = '/item/' . $this->hashid . '/' . $this->type . '?platform=prestashop&action=update';
 
-        $url = $this->api_url . $endpoint;
+        $url = $this->apiUrl . $endpoint;
 
         return $this->post($url, $payload);
     }
@@ -58,7 +57,7 @@ class DoofinderApiItems
     {
         $endpoint = '/item/' . $this->hashid . '/' . $this->type . '?platform=prestashop&action=delete';
 
-        $url = $this->api_url . $endpoint;
+        $url = $this->apiUrl . $endpoint;
 
         return $this->post($url, $payload);
     }
@@ -73,7 +72,7 @@ class DoofinderApiItems
             false,
             false,
             'application/json',
-            ['Authorization: Token ' . $this->api_key]
+            ['Authorization: Token ' . $this->apiKey]
         );
 
         return json_decode($response->response, true);
