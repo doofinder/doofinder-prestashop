@@ -167,8 +167,7 @@ class UpdateOnSave
         }
 
         if ('update' === $action) {
-            require_once 'dfProduct_build.php';
-            $builder = new \DfProductBuild($shopId, $idLang, $idCurrency);
+            $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
             $builder->setProducts($products);
             $payload = $builder->build();
 
@@ -199,9 +198,7 @@ class UpdateOnSave
 
         if ($hashid) {
             if ('update' === $action) {
-                require_once 'dfCms_build.php';
-
-                $builder = new \DfCmsBuild($shopId, $idLang);
+                $builder = new DfCmsBuild($shopId, $idLang);
                 $builder->setCmsPages($cmsPages);
                 $payload = $builder->build();
 
@@ -233,9 +230,7 @@ class UpdateOnSave
 
         if ($hashid) {
             if ('update' === $action) {
-                require_once 'dfCategory_build.php';
-
-                $builder = new \DfCategoryBuild($shopId, $idLang);
+                $builder = new DfCategoryBuild($shopId, $idLang);
                 $builder->setCategories($categories);
                 $payload = $builder->build();
 

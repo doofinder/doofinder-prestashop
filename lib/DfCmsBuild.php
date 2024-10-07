@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DfTools;
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -55,12 +55,12 @@ class DfCmsBuild
 
     private function assign()
     {
-        $this->link = Context::getContext()->link;
+        $this->link = \Context::getContext()->link;
     }
 
     private function buildCms($idCms)
     {
-        $cms = new CMS($idCms, $this->idLang, $this->idShop);
+        $cms = new \CMS($idCms, $this->idLang, $this->idShop);
 
         $c = [];
         $c['id'] = (string) $cms->id;

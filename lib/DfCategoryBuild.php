@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DfTools;
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -55,12 +55,12 @@ class DfCategoryBuild
 
     private function assign()
     {
-        $this->link = Context::getContext()->link;
+        $this->link = \Context::getContext()->link;
     }
 
     private function buildCategory($idCategory)
     {
-        $category = new Category($idCategory, $this->idLang, $this->idShop);
+        $category = new \Category($idCategory, $this->idLang, $this->idShop);
 
         $c = [];
 
