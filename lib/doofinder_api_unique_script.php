@@ -12,7 +12,7 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+use PrestaShop\Module\Doofinder\Lib\EasyREST;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,6 +22,10 @@ const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiUniqueScript
 {
+    private $installationId;
+    private $apiKey;
+    private $apiUrl;
+
     public function __construct($installationId, $region, $apiKey)
     {
         $this->installationId = $installationId;

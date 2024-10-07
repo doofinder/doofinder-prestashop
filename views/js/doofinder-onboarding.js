@@ -25,7 +25,7 @@ $(document).ready(function () {
       const doofinder_regex = /.*\.doofinder\.com/gm;
       //Check that the sender is doofinder
       if (!doofinder_regex.test(event.origin)) return;
-      if (event.data) {
+      if (event.data && 'string' === typeof event.data) {
         data = event.data.split("|");
         event_name = data[0];
         event_data = JSON.parse(atob(data[1]));

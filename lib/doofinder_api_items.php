@@ -12,7 +12,7 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-require_once _PS_MODULE_DIR_ . 'doofinder/lib/EasyREST.php';
+use PrestaShop\Module\Doofinder\Lib\EasyREST;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,6 +22,11 @@ const API_URL = 'https://{region}-plugins.doofinder.com';
 
 class DoofinderApiItems
 {
+    private $hashid;
+    private $api_key;
+    private $api_url;
+    private $type;
+
     public function __construct($hashid, $api_key, $region, $type = 'product')
     {
         $this->hashid = $hashid;
