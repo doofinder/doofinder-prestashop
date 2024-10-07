@@ -213,19 +213,19 @@ class DfProductBuild
     private function getImageLink($product)
     {
         if ($this->haveVariations($product)) {
-            $id_image = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
+            $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
 
-            if (isset($id_image)) {
-                $image_link = DfTools::cleanURL(
+            if (isset($idImage)) {
+                $imageLink = DfTools::cleanURL(
                     DfTools::getImageLink(
                         $product['id_product_attribute'],
-                        $id_image,
+                        $idImage,
                         $product['link_rewrite'],
                         $this->imageSize
                     )
                 );
             } else {
-                $image_link = DfTools::cleanURL(
+                $imageLink = DfTools::cleanURL(
                     DfTools::getImageLink(
                         $product['id_product_attribute'],
                         $product['id_image'],
@@ -236,8 +236,8 @@ class DfProductBuild
             }
 
             // For variations with no specific pictures
-            if (strpos($image_link, '/-') > -1) {
-                $image_link = DfTools::cleanURL(
+            if (strpos($imageLink, '/-') > -1) {
+                $imageLink = DfTools::cleanURL(
                     DfTools::getImageLink(
                         $product['id_product'],
                         $product['id_image'],
@@ -247,7 +247,7 @@ class DfProductBuild
                 );
             }
 
-            return $image_link;
+            return $imageLink;
         }
 
         return DfTools::cleanURL(
@@ -270,9 +270,9 @@ class DfProductBuild
                 isset($product['id_product_attribute']) ? $product['id_product_attribute'] : null,
                 $this->idShop
             );
-            $allow_oosp = Product::isAvailableWhenOutOfStock($product['out_of_stock']);
+            $allowOosp = Product::isAvailableWhenOutOfStock($product['out_of_stock']);
 
-            return $available && ($stock > 0 || $allow_oosp) ? 'in stock' : 'out of stock';
+            return $available && ($stock > 0 || $allowOosp) ? 'in stock' : 'out of stock';
         } else {
             return $available ? 'in stock' : 'out of stock';
         }
@@ -285,15 +285,15 @@ class DfProductBuild
         }
 
         if ($this->productVariations) {
-            $id_product_attribute = $product['id_product_attribute'];
+            $idProductAttribute = $product['id_product_attribute'];
         } else {
-            $id_product_attribute = null;
+            $idProductAttribute = null;
         }
 
-        $product_price = Product::getPriceStatic(
+        $productPrice = Product::getPriceStatic(
             $product['id_product'],
             $this->useTax,
-            $id_product_attribute,
+            $idProductAttribute,
             6,
             null,
             false,
@@ -301,17 +301,17 @@ class DfProductBuild
         );
 
         if (!$salePrice) {
-            return $product_price ? Tools::convertPrice($product_price, $this->idCurrency) : null;
+            return $productPrice ? Tools::convertPrice($productPrice, $this->idCurrency) : null;
         } else {
-            $onsale_price = Product::getPriceStatic(
+            $onsalePrice = Product::getPriceStatic(
                 $product['id_product'],
                 $this->useTax,
-                $id_product_attribute,
+                $idProductAttribute,
                 6
             );
 
-            return ($product_price && $onsale_price && $product_price != $onsale_price)
-                ? Tools::convertPrice($onsale_price, $this->idCurrency) : null;
+            return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
+                ? Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
         }
     }
 
@@ -336,13 +336,13 @@ class DfProductBuild
 
     private function getFeaturesKeys()
     {
-        $cfg_features_shown = explode(',', Configuration::get('DF_FEATURES_SHOWN'));
-        $all_feature_keys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
+        $cfgFeaturesShown = explode(',', Configuration::get('DF_FEATURES_SHOWN'));
+        $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
 
-        if (isset($cfg_features_shown) && count($cfg_features_shown) > 0 && $cfg_features_shown[0] !== '') {
-            return DfTools::getSelectedFeatures($all_feature_keys, $cfg_features_shown);
+        if (isset($cfgFeaturesShown) && count($cfgFeaturesShown) > 0 && $cfgFeaturesShown[0] !== '') {
+            return DfTools::getSelectedFeatures($allFeatureKeys, $cfgFeaturesShown);
         } else {
-            return $all_feature_keys;
+            return $allFeatureKeys;
         }
     }
 
@@ -354,13 +354,13 @@ class DfProductBuild
             $this->attributesShown
         );
 
-        $alt_attributes = [];
+        $altAttributes = [];
 
         foreach ($attributes as $attribute) {
-            $alt_attributes[$this->slugify($attribute['group_name'])] = $attribute['name'];
+            $altAttributes[$this->slugify($attribute['group_name'])] = $attribute['name'];
         }
 
-        return $alt_attributes;
+        return $altAttributes;
     }
 
     private function haveVariations($product)
@@ -377,13 +377,13 @@ class DfProductBuild
     private function getVariantsInformation($product)
     {
         if (DfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {
-            $product_attributes = DfTools::hasProductAttributes($product['id_product'], $this->attributesShown);
+            $productAttributes = DfTools::hasProductAttributes($product['id_product'], $this->attributesShown);
 
-            if (empty($product_attributes)) {
+            if (empty($productAttributes)) {
                 return [];
             }
 
-            $attributes = DfTools::getAttributesName($product_attributes, $this->idLang);
+            $attributes = DfTools::getAttributesName($productAttributes, $this->idLang);
 
             $names = array_column($attributes, 'name');
 

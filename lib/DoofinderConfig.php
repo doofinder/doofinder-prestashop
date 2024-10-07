@@ -75,8 +75,8 @@ class DoofinderConfig
         \Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $apiEndpoint);
         \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
 
-        $api_endpoint_array = explode('-', $apiEndpoint);
-        $region = $api_endpoint_array[0];
+        $apiEndpointArray = explode('-', $apiEndpoint);
+        $region = $apiEndpointArray[0];
         $shops = \Shop::getShops();
 
         foreach ($shops as $shop) {

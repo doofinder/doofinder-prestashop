@@ -19,10 +19,10 @@ if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
 }
 
-$root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
-$config_file_path = $root_path . '/config/config.inc.php';
-if (@file_exists($config_file_path)) {
-    require_once $config_file_path;
+$rootPath = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+$configFilePath = $rootPath . '/config/config.inc.php';
+if (@file_exists($configFilePath)) {
+    require_once $configFilePath;
     require_once dirname($_SERVER['SCRIPT_FILENAME']) . '/lib/dfCategory_build.php';
     require_once dirname($_SERVER['SCRIPT_FILENAME']) . '/autoloader.php';
 } else {
