@@ -35,7 +35,7 @@ class DfCategoryBuild
     /**
      * Set the categories to be included in the payload
      *
-     * @param array $arrayCategories Categories ids.
+     * @param array $arrayCategories categories ids
      */
     public function setCategories($arrayCategories)
     {

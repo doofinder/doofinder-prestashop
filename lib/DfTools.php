@@ -1070,6 +1070,7 @@ class DfTools
     {
         $forbidden = ['-'];
         $text = (is_string($text)) ? $text : '';
+
         return str_replace($forbidden, '', $text);
     }
 
@@ -1078,6 +1079,7 @@ class DfTools
         if (!is_string($text)) {
             return $text;
         }
+
         return preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
     }
 

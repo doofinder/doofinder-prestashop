@@ -35,7 +35,7 @@ class DfCmsBuild
     /**
      * Set the CMS pages to be included in the payload
      *
-     * @param array $arrayCmsPages cms pages ids.
+     * @param array $arrayCmsPages cms pages ids
      */
     public function setCmsPages($arrayCmsPages)
     {
