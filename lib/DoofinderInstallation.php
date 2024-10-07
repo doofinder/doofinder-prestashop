@@ -124,7 +124,7 @@ class DoofinderInstallation
     private static function _createStore($shop)
     {
         $client = new EasyREST();
-        $apikey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+        $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
         $languages = \Language::getLanguages(true, $shop['id_shop']);
         $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
@@ -174,7 +174,7 @@ class DoofinderInstallation
             false,
             false,
             'application/json',
-            ['Authorization: Token ' . $apikey]
+            ['Authorization: Token ' . $apiKey]
         );
 
         if ($response->getResponseCode() === 200) {

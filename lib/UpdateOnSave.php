@@ -264,10 +264,10 @@ class UpdateOnSave
             return;
         }
 
-        $apikey = explode('-', \Configuration::get('DF_API_KEY'))[1];
+        $apiKey = explode('-', \Configuration::get('DF_API_KEY'))[1];
         $region = \Configuration::get('DF_REGION');
 
-        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
+        $api = new DoofinderApiItems($hashid, $apiKey, $region, $type);
         $response = $api->updateBulk($payload);
 
         if (isset($response['error']) && !empty($response['error'])) {
@@ -293,10 +293,10 @@ class UpdateOnSave
             return;
         }
 
-        $apikey = explode('-', \Configuration::get('DF_API_KEY'))[1];
+        $apiKey = explode('-', \Configuration::get('DF_API_KEY'))[1];
         $region = \Configuration::get('DF_REGION');
 
-        $api = new DoofinderApiItems($hashid, $apikey, $region, $type);
+        $api = new DoofinderApiItems($hashid, $apiKey, $region, $type);
         $response = $api->deleteBulk(json_encode($payload));
 
         if (isset($response['error']) && !empty($response['error'])) {

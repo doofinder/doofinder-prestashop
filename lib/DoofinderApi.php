@@ -612,34 +612,35 @@ class DoofinderApi
         $context = \Context::getContext();
         foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
-                $lang_iso = \Tools::strtoupper($lang['iso_code']);
-                $hashid = \Configuration::get('DF_HASHID_' . $currency . '_' . $lang_iso);
+                $langIso = \Tools::strtoupper($lang['iso_code']);
+                $langFullIso = (isset($lang['language_code'])) ? \Tools::strtoupper($lang['language_code']) : $langIso;
+                $hashid = \Configuration::get('DF_HASHID_' . $currency . '_' . $langFullIso);
                 $apiKey = \Configuration::get('DF_API_KEY');
                 if ($hashid && $apiKey) {
                     try {
                         $dfOptions = $this->getOptions();
                         if ($dfOptions) {
                             $opt = json_decode($dfOptions, true);
-                            if ($opt['query_limit_reached']) {
-                                $msg = $translationFunction('Error: Credentials OK but limit query reached for Search Engine - ') . $lang_iso;
+                            if (isset($opt['query_limit_reached']) && $opt['query_limit_reached']) {
+                                $msg = $translationFunction('Error: Credentials OK but limit query reached for Search Engine - ') . $langFullIso;
                                 $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
                             } else {
                                 $result = true;
-                                $msg = $translationFunction('Connection successful for Search Engine - ') . $lang_iso;
+                                $msg = $translationFunction('Connection successful for Search Engine - ') . $langFullIso;
                                 $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
                             }
                         } else {
-                            $msg = $translationFunction('Error: no connection for Search Engine - ') . $lang_iso;
+                            $msg = $translationFunction('Error: no connection for Search Engine - ') . $langFullIso;
                             $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
                         }
                     } catch (DoofinderException $e) {
-                        $messages .= DoofinderAdminPanelView::displayErrorCtm($e->getMessage() . ' - Search Engine ' . $lang_iso);
+                        $messages .= DoofinderAdminPanelView::displayErrorCtm($e->getMessage() . ' - Search Engine ' . $langFullIso);
                     } catch (\Exception $e) {
                         $msg = $e->getMessage() . ' - Search Engine ';
-                        $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $lang_iso);
+                        $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
                     }
                 } else {
-                    $msg = $translationFunction('Empty Api Key or empty Search Engine - ') . $lang_iso;
+                    $msg = $translationFunction('Empty Api Key or empty Search Engine - ') . $langFullIso;
                     $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
                 }
             }

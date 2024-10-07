@@ -263,11 +263,11 @@ class Doofinder extends Module
      */
     protected function showNewShopForm($shop)
     {
-        $installation_id = Configuration::get('DF_INSTALLATION_ID', null, (int) $shop->id_shop_group, (int) $shop->id);
-        $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
-        $apikey = Configuration::get('DF_AI_APIKEY');
+        $installationId = Configuration::get('DF_INSTALLATION_ID', null, (int) $shop->id_shop_group, (int) $shop->id);
+        $multishopEnable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
+        $apiKey = Configuration::get('DF_AI_APIKEY');
 
-        return !$installation_id && $multishop_enable && $apikey;
+        return !$installationId && $multishopEnable && $apiKey;
     }
 
     /**
