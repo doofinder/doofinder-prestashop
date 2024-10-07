@@ -76,7 +76,7 @@ function slugify($text)
  *  Merge multidemensionnal array by value on each row
  *  https://stackoverflow.com/questions/7973915/php-merge-arrays-by-value
  */
-function array_merge_by_id_product($array1 = [], $array2 = [])
+function arrayMergeByIdProduct($array1 = [], $array2 = [])
 {
     $sub_key = 'id_product';
     $result = [];
@@ -278,17 +278,17 @@ if (!$limit || ($offset !== false && (int) $offset === 0)) {
 // PRODUCTS
 $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
 if (!empty($extra_rows)) {
-    $rows = array_merge_by_id_product($rows, $extra_rows);
+    $rows = arrayMergeByIdProduct($rows, $extra_rows);
 }
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::get_min_variant_prices($rows, $cfg_prices_w_taxes) : [];
+$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes) : [];
 
 foreach ($rows as $row) {
     $product_id = $row['id_product'];
     $variant_id = $row['id_product_attribute'];
-    $product_price = DfTools::get_price($product_id, $cfg_prices_w_taxes, $variant_id);
-    $onsale_price = DfTools::get_onsale_price($product_id, $cfg_prices_w_taxes, $variant_id);
+    $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes, $variant_id);
+    $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes, $variant_id);
 
     if ((int) $row['id_product'] > 0) {
         // ID, TITLE, LINK
@@ -481,7 +481,7 @@ foreach ($rows as $row) {
         echo DfTools::splitReferences($product_title) . DfTools::TXT_SEPARATOR;
 
         // TAGS
-        echo DfTools::str_replace(',', '/', DfTools::cleanString(DfTools::escapeSlashes($row['tags'])));
+        echo DfTools::escapeSlashes(DfTools::cleanString(DfTools::escapeSlashes($row['tags'])));
 
         // ISBN
         if (DfTools::versionGte('1.7.0.0')) {
@@ -498,8 +498,8 @@ foreach ($rows as $row) {
         if ($cfg_display_prices && $cfg_product_variations !== 1) {
             echo DfTools::TXT_SEPARATOR;
 
-            $product_price = DfTools::get_price($product_id, $cfg_prices_w_taxes);
-            $onsale_price = DfTools::get_onsale_price($product_id, $cfg_prices_w_taxes);
+            $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes);
+            $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes);
 
             if (!$row['show_price']) {
                 $product_price = false;
@@ -515,7 +515,7 @@ foreach ($rows as $row) {
             echo DfTools::TXT_SEPARATOR;
             // The parent product should have as price the lowest ones of the
             // variants (combinations) if there are any
-            if (DfTools::is_parent($row) && key_exists($product_id, $min_price_variant_by_product_id)) {
+            if (DfTools::isParent($row) && array_key_exists($product_id, $min_price_variant_by_product_id)) {
                 $min_variant = $min_price_variant_by_product_id[$product_id];
 
                 if ($min_variant['onsale_price'] < $onsale_price) {

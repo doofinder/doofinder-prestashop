@@ -21,25 +21,25 @@ if (!defined('_PS_VERSION_')) {
 
 class DfCategoryBuild
 {
-    private $id_shop;
-    private $id_lang;
+    private $idShop;
+    private $idLang;
     private $categories;
     private $link;
 
-    public function __construct($id_shop, $id_lang)
+    public function __construct($idShop, $idLang)
     {
-        $this->id_shop = $id_shop;
-        $this->id_lang = $id_lang;
+        $this->idShop = $idShop;
+        $this->idLang = $idLang;
     }
 
     /**
      * Set the categories to be included in the payload
      *
-     * @param array Categories ids
+     * @param array $arrayCategories Categories ids.
      */
-    public function setCategories($array_categories)
+    public function setCategories($arrayCategories)
     {
-        $this->categories = $array_categories;
+        $this->categories = $arrayCategories;
     }
 
     public function build($json = true)
@@ -58,9 +58,9 @@ class DfCategoryBuild
         $this->link = Context::getContext()->link;
     }
 
-    private function buildCategory($id_category)
+    private function buildCategory($idCategory)
     {
-        $category = new Category($id_category, $this->id_lang, $this->id_shop);
+        $category = new Category($idCategory, $this->idLang, $this->idShop);
 
         $c = [];
 

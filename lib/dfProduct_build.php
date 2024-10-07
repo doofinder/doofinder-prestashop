@@ -25,15 +25,15 @@ class DfProductBuild
     private $idLang;
     private $idCurrency;
     private $products;
-    private $attributes_shown;
-    private $display_prices;
-    private $image_size;
+    private $attributesShown;
+    private $displayPrices;
+    private $imageSize;
     private $link;
-    private $link_rewrite_conf;
-    private $product_variations;
-    private $show_product_features;
-    private $stock_management;
-    private $use_tax;
+    private $linkRewriteConf;
+    private $productVariations;
+    private $showProductFeatures;
+    private $stockManagement;
+    private $useTax;
     private $featuresKeys;
 
     public function __construct($idShop, $idLang, $idCurrency)
@@ -68,15 +68,15 @@ class DfProductBuild
 
     private function assign()
     {
-        $this->attributes_shown = Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
-        $this->display_prices = Configuration::get('DF_GS_DISPLAY_PRICES');
-        $this->image_size = Configuration::get('DF_GS_IMAGE_SIZE');
+        $this->attributesShown = Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
+        $this->displayPrices = Configuration::get('DF_GS_DISPLAY_PRICES');
+        $this->imageSize = Configuration::get('DF_GS_IMAGE_SIZE');
         $this->link = Context::getContext()->link;
-        $this->link_rewrite_conf = Configuration::get('PS_REWRITING_SETTINGS');
-        $this->product_variations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        $this->show_product_features = Configuration::get('DF_SHOW_PRODUCT_FEATURES');
-        $this->stock_management = Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->use_tax = Configuration::get('DF_GS_PRICES_USE_TAX');
+        $this->linkRewriteConf = Configuration::get('PS_REWRITING_SETTINGS');
+        $this->productVariations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
+        $this->showProductFeatures = Configuration::get('DF_SHOW_PRODUCT_FEATURES');
+        $this->stockManagement = Configuration::get('PS_STOCK_MANAGEMENT');
+        $this->useTax = Configuration::get('DF_GS_PRICES_USE_TAX');
         $this->featuresKeys = $this->getFeaturesKeys();
     }
 
@@ -129,16 +129,16 @@ class DfProductBuild
             $p['isbn'] = DfTools::cleanString($product['isbn']);
         }
 
-        if ($this->display_prices) {
+        if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
         }
 
-        if ($this->show_product_features) {
+        if ($this->showProductFeatures) {
             $p = array_merge($p, $this->getFeatures($product));
         }
 
-        if ($this->product_variations) {
+        if ($this->productVariations) {
             $p['item_group_id'] = $this->getItemGroupId($product);
             $p['group_id'] = $this->getItemGroupId($product);
 
@@ -189,7 +189,7 @@ class DfProductBuild
                     $this->idLang,
                     $this->idShop,
                     $product['id_product_attribute'],
-                    $this->link_rewrite_conf,
+                    $this->linkRewriteConf,
                     false,
                     true
                 )
@@ -205,7 +205,7 @@ class DfProductBuild
                 $this->idLang,
                 $this->idShop,
                 0,
-                $this->link_rewrite_conf
+                $this->linkRewriteConf
             )
         );
     }
@@ -221,7 +221,7 @@ class DfProductBuild
                         $product['id_product_attribute'],
                         $id_image,
                         $product['link_rewrite'],
-                        $this->image_size
+                        $this->imageSize
                     )
                 );
             } else {
@@ -230,7 +230,7 @@ class DfProductBuild
                         $product['id_product_attribute'],
                         $product['id_image'],
                         $product['link_rewrite'],
-                        $this->image_size
+                        $this->imageSize
                     )
                 );
             }
@@ -242,7 +242,7 @@ class DfProductBuild
                         $product['id_product'],
                         $product['id_image'],
                         $product['link_rewrite'],
-                        $this->image_size
+                        $this->imageSize
                     )
                 );
             }
@@ -255,7 +255,7 @@ class DfProductBuild
                 $product['id_product'],
                 $product['id_image'],
                 $product['link_rewrite'],
-                $this->image_size
+                $this->imageSize
             )
         );
     }
@@ -264,7 +264,7 @@ class DfProductBuild
     {
         $available = (int) $product['available_for_order'] > 0;
 
-        if ((int) $this->stock_management) {
+        if ((int) $this->stockManagement) {
             $stock = StockAvailable::getQuantityAvailableByProduct(
                 $product['id_product'],
                 isset($product['id_product_attribute']) ? $product['id_product_attribute'] : null,
@@ -284,7 +284,7 @@ class DfProductBuild
             return false;
         }
 
-        if ($this->product_variations) {
+        if ($this->productVariations) {
             $id_product_attribute = $product['id_product_attribute'];
         } else {
             $id_product_attribute = null;
@@ -292,7 +292,7 @@ class DfProductBuild
 
         $product_price = Product::getPriceStatic(
             $product['id_product'],
-            $this->use_tax,
+            $this->useTax,
             $id_product_attribute,
             6,
             null,
@@ -305,7 +305,7 @@ class DfProductBuild
         } else {
             $onsale_price = Product::getPriceStatic(
                 $product['id_product'],
-                $this->use_tax,
+                $this->useTax,
                 $id_product_attribute,
                 6
             );
@@ -351,7 +351,7 @@ class DfProductBuild
         $attributes = DfTools::getAttributesByCombination(
             $product['id_product_attribute'],
             $this->idLang,
-            $this->attributes_shown
+            $this->attributesShown
         );
 
         $alt_attributes = [];
@@ -365,7 +365,7 @@ class DfProductBuild
 
     private function haveVariations($product)
     {
-        if ($this->product_variations) {
+        if ($this->productVariations) {
             if (isset($product['id_product_attribute']) && (int) $product['id_product_attribute'] > 0) {
                 return true;
             }
@@ -377,7 +377,7 @@ class DfProductBuild
     private function getVariantsInformation($product)
     {
         if (DfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {
-            $product_attributes = DfTools::hasProductAttributes($product['id_product'], $this->attributes_shown);
+            $product_attributes = DfTools::hasProductAttributes($product['id_product'], $this->attributesShown);
 
             if (empty($product_attributes)) {
                 return [];

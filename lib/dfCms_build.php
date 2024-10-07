@@ -21,32 +21,32 @@ if (!defined('_PS_VERSION_')) {
 
 class DfCmsBuild
 {
-    private $id_shop;
-    private $id_lang;
-    private $cms_pages;
+    private $idShop;
+    private $idLang;
+    private $cmsPages;
     private $link;
 
-    public function __construct($id_shop, $id_lang)
+    public function __construct($idShop, $idLang)
     {
-        $this->id_shop = $id_shop;
-        $this->id_lang = $id_lang;
+        $this->idShop = $idShop;
+        $this->idLang = $idLang;
     }
 
     /**
      * Set the CMS pages to be included in the payload
      *
-     * @param array cms pages ids
+     * @param array $arrayCmsPages cms pages ids.
      */
-    public function setCmsPages($array_cms_pages)
+    public function setCmsPages($arrayCmsPages)
     {
-        $this->cms_pages = $array_cms_pages;
+        $this->cmsPages = $arrayCmsPages;
     }
 
     public function build($json = true)
     {
         $this->assign();
 
-        foreach ($this->cms_pages as $cms) {
+        foreach ($this->cmsPages as $cms) {
             $payload[] = $this->buildCms($cms);
         }
 
@@ -58,9 +58,9 @@ class DfCmsBuild
         $this->link = Context::getContext()->link;
     }
 
-    private function buildCms($id_cms)
+    private function buildCms($idCms)
     {
-        $cms = new CMS($id_cms, $this->id_lang, $this->id_shop);
+        $cms = new CMS($idCms, $this->idLang, $this->idShop);
 
         $c = [];
         $c['id'] = (string) $cms->id;
