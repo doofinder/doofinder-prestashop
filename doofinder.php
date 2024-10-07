@@ -12,16 +12,13 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!class_exists('dfTools')) {
-    require_once 'lib/dfTools.class.php';
-}
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 require_once 'autoloader.php';
 
+use PrestaShop\Module\Doofinder\Lib\DfTools;
 use PrestaShop\Module\Doofinder\Lib\DoofinderAdminPanelView;
 use PrestaShop\Module\Doofinder\Lib\DoofinderApi;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
@@ -477,7 +474,7 @@ class Doofinder extends Module
                         'label' => $this->l('Product Image Size'),
                         'name' => 'DF_GS_IMAGE_SIZE',
                         'options' => [
-                            'query' => dfTools::getAvailableImageSizes(),
+                            'query' => DfTools::getAvailableImageSizes(),
                             'id' => 'DF_GS_IMAGE_SIZE',
                             'name' => 'name',
                         ],

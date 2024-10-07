@@ -12,9 +12,8 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!class_exists('dfTools')) {
-    require_once 'dfTools.class.php';
-}
+
+use PrestaShop\Module\Doofinder\Lib\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,6 +21,11 @@ if (!defined('_PS_VERSION_')) {
 
 class DfCategoryBuild
 {
+    private $id_shop;
+    private $id_lang;
+    private $categories;
+    private $link;
+
     public function __construct($id_shop, $id_lang)
     {
         $this->id_shop = $id_shop;
@@ -61,11 +65,11 @@ class DfCategoryBuild
         $c = [];
 
         $c['id'] = (string) $category->id;
-        $c['title'] = dfTools::cleanString($category->name);
-        $c['description'] = dfTools::cleanString($category->description);
-        $c['meta_title'] = dfTools::cleanString($category->meta_title);
-        $c['meta_description'] = dfTools::cleanString($category->meta_description);
-        $c['tags'] = dfTools::cleanString($category->meta_keywords);
+        $c['title'] = DfTools::cleanString($category->name);
+        $c['description'] = DfTools::cleanString($category->description);
+        $c['meta_title'] = DfTools::cleanString($category->meta_title);
+        $c['meta_description'] = DfTools::cleanString($category->meta_description);
+        $c['tags'] = DfTools::cleanString($category->meta_keywords);
         $c['link'] = $this->link->getCategoryLink($category);
         $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, 'category_default') : '';
 

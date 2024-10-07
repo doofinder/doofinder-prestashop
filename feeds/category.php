@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Lib\DfTools;
+
 if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
 }
@@ -21,16 +24,18 @@ $config_file_path = $root_path . '/config/config.inc.php';
 if (file_exists($config_file_path)) {
     require_once $config_file_path;
     require_once dirname($_SERVER['SCRIPT_FILENAME']) . '/lib/dfCategory_build.php';
+    require_once dirname($_SERVER['SCRIPT_FILENAME']) . '/autoloader.php';
 } else {
     require_once dirname(__FILE__) . '/../../../config/config.inc.php';
     require_once dirname(__FILE__) . '/../lib/dfCategory_build.php';
+    require_once dirname(__FILE__) . '/../autoloader.php';
 }
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
+DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
 // OUTPUT
 if (isset($_SERVER['HTTPS'])) {
@@ -45,30 +50,30 @@ $shop = new Shop((int) $context->shop->id);
 if (!$shop->id) {
     exit('NOT PROPERLY CONFIGURED');
 }
-$lang = dfTools::getLanguageFromRequest();
+$lang = DfTools::getLanguageFromRequest();
 $context->language = $lang;
 
 // CATEGORY DATA
-$categories = dfTools::getCategories($lang->id);
+$categories = DfTools::getCategories($lang->id);
 $builder = new DfCategoryBuild($shop->id, $lang->id);
 $builder->setCategories($categories);
 $rows = $builder->build(false);
 
 // HEADERS
 $header = ['id', 'title', 'description', 'meta_title', 'meta_description', 'tags', 'link', 'image_link'];
-echo implode(TXT_SEPARATOR, $header) . PHP_EOL;
-dfTools::flush();
+echo implode(DfTools::TXT_SEPARATOR, $header) . PHP_EOL;
+DfTools::flush();
 
 // CATEGORIES
 foreach ($rows as $row) {
-    echo $row['id'] . TXT_SEPARATOR;
-    echo $row['title'] . TXT_SEPARATOR;
-    echo $row['description'] . TXT_SEPARATOR;
-    echo $row['meta_title'] . TXT_SEPARATOR;
-    echo $row['meta_description'] . TXT_SEPARATOR;
-    echo $row['tags'] . TXT_SEPARATOR;
-    echo $row['link'] . TXT_SEPARATOR;
+    echo $row['id'] . DfTools::TXT_SEPARATOR;
+    echo $row['title'] . DfTools::TXT_SEPARATOR;
+    echo $row['description'] . DfTools::TXT_SEPARATOR;
+    echo $row['meta_title'] . DfTools::TXT_SEPARATOR;
+    echo $row['meta_description'] . DfTools::TXT_SEPARATOR;
+    echo $row['tags'] . DfTools::TXT_SEPARATOR;
+    echo $row['link'] . DfTools::TXT_SEPARATOR;
     echo $row['image_link'];
     echo PHP_EOL;
-    dfTools::flush();
+    DfTools::flush();
 }

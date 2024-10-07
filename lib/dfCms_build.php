@@ -12,9 +12,8 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!class_exists('dfTools')) {
-    require_once 'dfTools.class.php';
-}
+
+use PrestaShop\Module\Doofinder\Lib\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,6 +21,11 @@ if (!defined('_PS_VERSION_')) {
 
 class DfCmsBuild
 {
+    private $id_shop;
+    private $id_lang;
+    private $cms_pages;
+    private $link;
+
     public function __construct($id_shop, $id_lang)
     {
         $this->id_shop = $id_shop;
@@ -60,12 +64,12 @@ class DfCmsBuild
 
         $c = [];
         $c['id'] = (string) $cms->id;
-        $c['title'] = dfTools::cleanString($cms->meta_title);
-        $c['description'] = dfTools::cleanString($cms->meta_description);
-        $c['meta_title'] = dfTools::cleanString($cms->meta_title);
-        $c['meta_description'] = dfTools::cleanString($cms->meta_description);
-        $c['tags'] = dfTools::cleanString($cms->meta_keywords);
-        $c['content'] = dfTools::cleanString($cms->content);
+        $c['title'] = DfTools::cleanString($cms->meta_title);
+        $c['description'] = DfTools::cleanString($cms->meta_description);
+        $c['meta_title'] = DfTools::cleanString($cms->meta_title);
+        $c['meta_description'] = DfTools::cleanString($cms->meta_description);
+        $c['tags'] = DfTools::cleanString($cms->meta_keywords);
+        $c['content'] = DfTools::cleanString($cms->content);
         $c['link'] = $this->link->getCMSLink($cms);
 
         return $c;

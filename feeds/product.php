@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Lib\DfTools;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -42,7 +45,7 @@ if (@file_exists($config_file_path)) {
     require_once dirname(__FILE__) . '/../doofinder.php';
 }
 
-dfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
+DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
 function slugify($text)
 {
@@ -111,34 +114,34 @@ if (!$shop->id) {
 }
 
 // CONFIG
-$lang = dfTools::getLanguageFromRequest();
+$lang = DfTools::getLanguageFromRequest();
 $context->language = $lang;
 $country = Configuration::get('PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
-$currency = dfTools::getCurrencyForLanguageFromRequest($lang);
+$currency = DfTools::getCurrencyForLanguageFromRequest($lang);
 
-$cfg_short_description = (dfTools::cfg(
+$cfg_short_description = (DfTools::cfg(
     $shop->id,
     'DF_GS_DESCRIPTION_TYPE',
     Doofinder::GS_SHORT_DESCRIPTION
 ) == Doofinder::GS_SHORT_DESCRIPTION);
 
-$cfg_display_prices = dfTools::getBooleanFromRequest(
+$cfg_display_prices = DfTools::getBooleanFromRequest(
     'prices',
-    (bool) dfTools::cfg($shop->id, 'DF_GS_DISPLAY_PRICES', Doofinder::YES)
+    (bool) DfTools::cfg($shop->id, 'DF_GS_DISPLAY_PRICES', Doofinder::YES)
 );
-$cfg_prices_w_taxes = dfTools::getBooleanFromRequest(
+$cfg_prices_w_taxes = DfTools::getBooleanFromRequest(
     'taxes',
-    (bool) dfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', Doofinder::YES)
+    (bool) DfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', Doofinder::YES)
 );
-$cfg_image_size = dfTools::cfg($shop->id, 'DF_GS_IMAGE_SIZE');
-$cfg_mod_rewrite = dfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', Doofinder::YES);
-$cfg_product_variations = (int) dfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
-$cfg_product_features = dfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
-$cfg_debug = dfTools::cfg($shop->id, 'DF_DEBUG');
-$cfg_features_shown = explode(',', dfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
+$cfg_image_size = DfTools::cfg($shop->id, 'DF_GS_IMAGE_SIZE');
+$cfg_mod_rewrite = DfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', Doofinder::YES);
+$cfg_product_variations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
+$cfg_product_features = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
+$cfg_debug = DfTools::cfg($shop->id, 'DF_DEBUG');
+$cfg_features_shown = explode(',', DfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
 
-$cfg_group_attributes_shown = explode(',', dfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
+$cfg_group_attributes_shown = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
 
 $limit_group_attributes = false;
 if (
@@ -156,7 +159,7 @@ if (
     $limit_group_attributes = true;
 }
 
-$debug = dfTools::getBooleanFromRequest('debug', false);
+$debug = DfTools::getBooleanFromRequest('debug', false);
 $limit = Tools::getValue('limit', false);
 $offset = Tools::getValue('offset', false);
 
@@ -191,7 +194,7 @@ $header = array_merge($header, [
     'supplier_reference', 'extra_title_1', 'extra_title_2', 'tags',
 ]);
 
-if (dfTools::versionGte('1.7.0.0')) {
+if (DfTools::versionGte('1.7.0.0')) {
     $header = array_merge($header, ['isbn']);
 }
 
@@ -210,7 +213,7 @@ if ($cfg_product_variations == 1) {
     $header[] = 'variation_upc';
     $header[] = 'df_group_leader';
     $header[] = 'df_variants_information';
-    $attribute_keys = dfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
+    $attribute_keys = DfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
     $alt_attribute_keys = [];
     foreach ($attribute_keys as $key) {
         $header_value = slugify($key);
@@ -224,14 +227,14 @@ if ($cfg_product_variations == 1) {
 }
 
 if ($cfg_product_features) {
-    $all_feature_keys = dfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
+    $all_feature_keys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
 
     if (
         isset($cfg_features_shown)
         && count($cfg_features_shown) > 0
         && $cfg_features_shown[0] !== ''
     ) {
-        $feature_keys = dfTools::getSelectedFeatures($all_feature_keys, $cfg_features_shown);
+        $feature_keys = DfTools::getSelectedFeatures($all_feature_keys, $cfg_features_shown);
     } else {
         $feature_keys = $all_feature_keys;
     }
@@ -268,24 +271,24 @@ if (!empty($extra_header)) {
 }
 
 if (!$limit || ($offset !== false && (int) $offset === 0)) {
-    echo implode(TXT_SEPARATOR, $header) . PHP_EOL;
-    dfTools::flush();
+    echo implode(DfTools::TXT_SEPARATOR, $header) . PHP_EOL;
+    DfTools::flush();
 }
 
 // PRODUCTS
-$rows = dfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
+$rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
 if (!empty($extra_rows)) {
     $rows = array_merge_by_id_product($rows, $extra_rows);
 }
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$min_price_variant_by_product_id = $cfg_display_prices ? dfTools::get_min_variant_prices($rows, $cfg_prices_w_taxes) : [];
+$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::get_min_variant_prices($rows, $cfg_prices_w_taxes) : [];
 
 foreach ($rows as $row) {
     $product_id = $row['id_product'];
     $variant_id = $row['id_product_attribute'];
-    $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes, $variant_id);
-    $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes, $variant_id);
+    $product_price = DfTools::get_price($product_id, $cfg_prices_w_taxes, $variant_id);
+    $onsale_price = DfTools::get_onsale_price($product_id, $cfg_prices_w_taxes, $variant_id);
 
     if ((int) $row['id_product'] > 0) {
         // ID, TITLE, LINK
@@ -296,14 +299,14 @@ foreach ($rows as $row) {
             && (int) $row['id_product_attribute'] > 0
         ) {
             // ID
-            echo 'VAR-' . $row['id_product_attribute'] . TXT_SEPARATOR;
+            echo 'VAR-' . $row['id_product_attribute'] . DfTools::TXT_SEPARATOR;
 
             // ITEM-GROUP-ID
-            echo $row['id_product'] . TXT_SEPARATOR;
+            echo $row['id_product'] . DfTools::TXT_SEPARATOR;
             // TITLE
-            $product_title = dfTools::cleanString($row['name']);
-            echo $product_title . TXT_SEPARATOR;
-            echo dfTools::cleanURL(
+            $product_title = DfTools::cleanString($row['name']);
+            echo $product_title . DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanURL(
                 $context->link->getProductLink(
                     (int) $row['id_product'],
                     $row['link_rewrite'],
@@ -316,22 +319,22 @@ foreach ($rows as $row) {
                     false,
                     true
                 )
-            ) . TXT_SEPARATOR;
+            ) . DfTools::TXT_SEPARATOR;
         } else {
             $eanLink = $row['ean13'];
             // ID
-            echo $row['id_product'] . TXT_SEPARATOR;
+            echo $row['id_product'] . DfTools::TXT_SEPARATOR;
 
             if ($cfg_product_variations == 1) {
                 // ITEM-GROUP-ID
-                echo '' . TXT_SEPARATOR;
+                echo '' . DfTools::TXT_SEPARATOR;
             }
 
             // TITLE
-            $product_title = dfTools::cleanString($row['name']);
-            echo $product_title . TXT_SEPARATOR;
+            $product_title = DfTools::cleanString($row['name']);
+            echo $product_title . DfTools::TXT_SEPARATOR;
 
-            $parent_url = dfTools::cleanURL(
+            $parent_url = DfTools::cleanURL(
                 $context->link->getProductLink(
                     (int) $row['id_product'],
                     $row['link_rewrite'],
@@ -350,27 +353,27 @@ foreach ($rows as $row) {
             } else {
                 echo $parent_url;
             }
-            echo TXT_SEPARATOR;
+            echo DfTools::TXT_SEPARATOR;
         }
 
         // DESCRIPTION
-        echo dfTools::cleanString(
+        echo DfTools::cleanString(
             $row[$cfg_short_description ? 'description_short' : 'description']
-        ) . TXT_SEPARATOR;
+        ) . DfTools::TXT_SEPARATOR;
 
         // ALTERNATE DESCRIPTION
-        echo dfTools::cleanString(
+        echo DfTools::cleanString(
             $row[$cfg_short_description ? 'description' : 'description_short']
-        ) . TXT_SEPARATOR;
+        ) . DfTools::TXT_SEPARATOR;
 
         // META KEYWORDS
-        echo dfTools::cleanString($row['meta_keywords']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['meta_keywords']) . DfTools::TXT_SEPARATOR;
 
         // META TITLE
-        echo dfTools::cleanString($row['meta_title']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['meta_title']) . DfTools::TXT_SEPARATOR;
 
         // META DESCRIPTION
-        echo dfTools::cleanString($row['meta_description']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['meta_description']) . DfTools::TXT_SEPARATOR;
 
         // IMAGE LINK
 
@@ -379,14 +382,14 @@ foreach ($rows as $row) {
             && (int) $row['id_product_attribute'] > 0
         ) {
             $cover = Product::getCover($row['id_product_attribute']);
-            $id_image = dfTools::getVariationImg(
+            $id_image = DfTools::getVariationImg(
                 $row['id_product'],
                 $row['id_product_attribute']
             );
 
             if (isset($id_image)) {
-                $image_link = dfTools::cleanURL(
-                    dfTools::getImageLink(
+                $image_link = DfTools::cleanURL(
+                    DfTools::getImageLink(
                         $row['id_product_attribute'],
                         $id_image,
                         $row['link_rewrite'],
@@ -394,8 +397,8 @@ foreach ($rows as $row) {
                     )
                 );
             } else {
-                $image_link = dfTools::cleanURL(
-                    dfTools::getImageLink(
+                $image_link = DfTools::cleanURL(
+                    DfTools::getImageLink(
                         $row['id_product_attribute'],
                         $row['id_image'],
                         $row['link_rewrite'],
@@ -406,8 +409,8 @@ foreach ($rows as $row) {
 
             // For variations with no specific pictures
             if (strpos($image_link, '/-') > -1) {
-                $image_link = dfTools::cleanURL(
-                    dfTools::getImageLink(
+                $image_link = DfTools::cleanURL(
+                    DfTools::getImageLink(
                         $row['id_product'],
                         $row['id_image'],
                         $row['link_rewrite'],
@@ -416,87 +419,87 @@ foreach ($rows as $row) {
                 );
             }
 
-            echo $image_link . TXT_SEPARATOR;
+            echo $image_link . DfTools::TXT_SEPARATOR;
         } else {
-            echo dfTools::cleanURL(
-                dfTools::getImageLink(
+            echo DfTools::cleanURL(
+                DfTools::getImageLink(
                     $row['id_product'],
                     $row['id_image'],
                     $row['link_rewrite'],
                     $cfg_image_size
                 )
-            ) . TXT_SEPARATOR;
+            ) . DfTools::TXT_SEPARATOR;
         }
 
         // MAIN CATEGORY
-        echo dfTools::cleanString($row['main_category']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['main_category']) . DfTools::TXT_SEPARATOR;
 
         // PRODUCT CATEGORIES
-        echo dfTools::getCategoriesForProductIdAndLanguage(
+        echo DfTools::getCategoriesForProductIdAndLanguage(
             $row['id_product'],
             $lang->id,
             $shop->id
-        ) . TXT_SEPARATOR;
+        ) . DfTools::TXT_SEPARATOR;
 
         // AVAILABILITY
         $available = (int) $row['available_for_order'] > 0;
 
-        if ((int) dfTools::cfg($shop->id, 'PS_STOCK_MANAGEMENT')) {
+        if ((int) DfTools::cfg($shop->id, 'PS_STOCK_MANAGEMENT')) {
             $stock = StockAvailable::getQuantityAvailableByProduct(
                 $row['id_product'],
                 isset($row['id_product_attribute']) ? $row['id_product_attribute'] : null,
                 $shop->id
             );
             $allow_oosp = Product::isAvailableWhenOutOfStock($row['out_of_stock']);
-            echo ($available && ($stock > 0 || $allow_oosp) ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
+            echo ($available && ($stock > 0 || $allow_oosp) ? 'in stock' : 'out of stock') . DfTools::TXT_SEPARATOR;
         } else {
-            echo ($available ? 'in stock' : 'out of stock') . TXT_SEPARATOR;
+            echo ($available ? 'in stock' : 'out of stock') . DfTools::TXT_SEPARATOR;
         }
 
         // BRAND
-        echo dfTools::cleanString($row['manufacturer']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['manufacturer']) . DfTools::TXT_SEPARATOR;
 
         // MPN
-        echo dfTools::cleanString($row['mpn']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['mpn']) . DfTools::TXT_SEPARATOR;
 
         // EAN13
-        echo dfTools::cleanString($row['ean13']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['ean13']) . DfTools::TXT_SEPARATOR;
 
         // UPC
-        echo dfTools::cleanString($row['upc']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['upc']) . DfTools::TXT_SEPARATOR;
 
         // REFERENCE
-        echo dfTools::cleanString($row['reference']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['reference']) . DfTools::TXT_SEPARATOR;
 
         // SUPPLIER_REFERENCE
-        echo dfTools::cleanString($row['supplier_reference']) . TXT_SEPARATOR;
+        echo DfTools::cleanString($row['supplier_reference']) . DfTools::TXT_SEPARATOR;
 
         // EXTRA_TITLE_1
-        echo dfTools::cleanReferences($product_title) . TXT_SEPARATOR;
+        echo DfTools::cleanReferences($product_title) . DfTools::TXT_SEPARATOR;
 
         // EXTRA_TITLE_2
-        echo dfTools::splitReferences($product_title) . TXT_SEPARATOR;
+        echo DfTools::splitReferences($product_title) . DfTools::TXT_SEPARATOR;
 
         // TAGS
-        echo dfTools::str_replace(',', '/', dfTools::cleanString(dfTools::escapeSlashes($row['tags'])));
+        echo DfTools::str_replace(',', '/', DfTools::cleanString(DfTools::escapeSlashes($row['tags'])));
 
         // ISBN
-        if (dfTools::versionGte('1.7.0.0')) {
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['isbn']);
+        if (DfTools::versionGte('1.7.0.0')) {
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['isbn']);
         }
 
         // STOCK_QUANTITY
-        echo TXT_SEPARATOR;
-        echo dfTools::cleanString($row['stock_quantity']);
+        echo DfTools::TXT_SEPARATOR;
+        echo DfTools::cleanString($row['stock_quantity']);
 
         // PRODUCT PRICE & ON SALE PRICE
 
         if ($cfg_display_prices && $cfg_product_variations !== 1) {
-            echo TXT_SEPARATOR;
+            echo DfTools::TXT_SEPARATOR;
 
-            $product_price = dfTools::get_price($product_id, $cfg_prices_w_taxes);
-            $onsale_price = dfTools::get_onsale_price($product_id, $cfg_prices_w_taxes);
+            $product_price = DfTools::get_price($product_id, $cfg_prices_w_taxes);
+            $onsale_price = DfTools::get_onsale_price($product_id, $cfg_prices_w_taxes);
 
             if (!$row['show_price']) {
                 $product_price = false;
@@ -505,14 +508,14 @@ foreach ($rows as $row) {
             echo ($product_price ? Tools::convertPrice(
                 $product_price,
                 $currency
-            ) : '') . TXT_SEPARATOR;
+            ) : '') . DfTools::TXT_SEPARATOR;
             echo ($product_price && $onsale_price && $product_price != $onsale_price)
                 ? Tools::convertPrice($onsale_price, $currency) : '';
         } elseif ($cfg_display_prices && $cfg_product_variations == 1) {
-            echo TXT_SEPARATOR;
+            echo DfTools::TXT_SEPARATOR;
             // The parent product should have as price the lowest ones of the
             // variants (combinations) if there are any
-            if (dfTools::is_parent($row) && key_exists($product_id, $min_price_variant_by_product_id)) {
+            if (DfTools::is_parent($row) && key_exists($product_id, $min_price_variant_by_product_id)) {
                 $min_variant = $min_price_variant_by_product_id[$product_id];
 
                 if ($min_variant['onsale_price'] < $onsale_price) {
@@ -524,34 +527,34 @@ foreach ($rows as $row) {
                 $product_price = false;
                 $onsale_price = false;
             }
-            echo ($product_price ? Tools::convertPrice($product_price, $currency) : '') . TXT_SEPARATOR;
+            echo ($product_price ? Tools::convertPrice($product_price, $currency) : '') . DfTools::TXT_SEPARATOR;
             echo ($product_price && $onsale_price && $product_price != $onsale_price) ?
                 Tools::convertPrice($onsale_price, $currency) : '';
         }
 
         if ($cfg_product_variations == 1) {
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['variation_reference']);
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['variation_supplier_reference']);
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['variation_mpn']);
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['variation_ean13']);
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['variation_upc']);
-            echo TXT_SEPARATOR;
-            echo dfTools::cleanString($row['df_group_leader']);
-            $variation_attributes = dfTools::getAttributesForProductVariation(
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['variation_reference']);
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['variation_supplier_reference']);
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['variation_mpn']);
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['variation_ean13']);
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['variation_upc']);
+            echo DfTools::TXT_SEPARATOR;
+            echo DfTools::cleanString($row['df_group_leader']);
+            $variation_attributes = DfTools::getAttributesForProductVariation(
                 $row['id_product_attribute'],
                 $lang->id,
                 $attribute_keys
             );
-            echo TXT_SEPARATOR;
-            if (dfTools::hasAttributes($row['id_product']) && !$row['id_product_attribute']) {
-                $product_attributes = dfTools::hasProductAttributes($row['id_product'], dfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
+            echo DfTools::TXT_SEPARATOR;
+            if (DfTools::hasAttributes($row['id_product']) && !$row['id_product_attribute']) {
+                $product_attributes = DfTools::hasProductAttributes($row['id_product'], DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
                 if ($product_attributes) {
-                    $attributes = dfTools::getAttributesName($product_attributes, $lang->id);
+                    $attributes = DfTools::getAttributesName($product_attributes, $lang->id);
                     $variants_keys = array_column($attributes, 'name');
                     echo implode('%%', array_map('slugify', $variants_keys));
                 } else {
@@ -559,16 +562,16 @@ foreach ($rows as $row) {
                 }
             }
             foreach ($variation_attributes as $attribute) {
-                echo TXT_SEPARATOR . str_replace('/', '//', dfTools::cleanString($attribute));
+                echo DfTools::TXT_SEPARATOR . str_replace('/', '//', DfTools::cleanString($attribute));
             }
         }
 
         if ($cfg_product_features) {
-            echo TXT_SEPARATOR;
-            foreach (dfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $values) {
+            echo DfTools::TXT_SEPARATOR;
+            foreach (DfTools::getFeaturesForProduct($row['id_product'], $lang->id, $feature_keys) as $key => $values) {
                 foreach ($values as $index => $value) {
                     echo slugify($key) . '=';
-                    echo str_replace('/', '\/', dfTools::cleanString($value)) . '/';
+                    echo str_replace('/', '\/', DfTools::cleanString($value)) . '/';
                 }
             }
         }
@@ -577,11 +580,11 @@ foreach ($rows as $row) {
          * @author camlafit <https://github.com/camlafit>
          */
         foreach ($extra_header as $extra) {
-            echo TXT_SEPARATOR;
-            echo isset($row[$extra]) ? dfTools::cleanString($row[$extra]) : '';
+            echo DfTools::TXT_SEPARATOR;
+            echo isset($row[$extra]) ? DfTools::cleanString($row[$extra]) : '';
         }
 
         echo PHP_EOL;
-        dfTools::flush();
+        DfTools::flush();
     }
 }

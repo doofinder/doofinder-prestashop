@@ -19,10 +19,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-if (!class_exists('dfTools')) {
-    require_once 'dfTools.class.php';
-}
-
 class DoofinderConfig
 {
     public static function debug($message, $logFile = 'doofinder.log')
@@ -61,7 +57,7 @@ class DoofinderConfig
         \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', DoofinderConstants::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(\dfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
+        \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(DfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
     }
 
     /**
