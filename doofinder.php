@@ -864,51 +864,6 @@ class Doofinder extends Module
             && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
     }
 
-    /**
-     * Get the language associated with a search engine
-     *
-     * @param bool $hashid
-     *
-     * @return bool|int
-     */
-    public function getLanguageByHashid($hashid)
-    {
-        $result = Db::getInstance()->getValue('
-            SELECT name
-            FROM ' . _DB_PREFIX_ . 'configuration
-            WHERE name like "DF_HASHID_%" and value = "' . pSQL($hashid) . '";
-        ');
-
-        if ($result) {
-            $key = str_replace('DF_HASHID_', '', $result);
-            $iso_code_parts = explode('_', $key);
-            $iso_code = end($iso_code_parts);
-
-            return (int) $this->getLanguageIdByLocale($iso_code);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Returns language id from locale
-     *
-     * @param string $locale Locale IETF language tag
-     *
-     * @return int|false|null
-     */
-    public function getLanguageIdByLocale($locale)
-    {
-        $sanitized_locale = pSQL(strtolower($locale));
-
-        return Db::getInstance()
-            ->getValue(
-                'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
-                WHERE `language_code` = \'' . $sanitized_locale . '\'
-                OR `iso_code` = \'' . $sanitized_locale . '\''
-            );
-    }
-
     private function getBooleanFormValue()
     {
         $option = [

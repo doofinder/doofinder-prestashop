@@ -34,6 +34,24 @@ class DoofinderConfig
     }
 
     /**
+     * Dumps the information about a variable.
+     *
+     * This function captures the output of `var_dump` for the provided variable and returns it as a string.
+     * It uses output buffering to store the dump result and then retrieves the buffered content before returning it.
+     *
+     * @param mixed $variable The variable to dump. It can be of any type.
+     *
+     * @return string returns the dumped content of the variable as a string
+     */
+    public static function dump($variable)
+    {
+        ob_start();
+        var_dump($variable);
+
+        return ob_get_clean();
+    }
+
+    /**
      * Set the default values in the configuration
      *
      * @param int $shopGroupId
