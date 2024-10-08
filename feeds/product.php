@@ -14,6 +14,7 @@
  */
 
 use PrestaShop\Module\Doofinder\Lib\DfTools;
+use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -123,19 +124,19 @@ $currency = DfTools::getCurrencyForLanguageFromRequest($lang);
 $cfg_short_description = (DfTools::cfg(
     $shop->id,
     'DF_GS_DESCRIPTION_TYPE',
-    Doofinder::GS_SHORT_DESCRIPTION
-) == Doofinder::GS_SHORT_DESCRIPTION);
+    DoofinderConstants::GS_SHORT_DESCRIPTION
+) == DoofinderConstants::GS_SHORT_DESCRIPTION);
 
 $cfg_display_prices = DfTools::getBooleanFromRequest(
     'prices',
-    (bool) DfTools::cfg($shop->id, 'DF_GS_DISPLAY_PRICES', Doofinder::YES)
+    (bool) DfTools::cfg($shop->id, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES)
 );
 $cfg_prices_w_taxes = DfTools::getBooleanFromRequest(
     'taxes',
-    (bool) DfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', Doofinder::YES)
+    (bool) DfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES)
 );
 $cfg_image_size = DfTools::cfg($shop->id, 'DF_GS_IMAGE_SIZE');
-$cfg_mod_rewrite = DfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', Doofinder::YES);
+$cfg_mod_rewrite = DfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
 $cfg_product_variations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
 $cfg_product_features = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
 $cfg_debug = DfTools::cfg($shop->id, 'DF_DEBUG');
