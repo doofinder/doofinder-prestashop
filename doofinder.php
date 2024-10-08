@@ -235,6 +235,118 @@ class Doofinder extends Module
     }
 
     /**
+     * @hook displayHeader FrontControllerCore
+     */
+    public function hookHeader($params)
+    {
+        if (!DoofinderScript::searchLayerMustBeInitialized()) {
+            return '';
+        }
+
+        $this->configureHookCommon($params);
+
+        return $this->displayScriptLiveLayer();
+    }
+
+    /**
+     * Render the script for the Livelayer search layer
+     *
+     * @return string
+     */
+    public function displayScriptLiveLayer()
+    {
+        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
+
+        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
+    }
+
+    /**
+     * @hook actionProductSave ProductCore
+     */
+    public function hookActionProductSave($params)
+    {
+        $action = $params['product']->active ? 'update' : 'delete';
+        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
+    }
+
+    /**
+     * @hook actionProductDelete ProductCore
+     */
+    public function hookActionProductDelete($params)
+    {
+        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, 'delete');
+    }
+
+    /**
+     * @hook actionObjectCmsAddAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsAddAfter($params)
+    {
+        if ($params['object']->active) {
+            HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'update');
+        }
+    }
+
+    /**
+     * @hook actionObjectCmsUpdateAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsUpdateAfter($params)
+    {
+        $action = $params['object']->active ? 'update' : 'delete';
+        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, $action);
+    }
+
+    /**
+     * @hook actionObjectCmsDeleteAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsDeleteAfter($params)
+    {
+        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'delete');
+    }
+
+    /**
+     * @hook actionObjectCategoryAddAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryAddAfter($params)
+    {
+        if ($params['object']->active) {
+            HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'update');
+        }
+    }
+
+    /**
+     * @hook actionObjectCategoryUpdateAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryUpdateAfter($params)
+    {
+        $action = $params['object']->active ? 'update' : 'delete';
+        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, $action);
+    }
+
+    /**
+     * @hook actionObjectCategoryDeleteAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryDeleteAfter($params)
+    {
+        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'delete');
+    }
+
+    /**
+     * Checks the connection with DooManager
+     *
+     * @return bool
+     */
+    public function checkOutsideConnection()
+    {
+        $client = new EasyREST(true, 3);
+        $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
+        $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
+
+        return $result && $result->originalResponse && isset($result->headers['code'])
+            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
+    }
+
+    /**
      * Check if the module has already been configured
      *
      * @return bool
@@ -750,118 +862,6 @@ class Doofinder extends Module
                 $params
             )
         );
-    }
-
-    /**
-     * @hook displayHeader FrontControllerCore
-     */
-    public function hookHeader($params)
-    {
-        if (!DoofinderScript::searchLayerMustBeInitialized()) {
-            return '';
-        }
-
-        $this->configureHookCommon($params);
-
-        return $this->displayScriptLiveLayer();
-    }
-
-    /**
-     * Render the script for the Livelayer search layer
-     *
-     * @return string
-     */
-    public function displayScriptLiveLayer()
-    {
-        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
-
-        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
-    }
-
-    /**
-     * @hook actionProductSave ProductCore
-     */
-    public function hookActionProductSave($params)
-    {
-        $action = $params['product']->active ? 'update' : 'delete';
-        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
-    }
-
-    /**
-     * @hook actionProductDelete ProductCore
-     */
-    public function hookActionProductDelete($params)
-    {
-        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, 'delete');
-    }
-
-    /**
-     * @hook actionObjectCmsAddAfter ObjectModelCore
-     */
-    public function hookActionObjectCmsAddAfter($params)
-    {
-        if ($params['object']->active) {
-            HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'update');
-        }
-    }
-
-    /**
-     * @hook actionObjectCmsUpdateAfter ObjectModelCore
-     */
-    public function hookActionObjectCmsUpdateAfter($params)
-    {
-        $action = $params['object']->active ? 'update' : 'delete';
-        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, $action);
-    }
-
-    /**
-     * @hook actionObjectCmsDeleteAfter ObjectModelCore
-     */
-    public function hookActionObjectCmsDeleteAfter($params)
-    {
-        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'delete');
-    }
-
-    /**
-     * @hook actionObjectCategoryAddAfter ObjectModelCore
-     */
-    public function hookActionObjectCategoryAddAfter($params)
-    {
-        if ($params['object']->active) {
-            HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'update');
-        }
-    }
-
-    /**
-     * @hook actionObjectCategoryUpdateAfter ObjectModelCore
-     */
-    public function hookActionObjectCategoryUpdateAfter($params)
-    {
-        $action = $params['object']->active ? 'update' : 'delete';
-        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, $action);
-    }
-
-    /**
-     * @hook actionObjectCategoryDeleteAfter ObjectModelCore
-     */
-    public function hookActionObjectCategoryDeleteAfter($params)
-    {
-        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'delete');
-    }
-
-    /**
-     * Checks the connection with DooManager
-     *
-     * @return bool
-     */
-    public function checkOutsideConnection()
-    {
-        $client = new EasyREST(true, 3);
-        $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
-        $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
-
-        return $result && $result->originalResponse && isset($result->headers['code'])
-            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
     }
 
     private function getBooleanFormValue()
