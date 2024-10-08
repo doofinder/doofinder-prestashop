@@ -15,6 +15,7 @@
 
 use PrestaShop\Module\Doofinder\Lib\DfTools;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
 
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $config_file_path = $root_path . '/config/config.inc.php';
@@ -25,6 +26,8 @@ if (@file_exists($config_file_path)) {
     require_once dirname(__FILE__) . '/../../config/config.inc.php';
     require_once dirname(__FILE__) . '/../../init.php';
 }
+
+require_once 'autoloader.php';
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -87,7 +90,7 @@ $cfg = [
         'version' => _PS_VERSION_,
     ],
     'module' => [
-        'version' => Doofinder::VERSION,
+        'version' => DoofinderConstants::VERSION,
         'feed' => $base . $shop->getBaseURI() . 'modules/doofinder/feed.php',
         'options' => [
             'language' => $languages,
