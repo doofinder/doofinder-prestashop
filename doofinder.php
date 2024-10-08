@@ -132,6 +132,16 @@ class Doofinder extends Module
     }
 
     /**
+     * Add controller routes
+     *
+     * @return array
+     */
+    public function hookModuleRoutes()
+    {
+        return HookManager::getHookModuleRoutes();
+    }
+
+    /**
      * Update the hashid of the search engines of the store in the configuration.
      * It must be declared here too to be used by upgrade 4.5.0.
      *
