@@ -691,7 +691,7 @@ class Doofinder extends Module
             $hash_id = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
             $api_key = Configuration::get('DF_API_KEY');
             $dfApi = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
-            $messages .= $dfApi->test([$this, 'l']);
+            $messages .= $dfApi->checkConnection([$this, 'l']);
             $this->context->smarty->assign('adv', 1);
         }
 
