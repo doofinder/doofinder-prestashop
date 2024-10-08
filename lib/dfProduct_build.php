@@ -365,6 +365,10 @@ class DfProductBuild
         if (dfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {
             $product_attributes = dfTools::hasProductAttributes($product['id_product'], $this->attributes_shown);
 
+            if (empty($product_attributes)) {
+                return [];
+            }
+
             $attributes = dfTools::getAttributesName($product_attributes, $this->id_lang);
 
             $names = array_column($attributes, 'name');

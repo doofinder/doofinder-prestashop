@@ -19,12 +19,32 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-if (!class_exists('DoofinderLayerApi')) {
-    require_once 'doofinder_layer_api.php';
-}
-
 class SearchEngine
 {
+    /**
+     * Get the configuration key for the language and currency corresponding to the hashid
+     *
+     * @param int $idLang
+     * @param int $idCurrency
+     *
+     * @return string
+     */
+    public static function getHashId($idLang, $idCurrency)
+    {
+        $currIso = strtoupper(self::getIsoCodeById($idCurrency));
+        $lang = new \Language($idLang);
+
+        $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper($lang->language_code);
+        $hashid = \Configuration::get($hashidKey);
+
+        if (!$hashid) {
+            $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper(self::getLanguageCode($lang->language_code));
+            $hashid = \Configuration::get($hashidKey);
+        }
+
+        return $hashid;
+    }
+
     /**
      * Update the hashid of the search engines of the store in the configuration
      *
@@ -32,7 +52,9 @@ class SearchEngine
      */
     public static function setSearchEnginesByConfig()
     {
-        require_once 'doofinder_layer_api.php';
+        if (!class_exists('DoofinderLayerApi')) {
+            require_once 'doofinder_layer_api.php';
+        }
         $installationID = \Configuration::get('DF_INSTALLATION_ID');
         $apiKey = \Configuration::get('DF_API_KEY');
         $region = \Configuration::get('DF_REGION');
@@ -46,5 +68,36 @@ class SearchEngine
         }
 
         return true;
+    }
+
+    /**
+     * Get the ISO of a currency
+     *
+     * @param int $id currency ID
+     *
+     * @return string
+     */
+    protected static function getIsoCodeById($id)
+    {
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            '
+            SELECT `iso_code` FROM ' . _DB_PREFIX_ . 'currency WHERE `id_currency` = ' . (int) $id
+        );
+    }
+
+    /**
+     * Gets the ISO code of a language code
+     *
+     * @param string $code 3-letter Month abbreviation
+     *
+     * @return string
+     */
+    protected static function getLanguageCode($code)
+    {
+        // $code is in the form of 'xx-YY' where xx is the language code
+        // and 'YY' a country code identifying a variant of the language.
+        $lang_country = explode('-', $code);
+
+        return $lang_country[0];
     }
 }
