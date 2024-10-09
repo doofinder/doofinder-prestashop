@@ -13,9 +13,9 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
-use PrestaShop\Module\Doofinder\Lib\LanguageManager;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Src\Entity\LanguageManager;
 
 $rootPath = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $configFilePath = $rootPath . '/config/config.inc.php';

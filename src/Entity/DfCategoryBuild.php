@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -71,7 +71,7 @@ class DfCategoryBuild
         $c['meta_description'] = DfTools::cleanString($category->meta_description);
         $c['tags'] = DfTools::cleanString($category->meta_keywords);
         $c['link'] = $this->link->getCategoryLink($category);
-        $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, 'category_default') : '';
+        $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, \ImageType::getFormattedName('category')) : '';
 
         return $c;
     }

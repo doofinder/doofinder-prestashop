@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -61,10 +61,10 @@ class DfTools
     public static function limitSQL($sql, $limit = false, $offset = false)
     {
         if (false !== $limit && is_numeric($limit)) {
-            $sql .= ' LIMIT ' . intval($limit);
+            $sql .= ' LIMIT ' . (int) $limit;
 
             if (false !== $offset && is_numeric($offset)) {
-                $sql .= ' OFFSET ' . intval($offset);
+                $sql .= ' OFFSET ' . (int) $offset;
             }
         }
 
@@ -92,7 +92,7 @@ class DfTools
             `products` = 1
         ORDER BY
             CASE
-                WHEN name = 'home_default' THEN '1'
+                WHEN name = '" . \ImageType::getFormattedName('home') . "' THEN '1'
             END DESC;
         ";
 
@@ -145,9 +145,9 @@ class DfTools
         $minVersion = explode('.', $minVersion);
 
         foreach ($version as $index => $value) {
-            if (intval($value) > intval($minVersion[$index])) {
+            if ((int) $value > (int) $minVersion[$index]) {
                 return true;
-            } elseif (intval($value) < intval($minVersion[$index])) {
+            } elseif ((int) $value < (int) $minVersion[$index]) {
                 return false;
             }
         }
@@ -868,13 +868,13 @@ class DfTools
 
         foreach (\Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $i => $row) {
             if (!$i) {
-                $idCategory0 = intval($row['id_category']);
-                $nleft0 = intval($row['nleft']);
-                $nright0 = intval($row['nright']);
+                $idCategory0 = (int) $row['id_category'];
+                $nleft0 = (int) $row['nleft'];
+                $nright0 = (int) $row['nright'];
             } else {
-                $idCategory1 = intval($row['id_category']);
-                $nleft1 = intval($row['nleft']);
-                $nright1 = intval($row['nright']);
+                $idCategory1 = (int) $row['id_category'];
+                $nleft1 = (int) $row['nleft'];
+                $nright1 = (int) $row['nright'];
 
                 if ($nleft1 < $nleft0 && $nright1 > $nright0) {
                     // $idCategory1 is an ancestor of $idCategory0
@@ -981,7 +981,7 @@ class DfTools
 
     public static function truncateText($text, $length)
     {
-        $l = intval($length);
+        $l = (int) $length;
         $c = trim(preg_replace('/\s+/', ' ', $text));
 
         if (strlen($c) <= $l) {
@@ -1169,7 +1169,7 @@ class DfTools
     {
         if ($idCurrency = \Tools::getValue('currency')) {
             if (is_numeric($idCurrency)) {
-                $idCurrency = intval($idCurrency);
+                $idCurrency = (int) $idCurrency;
             } else {
                 $idCurrency = \Currency::getIdByIsoCode(strtoupper($idCurrency));
             }
@@ -1411,8 +1411,8 @@ class DfTools
 
     private static function getVariantUrl($product, $context)
     {
-        global $lang, $shop;
-        $cfgModRewrite = self::cfg($shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
+        $context = \Context::getContext();
+        $cfgModRewrite = self::cfg($context->shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
 
         return self::cleanURL(
             $context->link->getProductLink(
@@ -1420,8 +1420,8 @@ class DfTools
                 $product['link_rewrite'],
                 $product['cat_link_rew'],
                 $product['ean13'],
-                $lang->id,
-                $shop->id,
+                $context->language->id,
+                $context->shop->id,
                 (int) $product['id_product_attribute'],
                 $cfgModRewrite,
                 false,
