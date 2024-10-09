@@ -1197,8 +1197,7 @@ class DfTools
     public static function getModuleLink($path, $ssl = false)
     {
         $context = \Context::getContext();
-        $shop = new \Shop($context->shop->id);
-        $base = (($ssl && \Configuration::get('PS_SSL_ENABLED')) ? 'https://' : 'http://') . $shop->domain;
+        $base = (($ssl && \Configuration::get('PS_SSL_ENABLED')) ? 'https://' : 'http://') . $context->shop->domain;
 
         return $base . _MODULE_DIR_ . basename(dirname(__FILE__)) . '/' . $path;
     }
