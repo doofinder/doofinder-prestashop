@@ -15,6 +15,8 @@
 
 namespace PrestaShop\Module\Doofinder\Lib;
 
+use Doofinder;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -27,7 +29,7 @@ class DoofinderInstallation
     public function __construct($apiKey, $region)
     {
         $this->apiKey = $apiKey;
-        $this->apiUrl = str_replace('{region}', $region, UrlManager::API_URL);
+        $this->apiUrl = UrlManager::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region);
     }
 
     /**

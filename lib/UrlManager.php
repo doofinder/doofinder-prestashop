@@ -21,8 +21,6 @@ if (!defined('_PS_VERSION_')) {
 
 class UrlManager
 {
-    const API_URL = 'https://{region}-plugins.doofinder.com';
-
     /**
      * Get store URL
      *
@@ -72,7 +70,22 @@ class UrlManager
 
     public static function getInstallUrl($region)
     {
-        return str_replace('{region}', $region, 'https://{region}-plugins.doofinder.com/install');
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/install');
+    }
+
+    /**
+     * Gets an URL with its region filled in. You can also append a path (optional).
+     * If the region is provided as '' it will return a regionless URL.
+     *
+     * @return string
+     */
+    public static function getRegionalUrl($url, $region, $pathToAppend = '')
+    {
+        if (empty($region)) {
+            return sprintf($url, '') . $pathToAppend;
+        }
+
+        return sprintf($url, $region . '-') . $pathToAppend;
     }
 
     private static function _getShopBaseURI($shop)

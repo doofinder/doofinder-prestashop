@@ -22,7 +22,9 @@ if (!defined('_PS_VERSION_')) {
 class DoofinderConstants
 {
     // Feel free to change this value to your own local env or ngrok
-    const DOOMANAGER_URL = 'https://admin.doofinder.com';
+    const DOOMANAGER_REGION_URL = 'https://%sadmin.doofinder.com';
+    const DOOPLUGINS_REGION_URL = 'https://%splugins.doofinder.com';
+    const DOOPHOENIX_REGION_URL = 'https://%ssearch.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
     const VERSION = '4.8.9';
