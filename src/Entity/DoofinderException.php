@@ -5,7 +5,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;

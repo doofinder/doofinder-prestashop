@@ -10,7 +10,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -39,9 +39,9 @@ class EasyREST
         if ($followLocation) {
             curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true); // This too
         }
-        curl_setopt($this->curl, CURLOPT_HEADER, true); // THis verbose option for extracting the headers
-        global $debug_response;
-        if ($debug_response) {
+        curl_setopt($this->curl, CURLOPT_HEADER, true); // This verbose option for extracting the headers
+        $isDebugCurlActivated = \Configuration::get('DF_DEBUG_CURL');
+        if ($isDebugCurlActivated) {
             curl_setopt($this->curl, CURLOPT_CONNECTTIMEOUT, 5);
             curl_setopt($this->curl, CURLOPT_TIMEOUT, 5);
         }

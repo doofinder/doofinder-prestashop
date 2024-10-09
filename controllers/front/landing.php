@@ -13,8 +13,8 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DoofinderApiLanding;
-use PrestaShop\Module\Doofinder\Lib\SearchEngine;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApiLanding;
+use PrestaShop\Module\Doofinder\Src\Entity\SearchEngine;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;

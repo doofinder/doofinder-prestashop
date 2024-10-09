@@ -16,7 +16,7 @@
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -372,15 +372,10 @@ class DoofinderApi
         if ($this->optionExists('filter') && isset($this->searchOptions['filter'][$filterName])
             && in_array($term, $this->searchOptions['filter'][$filterName])
         ) {
-            function filter_me($value)
-            {
-                global $term;
-
-                return $value != $term;
-            }
-
             $this->searchOptions['filter'][$filterName] =
-            array_filter($this->searchOptions['filter'][$filterName], 'filter_me');
+            array_filter($this->searchOptions['filter'][$filterName], function ($value) use ($term) {
+                return $value !== $term;
+            });
         }
     }
 

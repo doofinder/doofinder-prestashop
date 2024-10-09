@@ -13,53 +13,35 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class DoofinderApiItems
+class DoofinderApiIndex
 {
-    private $hashid;
     private $apiKey;
     private $apiUrl;
-    private $type;
 
-    public function __construct($hashid, $apiKey, $region, $type = 'product')
+    public function __construct($apiKey, $region)
     {
-        $this->hashid = $hashid;
         $this->apiKey = $apiKey;
         $this->apiUrl = UrlManager::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region);
-        $this->type = $type;
     }
 
     /**
-     * Make a request to the API to update the specified items
+     * Make a request to the plugins API to reprocess all the feeds
      *
-     * @param array items data
+     * @param string $installationId
+     * @param string $callbackUrl
      */
-    public function updateBulk($payload)
+    public function invokeReindexing($installationId, $callbackUrl = '')
     {
-        $endpoint = '/item/' . $this->hashid . '/' . $this->type . '?platform=prestashop&action=update';
+        $apiEndpoint = $this->apiUrl . '/process-feed';
+        $jsonData = json_encode(['store_id' => $installationId, 'callback_url' => $callbackUrl]);
 
-        $url = $this->apiUrl . $endpoint;
-
-        return $this->post($url, $payload);
-    }
-
-    /**
-     * Make a request to the API to delete the specified items
-     *
-     * @param array items ids
-     */
-    public function deleteBulk($payload)
-    {
-        $endpoint = '/item/' . $this->hashid . '/' . $this->type . '?platform=prestashop&action=delete';
-
-        $url = $this->apiUrl . $endpoint;
-
-        return $this->post($url, $payload);
+        return $this->post($apiEndpoint, $jsonData);
     }
 
     private function post($url, $payload)

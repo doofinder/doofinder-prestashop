@@ -13,8 +13,8 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DoofinderApi;
-use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApi;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderInstallation;
 
 $rootPath = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $configFilePath = $rootPath . '/config/config.inc.php';

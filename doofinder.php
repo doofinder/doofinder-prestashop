@@ -18,11 +18,11 @@ if (!defined('_PS_VERSION_')) {
 
 require_once 'autoloader.php';
 
-use PrestaShop\Module\Doofinder\Lib\DoofinderAdminPanelView;
-use PrestaShop\Module\Doofinder\Lib\DoofinderInstallation;
-use PrestaShop\Module\Doofinder\Lib\DoofinderScript;
-use PrestaShop\Module\Doofinder\Lib\HookManager;
-use PrestaShop\Module\Doofinder\Lib\SearchEngine;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderAdminPanelView;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderScript;
+use PrestaShop\Module\Doofinder\Src\Entity\HookManager;
+use PrestaShop\Module\Doofinder\Src\Entity\SearchEngine;
 
 class Doofinder extends Module
 {

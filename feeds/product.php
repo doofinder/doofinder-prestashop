@@ -13,8 +13,8 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DfTools;
-use PrestaShop\Module\Doofinder\Lib\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
 
 if (!defined('_PS_VERSION_')) {
     exit;
