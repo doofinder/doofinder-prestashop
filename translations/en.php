@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Install Doofinder in your shop with no effort';
 $_MODULE['<{doofinder}prestashop>doofinder_e499922a91899a55af0659f1f4772e6a'] = 'Are you sure? This will not cancel your account in Doofinder service';
