@@ -12,9 +12,8 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!class_exists('dfTools')) {
-    require_once 'dfTools.class.php';
-}
+
+use PrestaShop\Module\Doofinder\Lib\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,20 +21,25 @@ if (!defined('_PS_VERSION_')) {
 
 class DfCategoryBuild
 {
-    public function __construct($id_shop, $id_lang)
+    private $idShop;
+    private $idLang;
+    private $categories;
+    private $link;
+
+    public function __construct($idShop, $idLang)
     {
-        $this->id_shop = $id_shop;
-        $this->id_lang = $id_lang;
+        $this->idShop = $idShop;
+        $this->idLang = $idLang;
     }
 
     /**
      * Set the categories to be included in the payload
      *
-     * @param array Categories ids
+     * @param array $arrayCategories categories ids
      */
-    public function setCategories($array_categories)
+    public function setCategories($arrayCategories)
     {
-        $this->categories = $array_categories;
+        $this->categories = $arrayCategories;
     }
 
     public function build($json = true)
@@ -54,18 +58,18 @@ class DfCategoryBuild
         $this->link = Context::getContext()->link;
     }
 
-    private function buildCategory($id_category)
+    private function buildCategory($idCategory)
     {
-        $category = new Category($id_category, $this->id_lang, $this->id_shop);
+        $category = new Category($idCategory, $this->idLang, $this->idShop);
 
         $c = [];
 
         $c['id'] = (string) $category->id;
-        $c['title'] = dfTools::cleanString($category->name);
-        $c['description'] = dfTools::cleanString($category->description);
-        $c['meta_title'] = dfTools::cleanString($category->meta_title);
-        $c['meta_description'] = dfTools::cleanString($category->meta_description);
-        $c['tags'] = dfTools::cleanString($category->meta_keywords);
+        $c['title'] = DfTools::cleanString($category->name);
+        $c['description'] = DfTools::cleanString($category->description);
+        $c['meta_title'] = DfTools::cleanString($category->meta_title);
+        $c['meta_description'] = DfTools::cleanString($category->meta_description);
+        $c['tags'] = DfTools::cleanString($category->meta_keywords);
         $c['link'] = $this->link->getCategoryLink($category);
         $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, 'category_default') : '';
 

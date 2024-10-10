@@ -15,10 +15,6 @@
 
 namespace PrestaShop\Module\Doofinder\Lib;
 
-if (!class_exists('dfTools')) {
-    require_once 'dfTools.class.php';
-}
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -82,8 +78,8 @@ class HookManager
         return [
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => $languageCode,
-            'script_html' => \DfTools::fixScriptTag($script),
-            'extra_css_html' => \DfTools::fixStyleTag($extraCss),
+            'script_html' => DfTools::fixScriptTag($script),
+            'extra_css_html' => DfTools::fixStyleTag($extraCss),
             'productLinks' => $productLinks,
             'search_engine_id' => $searchEngineId,
             'df_region' => $dfRegion,

@@ -13,6 +13,7 @@
  * @license   GPLv3
  */
 
+use PrestaShop\Module\Doofinder\Lib\DfTools;
 use PrestaShop\Module\Doofinder\Lib\DoofinderConfig;
 
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
@@ -58,14 +59,14 @@ if ($autoinstallerToken) {
 
 $languages = [];
 $configurations = [];
-$currencies = array_keys(dfTools::getAvailableCurrencies());
+$currencies = array_keys(DfTools::getAvailableCurrencies());
 
 $display_prices = (bool) Configuration::get('DF_GS_DISPLAY_PRICES');
 $prices_with_taxes = (bool) Configuration::get('DF_GS_PRICES_USE_TAX');
 
 foreach (Language::getLanguages(true, $context->shop->id) as $lang) {
     $lang = Tools::strtoupper($lang['iso_code']);
-    $currency = dfTools::getCurrencyForLanguage($lang);
+    $currency = DfTools::getCurrencyForLanguage($lang);
 
     $languages[] = $lang;
     $configurations[$lang] = [
@@ -96,4 +97,4 @@ $cfg = [
     ],
 ];
 
-echo dfTools::jsonEncode($cfg);
+echo DfTools::jsonEncode($cfg);
