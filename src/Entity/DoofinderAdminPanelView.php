@@ -27,6 +27,12 @@ class DoofinderAdminPanelView
     */
     public $name;
     public $tab;
+
+    /**
+     * Doofinder main module class object
+     *
+     * @var \Doofinder
+     */
     private $module;
 
     public function __construct($module)
@@ -127,7 +133,7 @@ class DoofinderAdminPanelView
         $stop = false;
         if (\Shop::getContext() == \Shop::CONTEXT_GROUP || \Shop::getContext() == \Shop::CONTEXT_ALL) {
             $context = \Context::getContext();
-            $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a \'All Shops\' or a \'Group Shop\' context, select directly the shop you want to edit'));
+            $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a \'All Shops\' or a \'Group Shop\' context, select directly the shop you want to edit', 'doofinderadminpanelview'));
             $stop = $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
         }
 
@@ -243,7 +249,7 @@ class DoofinderAdminPanelView
             $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
         } else {
-            $context->controller->warnings[] = $this->module->l("This shop is new and it hasn't been synchronized with Doofinder yet.");
+            $context->controller->warnings[] = $this->module->l("This shop is new and it hasn't been synchronized with Doofinder yet.", 'doofinderadminpanelview');
         }
         $html .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/dummy/after_tab.tpl');
 
@@ -322,62 +328,62 @@ class DoofinderAdminPanelView
         if ($validUpdateOnSave) {
             $disabled = false;
             $query = [
-                5 => ['id' => 5, 'name' => sprintf($this->module->l('Each %s minutes'), '5')],
-                15 => ['id' => 15, 'name' => sprintf($this->module->l('Each %s minutes'), '15')],
-                30 => ['id' => 30, 'name' => sprintf($this->module->l('Each %s minutes'), '30')],
-                60 => ['id' => 60, 'name' => $this->module->l('Each hour')],
-                120 => ['id' => 120, 'name' => sprintf($this->module->l('Each %s hours'), '2')],
-                360 => ['id' => 360, 'name' => sprintf($this->module->l('Each %s hours'), '6')],
-                720 => ['id' => 720, 'name' => sprintf($this->module->l('Each %s hours'), '12')],
-                1440 => ['id' => 1440, 'name' => $this->module->l('Once a day')],
-                0 => ['id' => 0, 'name' => $this->module->l('Disabled')],
+                5 => ['id' => 5, 'name' => sprintf($this->module->l('Each %s minutes', 'doofinderadminpanelview'), '5')],
+                15 => ['id' => 15, 'name' => sprintf($this->module->l('Each %s minutes', 'doofinderadminpanelview'), '15')],
+                30 => ['id' => 30, 'name' => sprintf($this->module->l('Each %s minutes', 'doofinderadminpanelview'), '30')],
+                60 => ['id' => 60, 'name' => $this->module->l('Each hour', 'doofinderadminpanelview')],
+                120 => ['id' => 120, 'name' => sprintf($this->module->l('Each %s hours', 'doofinderadminpanelview'), '2')],
+                360 => ['id' => 360, 'name' => sprintf($this->module->l('Each %s hours', 'doofinderadminpanelview'), '6')],
+                720 => ['id' => 720, 'name' => sprintf($this->module->l('Each %s hours', 'doofinderadminpanelview'), '12')],
+                1440 => ['id' => 1440, 'name' => $this->module->l('Once a day', 'doofinderadminpanelview')],
+                0 => ['id' => 0, 'name' => $this->module->l('Disabled', 'doofinderadminpanelview')],
             ];
         } else {
             $disabled = true;
             $query = [
-                0 => ['id' => 0, 'name' => $this->module->l('Disabled')],
+                0 => ['id' => 0, 'name' => $this->module->l('Disabled', 'doofinderadminpanelview')],
             ];
         }
 
         return [
             'form' => [
                 'legend' => [
-                    'title' => $this->module->l('Data Feed'),
+                    'title' => $this->module->l('Data Feed', 'doofinderadminpanelview'),
                 ],
                 'input' => [
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Index product prices'),
-                        'desc' => $this->module->l('If you activate this option you will be able to show the prices of each product in the search results.'),
+                        'label' => $this->module->l('Index product prices', 'doofinderadminpanelview'),
+                        'desc' => $this->module->l('If you activate this option you will be able to show the prices of each product in the search results.', 'doofinderadminpanelview'),
                         'name' => 'DF_GS_DISPLAY_PRICES',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Show product prices including taxes'),
-                        'desc' => $this->module->l('If you activate this option, the price of the products that will be displayed will be inclusive of taxes.'),
+                        'label' => $this->module->l('Show product prices including taxes', 'doofinderadminpanelview'),
+                        'desc' => $this->module->l('If you activate this option, the price of the products that will be displayed will be inclusive of taxes.', 'doofinderadminpanelview'),
                         'name' => 'DF_GS_PRICES_USE_TAX',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Index the full path of the product category'),
+                        'label' => $this->module->l('Index the full path of the product category', 'doofinderadminpanelview'),
                         'name' => 'DF_FEED_FULL_PATH',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Index product attribute combinations'),
+                        'label' => $this->module->l('Index product attribute combinations', 'doofinderadminpanelview'),
                         'name' => 'DF_SHOW_PRODUCT_VARIATIONS',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->module->l('Define which combinations of product attributes you want to index for'),
+                        'label' => $this->module->l('Define which combinations of product attributes you want to index for', 'doofinderadminpanelview'),
                         'name' => 'DF_GROUP_ATTRIBUTES_SHOWN',
                         'multiple' => true,
                         'options' => [
@@ -388,14 +394,14 @@ class DoofinderAdminPanelView
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Index customized product features'),
+                        'label' => $this->module->l('Index customized product features', 'doofinderadminpanelview'),
                         'name' => 'DF_SHOW_PRODUCT_FEATURES',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->module->l('Select features will be shown in feed'),
+                        'label' => $this->module->l('Select features will be shown in feed', 'doofinderadminpanelview'),
                         'name' => 'DF_FEATURES_SHOWN',
                         'multiple' => true,
                         'options' => [
@@ -409,7 +415,7 @@ class DoofinderAdminPanelView
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->module->l('Product Image Size'),
+                        'label' => $this->module->l('Product Image Size', 'doofinderadminpanelview'),
                         'name' => 'DF_GS_IMAGE_SIZE',
                         'options' => [
                             'query' => DfTools::getAvailableImageSizes(),
@@ -419,8 +425,8 @@ class DoofinderAdminPanelView
                     ],
                     [
                         'type' => 'select',
-                        'label' => $this->module->l('Automatically process modified products'),
-                        'desc' => $this->module->l('This action will only be executed if there are changes. If you see the field disabled, it is because you are making a usage in the indexes that is not supported by the automatic processing of modified products.'),
+                        'label' => $this->module->l('Automatically process modified products', 'doofinderadminpanelview'),
+                        'desc' => $this->module->l('This action will only be executed if there are changes. If you see the field disabled, it is because you are making a usage in the indexes that is not supported by the automatic processing of modified products.', 'doofinderadminpanelview'),
                         'name' => 'DF_UPDATE_ON_SAVE_DELAY',
                         'disabled' => $disabled,
                         'options' => [
@@ -431,7 +437,7 @@ class DoofinderAdminPanelView
                     ],
                 ],
                 'submit' => [
-                    'title' => $this->module->l('Save Data Feed Options'),
+                    'title' => $this->module->l('Save Data Feed Options', 'doofinderadminpanelview'),
                     'name' => 'submitDoofinderModuleDataFeed',
                 ],
             ],
@@ -448,23 +454,23 @@ class DoofinderAdminPanelView
         $inputs = [
             [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                'label' => $this->module->l('Doofinder search layer'),
+                'label' => $this->module->l('Doofinder search layer', 'doofinderadminpanelview'),
                 'name' => 'DF_SHOW_LAYER',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
             ],
             [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                'label' => $this->module->l('Doofinder search layer in mobile version'),
+                'label' => $this->module->l('Doofinder search layer in mobile version', 'doofinderadminpanelview'),
                 'name' => 'DF_SHOW_LAYER_MOBILE',
                 'is_bool' => true,
                 'values' => $this->getBooleanFormValue(),
             ],
             [
                 'type' => 'text',
-                'label' => $this->module->l('Doofinder Store ID'),
+                'label' => $this->module->l('Doofinder Store ID', 'doofinderadminpanelview'),
                 'name' => 'DF_INSTALLATION_ID',
-                'desc' => $this->module->l('INSTALLATION_ID_EXPLANATION'),
+                'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
                 'lang' => false,
             ],
         ];
@@ -472,11 +478,11 @@ class DoofinderAdminPanelView
         return [
             'form' => [
                 'legend' => [
-                    'title' => $this->module->l('Search Layer'),
+                    'title' => $this->module->l('Search Layer', 'doofinderadminpanelview'),
                 ],
                 'input' => $inputs,
                 'submit' => [
-                    'title' => $this->module->l('Save Layer Widget Options'),
+                    'title' => $this->module->l('Save Layer Widget Options', 'doofinderadminpanelview'),
                     'name' => 'submitDoofinderModuleSearchLayer',
                 ],
             ],
@@ -493,53 +499,53 @@ class DoofinderAdminPanelView
         return [
             'form' => [
                 'legend' => [
-                    'title' => $this->module->l('Advanced Options'),
+                    'title' => $this->module->l('Advanced Options', 'doofinderadminpanelview'),
                     'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
                         'type' => 'text',
-                        'label' => $this->module->l('Doofinder Api Key'),
+                        'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
                         'name' => 'DF_API_KEY',
                     ],
                     [
                         'type' => 'text',
-                        'label' => $this->module->l('Region'),
+                        'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                         'name' => 'DF_REGION',
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Enable v9 layer (Livelayer)'),
+                        'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
                         'name' => 'DF_ENABLED_V9',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Debug Mode. Write info logs in doofinder.log file'),
+                        'label' => $this->module->l('Debug Mode. Write info logs in doofinder.log file', 'doofinderadminpanelview'),
                         'name' => 'DF_DEBUG',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('CURL disable HTTPS check'),
+                        'label' => $this->module->l('CURL disable HTTPS check', 'doofinderadminpanelview'),
                         'name' => 'DF_DSBL_HTTPS_CURL',
-                        'desc' => $this->module->l('CURL_DISABLE_HTTPS_EXPLANATION'),
+                        'desc' => $this->module->l('If your server have an untrusted certificate and you have connection problems with the API, please enable this', 'doofinderadminpanelview'),
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Debug CURL error response'),
+                        'label' => $this->module->l('Debug CURL error response', 'doofinderadminpanelview'),
                         'name' => 'DF_DEBUG_CURL',
-                        'desc' => $this->module->l('To debug if your server has symptoms of connection problems'),
+                        'desc' => $this->module->l('To debug if your server has symptoms of connection problems', 'doofinderadminpanelview'),
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
                 ],
                 'submit' => [
-                    'title' => $this->module->l('Save Internal Search Options'),
+                    'title' => $this->module->l('Save Internal Search Options', 'doofinderadminpanelview'),
                     'name' => 'submitDoofinderModuleAdvanced',
                 ],
             ],
@@ -552,12 +558,12 @@ class DoofinderAdminPanelView
             [
                 'id' => 'active_on',
                 'value' => true,
-                'label' => $this->module->l('Enabled'),
+                'label' => $this->module->l('Enabled', 'doofinderadminpanelview'),
             ],
             [
                 'id' => 'active_off',
                 'value' => false,
-                'label' => $this->module->l('Disabled'),
+                'label' => $this->module->l('Disabled', 'doofinderadminpanelview'),
             ],
         ];
 

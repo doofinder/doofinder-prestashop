@@ -180,7 +180,7 @@ class Doofinder extends Module
     /**
      * @hook displayHeader FrontControllerCore
      */
-    public function hookHeader($params)
+    public function hookDisplayHeader($params)
     {
         if (!DoofinderScript::searchLayerMustBeInitialized()) {
             return '';
