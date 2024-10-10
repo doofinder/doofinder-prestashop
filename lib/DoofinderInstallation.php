@@ -15,8 +15,6 @@
 
 namespace PrestaShop\Module\Doofinder\Lib;
 
-use Doofinder;
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -126,7 +124,7 @@ class DoofinderInstallation
     private static function _createStore($shop)
     {
         $client = new EasyREST();
-        $apikey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+        $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
         $languages = \Language::getLanguages(true, $shop['id_shop']);
         $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
@@ -176,7 +174,7 @@ class DoofinderInstallation
             false,
             false,
             'application/json',
-            ['Authorization: Token ' . $apikey]
+            ['Authorization: Token ' . $apiKey]
         );
 
         if ($response->getResponseCode() === 200) {
@@ -197,10 +195,10 @@ class DoofinderInstallation
                 exit('ko');
             }
         } else {
-            $error_msg = "Create Store failed with code {$response->getResponseCode()} and message '{$response->getResponseMessage()}'";
-            $response_msg = 'Response: ' . print_r($response->response, true);
-            DoofinderConfig::debug($error_msg);
-            DoofinderConfig::debug($response_msg);
+            $errorMsg = "Create Store failed with code {$response->getResponseCode()} and message '{$response->getResponseMessage()}'";
+            $responseMsg = 'Response: ' . print_r($response->response, true);
+            DoofinderConfig::debug($errorMsg);
+            DoofinderConfig::debug($responseMsg);
             echo $response->response;
             exit;
         }
@@ -240,7 +238,7 @@ class DoofinderInstallation
      */
     public static function deleteConfigVars()
     {
-        $config_vars = [
+        $configVars = [
             'DF_AI_ADMIN_ENDPOINT',
             'DF_AI_API_ENDPOINT',
             'DF_AI_APIKEY',
@@ -283,15 +281,15 @@ class DoofinderInstallation
             'DF_FEED_INDEXED',
         ];
 
-        $hashid_vars = array_column(
+        $hashidVars = array_column(
             \Db::getInstance()->executeS('
             SELECT name FROM ' . _DB_PREFIX_ . "configuration where name like 'DF_HASHID_%'"),
             'name'
         );
 
-        $config_vars = array_merge($config_vars, $hashid_vars);
+        $configVars = array_merge($configVars, $hashidVars);
 
-        foreach ($config_vars as $var) {
+        foreach ($configVars as $var) {
             \Configuration::deleteByName($var);
         }
 

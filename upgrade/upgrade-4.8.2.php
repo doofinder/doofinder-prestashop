@@ -23,11 +23,14 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
+use PrestaShop\Module\Doofinder\Lib\DoofinderApiUniqueScript;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once _PS_MODULE_DIR_ . 'doofinder/lib/doofinder_api_unique_script.php';
+require_once _PS_MODULE_DIR_ . 'doofinder/autoloader.php';
 
 function upgrade_module_4_8_2($module)
 {

@@ -47,7 +47,7 @@ class DoofinderConfig
      */
     public static function setDefaultShopConfig($shopGroupId, $shopId)
     {
-        $apikey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+        $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
         $apiEndpoint = \Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
         $apiEndpointArray = explode('-', $apiEndpoint);
         $region = $apiEndpointArray[0];
@@ -58,7 +58,7 @@ class DoofinderConfig
         \Configuration::updateValue('DF_FEED_FULL_PATH', true, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_REGION', $region, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $shopGroupId, $shopId);
+        \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', DoofinderConstants::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(\dfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
@@ -67,15 +67,15 @@ class DoofinderConfig
     /**
      * Save the information that Doofinder returns after login
      *
-     * @param string $apikey
+     * @param string $apiKey
      * @param string $apiEndpoint
      * @param string $adminEndpoint
      *
      * @return void
      */
-    public static function saveApiConfig($apikey, $apiEndpoint, $adminEndpoint)
+    public static function saveApiConfig($apiKey, $apiEndpoint, $adminEndpoint)
     {
-        \Configuration::updateGlobalValue('DF_AI_APIKEY', $apikey);
+        \Configuration::updateGlobalValue('DF_AI_APIKEY', $apiKey);
         \Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $apiEndpoint);
         \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
 
@@ -87,7 +87,7 @@ class DoofinderConfig
             $sid = $shop['id_shop'];
             $sgid = $shop['id_shop_group'];
 
-            \Configuration::updateValue('DF_API_KEY', $region . '-' . $apikey, false, $sgid, $sid);
+            \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $sgid, $sid);
         }
     }
 }

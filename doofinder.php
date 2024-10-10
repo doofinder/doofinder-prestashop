@@ -263,11 +263,11 @@ class Doofinder extends Module
      */
     protected function showNewShopForm($shop)
     {
-        $installation_id = Configuration::get('DF_INSTALLATION_ID', null, (int) $shop->id_shop_group, (int) $shop->id);
-        $multishop_enable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
-        $apikey = Configuration::get('DF_AI_APIKEY');
+        $installationId = Configuration::get('DF_INSTALLATION_ID', null, (int) $shop->id_shop_group, (int) $shop->id);
+        $multishopEnable = Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
+        $apiKey = Configuration::get('DF_AI_APIKEY');
 
-        return !$installation_id && $multishop_enable && $apikey;
+        return !$installationId && $multishopEnable && $apiKey;
     }
 
     /**
@@ -688,9 +688,9 @@ class Doofinder extends Module
         if (((bool) Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $form_values = array_merge($form_values, $this->getConfigFormValuesAdvanced());
             $formUpdated = 'advanced_tab';
-            $hash_id = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
-            $api_key = Configuration::get('DF_API_KEY');
-            $dfApi = new DoofinderApi($hash_id, $api_key, false, ['apiVersion' => '5']);
+            $hashid = SearchEngine::getHashId(Context::getContext()->language->id, Context::getContext()->currency->id);
+            $apiKey = Configuration::get('DF_API_KEY');
+            $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
             $messages .= $dfApi->checkConnection([$this, 'l']);
             $this->context->smarty->assign('adv', 1);
         }

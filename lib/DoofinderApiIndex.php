@@ -12,37 +12,36 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-use PrestaShop\Module\Doofinder\Lib\EasyREST;
+
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-const API_URL = 'https://{region}-plugins.doofinder.com';
-
 class DoofinderApiIndex
 {
-    private $api_key;
-    private $api_url;
+    private $apiKey;
+    private $apiUrl;
 
-    public function __construct($api_key, $region)
+    public function __construct($apiKey, $region)
     {
-        $this->api_key = $api_key;
-        $this->api_url = str_replace('{region}', $region, API_URL);
+        $this->apiKey = $apiKey;
+        $this->apiUrl = UrlManager::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region);
     }
 
     /**
      * Make a request to the plugins API to reprocess all the feeds
      *
-     * @param string $installation_id
-     * @param string $callback_url
+     * @param string $installationId
+     * @param string $callbackUrl
      */
-    public function invokeReindexing($installation_id, $callback_url = '')
+    public function invokeReindexing($installationId, $callbackUrl = '')
     {
-        $api_endpoint = $this->api_url . '/process-feed';
-        $json_data = json_encode(['store_id' => $installation_id, 'callback_url' => $callback_url]);
+        $apiEndpoint = $this->apiUrl . '/process-feed';
+        $jsonData = json_encode(['store_id' => $installationId, 'callback_url' => $callbackUrl]);
 
-        return $this->post($api_endpoint, $json_data);
+        return $this->post($apiEndpoint, $jsonData);
     }
 
     private function post($url, $payload)
@@ -55,7 +54,7 @@ class DoofinderApiIndex
             false,
             false,
             'application/json',
-            ['Authorization: Token ' . $this->api_key]
+            ['Authorization: Token ' . $this->apiKey]
         );
 
         return json_decode($response->response, true);
