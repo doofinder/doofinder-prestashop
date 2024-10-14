@@ -245,19 +245,7 @@ class Doofinder extends Module
 
         $this->configureHookCommon($params);
 
-        return $this->displayScriptLiveLayer();
-    }
-
-    /**
-     * Render the script for the Livelayer search layer
-     *
-     * @return string
-     */
-    public function displayScriptLiveLayer()
-    {
-        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
-
-        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
+        return $this->displaySingleScript();
     }
 
     /**
@@ -880,5 +868,17 @@ class Doofinder extends Module
         ];
 
         return $option;
+    }
+
+    /**
+     * Render the Doofinder single script, which can be used, for example, to show the Livelayer search layer.
+     *
+     * @return string
+     */
+    private function displaySingleScript()
+    {
+        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
+
+        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
     }
 }
