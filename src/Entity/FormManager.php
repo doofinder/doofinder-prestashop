@@ -58,7 +58,7 @@ class FormManager
             $hashid = SearchEngine::getHashId($context->language->id, $context->currency->id);
             $apiKey = \Configuration::get('DF_API_KEY');
             $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
-            $messages .= $dfApi->test([$this->module, 'l']);
+            $messages .= $dfApi->checkConnection([$this->module, 'l']);
             $context->smarty->assign('adv', 1);
         }
 

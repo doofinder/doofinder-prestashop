@@ -45,7 +45,7 @@ class DoofinderScript
      *
      * @return string
      */
-    public static function getScriptLiveLayerPath($modulePath)
+    public static function getSingleScriptPath($modulePath)
     {
         /*
          * Loads different cart handling assets depending on the version of PrestaShop used

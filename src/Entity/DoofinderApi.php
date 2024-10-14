@@ -599,7 +599,7 @@ class DoofinderApi
      *
      * @return bool|string
      */
-    public function test($translationFunction, $onlyOneLang = false)
+    public function checkConnection($translationFunction, $onlyOneLang = false)
     {
         $result = false;
         $messages = '';
