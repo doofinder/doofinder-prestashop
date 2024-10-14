@@ -41,11 +41,11 @@ class DoofinderScript
     }
 
     /**
-     * Gets the script for the Livelayer search layer according to the PrestaShop version.
+     * Gets the Doofinder single script path according to the PrestaShop version.
      *
      * @return string
      */
-    public static function getScriptLiveLayerPath($modulePath)
+    public static function getSingleScriptPath($modulePath)
     {
         /*
          * Loads different cart handling assets depending on the version of PrestaShop used
