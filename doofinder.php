@@ -235,6 +235,106 @@ class Doofinder extends Module
     }
 
     /**
+     * @hook displayHeader FrontControllerCore
+     */
+    public function hookHeader($params)
+    {
+        if (!DoofinderScript::searchLayerMustBeInitialized()) {
+            return '';
+        }
+
+        $this->configureHookCommon($params);
+
+        return $this->displaySingleScript();
+    }
+
+    /**
+     * @hook actionProductSave ProductCore
+     */
+    public function hookActionProductSave($params)
+    {
+        $action = $params['product']->active ? 'update' : 'delete';
+        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
+    }
+
+    /**
+     * @hook actionProductDelete ProductCore
+     */
+    public function hookActionProductDelete($params)
+    {
+        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, 'delete');
+    }
+
+    /**
+     * @hook actionObjectCmsAddAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsAddAfter($params)
+    {
+        if ($params['object']->active) {
+            HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'update');
+        }
+    }
+
+    /**
+     * @hook actionObjectCmsUpdateAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsUpdateAfter($params)
+    {
+        $action = $params['object']->active ? 'update' : 'delete';
+        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, $action);
+    }
+
+    /**
+     * @hook actionObjectCmsDeleteAfter ObjectModelCore
+     */
+    public function hookActionObjectCmsDeleteAfter($params)
+    {
+        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'delete');
+    }
+
+    /**
+     * @hook actionObjectCategoryAddAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryAddAfter($params)
+    {
+        if ($params['object']->active) {
+            HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'update');
+        }
+    }
+
+    /**
+     * @hook actionObjectCategoryUpdateAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryUpdateAfter($params)
+    {
+        $action = $params['object']->active ? 'update' : 'delete';
+        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, $action);
+    }
+
+    /**
+     * @hook actionObjectCategoryDeleteAfter ObjectModelCore
+     */
+    public function hookActionObjectCategoryDeleteAfter($params)
+    {
+        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'delete');
+    }
+
+    /**
+     * Checks the connection with DooManager
+     *
+     * @return bool
+     */
+    public function checkOutsideConnection()
+    {
+        $client = new EasyREST(true, 3);
+        $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
+        $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
+
+        return $result && $result->originalResponse && isset($result->headers['code'])
+            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
+    }
+
+    /**
      * Check if the module has already been configured
      *
      * @return bool
@@ -752,163 +852,6 @@ class Doofinder extends Module
         );
     }
 
-    /**
-     * @hook displayHeader FrontControllerCore
-     */
-    public function hookHeader($params)
-    {
-        if (!DoofinderScript::searchLayerMustBeInitialized()) {
-            return '';
-        }
-
-        $this->configureHookCommon($params);
-
-        return $this->displayScriptLiveLayer();
-    }
-
-    /**
-     * Render the script for the Livelayer search layer
-     *
-     * @return string
-     */
-    public function displayScriptLiveLayer()
-    {
-        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
-
-        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
-    }
-
-    /**
-     * @hook actionProductSave ProductCore
-     */
-    public function hookActionProductSave($params)
-    {
-        $action = $params['product']->active ? 'update' : 'delete';
-        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
-    }
-
-    /**
-     * @hook actionProductDelete ProductCore
-     */
-    public function hookActionProductDelete($params)
-    {
-        HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, 'delete');
-    }
-
-    /**
-     * @hook actionObjectCmsAddAfter ObjectModelCore
-     */
-    public function hookActionObjectCmsAddAfter($params)
-    {
-        if ($params['object']->active) {
-            HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'update');
-        }
-    }
-
-    /**
-     * @hook actionObjectCmsUpdateAfter ObjectModelCore
-     */
-    public function hookActionObjectCmsUpdateAfter($params)
-    {
-        $action = $params['object']->active ? 'update' : 'delete';
-        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, $action);
-    }
-
-    /**
-     * @hook actionObjectCmsDeleteAfter ObjectModelCore
-     */
-    public function hookActionObjectCmsDeleteAfter($params)
-    {
-        HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'delete');
-    }
-
-    /**
-     * @hook actionObjectCategoryAddAfter ObjectModelCore
-     */
-    public function hookActionObjectCategoryAddAfter($params)
-    {
-        if ($params['object']->active) {
-            HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'update');
-        }
-    }
-
-    /**
-     * @hook actionObjectCategoryUpdateAfter ObjectModelCore
-     */
-    public function hookActionObjectCategoryUpdateAfter($params)
-    {
-        $action = $params['object']->active ? 'update' : 'delete';
-        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, $action);
-    }
-
-    /**
-     * @hook actionObjectCategoryDeleteAfter ObjectModelCore
-     */
-    public function hookActionObjectCategoryDeleteAfter($params)
-    {
-        HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'delete');
-    }
-
-    /**
-     * Checks the connection with DooManager
-     *
-     * @return bool
-     */
-    public function checkOutsideConnection()
-    {
-        $client = new EasyREST(true, 3);
-        $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
-        $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
-
-        return $result && $result->originalResponse && isset($result->headers['code'])
-            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
-    }
-
-    /**
-     * Get the language associated with a search engine
-     *
-     * @param bool $hashid
-     *
-     * @return bool|int
-     */
-    public function getLanguageByHashid($hashid)
-    {
-        $result = Db::getInstance()->getValue('
-            SELECT name
-            FROM ' . _DB_PREFIX_ . 'configuration
-            WHERE name like "DF_HASHID_%" and value = "' . pSQL($hashid) . '";
-        ');
-
-        if ($result) {
-            $key = str_replace('DF_HASHID_', '', $result);
-            $iso_code_parts = explode('_', $key);
-            $iso_code = end($iso_code_parts);
-
-            return (int) $this->getLanguageIdByLocale($iso_code);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Returns language id from locale
-     *
-     * @param string $locale Locale IETF language tag
-     *
-     * @return int|false|null
-     */
-    public function getLanguageIdByLocale($locale)
-    {
-        $sanitized_locale = pSQL(strtolower($locale));
-
-        return Db::getInstance()
-            ->getValue(
-                'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
-                WHERE `language_code` = \'' . $sanitized_locale . '\'
-                OR `iso_code` = \'' . $sanitized_locale . '\''
-            );
-    }
-
     private function getBooleanFormValue()
     {
         $option = [
@@ -925,5 +868,17 @@ class Doofinder extends Module
         ];
 
         return $option;
+    }
+
+    /**
+     * Render the Doofinder single script, which can be used, for example, to show the Livelayer search layer.
+     *
+     * @return string
+     */
+    private function displaySingleScript()
+    {
+        $this->context->controller->addJS(DoofinderScript::getSingleScriptPath($this->_path));
+
+        return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
     }
 }

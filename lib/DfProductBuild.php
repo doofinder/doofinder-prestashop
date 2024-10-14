@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DfTools;
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -68,15 +68,15 @@ class DfProductBuild
 
     private function assign()
     {
-        $this->attributesShown = Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
-        $this->displayPrices = Configuration::get('DF_GS_DISPLAY_PRICES');
-        $this->imageSize = Configuration::get('DF_GS_IMAGE_SIZE');
-        $this->link = Context::getContext()->link;
-        $this->linkRewriteConf = Configuration::get('PS_REWRITING_SETTINGS');
-        $this->productVariations = Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        $this->showProductFeatures = Configuration::get('DF_SHOW_PRODUCT_FEATURES');
-        $this->stockManagement = Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = Configuration::get('DF_GS_PRICES_USE_TAX');
+        $this->attributesShown = \Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
+        $this->displayPrices = \Configuration::get('DF_GS_DISPLAY_PRICES');
+        $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
+        $this->link = \Context::getContext()->link;
+        $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
+        $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
+        $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
+        $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
+        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX');
         $this->featuresKeys = $this->getFeaturesKeys();
     }
 
@@ -265,12 +265,12 @@ class DfProductBuild
         $available = (int) $product['available_for_order'] > 0;
 
         if ((int) $this->stockManagement) {
-            $stock = StockAvailable::getQuantityAvailableByProduct(
+            $stock = \StockAvailable::getQuantityAvailableByProduct(
                 $product['id_product'],
                 isset($product['id_product_attribute']) ? $product['id_product_attribute'] : null,
                 $this->idShop
             );
-            $allowOosp = Product::isAvailableWhenOutOfStock($product['out_of_stock']);
+            $allowOosp = \Product::isAvailableWhenOutOfStock($product['out_of_stock']);
 
             return $available && ($stock > 0 || $allowOosp) ? 'in stock' : 'out of stock';
         } else {
@@ -290,7 +290,7 @@ class DfProductBuild
             $idProductAttribute = null;
         }
 
-        $productPrice = Product::getPriceStatic(
+        $productPrice = \Product::getPriceStatic(
             $product['id_product'],
             $this->useTax,
             $idProductAttribute,
@@ -301,9 +301,9 @@ class DfProductBuild
         );
 
         if (!$salePrice) {
-            return $productPrice ? Tools::convertPrice($productPrice, $this->idCurrency) : null;
+            return $productPrice ? \Tools::convertPrice($productPrice, $this->idCurrency) : null;
         } else {
-            $onsalePrice = Product::getPriceStatic(
+            $onsalePrice = \Product::getPriceStatic(
                 $product['id_product'],
                 $this->useTax,
                 $idProductAttribute,
@@ -311,7 +311,7 @@ class DfProductBuild
             );
 
             return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
-                ? Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
+                ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
         }
     }
 
@@ -336,7 +336,7 @@ class DfProductBuild
 
     private function getFeaturesKeys()
     {
-        $cfgFeaturesShown = explode(',', Configuration::get('DF_FEATURES_SHOWN'));
+        $cfgFeaturesShown = explode(',', \Configuration::get('DF_FEATURES_SHOWN'));
         $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
 
         if (isset($cfgFeaturesShown) && count($cfgFeaturesShown) > 0 && $cfgFeaturesShown[0] !== '') {
@@ -405,7 +405,7 @@ class DfProductBuild
         $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
 
         // lowercase
-        $text = Tools::strtolower($text);
+        $text = \Tools::strtolower($text);
 
         // remove unwanted characters
         $text = preg_replace('~[^-\w]+~', '', $text);

@@ -13,6 +13,7 @@
  * @license   GPLv3
  */
 
+use PrestaShop\Module\Doofinder\Lib\DfCategoryBuild;
 use PrestaShop\Module\Doofinder\Lib\DfTools;
 
 if (function_exists('set_time_limit')) {
@@ -23,11 +24,9 @@ $rootPath = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $configFilePath = $rootPath . '/config/config.inc.php';
 if (file_exists($configFilePath)) {
     require_once $configFilePath;
-    require_once dirname($_SERVER['SCRIPT_FILENAME']) . '/lib/dfCategory_build.php';
     require_once dirname($_SERVER['SCRIPT_FILENAME']) . '/autoloader.php';
 } else {
     require_once dirname(__FILE__) . '/../../../config/config.inc.php';
-    require_once dirname(__FILE__) . '/../lib/dfCategory_build.php';
     require_once dirname(__FILE__) . '/../autoloader.php';
 }
 

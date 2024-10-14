@@ -31,14 +31,14 @@ class SearchEngine
      */
     public static function getHashId($idLang, $idCurrency)
     {
-        $currIso = strtoupper(self::getIsoCodeById($idCurrency));
+        $currIso = strtoupper(LanguageManager::getIsoCodeById($idCurrency));
         $lang = new \Language($idLang);
 
         $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper($lang->language_code);
         $hashid = \Configuration::get($hashidKey);
 
         if (!$hashid) {
-            $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper(self::getLanguageCode($lang->language_code));
+            $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper(LanguageManager::getLanguageCode($lang->language_code));
             $hashid = \Configuration::get($hashidKey);
         }
 
@@ -65,36 +65,5 @@ class SearchEngine
         }
 
         return true;
-    }
-
-    /**
-     * Get the ISO of a currency
-     *
-     * @param int $id currency ID
-     *
-     * @return string
-     */
-    protected static function getIsoCodeById($id)
-    {
-        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
-            '
-            SELECT `iso_code` FROM ' . _DB_PREFIX_ . 'currency WHERE `id_currency` = ' . (int) $id
-        );
-    }
-
-    /**
-     * Gets the ISO code of a language code
-     *
-     * @param string $code 3-letter Month abbreviation
-     *
-     * @return string
-     */
-    protected static function getLanguageCode($code)
-    {
-        // $code is in the form of 'xx-YY' where xx is the language code
-        // and 'YY' a country code identifying a variant of the language.
-        $langCountry = explode('-', $code);
-
-        return $langCountry[0];
     }
 }
