@@ -12,9 +12,8 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-define('CATEGORY_SEPARATOR', ' %% ');
-define('CATEGORY_TREE_SEPARATOR', '>');
-define('TXT_SEPARATOR', '|');
+
+namespace PrestaShop\Module\Doofinder\Lib;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,10 +21,16 @@ if (!defined('_PS_VERSION_')) {
 
 class DfTools
 {
+    const CATEGORY_SEPARATOR = ' %% ';
+    const CATEGORY_TREE_SEPARATOR = '>';
+    const TXT_SEPARATOR = '|';
     // http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
     const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF]
     [\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F]
     [\x80-\xBF]{2})|./x';
+
+    protected static $rootCategoryIds;
+    protected static $cachedCategoryPaths = [];
 
     //
     // Validation
@@ -33,7 +38,7 @@ class DfTools
 
     public static function isBasicValue($v)
     {
-        return $v && !empty($v) && Validate::isGenericName($v);
+        return $v && !empty($v) && \Validate::isGenericName($v);
     }
 
     //
@@ -91,7 +96,8 @@ class DfTools
             END DESC;
         ";
 
-        foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $size) {
+        $imageSizes = \Db::getInstance()->ExecuteS(self::prepareSQL($sql));
+        foreach ($imageSizes as $size) {
             $sizes[$size['DF_GS_IMAGE_SIZE']] = $size;
         }
 
@@ -118,7 +124,7 @@ class DfTools
       ORDER BY `name`;
     ';
 
-        foreach (Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $currency) {
+        foreach (\Db::getInstance()->ExecuteS(self::prepareSQL($sql)) as $currency) {
             $currencies[$currency['iso_code']] = $currency;
         }
 
@@ -129,19 +135,19 @@ class DfTools
      * 1.[5].0.13 | 1.5.[0].5 | 1.5.0.[1]
      * 1.[6].0.6  | 1.5.[1].0 | 1.5.0.[5]
      *
-     * @param  [type] $min_version [description]
+     * @param  [type] $minVersion [description]
      *
      * @return [type]              [description]
      */
-    public static function versionGte($min_version)
+    public static function versionGte($minVersion)
     {
         $version = explode('.', _PS_VERSION_);
-        $min_version = explode('.', $min_version);
+        $minVersion = explode('.', $minVersion);
 
         foreach ($version as $index => $value) {
-            if (intval($value) > intval($min_version[$index])) {
+            if (intval($value) > intval($minVersion[$index])) {
                 return true;
-            } elseif (intval($value) < intval($min_version[$index])) {
+            } elseif (intval($value) < intval($minVersion[$index])) {
                 return false;
             }
         }
@@ -149,7 +155,7 @@ class DfTools
         return true;
     }
 
-    public static function getSelectedFeatures($features, $selected_keys)
+    public static function getSelectedFeatures($features, $selectedKeys)
     {
         /**
          * Returns the features selected by user
@@ -158,26 +164,26 @@ class DfTools
          *
          * @return array of rows (assoc arrays)
          */
-        $selected_features = [];
+        $selectedFeatures = [];
 
         foreach ($features as $key => $value) {
-            if (in_array((string) $key, $selected_keys)) {
-                $selected_features[] = $value;
+            if (in_array((string) $key, $selectedKeys, true)) {
+                $selectedFeatures[] = $value;
             }
         }
 
-        return $selected_features;
+        return $selectedFeatures;
     }
 
     /**
      * Returns the features of a product
      *
-     * @param int shop ID
-     * @param int language ID
+     * @param int $idShop shop ID
+     * @param int $idLang language ID
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getFeatureKeysForShopAndLang($id_shop, $id_lang)
+    public static function getFeatureKeysForShopAndLang($idShop, $idLang)
     {
         $sql = '
       SELECT fl.name, fl.id_feature
@@ -192,11 +198,11 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($id_lang),
-            '_ID_SHOP_' => (int) pSQL($id_shop),
+            '_ID_LANG_' => (int) pSQL($idLang),
+            '_ID_SHOP_' => (int) pSQL($idShop),
         ]);
 
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = [];
         foreach ($result as $elem) {
             $names[$elem['id_feature']] = $elem['name'];
@@ -208,12 +214,12 @@ class DfTools
     /**
      * Returns the features of a product
      *
-     * @param int shop ID
-     * @param int language ID
+     * @param int $idShop shop ID
+     * @param int $idLang language ID
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getAttributeKeysForShopAndLang($id_shop, $id_lang)
+    public static function getAttributeKeysForShopAndLang($idShop, $idLang)
     {
         $sql = '
       SELECT agl.name
@@ -228,11 +234,11 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($id_lang),
-            '_ID_SHOP_' => (int) pSQL($id_shop),
+            '_ID_LANG_' => (int) pSQL($idLang),
+            '_ID_SHOP_' => (int) pSQL($idShop),
         ]);
 
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = [];
         foreach ($result as $elem) {
             $names[] = $elem['name'];
@@ -244,12 +250,12 @@ class DfTools
     /**
      * Returns the features of a product
      *
-     * @param int shop ID
-     * @param int language ID
+     * @param int $idProduct ID of the product
+     * @param int $idProductAttribute id of the Product attribute
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getVariationImg($id_product, $id_product_attribute)
+    public static function getVariationImg($idProduct, $idProductAttribute)
     {
         $sql = '
       SELECT i.id_image
@@ -263,15 +269,15 @@ class DfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image
-            where pa.id_product = ' . (int) pSQL($id_product) . '
-                and pa.id_product_attribute = ' . (int) pSQL($id_product_attribute) . '
+            where pa.id_product = ' . (int) pSQL($idProduct) . '
+                and pa.id_product_attribute = ' . (int) pSQL($idProductAttribute) . '
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
              on i.id_product = P.id_product and i.position =  P.min_position
             ';
         $sql = self::prepareSQL($sql, []);
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         if (isset($result[0])) {
             return $result[0]['id_image'];
         } else {
@@ -282,12 +288,13 @@ class DfTools
     /**
      * Returns the features of a product
      *
-     * @param int product ID
+     * @param int $idProduct product ID
      * @param int language ID
+     * @param array $featureKeys keys of the features associated to the product
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getFeaturesForProduct($id_product, $id_lang, $feature_keys)
+    public static function getFeaturesForProduct($idProduct, $idLang, $featureKeys)
     {
         $sql = '
       SELECT fl.name,
@@ -305,16 +312,16 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($id_lang),
-            '_ID_PRODUCT' => (int) pSQL($id_product),
+            '_ID_LANG_' => (int) pSQL($idLang),
+            '_ID_PRODUCT' => (int) pSQL($idProduct),
         ]);
 
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
 
         $features = [];
 
         foreach ($result as $elem) {
-            if (in_array($elem['name'], $feature_keys)) {
+            if (in_array($elem['name'], $featureKeys, true)) {
                 $features[$elem['name']][] = $elem['value'];
             }
         }
@@ -325,14 +332,15 @@ class DfTools
     /**
      * Returns the product variation attributes
      *
-     * @param int product Attribute ID
-     * @param int language ID
+     * @param int $variationId product variation Attribute ID
+     * @param int $idLang language ID
+     * @param array $attributeKeys keys of the attributes associated to the product
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getAttributesForProductVariation($variation_id, $id_lang, $attribute_keys)
+    public static function getAttributesForProductVariation($variationId, $idLang, $attributeKeys)
     {
-        if (isset($variation_id) && $variation_id > 0) {
+        if (isset($variationId) && $variationId > 0) {
             $sql = '
         SELECT pc.id_product_attribute,
                pal.name,
@@ -351,24 +359,24 @@ class DfTools
       ';
 
             $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => (int) pSQL($id_lang),
-                '_VARIATION_ID' => (int) pSQL($variation_id),
+                '_ID_LANG_' => (int) pSQL($idLang),
+                '_VARIATION_ID' => (int) pSQL($variationId),
             ]);
 
-            $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         } else {
             $result = [];
         }
 
-        if (count($attribute_keys) > 0) {
-            $attributes = array_fill(0, count($attribute_keys), '');
+        if (count($attributeKeys) > 0) {
+            $attributes = array_fill(0, count($attributeKeys), '');
         } else {
             $attributes = [];
         }
 
         foreach ($result as $elem) {
-            if (array_search($elem['group_name'], $attribute_keys) !== false) {
-                $attributes[array_search($elem['group_name'], $attribute_keys)] = $elem['name'];
+            if (array_search($elem['group_name'], $attributeKeys) !== false) {
+                $attributes[array_search($elem['group_name'], $attributeKeys)] = $elem['name'];
             }
         }
 
@@ -384,9 +392,9 @@ class DfTools
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getAttributesByCombination($variation_id, $id_lang, $attr_limit = false)
+    public static function getAttributesByCombination($variationId, $idLang, $attrLimit = false)
     {
-        if (isset($variation_id) && $variation_id > 0) {
+        if (isset($variationId) && $variationId > 0) {
             $sql = 'SELECT pc.id_product_attribute,
                     pal.name,
                     pagl.name AS group_name
@@ -402,15 +410,15 @@ class DfTools
             WHERE
             pc.id_product_attribute = _VARIATION_ID';
 
-            if ($attr_limit) {
-                $sql .= ' AND pa.id_attribute_group IN (' . pSQL($attr_limit) . ')';
+            if ($attrLimit) {
+                $sql .= ' AND pa.id_attribute_group IN (' . pSQL($attrLimit) . ')';
             }
             $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => (int) pSQL($id_lang),
-                '_VARIATION_ID' => (int) pSQL($variation_id),
+                '_ID_LANG_' => (int) pSQL($idLang),
+                '_VARIATION_ID' => (int) pSQL($variationId),
             ]);
 
-            return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+            return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         } else {
             return [];
         }
@@ -424,20 +432,20 @@ class DfTools
      *
      * @return array
      */
-    public static function getAttributesName($attributes_ids, $id_lang)
+    public static function getAttributesName($attributesIds, $idLang)
     {
         $sql = '
             SELECT pag.id_attribute_group, pagl.name
             FROM _DB_PREFIX_attribute_group pag
             LEFT JOIN _DB_PREFIX_attribute_group_lang pagl ON pag.id_attribute_group = pagl.id_attribute_group  AND pagl.id_lang = _ID_LANG_
-            WHERE pag.id_attribute_group IN (' . implode(',', $attributes_ids) . ')
+            WHERE pag.id_attribute_group IN (' . implode(',', $attributesIds) . ')
             ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($id_lang),
+            '_ID_LANG_' => (int) pSQL($idLang),
         ]);
 
-        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
     /**
@@ -451,25 +459,25 @@ class DfTools
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getAvailableProductsForLanguage($id_lang, $id_shop, $limit = false, $offset = false, $ids = null)
+    public static function getAvailableProductsForLanguage($idLang, $idShop, $limit = false, $offset = false, $ids = null)
     {
-        $Shop = new Shop($id_shop);
+        $Shop = new \Shop($idShop);
 
         $isbn = '';
-        $isbn_pa = '';
-        if (dfTools::versionGte('1.7.0.0')) {
+        $isbnPa = '';
+        if (self::versionGte('1.7.0.0')) {
             $isbn = 'p.isbn,';
-            if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-                $isbn_pa = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
+            if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+                $isbnPa = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
             }
         }
 
         $mpn = 'p.reference as mpn,';
-        $mpn_pa = 'pa.reference AS variation_mpn,';
-        if (dfTools::versionGte('1.7.7.0')) {
+        $mpnPa = 'pa.reference AS variation_mpn,';
+        if (self::versionGte('1.7.7.0')) {
             $mpn = 'p.mpn AS mpn,';
-            if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-                $mpn_pa = 'pa.mpn AS variation_mpn,';
+            if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+                $mpnPa = 'pa.mpn AS variation_mpn,';
             }
         }
 
@@ -530,14 +538,14 @@ class DfTools
         p.id_product
     ";
 
-        $sql_variations = "
+        $sqlVariations = "
       SELECT
         ps.id_product,
         ps.show_price,
         pa.id_product_attribute,
         pa.reference AS variation_reference,
         psp.product_supplier_reference AS variation_supplier_reference,
-        $mpn_pa
+        $mpnPa
         pa.ean13 AS variation_ean13,
         pa.upc AS variation_upc,
         pa_im.id_image AS variation_image_id,
@@ -546,7 +554,7 @@ class DfTools
         m.name AS manufacturer,
         $mpn
         p.ean13 AS ean13,
-        $isbn_pa
+        $isbnPa
         p.upc AS upc,
         p.reference AS reference,
         p.supplier_reference AS supplier_reference,
@@ -663,15 +671,15 @@ class DfTools
         id_product
     ";
 
-        if (dfTools::cfg($id_shop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-            $sql = $sql_variations;
+        if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+            $sql = $sqlVariations;
         }
 
         // MIN: 1.5.0.9
-        $id_category_default = self::versionGte('1.5.0.9') ? 'ps.id_category_default' : 'p.id_category_default';
+        $idCategoryDefault = self::versionGte('1.5.0.9') ? 'ps.id_category_default' : 'p.id_category_default';
         // MIN: 1.5.1.0
-        $ims_cover = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
-        $is_active = self::versionGte('1.5.1.0') ? 'ps.active = 1' : 'p.active = 1';
+        $imsCover = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
+        $isActive = self::versionGte('1.5.1.0') ? 'ps.active = 1' : 'p.active = 1';
 
         if (self::versionGte('1.5.1.0')) {
             $visibility = "AND ps.visibility IN ('search', 'both')";
@@ -682,30 +690,27 @@ class DfTools
         }
 
         if (is_array($ids) && count($ids)) {
-            $product_ids = 'AND p.id_product IN (' . implode(',', $ids) . ')';
+            $productIds = 'AND p.id_product IN (' . implode(',', $ids) . ')';
         } else {
-            $product_ids = '';
+            $productIds = '';
         }
 
         $sql = self::limitSQL($sql, $limit, $offset);
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($id_lang),
-            '_ID_SHOP_' => (int) pSQL($id_shop),
+            '_ID_LANG_' => (int) pSQL($idLang),
+            '_ID_SHOP_' => (int) pSQL($idShop),
             '_ID_SHOPGROUP_' => (int) pSQL($Shop->id_shop_group),
-            '_IMS_COVER_' => (string) pSQL($ims_cover),
-            '__ID_CATEGORY_DEFAULT_FIELD__' => (string) pSQL($id_category_default),
-            '__IS_ACTIVE__' => (string) pSQL($is_active),
+            '_IMS_COVER_' => (string) pSQL($imsCover),
+            '__ID_CATEGORY_DEFAULT_FIELD__' => (string) pSQL($idCategoryDefault),
+            '__IS_ACTIVE__' => (string) pSQL($isActive),
             '__VISIBILITY__' => (string) pSQL($visibility),
-            '__PRODUCT_IDS__' => (string) pSQL($product_ids),
+            '__PRODUCT_IDS__' => (string) pSQL($productIds),
         ]);
 
         $sql = str_replace("\'", "'", $sql);
 
-        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
-
-    protected static $root_category_ids;
-    protected static $cached_category_paths = [];
 
     /**
      * Returns an array of "root" categories in Prestashop for a language.
@@ -713,16 +718,16 @@ class DfTools
      *
      * @return array
      */
-    public static function getRootCategoryIds($id_lang)
+    public static function getRootCategoryIds($idLang)
     {
-        if (null === self::$root_category_ids) {
-            self::$root_category_ids = [];
-            foreach (Category::getRootCategories($id_lang) as $category) {
-                self::$root_category_ids[] = $category['id_category'];
+        if (null === self::$rootCategoryIds) {
+            self::$rootCategoryIds = [];
+            foreach (\Category::getRootCategories($idLang) as $category) {
+                self::$rootCategoryIds[] = $category['id_category'];
             }
         }
 
-        return self::$root_category_ids;
+        return self::$rootCategoryIds;
     }
 
     /**
@@ -730,20 +735,20 @@ class DfTools
      * category ID in a language for the selected shop.
      * Results are cached by category ID.
      *
-     * @param int Category ID
-     * @param int Language ID
-     * @param int Shop ID
-     * @param bool return full category path
+     * @param int $idCategory Category ID
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     * @param bool $full return full category path
      *
      * @return string
      */
-    public static function getCategoryPath($id_category, $id_lang, $id_shop, $full = true)
+    public static function getCategoryPath($idCategory, $idLang, $idShop, $full = true)
     {
-        if (isset(self::$cached_category_paths[$id_category])) {
-            return self::$cached_category_paths[$id_category];
+        if (isset(self::$cachedCategoryPaths[$idCategory])) {
+            return self::$cachedCategoryPaths[$idCategory];
         }
 
-        $excluded_ids = self::getRootCategoryIds($id_lang);
+        $excludedIds = self::getRootCategoryIds($idLang);
 
         $sql = '
       SELECT
@@ -762,7 +767,7 @@ class DfTools
         AND parent.level_depth <> 0
         AND parent.active = 1 ';
 
-        if (count($excluded_ids) > 0 && $excluded_ids[0] != '') {
+        if (count($excludedIds) > 0 && '' !== (string) $excludedIds[0]) {
             $sql .= 'AND parent.id_category NOT IN (_EXCLUDED_IDS_) ';
         }
 
@@ -771,27 +776,27 @@ class DfTools
       ;';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_CATEGORY_' => (int) pSQL($id_category),
-            '_ID_SHOP_' => (int) pSQL($id_shop),
-            '_ID_LANG_' => (int) pSQL($id_lang),
-            '_EXCLUDED_IDS_' => (string) pSQL(implode(',', $excluded_ids)),
+            '_ID_CATEGORY_' => (int) pSQL($idCategory),
+            '_ID_SHOP_' => (int) pSQL($idShop),
+            '_ID_LANG_' => (int) pSQL($idLang),
+            '_EXCLUDED_IDS_' => (string) pSQL(implode(',', $excludedIds)),
         ]);
 
         $sql = str_replace("\'", "'", $sql);
 
         $path = [];
-        foreach (Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $row) {
-            $path[] = str_replace([CATEGORY_TREE_SEPARATOR, CATEGORY_SEPARATOR], '-', $row['name']);
+        foreach (\Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $row) {
+            $path[] = str_replace([self::CATEGORY_TREE_SEPARATOR, self::CATEGORY_SEPARATOR], '-', $row['name']);
         }
 
         if ($full) {
-            $path = implode(CATEGORY_TREE_SEPARATOR, $path);
+            $path = implode(self::CATEGORY_TREE_SEPARATOR, $path);
         } else {
             $path = end($path);
         }
 
         $path = self::cleanString($path);
-        self::$cached_category_paths[$id_category] = $path;
+        self::$cachedCategoryPaths[$idCategory] = $path;
 
         return $path;
     }
@@ -800,16 +805,16 @@ class DfTools
      * Returns a string with all the paths for categories for a product in a language
      * for the selected shop. If $flat == false then returns them as an array.
      *
-     * @param int Product ID
-     * @param int Language ID
-     * @param int Shop ID
-     * @param bool optional implode values
+     * @param int $idProduct Product ID
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     * @param bool $flat optional implode values
      *
      * @return string or array
      */
-    public static function getCategoriesForProductIdAndLanguage($id_product, $id_lang, $id_shop, $flat = true)
+    public static function getCategoriesForProductIdAndLanguage($idProduct, $idLang, $idShop, $flat = true)
     {
-        $use_main_category = (bool) dfTools::cfg($id_shop, 'DF_FEED_MAINCATEGORY_PATH', Doofinder::YES);
+        $useMainCategory = (bool) self::cfg($idShop, 'DF_FEED_MAINCATEGORY_PATH', DoofinderConstants::YES);
 
         $sql = '
       SELECT DISTINCT
@@ -835,110 +840,110 @@ class DfTools
         $mainCategoryInner = '';
         $mainCategoryWhere = '';
 
-        if ($use_main_category) {
+        if ($useMainCategory) {
             $mainInnerSql = 'INNER JOIN _DB_PREFIX_product_shop ps '
                 . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
             $mainCategoryInner = self::prepareSQL(
                 $mainInnerSql,
-                ['_ID_PRODUCT_' => (int) pSQL($id_product), '_ID_SHOP_' => (int) pSQL($id_shop)]
+                ['_ID_PRODUCT_' => (int) pSQL($idProduct), '_ID_SHOP_' => (int) pSQL($idShop)]
             );
             $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
         }
 
         $sql = self::prepareSQL($sql, [
-            '_ID_PRODUCT_' => (int) pSQL($id_product),
+            '_ID_PRODUCT_' => (int) pSQL($idProduct),
             '_MAIN_CATEGORY_INNER_' => (string) pSQL($mainCategoryInner),
             '_MAIN_CATEGORY_WHERE_' => (string) pSQL($mainCategoryWhere),
-            '_ID_SHOP_' => (int) pSQL($id_shop),
+            '_ID_SHOP_' => (int) pSQL($idShop),
         ]);
 
         $sql = str_replace("\'", "'", $sql);
 
         $categories = [];
-        $last_saved = 0;
-        $id_category0 = 0;
+        $lastSaved = 0;
+        $idCategory0 = 0;
         $nleft0 = 0;
         $nright0 = 0;
-        $use_full_path = (bool) dfTools::cfg($id_shop, 'DF_FEED_FULL_PATH', Doofinder::YES);
+        $useFullPath = (bool) self::cfg($idShop, 'DF_FEED_FULL_PATH', DoofinderConstants::YES);
 
-        foreach (Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $i => $row) {
+        foreach (\Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $i => $row) {
             if (!$i) {
-                $id_category0 = intval($row['id_category']);
+                $idCategory0 = intval($row['id_category']);
                 $nleft0 = intval($row['nleft']);
                 $nright0 = intval($row['nright']);
             } else {
-                $id_category1 = intval($row['id_category']);
+                $idCategory1 = intval($row['id_category']);
                 $nleft1 = intval($row['nleft']);
                 $nright1 = intval($row['nright']);
 
                 if ($nleft1 < $nleft0 && $nright1 > $nright0) {
-                    // $id_category1 is an ancestor of $id_category0
+                    // $idCategory1 is an ancestor of $idCategory0
                 } elseif ($nleft1 < $nleft0 && $nright1 > $nright0) {
-                    // $id_category1 is a child of $id_category0 so be replace $id_category0
-                    $id_category0 = $id_category1;
+                    // $idCategory1 is a child of $idCategory0 so be replace $idCategory0
+                    $idCategory0 = $idCategory1;
                     $nleft0 = $nleft1;
                     $nright0 = $nright1;
                 } else {
-                    // $id_category1 is not a relative of $id_category0 so we save
-                    // $id_category0 now and make $id_category1 the current category.
-                    $categories[] = self::getCategoryPath($id_category0, $id_lang, $id_shop, $use_full_path);
-                    $last_saved = $id_category0;
+                    // $idCategory1 is not a relative of $idCategory0 so we save
+                    // $idCategory0 now and make $idCategory1 the current category.
+                    $categories[] = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
+                    $lastSaved = $idCategory0;
 
-                    $id_category0 = $id_category1;
+                    $idCategory0 = $idCategory1;
                     $nleft0 = $nleft1;
                     $nright0 = $nright1;
                 }
             }
         } // endforeach
 
-        if ($last_saved != $id_category0) {
-            // The last item in loop didn't trigger the $id_category0 saving event.
-            $categories[] = self::getCategoryPath($id_category0, $id_lang, $id_shop, $use_full_path);
+        if ($lastSaved != $idCategory0) {
+            // The last item in loop didn't trigger the $idCategory0 saving event.
+            $categories[] = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
         }
 
-        return $flat ? implode(CATEGORY_SEPARATOR, $categories) : $categories;
+        return $flat ? implode(self::CATEGORY_SEPARATOR, $categories) : $categories;
     }
 
     /**
      * Check if product has variants
      *
-     * @param int product ID
+     * @param int $idProduct product ID
      *
      * @return int
      */
-    public static function hasAttributes($id_product)
+    public static function hasAttributes($idProduct)
     {
-        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
             '
             SELECT COUNT(*)
             FROM `' . _DB_PREFIX_ . 'product_attribute` pa
-            ' . Shop::addSqlAssociation('product_attribute', 'pa') . '
-            WHERE pa.`id_product` = ' . (int) $id_product
+            ' . \Shop::addSqlAssociation('product_attribute', 'pa') . '
+            WHERE pa.`id_product` = ' . (int) $idProduct
         );
     }
 
     /**
      * Check if product has attributes
      *
-     * @param int product ID
-     * @param string attribute groups IDs
+     * @param int $idProduct product ID
+     * @param string $attributeGroupsId attribute groups IDs
      *
      * @return array
      */
-    public static function hasProductAttributes($id_product, $attribute_groups_id)
+    public static function hasProductAttributes($idProduct, $attributeGroupsId)
     {
-        if (!$attribute_groups_id) {
+        if (!$attributeGroupsId) {
             return false;
         }
 
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
             '
             SELECT a.id_attribute_group
             FROM `' . _DB_PREFIX_ . 'product` p
             LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa ON p.id_product = pa.id_product
             LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON pa.id_product_attribute = pac.id_product_attribute
             LEFT JOIN `' . _DB_PREFIX_ . 'attribute` a ON pac.id_attribute = a.id_attribute
-            WHERE p.id_product = ' . pSQL($id_product) . ' AND id_attribute_group IN ( ' . pSQL($attribute_groups_id) . ')
+            WHERE p.id_product = ' . pSQL($idProduct) . ' AND id_attribute_group IN ( ' . pSQL($attributeGroupsId) . ')
             GROUP BY a.id_attribute_group
             '
         );
@@ -948,12 +953,12 @@ class DfTools
 
     public static function getCategories($idLang, $active = true)
     {
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
             '
             SELECT c.id_category
             FROM `' . _DB_PREFIX_ . 'category` c
-            ' . Shop::addSqlAssociation('category', 'c') . '
-            LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` cl ON c.`id_category` = cl.`id_category`' . Shop::addSqlRestrictionOnLang('cl') . '
+            ' . \Shop::addSqlAssociation('category', 'c') . '
+            LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` cl ON c.`id_category` = cl.`id_category`' . \Shop::addSqlRestrictionOnLang('cl') . '
             WHERE id_parent != 0
             ' . ($idLang ? 'AND `id_lang` = ' . (int) $idLang : '') . '
             ' . ($active ? 'AND `active` = 1' : '') . '
@@ -963,9 +968,9 @@ class DfTools
         return array_column($result, 'id_category');
     }
 
-    public static function getCmsPages($idLang, $id_shop, $active = true)
+    public static function getCmsPages($idLang, $idShop, $active = true)
     {
-        $result = CMS::getCMSPages($idLang, null, $active, $id_shop);
+        $result = \CMS::getCMSPages($idLang, null, $active, $idShop);
 
         return array_column($result, 'id_cms');
     }
@@ -1002,7 +1007,7 @@ class DfTools
         $text = trim($text);
         $text = preg_replace("/\r|\n/", '', $text);
         $text = explode('?', $text);
-        $text = str_replace(TXT_SEPARATOR, '%7C', $text);
+        $text = str_replace(self::TXT_SEPARATOR, '%7C', $text);
 
         $baseUrl = [];
         foreach (explode('/', $text[0]) as $part) {
@@ -1049,7 +1054,7 @@ class DfTools
         $text = preg_replace('/\s+/', ' ', $text);
         $text = trim($text);
         $text = preg_replace('/^["\']+/', '', $text); // remove first quotes
-        $text = str_replace(TXT_SEPARATOR, '&#124;', $text);
+        $text = str_replace(self::TXT_SEPARATOR, '&#124;', $text);
 
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
@@ -1064,13 +1069,18 @@ class DfTools
     public static function cleanReferences($text)
     {
         $forbidden = ['-'];
+        $text = (is_string($text)) ? $text : '';
 
-        return self::str_replace($forbidden, '', $text);
+        return str_replace($forbidden, '', $text);
     }
 
     public static function splitReferences($text)
     {
-        return self::preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
+        if (!is_string($text)) {
+            return $text;
+        }
+
+        return preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
     }
 
     //
@@ -1084,7 +1094,7 @@ class DfTools
      */
     public static function getBooleanFromRequest($parameter, $default = false)
     {
-        $v = Tools::getValue($parameter, null);
+        $v = \Tools::getValue($parameter, null);
 
         if ($v === null) {
             return $default;
@@ -1110,18 +1120,18 @@ class DfTools
      * request. If no language is found then the default one from the current
      * context is used.
      *
-     * @return Language
+     * @return \Language
      */
     public static function getLanguageFromRequest()
     {
-        $context = Context::getContext();
-        $id_lang = Tools::getValue('language', $context->language->id);
+        $context = \Context::getContext();
+        $idLang = \Tools::getValue('language', $context->language->id);
 
-        if (!is_numeric($id_lang)) {
-            $id_lang = Language::getIdByIso($id_lang);
+        if (!is_numeric($idLang)) {
+            $idLang = \Language::getIdByIso($idLang);
         }
 
-        return new Language($id_lang);
+        return new \Language($idLang);
     }
 
     /**
@@ -1131,18 +1141,18 @@ class DfTools
      *
      * @param string $code ISO language code
      *
-     * @return Currency
+     * @return \Currency
      */
     public static function getCurrencyForLanguage($code)
     {
         $optname = 'DF_GS_CURRENCY_' . strtoupper($code);
-        $id_currency = Configuration::get($optname);
+        $idCurrency = \Configuration::get($optname);
 
-        if ($id_currency) {
-            return new Currency(Currency::getIdByIsoCode($id_currency));
+        if ($idCurrency) {
+            return new \Currency(\Currency::getIdByIsoCode($idCurrency));
         }
 
-        return new Currency(Context::getContext()->currency->id);
+        return new \Currency(\Context::getContext()->currency->id);
     }
 
     /**
@@ -1151,29 +1161,29 @@ class DfTools
      * plugin configuration based on the $lang parameter. If none is configured
      * then the default one from the current context is used.
      *
-     * @param Language $lang
+     * @param \Language $lang
      *
-     * @return Currency
+     * @return \Currency
      */
-    public static function getCurrencyForLanguageFromRequest(Language $lang)
+    public static function getCurrencyForLanguageFromRequest(\Language $lang)
     {
-        if ($id_currency = Tools::getValue('currency')) {
-            if (is_numeric($id_currency)) {
-                $id_currency = intval($id_currency);
+        if ($idCurrency = \Tools::getValue('currency')) {
+            if (is_numeric($idCurrency)) {
+                $idCurrency = intval($idCurrency);
             } else {
-                $id_currency = Currency::getIdByIsoCode(strtoupper($id_currency));
+                $idCurrency = \Currency::getIdByIsoCode(strtoupper($idCurrency));
             }
         } else {
             $optname = 'DF_GS_CURRENCY_' . strtoupper($lang->iso_code);
-            $id_currency = Currency::getIdByIsoCode(Configuration::get($optname));
+            $idCurrency = \Currency::getIdByIsoCode(\Configuration::get($optname));
         }
 
-        if (!$id_currency) {
-            $context = Context::getContext();
-            $id_currency = $context->currency->id;
+        if (!$idCurrency) {
+            $context = \Context::getContext();
+            $idCurrency = $context->currency->id;
         }
 
-        return new Currency($id_currency);
+        return new \Currency($idCurrency);
     }
 
     /**
@@ -1186,9 +1196,9 @@ class DfTools
      */
     public static function getModuleLink($path, $ssl = false)
     {
-        $context = Context::getContext();
-        $shop = new Shop($context->shop->id);
-        $base = (($ssl && $context->link->ssl_enable) ? 'https://' : 'http://') . $shop->domain;
+        $context = \Context::getContext();
+        $shop = new \Shop($context->shop->id);
+        $base = (($ssl && \Configuration::get('PS_SSL_ENABLED')) ? 'https://' : 'http://') . $shop->domain;
 
         return $base . _MODULE_DIR_ . basename(dirname(__FILE__)) . '/' . $path;
     }
@@ -1202,10 +1212,10 @@ class DfTools
         return $url;
     }
 
-    public static function getImageLink($id_product, $id_image, $link_rewrite, $image_size)
+    public static function getImageLink($idProduct, $idImage, $linkRewrite, $imageSize)
     {
-        $context = Context::getContext();
-        $url = $context->link->getImageLink($link_rewrite, "$id_product-$id_image", $image_size);
+        $context = \Context::getContext();
+        $url = $context->link->getImageLink($linkRewrite, "$idProduct-$idImage", $imageSize);
 
         return self::fixURL($url);
     }
@@ -1277,18 +1287,18 @@ class DfTools
     }
 
     /**
-     * Returns a configuration value for a $key and a $id_shop. If the value is
+     * Returns a configuration value for a $key and a $idShop. If the value is
      * not found (or it's false) then returns a $default value.
      *
-     * @param int $id_shop shop id
+     * @param int $idShop shop id
      * @param string $key configuration variable name
      * @param mixed $default default value
      *
      * @return mixed
      */
-    public static function cfg($id_shop, $key, $default = false)
+    public static function cfg($idShop, $key, $default = false)
     {
-        $v = Configuration::get($key, null, null, $id_shop);
+        $v = \Configuration::get($key, null, null, $idShop);
         if ($v === false) {
             return $default;
         }
@@ -1310,15 +1320,15 @@ class DfTools
         return str_replace('\\/', '/', html_entity_decode(json_encode($data)));
     }
 
-    public static function escapeSlashes($string)
+    public static function escapeSlashes($text)
     {
-        return $string = self::str_replace('/', '//', $string);
+        return (is_string($text)) ? str_replace('/', '//', $text) : null;
     }
 
-    public static function validateSecurityToken($dfsec_hash)
+    public static function validateSecurityToken($dfsecHash)
     {
-        $doofinder_api_key = Configuration::get('DF_API_KEY');
-        if (!empty($doofinder_api_key) && $dfsec_hash != $doofinder_api_key) {
+        $doofinderApiKey = \Configuration::get('DF_API_KEY');
+        if (!empty($doofinderApiKey) && $dfsecHash != $doofinderApiKey) {
             header('HTTP/1.1 403 Forbidden', true, 403);
             $msgError = 'Forbidden access.'
                 . ' Maybe security token missed.'
@@ -1329,33 +1339,23 @@ class DfTools
         }
     }
 
-    public static function str_replace($search, $replace, $subject)
+    public static function getMinVariantPrices($products, $includeTaxes)
     {
-        return is_null($subject) ? null : str_replace('/', '//', $subject);
-    }
+        $context = \Context::getContext();
 
-    public static function preg_replace($pattern, $replacement, $subject)
-    {
-        return is_null($subject) ? null : preg_replace($pattern, $replacement, $subject);
-    }
-
-    public static function get_min_variant_prices($products, $include_taxes)
-    {
-        $context = Context::getContext();
-
-        $min_prices_by_product_id = [];
+        $minPricesByProductId = [];
         foreach ($products as $product) {
-            if (self::is_parent($product)) {
+            if (self::isParent($product)) {
                 continue;
             }
 
-            $product_id = $product['id_product'];
-            $variant_id = $product['id_product_attribute'];
-            $variant_price = self::get_price($product_id, $include_taxes, $variant_id);
-            $variant_onsale_price = self::get_onsale_price($product_id, $include_taxes, $variant_id);
+            $productId = $product['id_product'];
+            $variantId = $product['id_product_attribute'];
+            $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
+            $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
 
-            if (key_exists($product_id, $min_prices_by_product_id)) {
-                $current_min_prices = $min_prices_by_product_id[$product_id];
+            if (key_exists($productId, $minPricesByProductId)) {
+                $currentMinPrices = $minPricesByProductId[$productId];
 
                 /*
                 Even though, in order to track the minimum, we can only focus on
@@ -1364,34 +1364,34 @@ class DfTools
                 the parent to show the proper price vs sale_price when searching
                 in the layer
                 */
-                if ($variant_onsale_price < $current_min_prices['onsale_price']) {
-                    $min_prices_by_product_id[$product_id]['price'] = $variant_price;
-                    $min_prices_by_product_id[$product_id]['onsale_price'] = $variant_onsale_price;
-                    $min_prices_by_product_id[$product_id]['link'] = self::get_variant_url($product, $context);
+                if ($variantOnsalePrice < $currentMinPrices['onsale_price']) {
+                    $minPricesByProductId[$productId]['price'] = $variantPrice;
+                    $minPricesByProductId[$productId]['onsale_price'] = $variantOnsalePrice;
+                    $minPricesByProductId[$productId]['link'] = self::getVariantUrl($product, $context);
                 }
             } else {
-                $min_prices_by_product_id[$product_id] = [
-                    'price' => $variant_price,
-                    'onsale_price' => $variant_onsale_price,
-                    'link' => self::get_variant_url($product, $context),
+                $minPricesByProductId[$productId] = [
+                    'price' => $variantPrice,
+                    'onsale_price' => $variantOnsalePrice,
+                    'link' => self::getVariantUrl($product, $context),
                 ];
             }
         }
 
-        return $min_prices_by_product_id;
+        return $minPricesByProductId;
     }
 
-    public static function is_parent($product)
+    public static function isParent($product)
     {
         return isset($product['id_product_attribute']) && is_numeric($product['id_product_attribute']) && (int) $product['id_product_attribute'] === 0;
     }
 
-    public static function get_price($product_id, $include_taxes, $variant_id = null)
+    public static function getPrice($productId, $includeTaxes, $variantId = null)
     {
-        return Product::getPriceStatic(
-            $product_id,
-            $include_taxes,
-            $variant_id,
+        return \Product::getPriceStatic(
+            $productId,
+            $includeTaxes,
+            $variantId,
             6,
             null,
             false,
@@ -1399,18 +1399,21 @@ class DfTools
         );
     }
 
-    public static function get_onsale_price($product_id, $include_taxes, $variant_id = null)
+    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null)
     {
-        return Product::getPriceStatic(
-            $product_id,
-            $include_taxes,
-            $variant_id,
+        return \Product::getPriceStatic(
+            $productId,
+            $includeTaxes,
+            $variantId,
             6
         );
     }
 
-    private static function get_variant_url($product, $context)
+    private static function getVariantUrl($product, $context)
     {
+        global $lang, $shop;
+        $cfgModRewrite = self::cfg($shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
+
         return self::cleanURL(
             $context->link->getProductLink(
                 (int) $product['id_product'],
@@ -1420,7 +1423,7 @@ class DfTools
                 $lang->id,
                 $shop->id,
                 (int) $product['id_product_attribute'],
-                $cfg_mod_rewrite,
+                $cfgModRewrite,
                 false,
                 true
             )

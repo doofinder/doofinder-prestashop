@@ -12,9 +12,8 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-if (!class_exists('dfTools')) {
-    require_once 'dfTools.class.php';
-}
+
+use PrestaShop\Module\Doofinder\Lib\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,27 +21,32 @@ if (!defined('_PS_VERSION_')) {
 
 class DfCmsBuild
 {
-    public function __construct($id_shop, $id_lang)
+    private $idShop;
+    private $idLang;
+    private $cmsPages;
+    private $link;
+
+    public function __construct($idShop, $idLang)
     {
-        $this->id_shop = $id_shop;
-        $this->id_lang = $id_lang;
+        $this->idShop = $idShop;
+        $this->idLang = $idLang;
     }
 
     /**
      * Set the CMS pages to be included in the payload
      *
-     * @param array cms pages ids
+     * @param array $arrayCmsPages cms pages ids
      */
-    public function setCmsPages($array_cms_pages)
+    public function setCmsPages($arrayCmsPages)
     {
-        $this->cms_pages = $array_cms_pages;
+        $this->cmsPages = $arrayCmsPages;
     }
 
     public function build($json = true)
     {
         $this->assign();
 
-        foreach ($this->cms_pages as $cms) {
+        foreach ($this->cmsPages as $cms) {
             $payload[] = $this->buildCms($cms);
         }
 
@@ -54,18 +58,18 @@ class DfCmsBuild
         $this->link = Context::getContext()->link;
     }
 
-    private function buildCms($id_cms)
+    private function buildCms($idCms)
     {
-        $cms = new CMS($id_cms, $this->id_lang, $this->id_shop);
+        $cms = new CMS($idCms, $this->idLang, $this->idShop);
 
         $c = [];
         $c['id'] = (string) $cms->id;
-        $c['title'] = dfTools::cleanString($cms->meta_title);
-        $c['description'] = dfTools::cleanString($cms->meta_description);
-        $c['meta_title'] = dfTools::cleanString($cms->meta_title);
-        $c['meta_description'] = dfTools::cleanString($cms->meta_description);
-        $c['tags'] = dfTools::cleanString($cms->meta_keywords);
-        $c['content'] = dfTools::cleanString($cms->content);
+        $c['title'] = DfTools::cleanString($cms->meta_title);
+        $c['description'] = DfTools::cleanString($cms->meta_description);
+        $c['meta_title'] = DfTools::cleanString($cms->meta_title);
+        $c['meta_description'] = DfTools::cleanString($cms->meta_description);
+        $c['tags'] = DfTools::cleanString($cms->meta_keywords);
+        $c['content'] = DfTools::cleanString($cms->content);
         $c['link'] = $this->link->getCMSLink($cms);
 
         return $c;
