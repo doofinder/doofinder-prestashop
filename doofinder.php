@@ -69,7 +69,7 @@ class Doofinder extends Module
     /**
      * Uninstall the module and its dependencies
      *
-     * @return void
+     * @return bool
      */
     public function uninstall()
     {
