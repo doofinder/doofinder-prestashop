@@ -877,7 +877,7 @@ class Doofinder extends Module
      */
     private function displaySingleScript()
     {
-        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
+        $this->context->controller->addJS(DoofinderScript::getSingleScriptPath($this->_path));
 
         return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
     }
