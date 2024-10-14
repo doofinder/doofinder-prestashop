@@ -617,15 +617,15 @@ class DoofinderApi
                         if ($dfOptions) {
                             $opt = json_decode($dfOptions, true);
                             if (isset($opt['query_limit_reached']) && $opt['query_limit_reached']) {
-                                $msg = $module->l('Error: Credentials OK but limit query reached for Search Engine - ') . $langFullIso;
+                                $msg = $module->l('Error: Credentials OK but limit query reached for Search Engine - ', 'doofinderapi') . $langFullIso;
                                 $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
                             } else {
                                 $result = true;
-                                $msg = $module->l('Connection successful for Search Engine - ') . $langFullIso;
+                                $msg = $module->l('Connection successful for Search Engine - ', 'doofinderapi') . $langFullIso;
                                 $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
                             }
                         } else {
-                            $msg = $module->l('Error: no connection for Search Engine - ') . $langFullIso;
+                            $msg = $module->l('Error: no connection for Search Engine - ', 'doofinderapi') . $langFullIso;
                             $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
                         }
                     } catch (DoofinderException $e) {
@@ -635,7 +635,7 @@ class DoofinderApi
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
                     }
                 } else {
-                    $msg = $module->l('Empty Api Key or empty Search Engine - ') . $langFullIso;
+                    $msg = $module->l('Empty Api Key or empty Search Engine - ', 'doofinderapi') . $langFullIso;
                     $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
                 }
             }
