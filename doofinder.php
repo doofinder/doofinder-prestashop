@@ -188,17 +188,17 @@ class Doofinder extends Module
 
         $this->configureHookCommon($params);
 
-        return $this->displayScriptLiveLayer();
+        return $this->displaySingleScript();
     }
 
     /**
-     * Render the script for the Livelayer search layer
+     * Gets the Doofinder single script path according to the PrestaShop version.
      *
      * @return string
      */
-    public function displayScriptLiveLayer()
+    public function displaySingleScript()
     {
-        $this->context->controller->addJS(DoofinderScript::getScriptLiveLayerPath($this->_path));
+        $this->context->controller->addJS(DoofinderScript::getSingleScriptPath($this->_path));
 
         return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
     }

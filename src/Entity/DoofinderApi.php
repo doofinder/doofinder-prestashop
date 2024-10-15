@@ -662,24 +662,4 @@ class DoofinderApi
 
         return ($text) ? $statusText : $result;
     }
-
-    /**
-     * getFilterType
-     * obtain the filter type (i.e. 'terms' or 'numeric range' from its conditions)
-     *
-     * @param array filter conditions
-     *
-     * @return string 'terms' or 'numericrange' false otherwise
-     */
-    private function getFilterType($filter)
-    {
-        if (!is_array($filter)) {
-            return false;
-        }
-        if (count(array_intersect(['from', 'to'], array_keys($filter))) > 0) {
-            return 'numericrange';
-        }
-
-        return 'terms';
-    }
 }
