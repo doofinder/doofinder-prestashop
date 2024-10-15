@@ -21,6 +21,11 @@ if (!defined('_PS_VERSION_')) {
 
 class FormManager
 {
+    /**
+     * Doofinder main module class object
+     *
+     * @var \Doofinder
+     */
     private $module;
 
     public function __construct($module)
@@ -58,7 +63,7 @@ class FormManager
             $hashid = SearchEngine::getHashId($context->language->id, $context->currency->id);
             $apiKey = \Configuration::get('DF_API_KEY');
             $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
-            $messages .= $dfApi->checkConnection([$this->module, 'l']);
+            $messages .= $dfApi->checkConnection($this->module);
             $context->smarty->assign('adv', 1);
         }
 
@@ -89,14 +94,14 @@ class FormManager
                 \Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 5);
             }
 
-            $context->smarty->assign('text_data_changed', $this->module->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.'));
-            $context->smarty->assign('text_reindex', $this->module->l('Launch reindexing'));
+            $context->smarty->assign('text_data_changed', $this->module->l('You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.', 'formmanager'));
+            $context->smarty->assign('text_reindex', $this->module->l('Launch reindexing', 'formmanager'));
             $msg = $context->smarty->fetch(DoofinderAdminPanelView::getLocalPath() . 'views/templates/admin/reindex.tpl');
             $messages .= $adminPanelView->displayWarningCtm($msg, false, true);
         }
 
         if (!empty($formUpdated)) {
-            $messages .= $adminPanelView->displayConfirmationCtm($this->module->l('Settings updated!'));
+            $messages .= $adminPanelView->displayConfirmationCtm($this->module->l('Settings updated!', 'formmanager'));
             $context->smarty->assign('formUpdatedToClick', $formUpdated);
         }
 
