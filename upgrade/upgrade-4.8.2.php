@@ -24,7 +24,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-use PrestaShop\Module\Doofinder\Lib\DoofinderApiUniqueScript;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApiSingleScript;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -38,8 +38,8 @@ function upgrade_module_4_8_2($module)
     $region = Configuration::get('DF_REGION');
     $apiKey = Configuration::get('DF_API_KEY');
 
-    $apiModule = new DoofinderApiUniqueScript($installationId, $region, $apiKey);
-    $apiModule->set_unique_script_flag();
+    $apiModule = new DoofinderApiSingleScript($installationId, $region, $apiKey);
+    $apiModule->setSingleScriptFlag();
 
     return Configuration::updateValue('DF_UNIQUE_SCRIPT', true);
 }

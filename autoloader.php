@@ -18,6 +18,9 @@ if (!defined('_PS_VERSION_')) {
 
 class Autoloader
 {
+    // Exceptions based on: https://devdocs.prestashop-project.org/8/modules/creation/module-file-structure/
+    const EXCEPTIONS_FOR_UNCAPITALIZE = ['Entity', 'Controller'];
+
     /**
      * Registers the autoloader according to PrestaShop standards, which are PSR-12 standards.
      * More info at: https://www.php-fig.org/psr/psr-12/
@@ -74,6 +77,10 @@ class Autoloader
      */
     private static function uncapitalize($text)
     {
+        if (in_array($text, self::EXCEPTIONS_FOR_UNCAPITALIZE, true)) {
+            return $text;
+        }
+
         return strtolower(substr($text, 0, 1)) . substr($text, 1);
     }
 }

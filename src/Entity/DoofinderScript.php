@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -41,7 +41,7 @@ class DoofinderScript
     }
 
     /**
-     * Gets the Doofinder single script path according to the PrestaShop version.
+     * Gets the script for the Livelayer search layer according to the PrestaShop version.
      *
      * @return string
      */

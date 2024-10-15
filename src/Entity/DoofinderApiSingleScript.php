@@ -13,13 +13,13 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Lib;
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class DoofinderApiUniqueScript
+class DoofinderApiSingleScript
 {
     private $installationId;
     private $apiKey;
@@ -33,13 +33,13 @@ class DoofinderApiUniqueScript
     }
 
     /**
-     * Make a request to the API to SET unique script flag to notify the migration of this customer
+     * Make a request to the API to SET single script flag to notify the migration of this customer
      *
      * This function does not require any parameters.
      *
      * @return mixed The response from the API request
      */
-    public function set_unique_script_flag()
+    public function setSingleScriptFlag()
     {
         $endpoint = '/prestashop/migrate-unique-script';
 

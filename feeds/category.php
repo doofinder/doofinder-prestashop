@@ -13,8 +13,8 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Lib\DfCategoryBuild;
-use PrestaShop\Module\Doofinder\Lib\DfTools;
+use PrestaShop\Module\Doofinder\Src\Entity\DfCategoryBuild;
+use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
 
 if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
