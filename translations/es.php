@@ -43,9 +43,9 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Guardar opciones de búsqueda interna';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Activado';
 $_MODULE['<{doofinder}prestashop>doofinderapi_8412280eb3a42b954b37c5a5549f292e'] = 'Error: Las credenciales son correctas pero se alcanzó el límite de consultas para el motor de búsqueda - ';
-$_MODULE['<{doofinder}prestashop>doofinderapi_e43b9767da79f0184ebaa0e9d5abed3e'] = 'Conexión exitosa para el motor de búsqueda -';
-$_MODULE['<{doofinder}prestashop>doofinderapi_cfa4587136de2d97cdb650add327f593'] = 'Error: no hay conexión para el motor de búsqueda -';
-$_MODULE['<{doofinder}prestashop>doofinderapi_24fd2c7b489981c568b971ac3178f5df'] = 'Clave API vacía o motor de búsqueda vacío -';
+$_MODULE['<{doofinder}prestashop>doofinderapi_e43b9767da79f0184ebaa0e9d5abed3e'] = 'Conexión exitosa para el motor de búsqueda - ';
+$_MODULE['<{doofinder}prestashop>doofinderapi_cfa4587136de2d97cdb650add327f593'] = 'Error: no hay conexión para el motor de búsqueda - ';
+$_MODULE['<{doofinder}prestashop>doofinderapi_24fd2c7b489981c568b971ac3178f5df'] = 'Clave API vacía o motor de búsqueda vacío - ';
 $_MODULE['<{doofinder}prestashop>formmanager_fcea235fdf24a526070153f5b60355f4'] = 'Acabas de cambiar una opción del feed de datos. Es posible que para aplicar estos cambios de manera efectiva sea necesario volver a procesar el índice.';
 $_MODULE['<{doofinder}prestashop>formmanager_2378c5bcb7b183304da2a2b94262f024'] = 'Lanzar reindexación';
 $_MODULE['<{doofinder}prestashop>formmanager_039b452cd9646bf1a60dd09146311ee7'] = 'La configuración se guardó correctamente.';
