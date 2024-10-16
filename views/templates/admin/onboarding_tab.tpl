@@ -35,8 +35,8 @@
 			<div class="bootstrap message-error" style="display:none;">
 				<div class="module_warning alert alert-danger">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
-					{l s='An error occurred during the installation process. Please contact our support team on'
-					mod='doofinder'} support@doofinder.com
+					{l s='An error occurred during the installation process. Please contact our support team on' mod='doofinder'} 
+					support@doofinder.com
 					<ul id="installation-errors"></ul>
 				</div>
 			</div>
@@ -44,8 +44,7 @@
 				<img src="{$module_dir|escape:'html':'UTF-8'}views/img/doofinder_logo.png" />
 				<br>
 				<ul>
-					<li class="active">{l s='Please be patient, we are autoinstalling your definitive search
-						solution...' mod='doofinder'}</li>
+					<li class="active">{l s='Please be patient, we are autoinstalling your definitive search solution...' mod='doofinder'}</li>
 					<li>{l s='Creating search engines...' mod='doofinder'}</li>
 					<li>{l s='Recover data feed of your products...' mod='doofinder'}</li>
 					<li>{l s='Creating index to search on your site...' mod='doofinder'}</li>
@@ -64,13 +63,11 @@
 				{else}
 				<div class="col-md-12">
 					<a onclick="javascript:popupDoofinder('signup')" href="#"
-						class="btn btn-primary btn-lg btn-doofinder" id="create-account-btn">{l s='Use your free trial
-						now!' mod='doofinder'}</a>
+						class="btn btn-primary btn-lg btn-doofinder" id="create-account-btn">{l s='Use your free trial now!' mod='doofinder'}</a>
 				</div>
 				<div class="col-md-12" style="margin-top:15px">
 					<a onclick="javascript:popupDoofinder('login')" href="#"
-						class="btn btn-primary btn-lg btn-doofinder" id="login-account-btn">{l s='I have an account'
-						mod='doofinder'}</a>
+						class="btn btn-primary btn-lg btn-doofinder" id="login-account-btn">{l s='I have an account' mod='doofinder'}</a>
 				</div>
 				<div class="col-md-12" style="margin-top:35px">
 					<p>
@@ -81,18 +78,14 @@
 			</div>
 			<div class="col-md-6 choose-installer">
 				<div class="col-md-8">
-					<h2>{l s='Add a smart search engine to your e-commerce in 5 minutes and with no programming'
-						mod='doofinder'}</h2>
+					<h2>{l s='Add a smart search engine to your e-commerce in 5 minutes and with no programming' mod='doofinder'}</h2>
 					<hr />
 					<br />
 					<p><strong>{l s='ABOUT DOOFINDER' mod='doofinder'}:</strong></p>
 					<br />
-					<p>{l s='Doofinder provides you with an instant search layer to display your products when your
-						visitors use the search bar' mod='doofinder'}.</p>
+					<p>{l s='Doofinder provides you with an instant search layer to display your products when your visitors use the search bar' mod='doofinder'}.</p>
 					<br />
-					<p>{l s='Your customers then have the opportunity to preview your products, filter them and choose
-						the desired product. Upon hitting enter, doofinder will also power the results page'
-						mod='doofinder'}.</p>
+					<p>{l s='Your customers then have the opportunity to preview your products, filter them and choose the desired product. Upon hitting enter, doofinder will also power the results page' mod='doofinder'}.</p>
 					<br />
 					<p>{l s='Among our features are' mod='doofinder'}:</p>
 					<br />
@@ -101,8 +94,7 @@
 						<dd>&middot; {l s='Faceted search option' mod='doofinder'}.</dd>
 						<dd>&middot; {l s='Learning behaviour' mod='doofinder'}.</dd>
 						<dd>&middot; {l s='Merchandising power to set a products positioning' mod='doofinder'}.</dd>
-						<dd>&middot; {l s='Banner feature for advertising and promoting products, brands and events'
-							mod='doofinder'}.</dd>
+						<dd>&middot; {l s='Banner feature for advertising and promoting products, brands and events' mod='doofinder'}.</dd>
 						<dd>&middot; {l s='Options to redirect users to content pages' mod='doofinder'}.</dd>
 						<dd>&middot; {l s='Held on our servers for a faster page load time' mod='doofinder'}.</dd>
 					</dl>
@@ -112,8 +104,7 @@
 					<br />
 					<p>{l s='What are you waiting for?' mod='doofinder'}</p>
 					<br />
-					<p><a onclick="javascript:popupDoofinder('signup')" href="#">{l s='Test our solution for 30 days,
-							for free!' mod='doofinder'}</a></p>
+					<p><a onclick="javascript:popupDoofinder('signup')" href="#">{l s='Test our solution for 30 days, for free!' mod='doofinder'}</a></p>
 				</div>
 			</div>
 		</div>

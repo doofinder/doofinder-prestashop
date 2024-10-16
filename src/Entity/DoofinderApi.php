@@ -15,6 +15,9 @@
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)
  */
+
+namespace PrestaShop\Module\Doofinder\Src\Entity;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -28,29 +31,30 @@ class DoofinderApi
      * Returns a DoofinderResults object
      */
 
-    const URL_SUFFIX = '-search.doofinder.com';
     const DEFAULT_TIMEOUT = 10000;
     const DEFAULT_RPP = 10;
     const DEFAULT_PARAMS_PREFIX = 'dfParam_';
     const DEFAULT_API_VERSION = '6';
     const VERSION = '5.2.3';
 
-    private $api_key; // user API_KEY
+    private $apiKey; // user API_KEY
     private $hashid; // hashid of the doofinder account
     private $apiVersion;
     private $url;
     private $results;
     private $query;
-    private $search_options = [];  // assoc. array with doofinder options to be sent as request parameters
+    private $searchOptions = [];  // assoc. array with doofinder options to be sent as request parameters
     private $page = 1; // the page of the search results we're at
-    private $queryName; // the name of the last successfull query made
-    private $lastQuery; // the last successfull query made
+    private $queryName; // the name of the last successful query made
+    private $lastQuery; // the last successful query made
     private $total; // total number of results obtained
     private $maxScore;
     private $paramsPrefix = self::DEFAULT_PARAMS_PREFIX;
     private $serializationArray;
     private $queryParameter = 'query'; // the parameter used for querying
     private $allowedParameters = ['page', 'rpp', 'timeout', 'types', 'filter', 'query_name', 'transformer'];
+    private $zone;
+    private $filter;
     // request parameters that doofinder handle
 
     /**
@@ -65,12 +69,12 @@ class DoofinderApi
      *                             -'restrictedRequest'(default: $_REQUEST):  =>restrict request object
      *                             to look for params when unserializing. either 'get' or 'post'
      */
-    public function __construct($hashid, $api_key, $fromParams = false, $init_options = [])
+    public function __construct($hashid, $apiKey, $fromParams = false, $init_options = [])
     {
-        $zone_key_array = explode('-', $api_key);
-        $this->api_key = end($zone_key_array);
-        $this->zone = Configuration::get('DF_REGION');
-        $this->url = 'https://' . $this->zone . self::URL_SUFFIX;
+        $zone_key_array = explode('-', $apiKey);
+        $this->apiKey = end($zone_key_array);
+        $this->zone = \Configuration::get('DF_REGION');
+        $this->url = UrlManager::getRegionalUrl(DoofinderConstants::DOOPHOENIX_REGION_URL, $this->zone);
 
         if (array_key_exists('prefix', $init_options)) {
             $this->paramsPrefix = $init_options['prefix'];
@@ -146,7 +150,7 @@ class DoofinderApi
         $headers = [];
         $headers[] = 'Expect:'; // Fixes the HTTP/1.1 417 Expectation Failed
         $authHeaderName = $this->apiVersion == '4' ? 'API Token: ' : 'authorization: ';
-        $headers[] = $authHeaderName . $this->api_key; // API Authorization
+        $headers[] = $authHeaderName . $this->apiKey; // API Authorization
 
         return $headers;
     }
@@ -164,14 +168,14 @@ class DoofinderApi
         curl_setopt($session, CURLOPT_RETURNTRANSFER, true); // Tell curl to return the response
         curl_setopt($session, CURLOPT_HTTPHEADER, $this->reqHeaders()); // Adding request headers
         // IF YOU MAKE REQUEST FROM LOCALHOST OR HAVE SERVER CERTIFICATE ISSUE
-        $disableSSLVerify = Configuration::get('DF_DSBL_HTTPS_CURL');
+        $disableSSLVerify = \Configuration::get('DF_DSBL_HTTPS_CURL');
         if ($disableSSLVerify) {
             curl_setopt($session, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($session, CURLOPT_SSL_VERIFYPEER, 0);
         }
         $response = curl_exec($session);
         $httpCode = curl_getinfo($session, CURLINFO_HTTP_CODE);
-        $debugCurlError = Configuration::get('DF_DEBUG_CURL');
+        $debugCurlError = \Configuration::get('DF_DEBUG_CURL');
         if ($debugCurlError) {
             echo curl_errno($session);
         }
@@ -207,16 +211,16 @@ class DoofinderApi
     public function query($query = null, $page = null, $options = [])
     {
         if ($query) {
-            $this->search_options['query'] = $query;
+            $this->searchOptions['query'] = $query;
         }
         if ($page) {
-            $this->search_options['page'] = (int) $page;
+            $this->searchOptions['page'] = (int) $page;
         }
         foreach ($options as $optionName => $optionValue) {
-            $this->search_options[$optionName] = $options[$optionName];
+            $this->searchOptions[$optionName] = $options[$optionName];
         }
 
-        $params = $this->search_options;
+        $params = $this->searchOptions;
 
         // translate filters
         if (!empty($params['filter'])) {
@@ -226,7 +230,7 @@ class DoofinderApi
         }
 
         // no query? then match all documents
-        if (!$this->optionExists('query') || !trim($this->search_options['query'])) {
+        if (!$this->optionExists('query') || !trim($this->searchOptions['query'])) {
             $params['query_name'] = 'match_all';
         }
 
@@ -241,7 +245,7 @@ class DoofinderApi
         $dfResults = new DoofinderResults($this->apiCall('search', $params));
         $this->page = $dfResults->getProperty('page');
         $this->total = $dfResults->getProperty('total');
-        $this->search_options['query'] = $dfResults->getProperty('query');
+        $this->searchOptions['query'] = $dfResults->getProperty('query');
         $this->maxScore = $dfResults->getProperty('max_score');
         $this->queryName = $dfResults->getProperty('query_name');
         $this->lastQuery = $dfResults->getProperty('query');
@@ -293,9 +297,9 @@ class DoofinderApi
     public function setFilter($filterName, $filter)
     {
         if (!$this->optionExists('filter')) {
-            $this->search_options['filter'] = [];
+            $this->searchOptions['filter'] = [];
         }
-        $this->search_options['filter'][$filterName] = $filter;
+        $this->searchOptions['filter'][$filterName] = $filter;
     }
 
     /**
@@ -311,7 +315,7 @@ class DoofinderApi
      */
     public function getFilter($filterName)
     {
-        if ($this->optionExists('filter') && isset($this->search_options['filter'][$filterName])) {
+        if ($this->optionExists('filter') && isset($this->searchOptions['filter'][$filterName])) {
             return $this->filter[$filterName];
         }
 
@@ -327,8 +331,8 @@ class DoofinderApi
      */
     public function getFilters()
     {
-        if (isset($this->search_options['filter'])) {
-            return $this->search_options['filter'];
+        if (isset($this->searchOptions['filter'])) {
+            return $this->searchOptions['filter'];
         } else {
             return false;
         }
@@ -345,14 +349,14 @@ class DoofinderApi
     public function addTerm($filterName, $term)
     {
         if (!$this->optionExists('filter')) {
-            $this->search_options['filter'] = [$filterName => []];
+            $this->searchOptions['filter'] = [$filterName => []];
         }
-        if (!isset($this->search_options['filter'][$filterName])) {
+        if (!isset($this->searchOptions['filter'][$filterName])) {
             $this->filter[$filterName] = [];
-            $this->search_options['filter'][$filterName] = [];
+            $this->searchOptions['filter'][$filterName] = [];
         }
         $this->filter[$filterName][] = $term;
-        $this->search_options['filter'][$filterName][] = $term;
+        $this->searchOptions['filter'][$filterName][] = $term;
     }
 
     /**
@@ -365,18 +369,13 @@ class DoofinderApi
      */
     public function removeTerm($filterName, $term)
     {
-        if ($this->optionExists('filter') && isset($this->search_options['filter'][$filterName])
-            && in_array($term, $this->search_options['filter'][$filterName])
+        if ($this->optionExists('filter') && isset($this->searchOptions['filter'][$filterName])
+            && in_array($term, $this->searchOptions['filter'][$filterName])
         ) {
-            function filter_me($value)
-            {
-                global $term;
-
-                return $value != $term;
-            }
-
-            $this->search_options['filter'][$filterName] =
-            array_filter($this->search_options['filter'][$filterName], 'filter_me');
+            $this->searchOptions['filter'][$filterName] =
+            array_filter($this->searchOptions['filter'][$filterName], function ($value) use ($term) {
+                return $value !== $term;
+            });
         }
     }
 
@@ -392,16 +391,16 @@ class DoofinderApi
     public function setRange($filterName, $from = null, $to = null)
     {
         if (!$this->optionExists('filter')) {
-            $this->search_options['filter'] = [$filterName => []];
+            $this->searchOptions['filter'] = [$filterName => []];
         }
-        if (!isset($this->search_options['filter'][$filterName])) {
-            $this->search_options['filter'][$filterName] = [];
+        if (!isset($this->searchOptions['filter'][$filterName])) {
+            $this->searchOptions['filter'][$filterName] = [];
         }
         if ($from) {
-            $this->search_options['filter'][$filterName]['from'] = $from;
+            $this->searchOptions['filter'][$filterName]['from'] = $from;
         }
         if ($to) {
-            $this->search_options['filter'][$filterName]['to'] = $from;
+            $this->searchOptions['filter'][$filterName]['to'] = $from;
         }
     }
 
@@ -414,7 +413,7 @@ class DoofinderApi
      */
     public function toQuerystring($page = null)
     {
-        foreach ($this->search_options as $paramName => $paramValue) {
+        foreach ($this->searchOptions as $paramName => $paramValue) {
             if ($paramName == 'query') {
                 $toParams[$this->queryParameter] = $paramValue;
             } else {
@@ -442,12 +441,11 @@ class DoofinderApi
         $doofinderReqParams = array_filter(array_keys($this->serializationArray), [$this, 'belongsToDoofinder']);
 
         foreach ($doofinderReqParams as $dfReqParam) {
-            if ($dfReqParam == $this->queryParameter) {
-                $keey = 'query';
-            } else {
-                $keey = substr($dfReqParam, strlen($this->paramsPrefix));
+            $key = 'query';
+            if ($dfReqParam !== $this->queryParameter) {
+                $key = substr($dfReqParam, strlen($this->paramsPrefix));
             }
-            $this->search_options[$keey] = $this->serializationArray[$dfReqParam];
+            $this->searchOptions[$key] = $this->serializationArray[$dfReqParam];
         }
     }
 
@@ -495,7 +493,7 @@ class DoofinderApi
     /**
      * optionExists
      *
-     * checks whether a search option is defined in $this->search_options
+     * checks whether a search option is defined in $this->searchOptions
      *
      * @param string $optionName
      *
@@ -503,7 +501,7 @@ class DoofinderApi
      */
     private function optionExists($optionName)
     {
-        return array_key_exists($optionName, $this->search_options);
+        return array_key_exists($optionName, $this->searchOptions);
     }
 
     /**
@@ -552,7 +550,7 @@ class DoofinderApi
 
     public function getRpp()
     {
-        $rpp = $this->optionExists('rpp') ? $this->search_options['rpp'] : null;
+        $rpp = $this->optionExists('rpp') ? $this->searchOptions['rpp'] : null;
         $rpp = $rpp ? $rpp : self::DEFAULT_RPP;
 
         return $rpp;
@@ -594,25 +592,74 @@ class DoofinderApi
     }
 
     /**
-     * getFilterType
-     * obtain the filter type (i.e. 'terms' or 'numeric range' from its conditions)
+     * Perform an API connection test
      *
-     * @param array filter conditions
+     * @param \Doofinder $module Module main class to be able to use l() function here
+     * @param bool $onlyOneLang
      *
-     * @return string 'terms' or 'numericrange' false otherwise
+     * @return bool|string
      */
-    private function getFilterType($filter)
+    public function checkConnection($module, $onlyOneLang = false)
     {
-        if (!is_array($filter)) {
-            return false;
+        $result = false;
+        $messages = '';
+        $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
+        $context = \Context::getContext();
+        foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
+            if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
+                $langIso = \Tools::strtoupper($lang['iso_code']);
+                $langFullIso = (isset($lang['language_code'])) ? \Tools::strtoupper($lang['language_code']) : $langIso;
+                $hashid = \Configuration::get('DF_HASHID_' . $currency . '_' . $langFullIso);
+                $apiKey = \Configuration::get('DF_API_KEY');
+                if ($hashid && $apiKey) {
+                    try {
+                        $dfOptions = $this->getOptions();
+                        if ($dfOptions) {
+                            $opt = json_decode($dfOptions, true);
+                            if (isset($opt['query_limit_reached']) && $opt['query_limit_reached']) {
+                                $msg = $module->l('Error: Credentials OK but limit query reached for Search Engine - ', 'doofinderapi') . $langFullIso;
+                                $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                            } else {
+                                $result = true;
+                                $msg = $module->l('Connection successful for Search Engine - ', 'doofinderapi') . $langFullIso;
+                                $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
+                            }
+                        } else {
+                            $msg = $module->l('Error: no connection for Search Engine - ', 'doofinderapi') . $langFullIso;
+                            $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                        }
+                    } catch (DoofinderException $e) {
+                        $messages .= DoofinderAdminPanelView::displayErrorCtm($e->getMessage() . ' - Search Engine ' . $langFullIso);
+                    } catch (\Exception $e) {
+                        $msg = $e->getMessage() . ' - Search Engine ';
+                        $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
+                    }
+                } else {
+                    $msg = $module->l('Empty Api Key or empty Search Engine - ', 'doofinderapi') . $langFullIso;
+                    $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                }
+            }
         }
-        if (count(array_intersect(['from', 'to'], array_keys($filter))) > 0) {
-            return 'numericrange';
+        if ($onlyOneLang) {
+            return $result;
+        } else {
+            return $messages;
         }
+    }
 
-        return 'terms';
+    /**
+     * Check the connection to the API using the saved API KEY
+     *
+     * @param bool $text If the response is received as a string
+     *
+     * @return bool|string
+     */
+    public static function checkApiKey($text = false)
+    {
+        $result = \Db::getInstance()->getValue('SELECT id_configuration FROM ' . _DB_PREFIX_
+            . 'configuration WHERE name = "DF_API_KEY" AND (value IS NOT NULL OR value <> "")');
+        $statusText = (($result) ? 'OK' : 'KO');
+
+        return ($text) ? $statusText : $result;
     }
 }
-
-include_once 'DoofinderResults.php';
-include_once 'DoofinderException.php';

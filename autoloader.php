@@ -18,17 +18,26 @@ if (!defined('_PS_VERSION_')) {
 
 class Autoloader
 {
+    // Exceptions based on: https://devdocs.prestashop-project.org/8/modules/creation/module-file-structure/
+    const EXCEPTIONS_FOR_UNCAPITALIZE = ['Entity', 'Controller'];
+
+    /**
+     * Registers the autoloader according to PrestaShop standards, which are PSR-12 standards.
+     * More info at: https://www.php-fig.org/psr/psr-12/
+     *
+     * Basically, in order to used this autoloader, the paths have to be camelCased whereas the
+     * class names must be PascalCased, not snake_cased. Normally, the module namespaces should
+     * have the same structure: Prestashop\Module\Doofinder\My\Custom\PathExample\MyClass where
+     * my My\Custom\PathExample is the path from the module root folder, so it would be
+     * my/custom/pathExample and inside this folder there should be a class named MyClass.php
+     *
+     * @return bool
+     */
     public static function register()
     {
         spl_autoload_register(function ($class) {
-            $className = str_replace('PrestaShop\\Module\\Doofinder\\', '', $class);
-            $file = _PS_MODULE_DIR_ . 'doofinder/' . self::uncapitalize(str_replace('\\', DIRECTORY_SEPARATOR, $className) . '.php');
+            $file = sprintf('%1$sdoofinder/%2$s', _PS_MODULE_DIR_, self::pathFromNamespace($class));
             if (file_exists($file)) {
-                require_once $file;
-
-                return true;
-            } elseif (file_exists(self::pascalCaseToSnakeCase($file))) {
-                $file = self::pascalCaseToSnakeCase($file);
                 require_once $file;
 
                 return true;
@@ -38,19 +47,41 @@ class Autoloader
         });
     }
 
-    private static function pascalCaseToSnakeCase($path)
+    /**
+     * Converts a namespace into a path to load the files.
+     *
+     * According to PrestaShop's standards, the namespace of the modules
+     * should have the following base: Prestashop\Module\NameOfTheModule
+     * More info: https://devdocs.prestashop-project.org/8/modules/concepts/composer/
+     *
+     * @param string $fullNameSpace The class with its full namespace
+     *
+     * @return string
+     */
+    private static function pathFromNamespace($fullNameSpace)
     {
-        $parts = explode('/', $path);
-        $filename = array_pop($parts);
-        // Separate PascalCase words and convert to snake_case without the leading empty element.
-        $snakeCase = strtolower(ltrim(implode('_', preg_split('/(?=[A-Z])/', basename($filename, '.php'))), '_'));
+        $path = str_replace('PrestaShop\\Module\\Doofinder\\', '', $fullNameSpace);
+        $pathParts = explode('\\', $path);
+        $className = array_pop($pathParts);
+        $pathParts = array_map([__CLASS__, 'uncapitalize'], $pathParts);
 
-        return implode('/', $parts) . '/' . $snakeCase . '.php';
+        return implode(DIRECTORY_SEPARATOR, $pathParts) . DIRECTORY_SEPARATOR . $className . '.php';
     }
 
+    /**
+     * Converts to lowercase only the first letter of a string.
+     *
+     * @param string $text Text to uncapitalize
+     *
+     * @return string
+     */
     private static function uncapitalize($text)
     {
-        return strtolower($text[0]) . substr($text, 1);
+        if (in_array($text, self::EXCEPTIONS_FOR_UNCAPITALIZE, true)) {
+            return $text;
+        }
+
+        return strtolower(substr($text, 0, 1)) . substr($text, 1);
     }
 }
 Autoloader::register();

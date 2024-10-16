@@ -12,6 +12,11 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
+
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $config_file_path = $root_path . '/config/config.inc.php';
 if (@file_exists($config_file_path)) {
@@ -21,6 +26,8 @@ if (@file_exists($config_file_path)) {
     require_once dirname(__FILE__) . '/../../config/config.inc.php';
     require_once dirname(__FILE__) . '/../../init.php';
 }
+
+require_once 'autoloader.php';
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -41,7 +48,7 @@ if ($autoinstallerToken) {
         $api_endpoint = Tools::getValue('api_endpoint');
         $admin_endpoint = Tools::getValue('admin_endpoint');
         if ($apiToken) {
-            $module->saveApiData($apiToken, $api_endpoint, $admin_endpoint);
+            DoofinderConfig::saveApiConfig($apiToken, $api_endpoint, $admin_endpoint);
         }
         echo json_encode(['success' => true]);
         exit;
@@ -55,14 +62,14 @@ if ($autoinstallerToken) {
 
 $languages = [];
 $configurations = [];
-$currencies = array_keys(dfTools::getAvailableCurrencies());
+$currencies = array_keys(DfTools::getAvailableCurrencies());
 
 $display_prices = (bool) Configuration::get('DF_GS_DISPLAY_PRICES');
 $prices_with_taxes = (bool) Configuration::get('DF_GS_PRICES_USE_TAX');
 
 foreach (Language::getLanguages(true, $context->shop->id) as $lang) {
     $lang = Tools::strtoupper($lang['iso_code']);
-    $currency = dfTools::getCurrencyForLanguage($lang);
+    $currency = DfTools::getCurrencyForLanguage($lang);
 
     $languages[] = $lang;
     $configurations[$lang] = [
@@ -83,7 +90,7 @@ $cfg = [
         'version' => _PS_VERSION_,
     ],
     'module' => [
-        'version' => Doofinder::VERSION,
+        'version' => DoofinderConstants::VERSION,
         'feed' => $base . $shop->getBaseURI() . 'modules/doofinder/feed.php',
         'options' => [
             'language' => $languages,
@@ -93,4 +100,4 @@ $cfg = [
     ],
 ];
 
-echo dfTools::jsonEncode($cfg);
+echo DfTools::jsonEncode($cfg);

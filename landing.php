@@ -12,36 +12,53 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-$root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
-$config_file_path = $root_path . '/config/config.inc.php';
-if (@file_exists($config_file_path)) {
-    require_once $config_file_path;
+
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Src\Entity\LanguageManager;
+
+$rootPath = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+$configFilePath = $rootPath . '/config/config.inc.php';
+if (@file_exists($configFilePath)) {
+    require_once $configFilePath;
 } else {
     require_once dirname(__FILE__) . '/../../config/config.inc.php';
 }
+require_once 'autoloader.php';
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-if (Module::isInstalled('doofinder') && Module::isEnabled('doofinder')) {
-    $hashid = Tools::getValue('hashid');
-    $slug = Tools::getValue('slug');
-
-    if ($hashid && $slug) {
-        $module = Module::getInstanceByName('doofinder');
-
-        if ($id_lang = $module->getLanguageByHashid($hashid)) {
-            $link = Context::getContext()->link->getModuleLink(
-                $module->name,
-                'landing',
-                ['landing_name' => $slug],
-                null,
-                $id_lang
-            );
-
-            Tools::redirect($link);
-        }
-    }
+if (!Module::isInstalled('doofinder') || !Module::isEnabled('doofinder')) {
+    DoofinderConfig::debug('[Landing][Warning] Doofinder module is not installed or is not enabled');
+    Tools::redirect('index.php?controller=404');
+    exit;
 }
-Tools::redirect('index.php?controller=404');
+
+$hashid = Tools::getValue('hashid');
+$slug = Tools::getValue('slug');
+
+if (!$hashid || !$slug) {
+    DoofinderConfig::debug('[Landing][Warning] Hashid and/or slug could not be retrieved: ' . PHP_EOL . '- slug: ' . DoofinderConfig::dump($slug) . '- hashid: ' . DoofinderConfig::dump($hashid));
+    Tools::redirect('index.php?controller=404');
+    exit;
+}
+
+$idLang = LanguageManager::getLanguageByHashid($hashid);
+
+if (!$idLang) {
+    DoofinderConfig::debug('[Landing][Warning] Invalid Language ID: ' . DoofinderConfig::dump($idLang));
+    Tools::redirect('index.php?controller=404');
+    exit;
+}
+
+$link = Context::getContext()->link->getModuleLink(
+    DoofinderConstants::NAME,
+    'landing',
+    ['landing_name' => $slug],
+    null,
+    $idLang
+);
+
+Tools::redirect($link);

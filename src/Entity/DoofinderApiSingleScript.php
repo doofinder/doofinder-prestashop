@@ -12,15 +12,14 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-use PrestaShop\Module\Doofinder\Lib\EasyREST;
+
+namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-const API_URL = 'https://{region}-plugins.doofinder.com';
-
-class DoofinderApiUniqueScript
+class DoofinderApiSingleScript
 {
     private $installationId;
     private $apiKey;
@@ -30,17 +29,17 @@ class DoofinderApiUniqueScript
     {
         $this->installationId = $installationId;
         $this->apiKey = $apiKey;
-        $this->apiUrl = str_replace('{region}', $region, API_URL);
+        $this->apiUrl = UrlManager::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region);
     }
 
     /**
-     * Make a request to the API to SET unique script flag to notify the migration of this customer
+     * Make a request to the API to SET single script flag to notify the migration of this customer
      *
      * This function does not require any parameters.
      *
      * @return mixed The response from the API request
      */
-    public function set_unique_script_flag()
+    public function setSingleScriptFlag()
     {
         $endpoint = '/prestashop/migrate-unique-script';
 
@@ -57,11 +56,11 @@ class DoofinderApiUniqueScript
             'installation_id' => $this->installationId,
         ];
 
-        $json_store_data = json_encode($body);
+        $jsonStoreData = json_encode($body);
 
         $response = $client->post(
             $url,
-            $json_store_data,
+            $jsonStoreData,
             false,
             false,
             'application/json',
