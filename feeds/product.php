@@ -556,8 +556,13 @@ foreach ($rows as $row) {
                 $product_attributes = DfTools::hasProductAttributes($row['id_product'], DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
                 if ($product_attributes) {
                     $attributes = DfTools::getAttributesName($product_attributes, $lang->id);
-                    $variants_keys = array_column($attributes, 'name');
-                    echo implode('%%', array_map('slugify', $variants_keys));
+
+                    if (is_array($attributes)) {
+                        $variants_keys = array_column($attributes, 'name');
+                        echo implode('%%', array_map('slugify', $variants_keys));
+                    } else {
+                        echo '';
+                    }
                 } else {
                     echo '';
                 }
