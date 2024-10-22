@@ -47,7 +47,9 @@ class DfCategoryBuild
         $this->assign();
 
         foreach ($this->categories as $category) {
-            $payload[] = $this->buildCategory($category);
+            if (\Category::categoryExists($category)) {
+                $payload[] = $this->buildCategory($category);
+            }
         }
 
         return $json ? json_encode($payload) : $payload;
