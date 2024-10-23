@@ -82,6 +82,8 @@ class DfTools
     public static function getAvailableImageSizes()
     {
         $sizes = [];
+        $tableName = 'home';
+        $tableName = (method_exists(\ImageType::class, 'getFormattedName')) ? \ImageType::getFormattedName($tableName) : $tableName . '_default';
         $sql = "
         SELECT
             `name` AS DF_GS_IMAGE_SIZE,
@@ -92,7 +94,7 @@ class DfTools
             `products` = 1
         ORDER BY
             CASE
-                WHEN name = '" . \ImageType::getFormattedName('home') . "' THEN '1'
+                WHEN name = '" . $tableName . "' THEN '1'
             END DESC;
         ";
 
