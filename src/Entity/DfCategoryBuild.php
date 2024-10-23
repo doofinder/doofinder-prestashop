@@ -66,6 +66,9 @@ class DfCategoryBuild
 
         $c = [];
 
+        $tableName = 'category';
+        $tableName = (method_exists('ImageType', 'getFormattedName')) ? \ImageType::getFormattedName($tableName) : $tableName . '_default';
+
         $c['id'] = (string) $category->id;
         $c['title'] = DfTools::cleanString($category->name);
         $c['description'] = DfTools::cleanString($category->description);
@@ -73,7 +76,7 @@ class DfCategoryBuild
         $c['meta_description'] = DfTools::cleanString($category->meta_description);
         $c['tags'] = DfTools::cleanString($category->meta_keywords);
         $c['link'] = $this->link->getCategoryLink($category);
-        $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, \ImageType::getFormattedName('category')) : '';
+        $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, $tableName) : '';
 
         return $c;
     }
