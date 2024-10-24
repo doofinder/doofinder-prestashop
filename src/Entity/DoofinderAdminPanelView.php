@@ -248,6 +248,9 @@ class DoofinderAdminPanelView
             // Search layer form
             $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesSearchLayer();
             $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
+            // Store information
+            $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesStoreInfo();
+            $html .= $helper->generateForm([$this->getConfigFormStoreInfo()]);
         } else {
             $context->controller->warnings[] = $this->module->l("This shop is new and it hasn't been synchronized with Doofinder yet.", 'doofinderadminpanelview');
         }
@@ -284,37 +287,10 @@ class DoofinderAdminPanelView
         ];
         $context->smarty->assign('id_tab', 'advanced_tab');
         $html = $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/dummy/pre_tab.tpl');
-        $html .= $this->renderFeedURLs();
         $html .= $helper->generateForm([$this->getConfigFormAdvanced()]);
         $html .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/dummy/after_tab.tpl');
 
         return $html;
-    }
-
-    /**
-     * Render the feed url block
-     *
-     * @return string
-     */
-    protected function renderFeedURLs()
-    {
-        $urls = [];
-        $context = \Context::getContext();
-        $languages = \Language::getLanguages(true, $context->shop->id);
-        foreach ($languages as $lang) {
-            foreach (\Currency::getCurrencies() as $cur) {
-                $currencyIso = \Tools::strtoupper($cur['iso_code']);
-                $langIso = \Tools::strtoupper($lang['iso_code']);
-                $urls[] = [
-                    'url' => UrlManager::getFeedUrl($context->shop->id, $langIso, $currencyIso),
-                    'lang' => $langIso,
-                    'currency' => $currencyIso,
-                ];
-            }
-        }
-        $context->smarty->assign('df_feed_urls', $urls);
-
-        return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/feed_url_partial_tab.tpl');
     }
 
     /**
@@ -504,23 +480,6 @@ class DoofinderAdminPanelView
                 ],
                 'input' => [
                     [
-                        'type' => 'text',
-                        'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
-                        'name' => 'DF_API_KEY',
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->module->l('Region', 'doofinderadminpanelview'),
-                        'name' => 'DF_REGION',
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
-                        'name' => 'DF_ENABLED_V9',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->module->l('Debug Mode. Write info logs in doofinder.log file', 'doofinderadminpanelview'),
                         'name' => 'DF_DEBUG',
@@ -552,6 +511,52 @@ class DoofinderAdminPanelView
         ];
     }
 
+    /**
+     * Get the fields of the store information form
+     *
+     * @return array
+     */
+    protected function getConfigFormStoreInfo()
+    {
+        $inputs = [
+            [
+                'type' => 'text',
+                'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
+                'name' => 'DF_API_KEY',
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->module->l('Region', 'doofinderadminpanelview'),
+                'name' => 'DF_REGION',
+            ],
+            [
+                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
+                'name' => 'DF_ENABLED_V9',
+                'is_bool' => true,
+                'values' => $this->getBooleanFormValue(),
+            ],
+            [
+                'type' => 'html',
+                'label' => $this->module->l('Feed URLs to use on Doofinder Admin panel', 'doofinderadminpanelview'),
+                'html_content' => $this->feedUrlsFormatHtml($this->getFeedURLs()),
+            ],
+        ];
+
+        return [
+            'form' => [
+                'legend' => [
+                    'title' => $this->module->l('Store Information', 'doofinderadminpanelview'),
+                ],
+                'input' => $inputs,
+                'submit' => [
+                    'title' => $this->module->l('Save Store Info Widget Options', 'doofinderadminpanelview'),
+                    'name' => 'submitDoofinderModuleStoreInfo',
+                ],
+            ],
+        ];
+    }
+
     private function getBooleanFormValue()
     {
         $option = [
@@ -568,5 +573,40 @@ class DoofinderAdminPanelView
         ];
 
         return $option;
+    }
+
+    private function getFeedURLs()
+    {
+        $urls = [];
+        $context = \Context::getContext();
+        $languages = \Language::getLanguages(true, $context->shop->id);
+        foreach ($languages as $lang) {
+            foreach (\Currency::getCurrencies() as $cur) {
+                $currencyIso = \Tools::strtoupper($cur['iso_code']);
+                $langIso = \Tools::strtoupper($lang['iso_code']);
+                $urls[] = [
+                    'url' => UrlManager::getFeedUrl($context->shop->id, $langIso, $currencyIso),
+                    'lang' => $langIso,
+                    'currency' => $currencyIso,
+                ];
+            }
+        }
+
+        return $urls;
+    }
+
+    private function feedUrlsFormatHtml($df_feed_urls)
+    {
+        $htmlContent = '<dl>';
+        foreach ($df_feed_urls as $feed_url) {
+            $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinder') . ' [' 
+                        . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . ' - ' 
+                        . htmlspecialchars($feed_url['currency'], ENT_QUOTES, 'UTF-8') . ']</dt>';
+            $htmlContent .= '<dd><a href="' . htmlspecialchars(urldecode($feed_url['url']), ENT_QUOTES, 'UTF-8') . '" target="_blank">'
+                        . htmlspecialchars($feed_url['url'], ENT_QUOTES, 'UTF-8') . '</a></dd>';
+        }
+        $htmlContent .= '</dl>';
+
+        return $htmlContent;
     }
 }
