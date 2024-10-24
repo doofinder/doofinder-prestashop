@@ -189,7 +189,7 @@ class DoofinderApi
             $response = 'Connection could not be established';
         }
 
-        throw new DoofinderException(  'Error code: '. $httpCode . ' - ' . $response, $httpCode);
+        throw new DoofinderException('Error code: '. $httpCode . ' - ' . $response, $httpCode);
     }
 
     public function getOptions()
