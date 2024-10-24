@@ -132,12 +132,11 @@ class DoofinderConfig
      */
     public static function getConfigFormValuesSearchLayer()
     {
-        $fields = [];
-        $fields['DF_INSTALLATION_ID'] = \Configuration::get('DF_INSTALLATION_ID');
-        $fields['DF_SHOW_LAYER'] = \Configuration::get('DF_SHOW_LAYER', null, null, null, true);
-        $fields['DF_SHOW_LAYER_MOBILE'] = \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
-
-        return $fields;
+        return [
+            'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
+            'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
+            'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
+        ];
     }
 
     /**
@@ -148,12 +147,23 @@ class DoofinderConfig
     public static function getConfigFormValuesAdvanced()
     {
         return [
-            'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
-            'DF_REGION' => \Configuration::get('DF_REGION'),
-            'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
             'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
             'DF_DSBL_HTTPS_CURL' => \Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
+        ];
+    }
+
+    /**
+     * Get the values for the store information form
+     *
+     * @return array
+     */
+    public static function getConfigFormValuesStoreInfo()
+    {
+        return [
+            'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
+            'DF_REGION' => \Configuration::get('DF_REGION'),
+            'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
         ];
     }
 
