@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -600,7 +599,7 @@ class DoofinderAdminPanelView
     {
         $htmlContent = '<dl>';
         foreach ($df_feed_urls as $feed_url) {
-            $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinder') . ' ['
+            $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinderadminpanelview') . ' ['
                 . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . ' - '
                 . htmlspecialchars($feed_url['currency'], ENT_QUOTES, 'UTF-8') . ']</dt>';
             $htmlContent .= '<dd><a href="' . htmlspecialchars(urldecode($feed_url['url']), ENT_QUOTES, 'UTF-8') . '" target="_blank">'

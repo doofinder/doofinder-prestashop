@@ -185,7 +185,7 @@ class DoofinderApi
             return $response;
         }
 
-        if ($httpCode == 0) {
+        if (0 == $httpCode) {
             $response = 'Connection could not be established';
         }
 
