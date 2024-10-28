@@ -58,9 +58,5 @@
 				</dl>
 			</div>
 		</div>
-		<div class="row">
-					<span><strong>&middot; {l s='You can debug or disable some options on the hidden advanced tab of the module. Caution: Use only if you are a experienced user!!' mod='doofinder'}</strong></span><br />
-					<span><a href="{html_entity_decode($adv_url|escape:'htmlall':'UTF-8')}">{l s='Enable advanced module tab options' mod='doofinder'}</a></span>
-		</div>
 	</div>
 </div>

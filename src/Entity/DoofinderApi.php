@@ -184,7 +184,12 @@ class DoofinderApi
         if (floor($httpCode / 100) == 2) {
             return $response;
         }
-        throw new DoofinderException($httpCode . ' - ' . $response, $httpCode);
+
+        if (0 === $httpCode) {
+            $response = 'Connection could not be established';
+        }
+
+        throw new DoofinderException('Error code: ' . $httpCode . ' - ' . $response, $httpCode);
     }
 
     public function getOptions()

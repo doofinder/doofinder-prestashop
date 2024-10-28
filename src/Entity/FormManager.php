@@ -60,11 +60,12 @@ class FormManager
         if (((bool) \Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesAdvanced());
             $formUpdated = 'advanced_tab';
-            $hashid = SearchEngine::getHashId($context->language->id, $context->currency->id);
-            $apiKey = \Configuration::get('DF_API_KEY');
-            $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
-            $messages .= $dfApi->checkConnection($this->module);
             $context->smarty->assign('adv', 1);
+        }
+
+        if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo());
+            $formUpdated = 'store_info_tab';
         }
 
         $adminPanelView = new DoofinderAdminPanelView($this->module);
@@ -98,6 +99,14 @@ class FormManager
             $context->smarty->assign('text_reindex', $this->module->l('Launch reindexing', 'formmanager'));
             $msg = $context->smarty->fetch(DoofinderAdminPanelView::getLocalPath() . 'views/templates/admin/reindex.tpl');
             $messages .= $adminPanelView->displayWarningCtm($msg, false, true);
+        }
+
+        // Check connection
+        if ($formUpdated == 'store_info_tab') {
+            $hashid = SearchEngine::getHashId($context->language->id, $context->currency->id);
+            $apiKey = \Configuration::get('DF_API_KEY');
+            $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
+            $messages .= $dfApi->checkConnection($this->module);
         }
 
         if (!empty($formUpdated)) {
