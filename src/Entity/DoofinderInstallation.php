@@ -285,6 +285,7 @@ class DoofinderInstallation
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC',
             'DF_FEED_INDEXED',
+            'DF_MULTIPRICE_ENABLED'
         ];
 
         $hashidVars = array_column(
