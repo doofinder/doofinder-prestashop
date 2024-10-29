@@ -334,13 +334,6 @@ class DoofinderAdminPanelView
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Doofinder script in mobile version', 'doofinderadminpanelview'),
-                        'name' => 'DF_SHOW_LAYER_MOBILE',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->module->l('Index product prices', 'doofinderadminpanelview'),
                         'desc' => $this->module->l('If you activate this option you will be able to show the prices of each product in the search results.', 'doofinderadminpanelview'),
                         'name' => 'DF_GS_DISPLAY_PRICES',
@@ -423,14 +416,6 @@ class DoofinderAdminPanelView
                             'name' => 'name',
                         ],
                     ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->module->l('Doofinder Store ID', 'doofinderadminpanelview'),
-                        'name' => 'DF_INSTALLATION_ID',
-                        'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
-                        'lang' => false,
-                        'readonly' => true,
-                    ],
                 ],
                 'submit' => [
                     'title' => $this->module->l('Save configuration', 'doofinderadminpanelview'),
@@ -477,6 +462,13 @@ class DoofinderAdminPanelView
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
+                    [
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->module->l('Doofinder script in mobile version', 'doofinderadminpanelview'),
+                        'name' => 'DF_SHOW_LAYER_MOBILE',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ],
                 ],
                 'submit' => [
                     'title' => $this->module->l('Save Internal Search Options', 'doofinderadminpanelview'),
@@ -494,6 +486,14 @@ class DoofinderAdminPanelView
     protected function getConfigFormStoreInfo()
     {
         $inputs = [
+            [
+                'type' => 'text',
+                'label' => $this->module->l('Doofinder Store ID', 'doofinderadminpanelview'),
+                'name' => 'DF_INSTALLATION_ID',
+                'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
+                'lang' => false,
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
+            ],
             [
                 'type' => 'text',
                 'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
