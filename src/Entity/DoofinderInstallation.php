@@ -142,7 +142,7 @@ class DoofinderInstallation
             'primary_language' => $primaryLang->language_code,
             'site_url' => $shopUrl,
             'search_engines' => [],
-            'plugin_version' => DoofinderConstants::VERSION
+            'plugin_version' => DoofinderConstants::VERSION,
         ];
 
         foreach ($languages as $lang) {
@@ -168,7 +168,7 @@ class DoofinderInstallation
             $currencyCodes[] = $cur['iso_code'];
         }
 
-        $createStoreRequest = ["store_data" => $storeData, "prices" => $currencyCodes];
+        $createStoreRequest = ['store_data' => $storeData, 'prices' => $currencyCodes];
 
         $jsonCreateStoreRequest = json_encode($createStoreRequest);
         DoofinderConfig::debug('Create Store Start');
@@ -285,7 +285,7 @@ class DoofinderInstallation
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC',
             'DF_FEED_INDEXED',
-            'DF_MULTIPRICE_ENABLED'
+            'DF_MULTIPRICE_ENABLED',
         ];
 
         $hashidVars = array_column(

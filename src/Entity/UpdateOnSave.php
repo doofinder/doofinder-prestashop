@@ -104,7 +104,7 @@ class UpdateOnSave
             $itemsDelete = self::getItemsQueue($shopId, $type, 'delete');
 
             foreach ($languages as $language) {
-                /**
+                /*
                  * For Stores with Multiprice SE, we only have one SE per language.
                  * In these cases, we can just use the default currency as all
                  * Language-Currency will point to the same SE HashId

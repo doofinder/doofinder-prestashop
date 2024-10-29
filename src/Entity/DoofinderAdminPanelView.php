@@ -592,7 +592,7 @@ class DoofinderAdminPanelView
             if ($multipriceEnabled) {
                 $urls[] = [
                     'url' => UrlManager::getFeedUrl($context->shop->id, $langIso),
-                    'lang' => $langIso
+                    'lang' => $langIso,
                 ];
             } else {
                 foreach (\Currency::getCurrencies() as $cur) {
