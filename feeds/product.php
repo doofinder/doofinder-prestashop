@@ -208,7 +208,7 @@ $header[] = 'stock_quantity';
 if ($cfg_display_prices) {
     $header[] = 'price';
     $header[] = 'sale_price';
-    $header[] = 'df_multiprice_aux';
+    $header[] = 'df_multiprice';
 }
 
 if ($cfg_product_variations == 1) {

@@ -136,7 +136,7 @@ class DfProductBuild
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
-            $p['df_multiprice_aux'] = $this->getMultiprice($product);
+            $p['df_multiprice'] = $this->getMultiprice($product);
         }
 
         if ($this->showProductFeatures) {
