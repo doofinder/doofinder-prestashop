@@ -83,7 +83,7 @@
 					<br />
 					<p><strong>{l s='ABOUT DOOFINDER' mod='doofinder'}:</strong></p>
 					<br />
-					<p>{l s='Doofinder provides you with an instant search layer to display your products when your visitors use the search bar' mod='doofinder'}.</p>
+					<p>{l s='Doofinder provides you with an instant search layer to display your products when your visitors use the Doofinder script' mod='doofinder'}.</p>
 					<br />
 					<p>{l s='Your customers then have the opportunity to preview your products, filter them and choose the desired product. Upon hitting enter, doofinder will also power the results page' mod='doofinder'}.</p>
 					<br />

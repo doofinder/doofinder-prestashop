@@ -113,6 +113,8 @@ class DoofinderConfig
     public static function getConfigFormValuesDataFeed()
     {
         return [
+            'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
+            'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
             'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES'),
             'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
@@ -122,20 +124,7 @@ class DoofinderConfig
             'DF_FEATURES_SHOWN[]' => explode(',', \Configuration::get('DF_FEATURES_SHOWN')),
             'DF_GS_IMAGE_SIZE' => \Configuration::get('DF_GS_IMAGE_SIZE'),
             'DF_UPDATE_ON_SAVE_DELAY' => \Configuration::get('DF_UPDATE_ON_SAVE_DELAY'),
-        ];
-    }
-
-    /**
-     * Get the values for the search layer configuration form
-     *
-     * @return array
-     */
-    public static function getConfigFormValuesSearchLayer()
-    {
-        return [
             'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
-            'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
-            'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
         ];
     }
 
