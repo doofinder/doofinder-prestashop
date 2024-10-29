@@ -597,7 +597,6 @@ class DoofinderAdminPanelView
             } else {
                 foreach (\Currency::getCurrencies() as $cur) {
                     $currencyIso = \Tools::strtoupper($cur['iso_code']);
-                    $langIso = \Tools::strtoupper($lang['iso_code']);
                     $urls[] = [
                         'url' => UrlManager::getFeedUrl($context->shop->id, $langIso, $currencyIso),
                         'lang' => $langIso,
