@@ -96,15 +96,27 @@ class UpdateOnSave
 
         $languages = \Language::getLanguages(true, $shopId);
         $currencies = \Currency::getCurrenciesByIdShop($shopId);
+        $defaultCurrency = new \Currency(\Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId));
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 
         foreach (['product', 'cms', 'category'] as $type) {
             $itemsUpdate = self::getItemsQueue($shopId, $type, 'update');
             $itemsDelete = self::getItemsQueue($shopId, $type, 'delete');
 
             foreach ($languages as $language) {
-                foreach ($currencies as $currency) {
-                    self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $language['id_lang'], $currency['id_currency']);
-                    self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $language['id_lang'], $currency['id_currency'], 'delete');
+                /**
+                 * For Stores with Multiprice SE, we only have one SE per language.
+                 * In these cases, we can just use the default currency as all
+                 * Language-Currency will point to the same SE HashId
+                 */
+                if ($multipriceEnabled) {
+                    self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $language['id_lang'], $defaultCurrency->id);
+                    self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $language['id_lang'], $defaultCurrency->id, 'delete');
+                } else {
+                    foreach ($currencies as $currency) {
+                        self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $language['id_lang'], $currency['id_currency']);
+                        self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $language['id_lang'], $currency['id_currency'], 'delete');
+                    }
                 }
             }
         }

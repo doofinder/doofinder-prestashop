@@ -130,6 +130,7 @@ class DoofinderInstallation
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
         $primaryLang = new \Language(\Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
+        $primaryCurrency = new \Currency(\Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId));
         $installationID = null;
 
         DoofinderConfig::setDefaultShopConfig($shopGroupId, $shopId);
@@ -141,36 +142,41 @@ class DoofinderInstallation
             'primary_language' => $primaryLang->language_code,
             'site_url' => $shopUrl,
             'search_engines' => [],
-            'plugin_version' => DoofinderConstants::VERSION,
+            'plugin_version' => DoofinderConstants::VERSION
         ];
 
         foreach ($languages as $lang) {
             if ($lang['active'] == 0) {
                 continue;
             }
-            foreach ($currencies as $cur) {
-                if ($cur['deleted'] == 1 || $cur['active'] == 0) {
-                    continue;
-                }
-                $ciso = $cur['iso_code'];
-                $langCode = $lang['language_code'];
-                $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code'], $ciso);
-                $storeData['search_engines'][] = [
-                    'language' => $langCode,
-                    'currency' => $ciso,
-                    'feed_url' => $feedUrl,
-                    'callback_url' => UrlManager::getProcessCallbackUrl(),
-                ];
-            }
+            $langCode = $lang['language_code'];
+            $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code']);
+            $storeData['search_engines'][] = [
+                'language' => $langCode,
+                'currency' => $primaryCurrency->iso_code,
+                'feed_url' => $feedUrl,
+                'callback_url' => UrlManager::getProcessCallbackUrl(),
+            ];
         }
 
-        $jsonStoreData = json_encode($storeData);
+        $currencyCodes = [];
+
+        foreach ($currencies as $cur) {
+            if ($cur['deleted'] == 1 || $cur['active'] == 0) {
+                continue;
+            }
+            $currencyCodes[] = $cur['iso_code'];
+        }
+
+        $createStoreRequest = ["store_data" => $storeData, "prices" => $currencyCodes];
+
+        $jsonCreateStoreRequest = json_encode($createStoreRequest);
         DoofinderConfig::debug('Create Store Start');
-        DoofinderConfig::debug(print_r($storeData, true));
+        DoofinderConfig::debug(print_r($createStoreRequest, true));
 
         $response = $client->post(
             UrlManager::getInstallUrl(\Configuration::get('DF_REGION')),
-            $jsonStoreData,
+            $jsonCreateStoreRequest,
             false,
             false,
             'application/json',

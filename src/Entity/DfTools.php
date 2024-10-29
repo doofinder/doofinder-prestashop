@@ -1340,7 +1340,7 @@ class DfTools
         }
     }
 
-    public static function getMinVariantPrices($products, $includeTaxes)
+    public static function getMinVariantPrices($products, $includeTaxes, $currencies)
     {
         $context = \Context::getContext();
 
@@ -1354,6 +1354,7 @@ class DfTools
             $variantId = $product['id_product_attribute'];
             $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
             $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
+            $variantMultiprice = self::getMultiprice($productId, $includeTaxes, $currencies, $variantId);
 
             if (key_exists($productId, $minPricesByProductId)) {
                 $currentMinPrices = $minPricesByProductId[$productId];
@@ -1368,12 +1369,14 @@ class DfTools
                 if ($variantOnsalePrice < $currentMinPrices['onsale_price']) {
                     $minPricesByProductId[$productId]['price'] = $variantPrice;
                     $minPricesByProductId[$productId]['onsale_price'] = $variantOnsalePrice;
+                    $minPricesByProductId[$productId]['multiprice'] = $variantMultiprice;
                     $minPricesByProductId[$productId]['link'] = self::getVariantUrl($product, $context);
                 }
             } else {
                 $minPricesByProductId[$productId] = [
                     'price' => $variantPrice,
                     'onsale_price' => $variantOnsalePrice,
+                    'multiprice' => $variantMultiprice,
                     'link' => self::getVariantUrl($product, $context),
                 ];
             }
@@ -1408,6 +1411,28 @@ class DfTools
             $variantId,
             6
         );
+    }
+
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
+    {
+        $multiprices = [];
+        $price = self::getPrice($productId, $includeTaxes, $variantId);
+        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId);
+
+        foreach ($currencies as $currency) {
+            if ($currency['deleted'] == 0 && $currency['active'] == 1) {
+                $convertedPrice = \Tools::convertPrice($price, $currency);
+                $convertedOnsalePrice = \Tools::convertPrice($onsale_price, $currency);
+
+                $multiprices[] = 'price_' . $currency['iso_code'] . '=' . $convertedPrice;
+
+                if ($convertedPrice != $convertedOnsalePrice) {
+                    $multiprices[] = 'sale_price_' . $currency['iso_code'] . '=' . $convertedOnsalePrice;
+                }
+            }
+        }
+
+        return implode('/', $multiprices);
     }
 
     private static function getVariantUrl($product, $context)

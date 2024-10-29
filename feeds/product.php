@@ -26,9 +26,11 @@ if (!defined('_PS_VERSION_')) {
  * - limit:      Max results in this request.
  * - offset:     Zero-based position to start getting results.
  * - language:   Language ISO code, like "es" or "en"
- * - currency:   Currency ISO code, like "EUR" or "GBP"
  * - taxes:      Boolean. Apply taxes to prices. Default true.
  * - prices:     Boolean. Display Prices. Default true.
+ * - currency:   Currency ISO code, like "EUR" or "GBP". It needs to be specified
+ *               non multiprice SE stores. For multiprice SE, the currency is not
+ *               included in the feed URL
  */
 if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
@@ -120,6 +122,8 @@ $context->language = $lang;
 $country = Configuration::get('PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
 $currency = DfTools::getCurrencyForLanguageFromRequest($lang);
+$multiprice_enabled = Configuration::get('DF_MULTIPRICE_ENABLED');
+$currencies = Currency::getCurrenciesByIdShop($context->shop->id);
 
 $cfg_short_description = (DfTools::cfg(
     $shop->id,
@@ -204,6 +208,7 @@ $header[] = 'stock_quantity';
 if ($cfg_display_prices) {
     $header[] = 'price';
     $header[] = 'sale_price';
+    $header[] = 'df_multiprice_aux';
 }
 
 if ($cfg_product_variations == 1) {
@@ -283,13 +288,14 @@ if (!empty($extra_rows)) {
 }
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes) : [];
+$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies) : [];
 
 foreach ($rows as $row) {
     $product_id = $row['id_product'];
     $variant_id = $row['id_product_attribute'];
     $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes, $variant_id);
     $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes, $variant_id);
+    $multiprice = DfTools::getMultiprice($product_id, $cfg_prices_w_taxes, $currencies, $variant_id);
 
     if ((int) $row['id_product'] > 0) {
         // ID, TITLE, LINK
@@ -501,17 +507,17 @@ foreach ($rows as $row) {
 
             $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes);
             $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes);
+            $multiprice = DfTools::getMultiprice($product_id, $cfg_prices_w_taxes, $currencies);
 
-            if (!$row['show_price']) {
-                $product_price = false;
-                $onsale_price = false;
+            if ($row['show_price']) {
+                echo Tools::convertPrice($product_price, $currency);
+                echo DfTools::TXT_SEPARATOR;
+                echo $product_price != $onsale_price ? Tools::convertPrice($onsale_price, $currency) : '';
+                echo DfTools::TXT_SEPARATOR;
+                echo $multiprice_enabled && $multiprice ? $multiprice : '';
+            } else {
+                echo DfTools::TXT_SEPARATOR . DfTools::TXT_SEPARATOR;
             }
-            echo ($product_price ? Tools::convertPrice(
-                $product_price,
-                $currency
-            ) : '') . DfTools::TXT_SEPARATOR;
-            echo ($product_price && $onsale_price && $product_price != $onsale_price)
-                ? Tools::convertPrice($onsale_price, $currency) : '';
         } elseif ($cfg_display_prices && $cfg_product_variations == 1) {
             echo DfTools::TXT_SEPARATOR;
             // The parent product should have as price the lowest ones of the
@@ -522,15 +528,19 @@ foreach ($rows as $row) {
                 if (!is_null($min_variant['onsale_price']) && !is_null($min_variant['price']) && $min_variant['onsale_price'] < $onsale_price) {
                     $product_price = $min_variant['price'];
                     $onsale_price = $min_variant['onsale_price'];
+                    $multiprice = $min_variant['multiprice'];
                 }
             }
-            if (!$row['show_price']) {
-                $product_price = false;
-                $onsale_price = false;
+
+            if ($row['show_price']) {
+                echo Tools::convertPrice($product_price, $currency);
+                echo DfTools::TXT_SEPARATOR;
+                echo $product_price != $onsale_price ? Tools::convertPrice($onsale_price, $currency) : '';
+                echo DfTools::TXT_SEPARATOR;
+                echo $multiprice_enabled && $multiprice ? $multiprice : '';
+            } else {
+                echo DfTools::TXT_SEPARATOR . DfTools::TXT_SEPARATOR;
             }
-            echo ($product_price ? Tools::convertPrice($product_price, $currency) : '') . DfTools::TXT_SEPARATOR;
-            echo ($product_price && $onsale_price && $product_price != $onsale_price) ?
-                Tools::convertPrice($onsale_price, $currency) : '';
         }
 
         if ($cfg_product_variations == 1) {
