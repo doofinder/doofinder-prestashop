@@ -539,6 +539,7 @@ class DoofinderAdminPanelView
             [
                 'type' => 'html',
                 'label' => $this->module->l('Feed URLs to use on Doofinder Admin panel', 'doofinderadminpanelview'),
+                'name' => 'DF_FEED_READONLY_URLS',
                 'html_content' => $this->feedUrlsFormatHtml($this->getFeedURLs()),
             ],
         ];
