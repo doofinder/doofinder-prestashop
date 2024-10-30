@@ -1413,6 +1413,20 @@ class DfTools
         );
     }
 
+    /**
+     * Given a product and a list of currencies, returns the multiprice field
+     * in the correct format to be processed by the indexing process.
+     *
+     * An example of a value for this field is: "price_EUR=33/sale_price_EUR=25/price_GBP=11/sale_price_GBP=8"
+     * for a list containing two currencies ["EUR", "GBP"].
+     *
+     * @param int $productId Id of the procut to calculate the multiprice for
+     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
+     * @param array $currencies List of currencies to consider for the multiprice calculation
+     * @param in $variantId When specified, the multiprice will be calculated for that variant
+     *
+     * @return string
+     */
     public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
     {
         $multiprices = [];
