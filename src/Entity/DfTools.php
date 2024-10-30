@@ -1438,10 +1438,10 @@ class DfTools
                 $convertedPrice = \Tools::convertPrice($price, $currency);
                 $convertedOnsalePrice = \Tools::convertPrice($onsale_price, $currency);
 
-                $multiprices[] = 'price_' . $currency['iso_code'] . '=' . $convertedPrice;
+                $multiprices[] = $currency['iso_code'] . '_price=' . $convertedPrice;
 
                 if ($convertedPrice != $convertedOnsalePrice) {
-                    $multiprices[] = 'sale_price_' . $currency['iso_code'] . '=' . $convertedOnsalePrice;
+                    $multiprices[] = $currency['iso_code'] . '_sale_price=' . $convertedOnsalePrice;
                 }
             }
         }
