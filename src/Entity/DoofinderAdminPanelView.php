@@ -90,7 +90,6 @@ class DoofinderAdminPanelView
         $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
         $token = \Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $context->employee->email . '&token=' . $token;
-        $dfEnabledV9 = \Configuration::get('DF_ENABLED_V9');
 
         $context->smarty->assign('oldPS', $oldPS);
         $context->smarty->assign('module_dir', $this->module->getPath());
@@ -101,7 +100,6 @@ class DoofinderAdminPanelView
         $context->smarty->assign('tokenAjax', \Tools::encrypt('doofinder-ajax'));
         $context->smarty->assign('skipurl', $skipUrl);
         $context->smarty->assign('paramsPopup', $paramsPopup);
-        $context->smarty->assign('dfEnabledV9', $dfEnabledV9);
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
         if ($configured) {
@@ -202,7 +200,6 @@ class DoofinderAdminPanelView
         $skip = \Tools::getValue('skip');
         if ($skip) {
             \Configuration::updateValue('DF_ENABLE_HASH', 0);
-            \Configuration::updateValue('DF_ENABLED_V9', true);
         }
         $sql = 'SELECT id_configuration FROM ' . _DB_PREFIX_ . 'configuration WHERE name = \'DF_ENABLE_HASH\'';
 
@@ -503,13 +500,6 @@ class DoofinderAdminPanelView
                 'type' => 'text',
                 'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                 'name' => 'DF_REGION',
-            ],
-            [
-                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
-                'name' => 'DF_ENABLED_V9',
-                'is_bool' => true,
-                'values' => $this->getBooleanFormValue(),
             ],
             [
                 'type' => 'html',

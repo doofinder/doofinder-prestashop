@@ -186,7 +186,6 @@ class DoofinderInstallation
             if ($installationID) {
                 DoofinderConfig::debug("Set installation ID: $installationID");
                 \Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
-                \Configuration::updateValue('DF_ENABLED_V9', true, false, $shopGroupId, $shopId);
                 \Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
                 SearchEngine::setSearchEnginesByConfig();
             } else {

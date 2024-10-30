@@ -152,7 +152,6 @@ class DoofinderConfig
             'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
             'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
             'DF_REGION' => \Configuration::get('DF_REGION'),
-            'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
         ];
     }
 
