@@ -448,6 +448,7 @@ class DoofinderAdminPanelView
                 'name' => 'DF_INSTALLATION_ID',
                 'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
                 'lang' => false,
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
             ],
         ];
 
@@ -523,11 +524,13 @@ class DoofinderAdminPanelView
                 'type' => 'text',
                 'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
                 'name' => 'DF_API_KEY',
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
             ],
             [
                 'type' => 'text',
                 'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                 'name' => 'DF_REGION',
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
             ],
             [
                 'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -598,7 +601,7 @@ class DoofinderAdminPanelView
 
     private function feedUrlsFormatHtml($df_feed_urls)
     {
-        $htmlContent = '<dl>';
+        $htmlContent = '<div class="feed-urls" style="max-height:150px; overflow-y: auto;"><dl>';
         foreach ($df_feed_urls as $feed_url) {
             $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinderadminpanelview') . ' ['
                 . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . ' - '
@@ -606,7 +609,7 @@ class DoofinderAdminPanelView
             $htmlContent .= '<dd><a href="' . htmlspecialchars(urldecode($feed_url['url']), ENT_QUOTES, 'UTF-8') . '" target="_blank">'
                 . htmlspecialchars($feed_url['url'], ENT_QUOTES, 'UTF-8') . '</a></dd>';
         }
-        $htmlContent .= '</dl>';
+        $htmlContent .= '</dl></div>';
 
         return $htmlContent;
     }
