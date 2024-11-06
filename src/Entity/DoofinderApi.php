@@ -102,13 +102,17 @@ class DoofinderApi
             }
         }
         $patt = '/^[0-9a-f]{32}$/i';
-        if (!preg_match($patt, $hashid)) {
+
+        if ($hashid != false && !preg_match($patt, $hashid)) {
             throw new DoofinderException('Wrong hashid');
+        } else {
+            $this->hashid = $hashid;
         }
+
         if (!in_array($this->apiVersion, ['5', '4', '3.0', '1.0'])) {
             throw new DoofinderException('Wrong API');
         }
-        $this->hashid = $hashid;
+
         if ($fromParams) {
             $this->fromQuerystring();
         }
