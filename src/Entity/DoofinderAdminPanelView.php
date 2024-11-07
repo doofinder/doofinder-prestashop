@@ -601,7 +601,7 @@ class DoofinderAdminPanelView
 
     private function feedUrlsFormatHtml($df_feed_urls)
     {
-        $htmlContent = '<div class="feed-urls" style="max-height:150px; overflow-y: auto;"><dl>';
+        $htmlContent = '<dl style="max-height:150px; overflow-y: auto;">';
         foreach ($df_feed_urls as $feed_url) {
             $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinderadminpanelview') . ' ['
                 . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . ' - '
@@ -609,7 +609,7 @@ class DoofinderAdminPanelView
             $htmlContent .= '<dd><a href="' . htmlspecialchars(urldecode($feed_url['url']), ENT_QUOTES, 'UTF-8') . '" target="_blank">'
                 . htmlspecialchars($feed_url['url'], ENT_QUOTES, 'UTF-8') . '</a></dd>';
         }
-        $htmlContent .= '</dl></div>';
+        $htmlContent .= '</dl>';
 
         return $htmlContent;
     }
