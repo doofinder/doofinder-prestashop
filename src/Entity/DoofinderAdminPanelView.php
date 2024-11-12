@@ -503,6 +503,13 @@ class DoofinderAdminPanelView
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
+                    [
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
+                        'name' => 'DF_ENABLED_V9',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ],
                 ],
                 'submit' => [
                     'title' => $this->module->l('Save Internal Search Options', 'doofinderadminpanelview'),
@@ -531,13 +538,6 @@ class DoofinderAdminPanelView
                 'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                 'name' => 'DF_REGION',
                 'readonly' => !(bool) \Tools::getValue('adv', 0),
-            ],
-            [
-                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
-                'name' => 'DF_ENABLED_V9',
-                'is_bool' => true,
-                'values' => $this->getBooleanFormValue(),
             ],
             [
                 'type' => 'html',
