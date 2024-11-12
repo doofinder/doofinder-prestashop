@@ -150,6 +150,7 @@ class DoofinderConfig
             'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
             'DF_DSBL_HTTPS_CURL' => \Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
+            'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9')
         ];
     }
 
@@ -162,8 +163,7 @@ class DoofinderConfig
     {
         return [
             'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
-            'DF_REGION' => \Configuration::get('DF_REGION'),
-            'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
+            'DF_REGION' => \Configuration::get('DF_REGION')
         ];
     }
 
