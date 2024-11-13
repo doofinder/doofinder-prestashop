@@ -1346,21 +1346,14 @@ class DfTools
 
         $minPricesByProductId = [];
         foreach ($products as $product) {
+            if (self::isParent($product)) {
+                continue;
+            }
+
             $productId = $product['id_product'];
             $variantId = $product['id_product_attribute'];
             $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
             $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
-
-            if (self::isParent($product)) {
-                if (is_null($minPricesByProductId[$productId]['price'])) {
-                    $minPricesByProductId[$productId]['price'] = $variantPrice;
-                }
-
-                if (is_null($minPricesByProductId[$productId]['onsale_price'])) {
-                    $minPricesByProductId[$productId]['onsale_price'] = $variantOnsalePrice;
-                }
-                continue;
-            }
 
             if (key_exists($productId, $minPricesByProductId)) {
                 $currentMinPrices = $minPricesByProductId[$productId];
