@@ -495,6 +495,7 @@ class DoofinderAdminPanelView
                 'type' => 'text',
                 'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
                 'name' => 'DF_API_KEY',
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
             ],
             [
                 'type' => 'text',
@@ -563,7 +564,7 @@ class DoofinderAdminPanelView
 
     private function feedUrlsFormatHtml($df_feed_urls)
     {
-        $htmlContent = '<dl>';
+        $htmlContent = '<dl style="max-height:150px; overflow-y: auto;">';
         foreach ($df_feed_urls as $feed_url) {
             $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinderadminpanelview') . ' ['
                 . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . ' - '
