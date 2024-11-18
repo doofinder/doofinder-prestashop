@@ -1438,13 +1438,13 @@ class DfTools
                 $convertedPrice = \Tools::convertPrice($price, $currency);
                 $convertedOnsalePrice = \Tools::convertPrice($onsale_price, $currency);
                 $currencyCode = $currency['iso_code'];
-                $pricesMap = ["price" => $convertedPrice];
+                $pricesMap = ['price' => $convertedPrice];
 
                 if ($convertedPrice != $convertedOnsalePrice) {
-                    $pricesMap["sale_price"] = $convertedOnsalePrice;
+                    $pricesMap['sale_price'] = $convertedOnsalePrice;
                 }
 
-                $multiprice[$currencyCode]  = $pricesMap;
+                $multiprice[$currencyCode] = $pricesMap;
             }
         }
 
@@ -1469,6 +1469,7 @@ class DfTools
     public static function getFormattedMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
     {
         $multiprice = self::getMultiprice($productId, $includeTaxes, $currencies);
+
         return self::formatMultiprice($multiprice);
     }
 
