@@ -295,7 +295,7 @@ foreach ($rows as $row) {
     $variant_id = $row['id_product_attribute'];
     $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes, $variant_id);
     $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes, $variant_id);
-    $multiprice = DfTools::getMultiprice($product_id, $cfg_prices_w_taxes, $currencies, $variant_id);
+    $multiprice = DfTools::getFormattedMultiprice($product_id, $cfg_prices_w_taxes, $currencies, $variant_id);
 
     if ((int) $row['id_product'] > 0) {
         // ID, TITLE, LINK
@@ -507,7 +507,7 @@ foreach ($rows as $row) {
 
             $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes);
             $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes);
-            $multiprice = DfTools::getMultiprice($product_id, $cfg_prices_w_taxes, $currencies);
+            $multiprice = DfTools::getFormattedMultiprice($product_id, $cfg_prices_w_taxes, $currencies);
 
             if ($row['show_price']) {
                 echo Tools::convertPrice($product_price, $currency);

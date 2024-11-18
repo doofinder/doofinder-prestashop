@@ -136,7 +136,10 @@ class DfProductBuild
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
-            $p['df_multiprice'] = $this->getMultiprice($product);
+
+            if ($this->multipriceEnabled) {
+                $p['df_multiprice'] = $this->getMultiprice($product);
+            }
         }
 
         if ($this->showProductFeatures) {
@@ -322,10 +325,6 @@ class DfProductBuild
 
     private function getMultiprice($product)
     {
-        if (!$this->multipriceEnabled) {
-            return '';
-        }
-
         $productId = $product['id_product'];
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
