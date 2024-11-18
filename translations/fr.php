@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Ajoutez un moteur de recherche intelligent à votre site en moins de 5 minutes et sans programmation';
 $_MODULE['<{doofinder}prestashop>doofinder_e499922a91899a55af0659f1f4772e6a'] = 'Êtes-vous sûr? Cela n\'annulera pas votre compte dans le service Doofinder';
@@ -14,7 +14,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b9f5c797ebbf55adccdd853
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_1f210c9967fadb26e8e2553e0484e086'] = 'Configuration de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_53269e09665ac13a651b7a10191fbdf2'] = 'Script de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_af57630a4afdbdfcc57127603949a9be'] = 'En activant cette option, vous insérez le script dans le code de votre magasin. Vous pouvez gérer la visibilité des produits depuis admin.doofinder.com.';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Script de Doofinder dans la version mobile';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_c5848d64c88f4174aa2c7a25d06bc044'] = 'Indexation des prix des produits';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79272d6ac0fc6480115ee98565778947'] = 'Si vous activez cette option, vous pourrez afficher les prix de chaque produit dans les résultats de la recherche.';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_2e50fba97feb0e9b740a5c785d07ab7d'] = 'Afficher les prix TTC des produits';
@@ -27,8 +26,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ebe75aa799359b32559a09e
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_90dce1b992114b5c7ab37ee99ea195ec'] = 'Taille de l’image du produit';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae29d32626c4da07fe58def585bbc283'] = 'Traiter automatiquement les produits modifiés';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_acc697e9b9f3dae4b46e08fc16374b06'] = 'Cette action ne sera exécutée que s\'il y a des changements. Si vous voyez le champ désactivé, c\'est que vous faites une utilisation dans les index qui n\'est pas prise en charge par le traitement automatique des produits modifiés.';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'ID de magasin Doofinder';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'Vous trouverez cet identifiant dans votre Panel de Contrôle, sous le menu \"Live Layer\"';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_cf565402d32b79d33f626252949a6941'] = 'Sauvegarder la configuration';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_9dfc5d5738312210c3c75e68a468691d'] = 'Options Avancées';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38461ba2356'] = 'Mode Débogage. Écrire les journaux d’informations dans le fichier doofinder.log';
@@ -36,15 +33,17 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b0939b990335e5c6a8f76fa
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_958cf5c1405c86e460b294803caedc45'] = 'Si votre serveur dispose d’un certificat non fiable et que vous rencontrez des problèmes de connexion avec l’API, veuillez activer ceci';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Réponse d’erreur CURL en mode débogage';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'Pour déboguer si votre serveur présente des symptômes de problèmes de connexion';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Script de Doofinder dans la version mobile';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Sauvegarder les options de recherche interne';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'ID de magasin Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'Vous trouverez cet identifiant dans votre Panel de Contrôle, sous le menu \"Live Layer\"';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_e0daaf59114081fac112928e638c8d85'] = 'Clé API de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f447ac856e7e72435904956e3b15f433'] = 'Région';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_c01ae558981823abcbd1489ac81f6fc9'] = 'Activer la layer v9 (Livelayer)';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_08c1cf7707bb72744cd07192c8580580'] = 'Voici vos Url de flux produit à insérer dans le back office de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_80a11d2a54a677f6fadd9c041c0d6b98'] = 'Informations sur le magasin';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_41bfb72cd54183db3f00393c9a052495'] = 'Options du widget Enregistrer les informations du magasin';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_41bfb72cd54183db3f00393c9a052495'] = 'Sauvegarder les options du widget d\'informations sur le magasin';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Activé';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_4c48400a2f3c25d9ee6542529bae1b07'] = 'URL du flux produit pour';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_4c48400a2f3c25d9ee6542529bae1b07'] = 'Url du flux produit pour';
 $_MODULE['<{doofinder}prestashop>doofinderapi_8412280eb3a42b954b37c5a5549f292e'] = 'Erreur : les informations d\'identification sont correctes mais la limite de requête est atteinte pour le moteur de recherche - ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_e43b9767da79f0184ebaa0e9d5abed3e'] = 'Connexion réussie pour le moteur de recherche - ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_cfa4587136de2d97cdb650add327f593'] = 'Erreur : aucune connexion pour le moteur de recherche - ';

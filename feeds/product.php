@@ -519,7 +519,7 @@ foreach ($rows as $row) {
             if (DfTools::isParent($row) && array_key_exists($product_id, $min_price_variant_by_product_id)) {
                 $min_variant = $min_price_variant_by_product_id[$product_id];
 
-                if ($min_variant['onsale_price'] < $onsale_price) {
+                if (!is_null($min_variant['onsale_price']) && !is_null($min_variant['price']) && $min_variant['onsale_price'] < $onsale_price) {
                     $product_price = $min_variant['price'];
                     $onsale_price = $min_variant['onsale_price'];
                 }

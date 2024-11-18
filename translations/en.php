@@ -14,7 +14,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b9f5c797ebbf55adccdd853
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_1f210c9967fadb26e8e2553e0484e086'] = 'Doofinder configuration';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_53269e09665ac13a651b7a10191fbdf2'] = 'Doofinder script';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_af57630a4afdbdfcc57127603949a9be'] = 'Activating this option you are inserting the script into your store code. You can manage product visibility from admin.doofinder.com.';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Doofinder script in mobile version';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_c5848d64c88f4174aa2c7a25d06bc044'] = 'Index product prices';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79272d6ac0fc6480115ee98565778947'] = 'If you activate this option you will be able to show the prices of each product in the search results.';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_2e50fba97feb0e9b740a5c785d07ab7d'] = 'Show product prices including taxes';
@@ -27,8 +26,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ebe75aa799359b32559a09e
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_90dce1b992114b5c7ab37ee99ea195ec'] = 'Product Image Size';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae29d32626c4da07fe58def585bbc283'] = 'Automatically process modified products';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_acc697e9b9f3dae4b46e08fc16374b06'] = 'This action will only be executed if there are changes. If you see the field disabled, it is because you are making a usage in the indexes that is not supported by the automatic processing of modified products.';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'Doofinder Store ID';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'You can find this identifier in our control panel. Inside the side menu labeled \"Store settings\".';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_cf565402d32b79d33f626252949a6941'] = 'Save configuration';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_9dfc5d5738312210c3c75e68a468691d'] = 'Advanced Options';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38461ba2356'] = 'Debug Mode. Write info logs in doofinder.log file';
@@ -36,10 +33,12 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b0939b990335e5c6a8f76fa
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_958cf5c1405c86e460b294803caedc45'] = 'If your server have an untrusted certificate and you have connection problems with the API, please enable this';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Debug CURL error response';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'To debug if your server has symptoms of connection problems';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Doofinder script in mobile version';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Save Internal Search Options';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'Doofinder Store ID';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'You can find this identifier in our control panel. Inside the side menu labeled \"Store settings\".';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_e0daaf59114081fac112928e638c8d85'] = 'Doofinder Api Key';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f447ac856e7e72435904956e3b15f433'] = 'Region';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_c01ae558981823abcbd1489ac81f6fc9'] = 'Enable v9 layer (Livelayer)';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_08c1cf7707bb72744cd07192c8580580'] = 'Feed URLs to use on Doofinder Admin panel';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_80a11d2a54a677f6fadd9c041c0d6b98'] = 'Store Information';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_41bfb72cd54183db3f00393c9a052495'] = 'Save Store Info Widget Options';

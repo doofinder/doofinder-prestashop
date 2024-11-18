@@ -501,6 +501,7 @@ class DoofinderAdminPanelView
                 'type' => 'text',
                 'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                 'name' => 'DF_REGION',
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
             ],
             [
                 'type' => 'html',

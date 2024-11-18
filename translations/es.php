@@ -14,7 +14,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b9f5c797ebbf55adccdd853
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_1f210c9967fadb26e8e2553e0484e086'] = 'Configuración de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_53269e09665ac13a651b7a10191fbdf2'] = 'Script de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_af57630a4afdbdfcc57127603949a9be'] = 'Al activar esta opción estás insertando el script en el código de tu tienda. Puedes gestionar la visibilidad de los productos desde admin.doofinder.com.';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Script de Doofinder en versión móvil';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_c5848d64c88f4174aa2c7a25d06bc044'] = 'Indexar los precios de los productos';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79272d6ac0fc6480115ee98565778947'] = 'Si activas esta opción podrás mostrar los precios de cada producto en los resultados de búsqueda.';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_2e50fba97feb0e9b740a5c785d07ab7d'] = 'Mostrar los precios de los productos con impuestos incluidos';
@@ -27,8 +26,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ebe75aa799359b32559a09e
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_90dce1b992114b5c7ab37ee99ea195ec'] = 'Tamaño de la imagen de producto';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae29d32626c4da07fe58def585bbc283'] = 'Procesar automáticamente los productos modificados';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_acc697e9b9f3dae4b46e08fc16374b06'] = 'Esta acción solo se ejecutará si hay cambios. Si le aparece el campo deshabilitado, es debido a que está haciendo un uso en los índices que no está soportado por el procesamiento automático de productos modificados.';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'Store ID de Doofinder';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'Puedes encontrar este identificador en nuestro Panel de Control, dentro del menú superior etiquetado como \"Store settings\"';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_cf565402d32b79d33f626252949a6941'] = 'Guardar la configuración';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_9dfc5d5738312210c3c75e68a468691d'] = 'Opciones Avanzadas';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38461ba2356'] = 'Modo depuración. Escribe logs de información en el fichero doofinder.log';
@@ -36,15 +33,17 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b0939b990335e5c6a8f76fa
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_958cf5c1405c86e460b294803caedc45'] = 'Si tu servidor tiene un certificado inválido y tienes problemas con la API, por favor activa esto';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Depurar respuesta de error en el CURL';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'Para depurar si tu servidor tiene problemas de conexión';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Script de Doofinder en versión móvil';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Guardar opciones de búsqueda interna';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'Store ID de Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'Puedes encontrar este identificador en nuestro Panel de Control, dentro del menú superior etiquetado como \"Store settings\"';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_e0daaf59114081fac112928e638c8d85'] = 'Doofinder Api Key';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f447ac856e7e72435904956e3b15f433'] = 'Región';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_c01ae558981823abcbd1489ac81f6fc9'] = 'Habilitar layer v9 (Livelayer)';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_08c1cf7707bb72744cd07192c8580580'] = 'URLs de los feeds para usar en el Dashboard de Doofinder';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_08c1cf7707bb72744cd07192c8580580'] = 'URLs de los feed para usar en el panel de administración de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_80a11d2a54a677f6fadd9c041c0d6b98'] = 'Información de la tienda';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_41bfb72cd54183db3f00393c9a052495'] = 'Guardar información de la tienda';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Activado';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_4c48400a2f3c25d9ee6542529bae1b07'] = 'URL del feed de datos para';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_4c48400a2f3c25d9ee6542529bae1b07'] = 'URL del feed de datos para ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_8412280eb3a42b954b37c5a5549f292e'] = 'Error: Las credenciales son correctas pero se alcanzó el límite de consultas para el motor de búsqueda - ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_e43b9767da79f0184ebaa0e9d5abed3e'] = 'Conexión exitosa para el motor de búsqueda - ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_cfa4587136de2d97cdb650add327f593'] = 'Error: no hay conexión para el motor de búsqueda - ';
