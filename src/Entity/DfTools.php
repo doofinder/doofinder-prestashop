@@ -1340,7 +1340,7 @@ class DfTools
         }
     }
 
-    public static function getMinVariantPrices($products, $includeTaxes)
+    public static function getMinVariantPrices($products, $includeTaxes, $currencies)
     {
         $context = \Context::getContext();
 
@@ -1354,6 +1354,7 @@ class DfTools
             $variantId = $product['id_product_attribute'];
             $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
             $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
+            $variantMultiprice = self::getFormattedMultiprice($productId, $includeTaxes, $currencies, $variantId);
 
             if (key_exists($productId, $minPricesByProductId)) {
                 $currentMinPrices = $minPricesByProductId[$productId];
@@ -1368,12 +1369,14 @@ class DfTools
                 if ($variantOnsalePrice < $currentMinPrices['onsale_price']) {
                     $minPricesByProductId[$productId]['price'] = $variantPrice;
                     $minPricesByProductId[$productId]['onsale_price'] = $variantOnsalePrice;
+                    $minPricesByProductId[$productId]['multiprice'] = $variantMultiprice;
                     $minPricesByProductId[$productId]['link'] = self::getVariantUrl($product, $context);
                 }
             } else {
                 $minPricesByProductId[$productId] = [
                     'price' => $variantPrice,
                     'onsale_price' => $variantOnsalePrice,
+                    'multiprice' => $variantMultiprice,
                     'link' => self::getVariantUrl($product, $context),
                 ];
             }
@@ -1408,6 +1411,92 @@ class DfTools
             $variantId,
             6
         );
+    }
+
+    /**
+     * Given a product and a list of currencies, returns the multiprice map.
+     *
+     * An example of a value for this field is
+     * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
+     * for a list containing two currencies ["EUR", "GBP"].
+     *
+     * @param int $productId Id of the product to calculate the multiprice for
+     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
+     * @param array $currencies List of currencies to consider for the multiprice calculation
+     * @param int $variantId When specified, the multiprice will be calculated for that variant
+     *
+     * @return array
+     */
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
+    {
+        $multiprice = [];
+        $price = self::getPrice($productId, $includeTaxes, $variantId);
+        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId);
+
+        foreach ($currencies as $currency) {
+            if ($currency['deleted'] == 0 && $currency['active'] == 1) {
+                $convertedPrice = \Tools::convertPrice($price, $currency);
+                $convertedOnsalePrice = \Tools::convertPrice($onsale_price, $currency);
+                $currencyCode = $currency['iso_code'];
+                $pricesMap = ['price' => $convertedPrice];
+
+                if ($convertedPrice != $convertedOnsalePrice) {
+                    $pricesMap['sale_price'] = $convertedOnsalePrice;
+                }
+
+                $multiprice[$currencyCode] = $pricesMap;
+            }
+        }
+
+        return $multiprice;
+    }
+
+    /**
+     * Given a product and a list of currencies, returns the multiprice field
+     * in the correct format to be used in the feed CSV.
+     *
+     * An example of a value for this field is
+     * "price_EUR=5/sale_price_EUR=3/price_GBP=4.3/sale_price_GBP=2.7"
+     * for a list containing two currencies ["EUR", "GBP"].
+     *
+     * @param int $productId Id of the product to calculate the multiprice for
+     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
+     * @param array $currencies List of currencies to consider for the multiprice calculation
+     * @param int $variantId When specified, the multiprice will be calculated for that variant
+     *
+     * @return string
+     */
+    public static function getFormattedMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
+    {
+        $multiprice = self::getMultiprice($productId, $includeTaxes, $currencies);
+
+        return self::formatMultiprice($multiprice);
+    }
+
+    /**
+     * Transforms a given multiprice map into the correct format to be processed
+     * to the format required by the CSV feed.
+     *
+     * For an input like
+     * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
+     * it would produce
+     * "price_EUR=5/sale_price_EUR=3/price_GBP=4.3/sale_price_GBP=2.7"
+     *
+     * @param int $multiprice Multiprice map to be formatted
+     *
+     * @return string
+     */
+    private static function formatMultiprice($multiprice)
+    {
+        $multiprices = [];
+
+        foreach ($multiprice as $currency => $prices) {
+            foreach ($prices as $price_name => $value) {
+                $multiprices[] = $currency . '_' . $price_name . '=' . $value;
+            }
+        }
+
+        return implode('/', $multiprices);
     }
 
     private static function getVariantUrl($product, $context)
