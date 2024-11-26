@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 2007-2022 PrestaShop SA and Contributors
  *
@@ -23,6 +24,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }

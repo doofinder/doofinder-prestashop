@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -12,6 +13,7 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
