@@ -16,6 +16,7 @@
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)
  */
+
 namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
