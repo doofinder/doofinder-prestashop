@@ -169,9 +169,9 @@ class UpdateOnSave
 
         if ('update' === $action) {
             $chunks = array_chunk($products, 100);
+            $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
-            foreach ($chunks as $chunk) {
-                $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
+            foreach ($chunks as $chunk) {    
                 $builder->setProducts($chunk);
                 $payload = $builder->build();
 
