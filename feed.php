@@ -13,7 +13,6 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
 $root_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
 $config_file_path = $root_path . '/config/config.inc.php';
 if (@file_exists($config_file_path)) {
