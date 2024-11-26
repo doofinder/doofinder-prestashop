@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author    Doofinder
  * @copyright Doofinder
