@@ -167,11 +167,16 @@ class UpdateOnSave
         }
 
         if ('update' === $action) {
-            $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
-            $builder->setProducts($products);
-            $payload = $builder->build();
+            $chunks = array_chunk($products, 100);
 
-            self::updateItemsApi($hashid, 'product', $payload);
+            foreach ($chunks as $chunk) {
+                $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
+                $builder->setProducts($chunk);
+                $payload = $builder->build();
+
+                self::updateItemsApi($hashid, 'product', $payload);
+            }
+            
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);
         }
