@@ -28,8 +28,5 @@ jobs:
       - name: cs-fixer:init
         run: php vendor/bin/prestashop-coding-standards cs-fixer:init
 
-      - name: Disable blank line rule
-        run: sed -i 's/"blank_line_after_opening_tag" => true/"blank_line_after_opening_tag" => false/g' .php-cs-fixer.dist.php
-
       - name: PHP-CS-Fixer
-        run: php vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
+        run: php vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --rules='{"blank_line_after_opening_tag": false}'
