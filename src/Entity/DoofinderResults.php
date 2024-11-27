@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author JoeZ99 <jzarate@gmail.com>
  * @copyright Doofinder
