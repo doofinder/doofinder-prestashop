@@ -175,7 +175,7 @@ class UpdateOnSave
                 $payload = $builder->build();
 
                 self::updateItemsApi($hashid, 'product', $payload);
-            } 
+            }
 
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);
