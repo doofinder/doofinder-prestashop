@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class EasyREST
  * Wraps HTTP calls using cURL, aimed for accessing and testing RESTful webservice.
