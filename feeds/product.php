@@ -12,6 +12,7 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
 use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
 
