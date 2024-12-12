@@ -77,7 +77,9 @@ class Autoloader
      */
     private static function uncapitalize($text)
     {
-        if (in_array($text, self::EXCEPTIONS_FOR_UNCAPITALIZE, true)) {
+        $exceptions_for_capitalization = ['Entity', 'Controller'];
+
+        if (in_array($text, $exceptions_for_capitalization, true)) {
             return $text;
         }
 
