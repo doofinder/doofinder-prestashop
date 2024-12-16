@@ -176,7 +176,6 @@ class UpdateOnSave
 
                 self::updateItemsApi($hashid, 'product', $payload);
             }
-
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);
         }
