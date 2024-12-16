@@ -110,6 +110,16 @@ class HookManager
                     'controller' => 'landing',
                 ],
             ],
+            'module-doofinder-config' => [
+                'controller' => 'config',
+                'rule' => 'modules/doofinder/config.php',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'config',
+                ],
+            ],
         ];
     }
 

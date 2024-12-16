@@ -12,15 +12,15 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+namespace PrestaShop\Module\Doofinder\Src;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 class Autoloader
 {
-    // Exceptions based on: https://devdocs.prestashop-project.org/8/modules/creation/module-file-structure/
-    const EXCEPTIONS_FOR_UNCAPITALIZE = ['Entity', 'Controller'];
-
     /**
      * Registers the autoloader according to PrestaShop standards, which are PSR-12 standards.
      * More info at: https://www.php-fig.org/psr/psr-12/
@@ -77,7 +77,9 @@ class Autoloader
      */
     private static function uncapitalize($text)
     {
-        if (in_array($text, self::EXCEPTIONS_FOR_UNCAPITALIZE, true)) {
+        // Exceptions based on: https://devdocs.prestashop-project.org/8/modules/creation/module-file-structure/
+        $exceptions_for_capitalization = ['Entity', 'Controller'];
+        if (in_array($text, $exceptions_for_capitalization, true)) {
             return $text;
         }
 

@@ -21,7 +21,7 @@ if (!defined('_PS_VERSION_')) {
 
 class DoofinderConstants
 {
-    // Feel free to change this value to your own local env or ngrok
+    // Feel free to change these values to your own local env or ngrok
     const DOOMANAGER_REGION_URL = 'https://%sadmin.doofinder.com';
     const DOOPLUGINS_REGION_URL = 'https://%splugins.doofinder.com';
     const DOOPHOENIX_REGION_URL = 'https://%ssearch.doofinder.com';

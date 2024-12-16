@@ -16,7 +16,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once 'autoloader.php';
+require_once 'src/autoloader.php';
 
 /*
 We cannot use the `use` statement in the main module file due to a eval function
