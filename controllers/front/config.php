@@ -23,16 +23,6 @@ use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
 class DoofinderConfigModuleFrontController extends ModuleFrontController
 {
     /**
-     * Initialize config controller.
-     *
-     * @see FrontController::init()
-     */
-    public function init()
-    {
-        parent::init();
-    }
-
-    /**
      * Assign template vars related to page content.
      *
      * @see FrontController::initContent()

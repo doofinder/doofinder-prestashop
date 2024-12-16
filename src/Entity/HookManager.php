@@ -120,6 +120,16 @@ class HookManager
                     'controller' => 'config',
                 ],
             ],
+            'module-doofinder-ajax' => [
+                'controller' => 'ajax',
+                'rule' => 'modules/doofinder/doofinder-ajax.php',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'ajax',
+                ],
+            ],
         ];
     }
 
