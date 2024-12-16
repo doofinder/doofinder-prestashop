@@ -31,6 +31,8 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
+        $this->ajax = 1;
+
         header('Content-Type:application/json; charset=utf-8');
 
         $module = Module::getInstanceByName('doofinder');
@@ -96,7 +98,6 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
             ],
         ];
 
-        $this->ajax = 1;
         $this->ajaxRender(DfTools::jsonEncode($cfg));
     }
 }

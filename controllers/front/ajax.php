@@ -30,12 +30,12 @@ class DoofinderAjaxModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
+        $this->ajax = 1;
+
         $checkApiKey = Tools::getValue('check_api_key');
         if ($checkApiKey) {
             exit(DoofinderApi::checkApiKey(true));
         }
-
-        $this->ajax = 1;
 
         $autoinstaller = Tools::getValue('autoinstaller');
         $shopId = Tools::getValue('shop_id', null);
