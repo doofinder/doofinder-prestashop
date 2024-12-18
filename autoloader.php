@@ -18,7 +18,6 @@ if (!defined('_PS_VERSION_')) {
 
 class Autoloader
 {
-
     /**
      * Registers the autoloader according to PrestaShop standards, which are PSR-12 standards.
      * More info at: https://www.php-fig.org/psr/psr-12/
