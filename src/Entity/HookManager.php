@@ -98,16 +98,6 @@ class HookManager
     public static function getHookModuleRoutes()
     {
         return [
-            'module-doofinder-landing-entrypoint' => [
-                'controller' => 'landingEntrypoint',
-                'rule' => 'modules/doofinder/landing.php',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'landingEntrypoint',
-                ],
-            ],
             'module-doofinder-landing' => [
                 'controller' => 'landing',
                 'rule' => 'df/{landing_name}',
@@ -118,46 +108,6 @@ class HookManager
                     'fc' => 'module',
                     'module' => 'doofinder',
                     'controller' => 'landing',
-                ],
-            ],
-            'module-doofinder-cache' => [
-                'controller' => 'cache',
-                'rule' => 'modules/doofinder/cache.php',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'cache',
-                ],
-            ],
-            'module-doofinder-config' => [
-                'controller' => 'config',
-                'rule' => 'modules/doofinder/config.php',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'config',
-                ],
-            ],
-            'module-doofinder-ajax' => [
-                'controller' => 'ajax',
-                'rule' => 'modules/doofinder/doofinder-ajax.php',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'ajax',
-                ],
-            ],
-            'module-doofinder-feed' => [
-                'controller' => 'feed',
-                'rule' => 'modules/doofinder/feed.php',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'feed',
                 ],
             ],
         ];
