@@ -16,7 +16,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once 'src/autoloader.php';
+require_once 'autoloader.php';
 
 /*
 We cannot use the `use` statement in the main module file due to a eval function
@@ -39,7 +39,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '4.10.0';
+        $this->version = '4.10.1';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => _PS_VERSION_];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
