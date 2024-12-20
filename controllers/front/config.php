@@ -89,7 +89,7 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
             ],
             'module' => [
                 'version' => DoofinderConstants::VERSION,
-                'feed' => $base . $shop->getBaseURI() . 'modules/doofinder/feed.php',
+                'feed' => $base . $shop->getBaseURI() . 'module/doofinder/feed',
                 'options' => [
                     'language' => $languages,
                     'currency' => $currencies,

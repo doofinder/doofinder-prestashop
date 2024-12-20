@@ -49,13 +49,16 @@ class UrlManager
      */
     public static function getFeedUrl($shopId, $language, $currency)
     {
-        $shopUrl = self::getShopURL($shopId);
+        $shop = new \Shop($shopId);
+        \Context::getContext()->shop = $shop;
 
-        return $shopUrl . ltrim('modules/' . DoofinderConstants::NAME, DIRECTORY_SEPARATOR)
-            . '/feed.php?'
-            . 'currency=' . \Tools::strtoupper($currency)
-            . '&language=' . \Tools::strtoupper($language)
-            . '&dfsec_hash=' . \Configuration::get('DF_API_KEY');
+        $feed_url = \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', [
+            'currency' => \Tools::strtoupper($currency),
+            'language' => \Tools::strtoupper($language),
+            'dfsec_hash' => \Configuration::get('DF_API_KEY')
+        ]);
+
+        return $feed_url;
     }
 
     /**
@@ -63,14 +66,22 @@ class UrlManager
      *
      * @return string
      */
-    public static function getProcessCallbackUrl()
+    public static function getProcessCallbackUrl($shopId)
     {
-        return \Context::getContext()->link->getModuleLink('doofinder', 'callback', []);
+        $shop = new \Shop($shopId);
+        \Context::getContext()->shop = $shop;
+
+        return \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'callback', []);
     }
 
     public static function getInstallUrl($region)
     {
         return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/install');
+    }
+
+    public static function getUpdateFeedUrl($region)
+    {
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/feed-url-update');
     }
 
     /**

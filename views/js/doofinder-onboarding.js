@@ -72,7 +72,7 @@ function launchAutoinstaller() {
     post_data["shop_id"] = shop_id;
   }
 
-  $.post(shopDomain + df_module_dir + "doofinder-ajax.php", post_data, function (data) {
+  $.post(shopDomain + "/module/doofinder/ajax", post_data, function (data) {
     if (data.success) {
       //reload without resending post data
       history.go(0);
@@ -140,7 +140,7 @@ function send_connect_data(data) {
   $.ajax({
     type: "POST",
     dataType: "json",
-    url: shopDomain + df_module_dir + "config.php",
+    url: shopDomain + "/module/doofinder/config",
     data: data,
     success: function (response) {
       if (response.success) {
