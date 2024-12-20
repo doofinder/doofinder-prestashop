@@ -98,6 +98,16 @@ class HookManager
     public static function getHookModuleRoutes()
     {
         return [
+            'module-doofinder-landing-entrypoint' => [
+                'controller' => 'landingEntrypoint',
+                'rule' => 'module/doofinder/landing',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'landingEntrypoint',
+                ],
+            ],
             'module-doofinder-landing' => [
                 'controller' => 'landing',
                 'rule' => 'df/{landing_name}',
@@ -110,6 +120,56 @@ class HookManager
                     'controller' => 'landing',
                 ],
             ],
+            'module-doofinder-cache' => [
+                'controller' => 'cache',
+                'rule' => 'module/doofinder/cache',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'cache',
+                ],
+            ],
+            'module-doofinder-config' => [
+                'controller' => 'config',
+                'rule' => 'module/doofinder/config',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'config',
+                ],
+            ],
+            'module-doofinder-ajax' => [
+                'controller' => 'ajax',
+                'rule' => 'module/doofinder/ajax',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'ajax',
+                ],
+            ],
+            'module-doofinder-feed' => [
+                'controller' => 'feed',
+                'rule' => 'module/doofinder/feed',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'feed',
+                ],
+            ],
+            'module-doofinder-callback' => [
+                'controller' => 'callback',
+                'rule' => 'module/doofinder/callback',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'callback',
+                ],
+            ]
         ];
     }
 

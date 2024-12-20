@@ -159,13 +159,13 @@ class DoofinderInstallation
                     'language' => $langCode,
                     'currency' => $ciso,
                     'feed_url' => $feedUrl,
-                    'callback_url' => UrlManager::getProcessCallbackUrl(),
+                    'callback_url' => UrlManager::getProcessCallbackUrl($shopId),
                 ];
             }
         }
 
         $jsonStoreData = json_encode($storeData);
-        DoofinderConfig::debug('Create Store Start');
+        DoofinderConfig::debug("Create Store Start for shop with id: $shopId , and group: $shopGroupId.");
         DoofinderConfig::debug(print_r($storeData, true));
 
         $response = $client->post(
