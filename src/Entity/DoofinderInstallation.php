@@ -204,7 +204,7 @@ class DoofinderInstallation
 
     /**
      * This function sends a request to the plugins API to update feed urls to the new format.
-     * 
+     *
      * @throws \Exception
      * @return void
      */
