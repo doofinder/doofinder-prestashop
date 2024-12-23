@@ -62,7 +62,7 @@ function unlink_files()
         $file_path = _PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . $file_name;
         if (file_exists($file_path)) {
             if (!unlink($file_path)) {
-                error_log('Couldn\'t delete fiel: ' . $file_path);
+                error_log('Couldn\'t delete file: ' . $file_path);
                 throw new Exception('Error when deleting file: ' . $file_name);
             }
             error_log('Deleted file: ' . $file_path);
