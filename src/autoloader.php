@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+namespace PrestaShop\Module\Doofinder\Src;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
