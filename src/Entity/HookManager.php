@@ -36,15 +36,15 @@ class HookManager
     public function registerHooks()
     {
         return $this->module->registerHook('displayHeader')
-        && $this->module->registerHook('moduleRoutes')
-        && $this->module->registerHook('actionProductSave')
-        && $this->module->registerHook('actionProductDelete')
-        && $this->module->registerHook('actionObjectCmsAddAfter')
-        && $this->module->registerHook('actionObjectCmsUpdateAfter')
-        && $this->module->registerHook('actionObjectCmsDeleteAfter')
-        && $this->module->registerHook('actionObjectCategoryAddAfter')
-        && $this->module->registerHook('actionObjectCategoryUpdateAfter')
-        && $this->module->registerHook('actionObjectCategoryDeleteAfter');
+            && $this->module->registerHook('moduleRoutes')
+            && $this->module->registerHook('actionProductSave')
+            && $this->module->registerHook('actionProductDelete')
+            && $this->module->registerHook('actionObjectCmsAddAfter')
+            && $this->module->registerHook('actionObjectCmsUpdateAfter')
+            && $this->module->registerHook('actionObjectCmsDeleteAfter')
+            && $this->module->registerHook('actionObjectCategoryAddAfter')
+            && $this->module->registerHook('actionObjectCategoryUpdateAfter')
+            && $this->module->registerHook('actionObjectCategoryDeleteAfter');
     }
 
     /**
@@ -98,18 +98,8 @@ class HookManager
     public static function getHookModuleRoutes()
     {
         return [
-            'module-doofinder-landing-entrypoint' => [
-                'controller' => 'landingEntrypoint',
-                'rule' => 'module/doofinder/landing',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'landingEntrypoint',
-                ],
-            ],
             'module-doofinder-landing' => [
-                'controller' => 'landing',
+                'controller' => 'landingPage',
                 'rule' => 'df/{landing_name}',
                 'keywords' => [
                     'landing_name' => ['regexp' => '[_a-zA-Z0-9_-]+', 'param' => 'landing_name'],
@@ -117,7 +107,7 @@ class HookManager
                 'params' => [
                     'fc' => 'module',
                     'module' => 'doofinder',
-                    'controller' => 'landing',
+                    'controller' => 'landingPage',
                 ],
             ],
             'module-doofinder-cache' => [
