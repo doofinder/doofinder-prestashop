@@ -237,7 +237,8 @@ class DoofinderInstallation
                     $ciso = $cur['iso_code'];
                     $langFullIso = $lang['iso_code'];
                     $feedUrl = UrlManager::getFeedUrl($shopId, $langFullIso, $ciso);
-                    $hashid = \Configuration::get('DF_HASHID_' . strtoupper($ciso) . '_' . strtoupper($langFullIso));
+                    $hashidKey = 'DF_HASHID_' . strtoupper($ciso) . '_' . strtoupper($langFullIso);
+                    $hashid = \Configuration::get($hashidKey, null, $shopGroupId, $shopId);
 
                     DoofinderConfig::debug("Hashid for lang $langFullIso and currency $ciso :  $hashid");
 
