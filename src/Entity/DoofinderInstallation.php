@@ -203,9 +203,10 @@ class DoofinderInstallation
     }
 
     /**
-     * This function sends a request to the plugins API to update feed URLs to the new format.
+     * Sends a request to the plugins API to update feed URLs to the new format
      *
-     * @throws \Exception If the request fails.
+     * @throws \Exception If the request fails
+     *
      * @return void
      */
     public static function updateFeedUrls()
