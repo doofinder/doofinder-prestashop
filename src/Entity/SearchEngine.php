@@ -31,11 +31,11 @@ class SearchEngine
      */
     public static function getHashId($idLang, $idCurrency)
     {
+        $context = \Context::getContext();
         $currIso = strtoupper(LanguageManager::getIsoCodeById($idCurrency));
         $lang = new \Language($idLang);
-
         $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper($lang->language_code);
-        $hashid = \Configuration::get($hashidKey);
+        $hashid = \Configuration::get($hashidKey, $idLang, $context->shop->id_shop_group, $context->shop->id);
 
         if (!$hashid) {
             $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper(LanguageManager::getLanguageCode($lang->language_code));
@@ -52,6 +52,7 @@ class SearchEngine
      */
     public static function setSearchEnginesByConfig()
     {
+        $context = \Context::getContext();
         $installationID = \Configuration::get('DF_INSTALLATION_ID');
         $apiKey = \Configuration::get('DF_API_KEY');
         $region = \Configuration::get('DF_REGION');
@@ -60,7 +61,8 @@ class SearchEngine
 
         foreach ($data['config']['search_engines'] as $lang => $currencies) {
             foreach ($currencies as $currency => $hashid) {
-                \Configuration::updateValue('DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang), $hashid);
+                $hashidKey = 'DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang);
+                \Configuration::updateValue($hashidKey, $hashid, false, $context->shop->id_shop_group, $context->shop->id);
             }
         }
 
