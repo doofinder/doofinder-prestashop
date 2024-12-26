@@ -169,7 +169,7 @@ class HookManager
                     'module' => 'doofinder',
                     'controller' => 'callback',
                 ],
-            ]
+            ],
         ];
     }
 

@@ -206,13 +206,14 @@ class DoofinderInstallation
      * This function sends a request to the plugins API to update feed urls to the new format.
      *
      * @throws \Exception
+     *
      * @return void
      */
     public static function updateFeedUrls()
     {
         $shops = \Shop::getShops();
 
-        DoofinderConfig::debug("SHOPS:");
+        DoofinderConfig::debug('SHOPS:');
         DoofinderConfig::debug(print_r($shops, true));
 
         foreach ($shops as $shop) {
@@ -247,8 +248,8 @@ class DoofinderInstallation
             }
 
             $json_feed_urls = json_encode([
-                "installation_id" => $installationID,
-                "urls" => $feed_urls
+                'installation_id' => $installationID,
+                'urls' => $feed_urls,
             ]);
 
             DoofinderConfig::debug('Update feed urls Start');
@@ -272,9 +273,9 @@ class DoofinderInstallation
                 $decodedResponse = json_decode($response->response);
                 DoofinderConfig::debug($errorMsg);
                 DoofinderConfig::debug($decodedResponse);
-                error_log("[Doofinder] An error occurred when updating feed urls.");
+                error_log('[Doofinder] An error occurred when updating feed urls.');
 
-                throw new \Exception("An error occurred when updating feed urls.", $response->getResponseCode());
+                throw new \Exception('An error occurred when updating feed urls.', $response->getResponseCode());
             }
         }
     }

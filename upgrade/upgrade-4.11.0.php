@@ -51,11 +51,11 @@ function upgrade_module_4_11_0($module)
 function unlink_files()
 {
     $files = [
-        "cache.php",
-        "config.php",
-        "doofinder-ajax.php",
-        "feed.php",
-        "landing.php"
+        'cache.php',
+        'config.php',
+        'doofinder-ajax.php',
+        'feed.php',
+        'landing.php',
     ];
 
     foreach ($files as $file_name) {

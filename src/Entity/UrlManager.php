@@ -55,7 +55,7 @@ class UrlManager
         $feed_url = \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', [
             'currency' => \Tools::strtoupper($currency),
             'language' => \Tools::strtoupper($language),
-            'dfsec_hash' => \Configuration::get('DF_API_KEY')
+            'dfsec_hash' => \Configuration::get('DF_API_KEY'),
         ]);
 
         return $feed_url;
