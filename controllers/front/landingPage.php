@@ -48,7 +48,7 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         $this->landing_data = $this->getLandingData($landing_name, $this->context->shop->id, $this->context->language->id, $this->context->currency->id);
 
         if (!$this->landing_data) {
-            Tools::redirect('index.php?controller=404&landing_name='.$landing_name);
+            Tools::redirect('index.php?controller=404');
         }
 
         $hashid = SearchEngine::getHashId($this->context->language->id, $this->context->currency->id);
