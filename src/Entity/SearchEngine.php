@@ -38,6 +38,16 @@ class SearchEngine
         $hashid = \Configuration::get($hashidKey, $idLang, $context->shop->id_shop_group, $context->shop->id);
 
         if (!$hashid) {
+            //If not found, try to obtain hashid without context
+            $hashid = \Configuration::get($hashidKey, $idLang);
+        }
+
+        if (!$hashid) {
+            //If not found, try to obtain hashid without idLang
+            $hashid = \Configuration::get($hashidKey);
+        }
+
+        if (!$hashid) {
             $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper(LanguageManager::getLanguageCode($lang->language_code));
             $hashid = \Configuration::get($hashidKey);
         }
