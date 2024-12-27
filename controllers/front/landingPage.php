@@ -28,8 +28,8 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
 {
     public $products = [];
     public $landing_data = [];
-    private $display_column_right;
-    private $display_column_left;
+    public $display_column_right;
+    public $display_column_left;
 
     const RESULTS = 48;
     const TTL_CACHE = 30;
