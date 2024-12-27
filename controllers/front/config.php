@@ -53,7 +53,7 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
             } else {
                 header('HTTP/1.1 403 Forbidden', true, 403);
                 $msgError = 'Forbidden access.'
-                        . ' Token for autoinstaller invalid.';
+                    . ' Token for autoinstaller invalid.';
                 exit($msgError);
             }
         }
@@ -98,6 +98,11 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
             ],
         ];
 
-        $this->ajaxRender(DfTools::jsonEncode($cfg));
+        if (method_exists($this, 'ajaxRender')) {
+            $this->ajaxRender(DfTools::jsonEncode($cfg));
+        } else {
+            //Workaround for PS 1.6 as ajaxRender is not available
+            die(DfTools::jsonEncode($cfg));
+        }
     }
 }
