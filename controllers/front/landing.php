@@ -51,12 +51,11 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
             exit;
         }
 
-        $link = Context::getContext()->link->getModuleLink(
-            DoofinderConstants::NAME,
-            'landing',
-            ['landing_name' => $slug],
+        $link = $this->context->link->getPageLink(
+            'module-doofinder-landingpage',
             null,
-            $idLang
+            $idLang,
+            ['landing_name' => $slug]
         );
 
         Tools::redirect($link);

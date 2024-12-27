@@ -99,6 +99,16 @@ class HookManager
     {
         return [
             'module-doofinder-landing' => [
+                'controller' => 'landing',
+                'rule' => 'module/doofinder/landing',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'landing',
+                ],
+            ],
+            'module-doofinder-landingpage' => [
                 'controller' => 'landingPage',
                 'rule' => 'df/{landing_name}',
                 'keywords' => [
