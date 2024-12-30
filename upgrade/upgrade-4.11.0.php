@@ -56,6 +56,7 @@ function unlink_files()
         'doofinder-ajax.php',
         'feed.php',
         'landing.php',
+        'controllers/front/landingEntrypoint.php',
     ];
 
     foreach ($files as $file_name) {
