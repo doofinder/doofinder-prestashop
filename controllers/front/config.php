@@ -101,8 +101,9 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
         if (method_exists($this, 'ajaxRender')) {
             $this->ajaxRender(DfTools::jsonEncode($cfg));
         } else {
-            //Workaround for PS 1.6 as ajaxRender is not available
-            die(DfTools::jsonEncode($cfg));
+            // Workaround for PS 1.6 as ajaxRender is not available
+            echo DfTools::jsonEncode($cfg);
+            exit;
         }
     }
 }

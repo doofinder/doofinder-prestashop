@@ -14,7 +14,6 @@
  */
 
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Src\Entity\LanguageManager;
 
 if (!defined('_PS_VERSION_')) {

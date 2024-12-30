@@ -38,12 +38,12 @@ class SearchEngine
         $hashid = \Configuration::get($hashidKey, $idLang, $context->shop->id_shop_group, $context->shop->id);
 
         if (!$hashid) {
-            //If not found, try to obtain hashid without context
+            // If not found, try to obtain hashid without context
             $hashid = \Configuration::get($hashidKey, $idLang);
         }
 
         if (!$hashid) {
-            //If not found, try to obtain hashid without idLang
+            // If not found, try to obtain hashid without idLang
             $hashid = \Configuration::get($hashidKey);
         }
 
