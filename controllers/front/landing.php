@@ -30,10 +30,6 @@ class DoofinderLandingModuleFrontController extends ModuleFrontController
      */
     public function initContent()
     {
-        parent::initContent();
-
-        $this->ajax = 1;
-
         $hashid = Tools::getValue('hashid');
         $slug = Tools::getValue('slug');
 
