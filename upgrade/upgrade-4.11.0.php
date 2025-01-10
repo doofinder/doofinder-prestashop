@@ -37,7 +37,7 @@ function upgrade_module_4_11_0($module)
 {
     DoofinderConfig::debug('Initiating 4.11.0 upgrade');
     // Delete old *.php files
-    unlink_files();
+    unlinkFiles();
     DoofinderConfig::debug('Old files deleted successfully.');
 
     // Update feed URLs
@@ -48,25 +48,66 @@ function upgrade_module_4_11_0($module)
     return true;
 }
 
-function unlink_files()
+function unlinkFiles()
 {
     $files = [
+        'autoloader.php',
         'cache.php',
         'config.php',
         'doofinder-ajax.php',
         'feed.php',
         'landing.php',
         'controllers/front/landingEntrypoint.php',
+        /* Files from older versions. */
+        'lib/doofinder_api.php',
+        'lib/doofinder_api_landing.php',
+        'views/templates/front/script.tpl',
+        'lib/doofinder_api_index.php',
+        'lib/doofinder_api_items.php',
+        'lib/doofinder_layer_api.php',
+        'lib/doofinder_api_unique_script.php',
+        'lib/doofinder_installation.php',
+        'lib/dfTools.class.php',
+        'lib/dfCategory_build.php',
+        'lib/dfCms_build.php',
+        'lib/dfProduct_build.php',
+        'lib/DfCategoryBuild.php',
+        'lib/DfCmsBuild.php',
+        'lib/DfProductBuild.php',
+        'lib/DfTools.php',
+        'lib/DoofinderAdminPanelView.php',
+        'lib/DoofinderApi.php',
+        'lib/DoofinderApiIndex.php',
+        'lib/DoofinderApiItems.php',
+        'lib/DoofinderApiLanding.php',
+        'lib/DoofinderApiUniqueScript.php',
+        'lib/DoofinderConfig.php',
+        'lib/DoofinderConstants.php',
+        'lib/DoofinderException.php',
+        'lib/DoofinderInstallation.php',
+        'lib/DoofinderLayerApi.php',
+        'lib/DoofinderResults.php',
+        'lib/DoofinderScript.php',
+        'lib/EasyREST.php',
+        'lib/FormManager.php',
+        'lib/HookManager.php',
+        'lib/LanguageManager.php',
+        'lib/SearchEngine.php',
+        'lib/UpdateOnSave.php',
+        'lib/UrlManager.php',
     ];
 
-    foreach ($files as $file_name) {
-        $file_path = _PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . $file_name;
-        if (file_exists($file_path)) {
-            if (!unlink($file_path)) {
-                error_log('Couldn\'t delete file: ' . $file_path);
-                throw new Exception('Error when deleting file: ' . $file_name);
-            }
-            error_log('Deleted file: ' . $file_path);
+    foreach ($files as $fileName) {
+        $filePath = _PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . $fileName;
+        if (!file_exists($filePath)) {
+            continue;
         }
+
+        if (!unlink($filePath)) {
+            error_log('Couldn\'t delete file: ' . $filePath);
+            throw new Exception('Error when deleting file: ' . $fileName);
+        }
+
+        error_log('Deleted file: ' . $filePath);
     }
 }
