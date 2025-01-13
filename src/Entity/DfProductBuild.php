@@ -79,7 +79,7 @@ class DfProductBuild
         $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX');
+        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX') || DoofinderConstants::NO;
         $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
         $this->featuresKeys = $this->getFeaturesKeys();
     }
