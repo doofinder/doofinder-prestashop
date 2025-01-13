@@ -32,12 +32,12 @@ class DoofinderScript
      */
     public static function searchLayerMustBeInitialized()
     {
+        $displayGeneral = \Configuration::get('DF_SHOW_LAYER', null, null, null, true);
         $displayMobile = \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
-        $displayDesktop = \Configuration::get('DF_SHOW_LAYER', null, null, null, true);
         $context = \Context::getContext();
         $isMobile = method_exists($context, 'isMobile') ? $context->isMobile() : $context->getMobileDetect()->isMobile();
 
-        return ($isMobile && $displayMobile) || (!$isMobile && $displayDesktop);
+        return $displayGeneral && (!$isMobile || $displayMobile);
     }
 
     /**

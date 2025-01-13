@@ -114,6 +114,7 @@ class DoofinderConfig
     public static function getConfigFormValuesDataFeed()
     {
         return [
+            'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
             'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES'),
             'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
@@ -127,20 +128,6 @@ class DoofinderConfig
     }
 
     /**
-     * Get the values for the search layer configuration form
-     *
-     * @return array
-     */
-    public static function getConfigFormValuesSearchLayer()
-    {
-        return [
-            'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
-            'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
-            'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
-        ];
-    }
-
-    /**
      * Get the values for the advanced configuration form
      *
      * @return array
@@ -148,6 +135,7 @@ class DoofinderConfig
     public static function getConfigFormValuesAdvanced()
     {
         return [
+            'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
             'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
             'DF_DSBL_HTTPS_CURL' => \Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
@@ -163,6 +151,7 @@ class DoofinderConfig
     public static function getConfigFormValuesStoreInfo()
     {
         return [
+            'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
             'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
             'DF_REGION' => \Configuration::get('DF_REGION'),
         ];

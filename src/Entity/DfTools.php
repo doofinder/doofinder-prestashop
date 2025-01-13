@@ -83,7 +83,7 @@ class DfTools
     {
         $sizes = [];
         $tableName = 'home';
-        $tableName = (method_exists(\ImageType::class, 'getFormattedName')) ? \ImageType::getFormattedName($tableName) : $tableName . '_default';
+        $tableName = (method_exists(get_class(new \ImageType()), 'getFormattedName')) ? \ImageType::getFormattedName($tableName) : $tableName . '_default';
         $sql = "
         SELECT
             `name` AS DF_GS_IMAGE_SIZE,

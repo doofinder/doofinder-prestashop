@@ -90,7 +90,6 @@ class DoofinderAdminPanelView
         $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
         $token = \Tools::encrypt($redirect);
         $paramsPopup = 'email=' . $context->employee->email . '&token=' . $token;
-        $dfEnabledV9 = \Configuration::get('DF_ENABLED_V9');
 
         $context->smarty->assign('oldPS', $oldPS);
         $context->smarty->assign('module_dir', $this->module->getPath());
@@ -101,7 +100,6 @@ class DoofinderAdminPanelView
         $context->smarty->assign('tokenAjax', \Tools::encrypt('doofinder-ajax'));
         $context->smarty->assign('skipurl', $skipUrl);
         $context->smarty->assign('paramsPopup', $paramsPopup);
-        $context->smarty->assign('dfEnabledV9', $dfEnabledV9);
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
         if ($configured) {
@@ -202,7 +200,6 @@ class DoofinderAdminPanelView
         $skip = \Tools::getValue('skip');
         if ($skip) {
             \Configuration::updateValue('DF_ENABLE_HASH', 0);
-            \Configuration::updateValue('DF_ENABLED_V9', true);
         }
         $sql = 'SELECT id_configuration FROM ' . _DB_PREFIX_ . 'configuration WHERE name = \'DF_ENABLE_HASH\'';
 
@@ -245,9 +242,6 @@ class DoofinderAdminPanelView
         if (!$this->showNewShopForm(\Context::getContext()->shop)) {
             $validUpdateOnSave = UpdateOnSave::isValid();
             $html .= $helper->generateForm([$this->getConfigFormDataFeed($validUpdateOnSave)]);
-            // Search layer form
-            $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesSearchLayer();
-            $html .= $helper->generateForm([$this->getConfigFormSearchLayer()]);
             // Store information
             $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesStoreInfo();
             $html .= $helper->generateForm([$this->getConfigFormStoreInfo()]);
@@ -324,9 +318,17 @@ class DoofinderAdminPanelView
         return [
             'form' => [
                 'legend' => [
-                    'title' => $this->module->l('Data Feed', 'doofinderadminpanelview'),
+                    'title' => $this->module->l('Doofinder configuration', 'doofinderadminpanelview'),
                 ],
                 'input' => [
+                    [
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->module->l('Doofinder script', 'doofinderadminpanelview'),
+                        'desc' => $this->module->l('Activating this option you are inserting the script into your store code. You can manage product visibility from admin.doofinder.com.', 'doofinderadminpanelview'),
+                        'name' => 'DF_SHOW_LAYER',
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->module->l('Index product prices', 'doofinderadminpanelview'),
@@ -413,54 +415,8 @@ class DoofinderAdminPanelView
                     ],
                 ],
                 'submit' => [
-                    'title' => $this->module->l('Save Data Feed Options', 'doofinderadminpanelview'),
+                    'title' => $this->module->l('Save configuration', 'doofinderadminpanelview'),
                     'name' => 'submitDoofinderModuleDataFeed',
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * Get the fields of the search layer configuration form
-     *
-     * @return array
-     */
-    protected function getConfigFormSearchLayer()
-    {
-        $inputs = [
-            [
-                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                'label' => $this->module->l('Doofinder search layer', 'doofinderadminpanelview'),
-                'name' => 'DF_SHOW_LAYER',
-                'is_bool' => true,
-                'values' => $this->getBooleanFormValue(),
-            ],
-            [
-                'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                'label' => $this->module->l('Doofinder search layer in mobile version', 'doofinderadminpanelview'),
-                'name' => 'DF_SHOW_LAYER_MOBILE',
-                'is_bool' => true,
-                'values' => $this->getBooleanFormValue(),
-            ],
-            [
-                'type' => 'text',
-                'label' => $this->module->l('Doofinder Store ID', 'doofinderadminpanelview'),
-                'name' => 'DF_INSTALLATION_ID',
-                'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
-                'lang' => false,
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
-            ],
-        ];
-
-        return [
-            'form' => [
-                'legend' => [
-                    'title' => $this->module->l('Search Layer', 'doofinderadminpanelview'),
-                ],
-                'input' => $inputs,
-                'submit' => [
-                    'title' => $this->module->l('Save Layer Widget Options', 'doofinderadminpanelview'),
-                    'name' => 'submitDoofinderModuleSearchLayer',
                 ],
             ],
         ];
@@ -505,8 +461,8 @@ class DoofinderAdminPanelView
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Enable v9 layer (Livelayer)', 'doofinderadminpanelview'),
-                        'name' => 'DF_ENABLED_V9',
+                        'label' => $this->module->l('Doofinder script in mobile version', 'doofinderadminpanelview'),
+                        'name' => 'DF_SHOW_LAYER_MOBILE',
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
@@ -527,6 +483,14 @@ class DoofinderAdminPanelView
     protected function getConfigFormStoreInfo()
     {
         $inputs = [
+            [
+                'type' => 'text',
+                'label' => $this->module->l('Doofinder Store ID', 'doofinderadminpanelview'),
+                'name' => 'DF_INSTALLATION_ID',
+                'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
+                'lang' => false,
+                'readonly' => !(bool) \Tools::getValue('adv', 0),
+            ],
             [
                 'type' => 'text',
                 'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
