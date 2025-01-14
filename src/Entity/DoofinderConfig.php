@@ -76,6 +76,7 @@ class DoofinderConfig
         \Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', DoofinderConstants::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(DfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
+        \Configuration::updateValue('DF_MULTIPRICE_ENABLED', true, false, $shopGroupId, $shopId);
     }
 
     /**

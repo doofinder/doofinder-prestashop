@@ -43,18 +43,17 @@ class UrlManager
      *
      * @param int $shopId
      * @param int $language
-     * @param int $currency
      *
      * @return string
      */
-    public static function getFeedUrl($shopId, $language, $currency)
+    public static function getFeedUrl($shopId, $language, $currency = null)
     {
         $shopUrl = self::getShopURL($shopId);
 
         return $shopUrl . ltrim('modules/' . DoofinderConstants::NAME, DIRECTORY_SEPARATOR)
             . '/feed.php?'
-            . 'currency=' . \Tools::strtoupper($currency)
-            . '&language=' . \Tools::strtoupper($language)
+            . ($currency ? 'currency=' . $currency : '')
+            . 'language=' . \Tools::strtoupper($language)
             . '&dfsec_hash=' . \Configuration::get('DF_API_KEY');
     }
 

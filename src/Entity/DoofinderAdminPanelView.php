@@ -548,15 +548,25 @@ class DoofinderAdminPanelView
         $urls = [];
         $context = \Context::getContext();
         $languages = \Language::getLanguages(true, $context->shop->id);
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+
         foreach ($languages as $lang) {
-            foreach (\Currency::getCurrencies() as $cur) {
-                $currencyIso = \Tools::strtoupper($cur['iso_code']);
-                $langIso = \Tools::strtoupper($lang['iso_code']);
+            $langIso = \Tools::strtoupper($lang['iso_code']);
+
+            if ($multipriceEnabled) {
                 $urls[] = [
-                    'url' => UrlManager::getFeedUrl($context->shop->id, $langIso, $currencyIso),
+                    'url' => UrlManager::getFeedUrl($context->shop->id, $langIso),
                     'lang' => $langIso,
-                    'currency' => $currencyIso,
                 ];
+            } else {
+                foreach (\Currency::getCurrencies() as $cur) {
+                    $currencyIso = \Tools::strtoupper($cur['iso_code']);
+                    $urls[] = [
+                        'url' => UrlManager::getFeedUrl($context->shop->id, $langIso, $currencyIso),
+                        'lang' => $langIso,
+                        'currency' => $currencyIso,
+                    ];
+                }
             }
         }
 
@@ -568,8 +578,8 @@ class DoofinderAdminPanelView
         $htmlContent = '<dl style="max-height:150px; overflow-y: auto;">';
         foreach ($df_feed_urls as $feed_url) {
             $htmlContent .= '<dt>' . $this->module->l('Data feed URL for', 'doofinderadminpanelview') . ' ['
-                . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . ' - '
-                . htmlspecialchars($feed_url['currency'], ENT_QUOTES, 'UTF-8') . ']</dt>';
+                . htmlspecialchars($feed_url['lang'], ENT_QUOTES, 'UTF-8') . (isset($feed_url['currency']) ? ' - '
+                . htmlspecialchars($feed_url['currency'], ENT_QUOTES, 'UTF-8') : '') . ']</dt>';
             $htmlContent .= '<dd><a href="' . htmlspecialchars(urldecode($feed_url['url']), ENT_QUOTES, 'UTF-8') . '" target="_blank">'
                 . htmlspecialchars($feed_url['url'], ENT_QUOTES, 'UTF-8') . '</a></dd>';
         }
