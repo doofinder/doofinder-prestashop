@@ -24,6 +24,7 @@ class DfProductBuild
     private $idShop;
     private $idLang;
     private $idCurrency;
+    private $currencies;
     private $products;
     private $attributesShown;
     private $displayPrices;
@@ -34,6 +35,7 @@ class DfProductBuild
     private $showProductFeatures;
     private $stockManagement;
     private $useTax;
+    private $multipriceEnabled;
     private $featuresKeys;
 
     public function __construct($idShop, $idLang, $idCurrency)
@@ -41,6 +43,7 @@ class DfProductBuild
         $this->idShop = $idShop;
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
+        $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
     }
 
     /**
@@ -76,7 +79,8 @@ class DfProductBuild
         $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX');
+        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX') || DoofinderConstants::NO;
+        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
         $this->featuresKeys = $this->getFeaturesKeys();
     }
 
@@ -132,6 +136,10 @@ class DfProductBuild
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
+
+            if ($this->multipriceEnabled) {
+                $p['df_multiprice'] = $this->getMultiprice($product);
+            }
         }
 
         if ($this->showProductFeatures) {
@@ -313,6 +321,14 @@ class DfProductBuild
             return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
                 ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
         }
+    }
+
+    private function getMultiprice($product)
+    {
+        $productId = $product['id_product'];
+        $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
+
+        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute);
     }
 
     private function getFeatures($product)
