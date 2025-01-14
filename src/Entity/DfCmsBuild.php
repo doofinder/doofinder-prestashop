@@ -46,6 +46,8 @@ class DfCmsBuild
     {
         $this->assign();
 
+        $payload = [];
+
         foreach ($this->cmsPages as $cms) {
             $payload[] = $this->buildCms($cms);
         }

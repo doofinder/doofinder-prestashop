@@ -60,6 +60,8 @@ class DfProductBuild
     {
         $this->assign();
 
+        $payload = [];
+
         $products = $this->getProductData();
 
         foreach ($products as $product) {
@@ -223,7 +225,7 @@ class DfProductBuild
         if ($this->haveVariations($product)) {
             $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
 
-            if (isset($idImage)) {
+            if (!empty($idImage)) {
                 $imageLink = DfTools::cleanURL(
                     DfTools::getImageLink(
                         $product['id_product_attribute'],
@@ -355,7 +357,7 @@ class DfProductBuild
         $cfgFeaturesShown = explode(',', \Configuration::get('DF_FEATURES_SHOWN'));
         $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
 
-        if (isset($cfgFeaturesShown) && count($cfgFeaturesShown) > 0 && $cfgFeaturesShown[0] !== '') {
+        if (is_array($cfgFeaturesShown) && count($cfgFeaturesShown) > 0 && $cfgFeaturesShown[0] !== '') {
             return DfTools::getSelectedFeatures($allFeatureKeys, $cfgFeaturesShown);
         } else {
             return $allFeatureKeys;

@@ -32,7 +32,7 @@ class Autoloader
      */
     public static function register()
     {
-        spl_autoload_register(function ($class) {
+        return spl_autoload_register(function ($class) {
             $file = sprintf('%1$sdoofinder/%2$s', _PS_MODULE_DIR_, self::pathFromNamespace($class));
             if (file_exists($file)) {
                 require_once $file;

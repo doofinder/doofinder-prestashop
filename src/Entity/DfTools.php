@@ -38,7 +38,7 @@ class DfTools
 
     public static function isBasicValue($v)
     {
-        return $v && !empty($v) && \Validate::isGenericName($v);
+        return $v && \Validate::isGenericName($v);
     }
 
     //
@@ -342,7 +342,7 @@ class DfTools
      */
     public static function getAttributesForProductVariation($variationId, $idLang, $attributeKeys)
     {
-        if (isset($variationId) && $variationId > 0) {
+        if (is_numeric($variationId) && $variationId > 0) {
             $sql = '
         SELECT pc.id_product_attribute,
                pal.name,
