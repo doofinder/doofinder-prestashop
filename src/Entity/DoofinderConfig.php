@@ -28,7 +28,7 @@ class DoofinderConfig
         }
 
         $debug = \Configuration::get('DF_DEBUG');
-        if (isset($debug) && $debug) {
+        if (!empty($debug) && $debug) {
             error_log("$message\n", 3, _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . 'doofinder' . DIRECTORY_SEPARATOR . $logFile);
         }
     }
@@ -164,7 +164,7 @@ class DoofinderConfig
      */
     public static function checkOutsideConnection()
     {
-        $client = new EasyREST(true, 3);
+        $client = new EasyREST(true);
         $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
         $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
 

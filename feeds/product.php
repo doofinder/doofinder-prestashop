@@ -150,7 +150,7 @@ $cfg_group_attributes_shown = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATT
 
 $limit_group_attributes = false;
 if (
-    isset($cfg_group_attributes_shown)
+    is_array($cfg_group_attributes_shown)
     && count($cfg_group_attributes_shown) > 0
     && $cfg_group_attributes_shown[0] !== ''
 ) {
@@ -236,7 +236,7 @@ if ($cfg_product_features) {
     $all_feature_keys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
 
     if (
-        isset($cfg_features_shown)
+        is_array($cfg_features_shown)
         && count($cfg_features_shown) > 0
         && $cfg_features_shown[0] !== ''
     ) {
@@ -272,9 +272,8 @@ Hook::exec('actionDoofinderExtendFeed', [
     'limit' => $limit,
     'offset' => $offset,
 ]);
-if (!empty($extra_header)) {
-    $header = array_merge($header, $extra_header);
-}
+
+$header = array_merge($header, $extra_header);
 
 if (!$limit || ($offset !== false && (int) $offset === 0)) {
     echo implode(DfTools::TXT_SEPARATOR, $header) . PHP_EOL;
@@ -283,9 +282,8 @@ if (!$limit || ($offset !== false && (int) $offset === 0)) {
 
 // PRODUCTS
 $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
-if (!empty($extra_rows)) {
-    $rows = arrayMergeByIdProduct($rows, $extra_rows);
-}
+
+$rows = arrayMergeByIdProduct($rows, $extra_rows);
 
 // In case there is no need to display prices, avoid calculating the mins by variant
 $min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies) : [];
@@ -394,7 +392,7 @@ foreach ($rows as $row) {
                 $row['id_product_attribute']
             );
 
-            if (isset($id_image)) {
+            if (!empty($id_image)) {
                 $image_link = DfTools::cleanURL(
                     DfTools::getImageLink(
                         $row['id_product_attribute'],

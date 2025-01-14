@@ -52,10 +52,6 @@ class FormManager
             $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesDataFeed());
             $formUpdated = 'data_feed_tab';
         }
-        if (((bool) \Tools::isSubmit('submitDoofinderModuleSearchLayer')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesSearchLayer());
-            $formUpdated = 'search_layer_tab';
-        }
 
         if (((bool) \Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
             $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesAdvanced());

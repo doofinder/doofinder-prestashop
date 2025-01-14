@@ -95,8 +95,8 @@ class DoofinderApiLanding
 
         if ($hashid && $apiKey) {
             $fail = false;
+            $df = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
             try {
-                $df = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
                 $queryParams = [
                     'rpp' => $pageSize, // results per page
                     'timeout' => $timeout,

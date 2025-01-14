@@ -46,6 +46,8 @@ class DfCategoryBuild
     {
         $this->assign();
 
+        $payload = [];
+
         foreach ($this->categories as $category) {
             if (\Category::categoryExists($category)) {
                 $payload[] = $this->buildCategory($category);
