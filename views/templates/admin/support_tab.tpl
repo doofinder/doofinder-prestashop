@@ -53,8 +53,7 @@
 			<div class="col-md-12">
 				<h4>{l s='Or contact directly with us. We will be glad to help you' mod='doofinder'}</h4>
 				<dl>
-					<dt>&middot; {l s='Support email' mod='doofinder'}</dt>
-					<dd><a href="mailto:support@doofinder.com" target="_blank">support@doofinder.com</a></dd>
+					<dd><a href="https://admin.doofinder.com/admin/support/contact-us" target="_blank" rel="noopener noreferrer">https://admin.doofinder.com/admin/support/contact-us</a></dd>
 				</dl>
 			</div>
 		</div>
