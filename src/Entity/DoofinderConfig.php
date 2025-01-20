@@ -28,7 +28,7 @@ class DoofinderConfig
         }
 
         $debug = \Configuration::get('DF_DEBUG');
-        if (isset($debug) && $debug) {
+        if (!empty($debug) && $debug) {
             $message = is_string($message) ? $message : print_r($message, true);
             error_log("$message\n", 3, _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . 'doofinder' . DIRECTORY_SEPARATOR . $logFile);
         }
