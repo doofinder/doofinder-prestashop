@@ -1232,7 +1232,7 @@ class DfTools
     public static function getFeedURL($langIsoCode)
     {
         $currency = self::getCurrencyForLanguage($langIsoCode);
-        $feedUrl = self::getModuleLink('feed.php') . '?language=' . strtoupper($langIsoCode);
+        $feedUrl = self::getModuleLink('feed') . '?language=' . strtoupper($langIsoCode);
         $feedUrl .= '&currency=' . strtoupper($currency->iso_code);
 
         return $feedUrl;

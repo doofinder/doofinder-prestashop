@@ -155,7 +155,7 @@ class DoofinderInstallation
                 'language' => $langCode,
                 'currency' => $primaryCurrency->iso_code,
                 'feed_url' => $feedUrl,
-                'callback_url' => UrlManager::getProcessCallbackUrl(),
+                'callback_url' => UrlManager::getProcessCallbackUrl($shopId),
             ];
         }
 
@@ -171,7 +171,7 @@ class DoofinderInstallation
         $createStoreRequest = ['store_data' => $storeData, 'prices' => $currencyCodes];
 
         $jsonCreateStoreRequest = json_encode($createStoreRequest);
-        DoofinderConfig::debug('Create Store Start');
+        DoofinderConfig::debug("Create Store Start for shop with id: $shopId , and group: $shopGroupId.");
         DoofinderConfig::debug(print_r($createStoreRequest, true));
 
         $response = $client->post(
@@ -205,6 +205,84 @@ class DoofinderInstallation
             DoofinderConfig::debug($responseMsg);
             echo $response->response;
             exit;
+        }
+    }
+
+    /**
+     * Sends a request to the plugins API to update feed URLs to the new format
+     *
+     * @return void
+     *
+     * @throws \Exception If the request fails
+     */
+    public static function updateFeedUrls()
+    {
+        $shops = \Shop::getShops();
+
+        DoofinderConfig::debug('SHOPS:');
+        DoofinderConfig::debug(print_r($shops, true));
+
+        foreach ($shops as $shop) {
+            $feed_urls = [];
+            $client = new EasyREST();
+            $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+            $languages = \Language::getLanguages(true, $shop['id_shop']);
+            $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
+            $shopId = $shop['id_shop'];
+            $shopGroupId = $shop['id_shop_group'];
+            $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $shopGroupId, $shopId);
+            DoofinderConfig::debug("Updating feed urls for shop: {$shopId} and group: {$shopGroupId}");
+
+            foreach ($languages as $lang) {
+                if ($lang['active'] == 0) {
+                    continue;
+                }
+                foreach ($currencies as $cur) {
+                    if ($cur['deleted'] == 1 || $cur['active'] == 0) {
+                        continue;
+                    }
+                    $ciso = $cur['iso_code'];
+                    $langFullIso = $lang['iso_code'];
+                    $feedUrl = UrlManager::getFeedUrl($shopId, $langFullIso, $ciso);
+                    $hashidKey = 'DF_HASHID_' . strtoupper($ciso) . '_' . strtoupper($langFullIso);
+                    $hashid = \Configuration::get($hashidKey, null, $shopGroupId, $shopId);
+
+                    DoofinderConfig::debug("Hashid for lang $langFullIso and currency $ciso :  $hashid");
+
+                    $feed_urls[$hashid] = $feedUrl;
+                }
+            }
+
+            $json_feed_urls = json_encode([
+                'installation_id' => $installationID,
+                'urls' => $feed_urls,
+            ]);
+
+            DoofinderConfig::debug('Update feed urls Start');
+            DoofinderConfig::debug(print_r($json_feed_urls, true));
+
+            $response = $client->post(
+                UrlManager::getUpdateFeedUrl(\Configuration::get('DF_REGION')),
+                $json_feed_urls,
+                false,
+                false,
+                'application/json',
+                ['Authorization: Token ' . $apiKey]
+            );
+
+            if ($response->getResponseCode() === 200) {
+                $response = json_decode($response->response, true);
+                DoofinderConfig::debug('Update feed urls response:');
+                DoofinderConfig::debug(print_r($response, true));
+            } else {
+                $errorMsg = "Update feed urls failed with code {$response->getResponseCode()} and message '{$response->getResponseMessage()}'";
+                $decodedResponse = json_decode($response->response);
+                DoofinderConfig::debug($errorMsg);
+                DoofinderConfig::debug($decodedResponse);
+                error_log('[Doofinder] An error occurred when updating feed urls.');
+
+                throw new \Exception('An error occurred when updating feed urls.', $response->getResponseCode());
+            }
         }
     }
 

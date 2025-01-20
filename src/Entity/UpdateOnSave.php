@@ -326,10 +326,14 @@ class UpdateOnSave
      */
     public static function indexApiInvokeReindexing()
     {
+        $context = \Context::getContext();
         $region = \Configuration::get('DF_REGION');
         $apiKey = \Configuration::get('DF_API_KEY');
         $api = new DoofinderApiIndex($apiKey, $region);
-        $response = $api->invokeReindexing(\Configuration::get('DF_INSTALLATION_ID'), UrlManager::getProcessCallbackUrl());
+        $installationId = \Configuration::get('DF_INSTALLATION_ID', null, $context->shop->id_shop_group, $context->shop->id);
+
+        DoofinderConfig::debug("Invoking reindexing for shop: {$context->shop->id} and group: {$context->shop->id_shop_group} with installation id: {$installationId}");
+        $response = $api->invokeReindexing($installationId, UrlManager::getProcessCallbackUrl($context->shop->id));
         if (empty($response) || 200 !== $response['status']) {
             DoofinderConfig::debug('Error while invoking reindexing: ' . json_encode($response));
 
@@ -352,7 +356,9 @@ class UpdateOnSave
         $region = \Configuration::get('DF_REGION');
         $apiKey = \Configuration::get('DF_API_KEY');
         $api = new DoofinderInstallation($apiKey, $region);
-        $decodeResponse = $api->isValidUpdateOnSave(\Configuration::get('DF_INSTALLATION_ID'));
+        $context = \Context::getContext();
+        $installationId = \Configuration::get('DF_INSTALLATION_ID', null, $context->shop->id_shop_group, $context->shop->id);
+        $decodeResponse = $api->isValidUpdateOnSave($installationId);
 
         if (empty($decodeResponse['valid?'])) {
             DoofinderConfig::debug('Error checking search engines: ' . json_encode($decodeResponse));
