@@ -51,12 +51,12 @@ class UrlManager
         $shop = new \Shop($shopId);
         \Context::getContext()->shop = $shop;
 
-        $params = [          
+        $params = [
             'language' => \Tools::strtoupper($language),
             'dfsec_hash' => \Configuration::get('DF_API_KEY'),
         ];
 
-        if( $currency ){
+        if ($currency) {
             $params['currency'] = \Tools::strtoupper($currency);
         }
 
