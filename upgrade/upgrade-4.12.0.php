@@ -33,9 +33,9 @@ if (!defined('_PS_VERSION_')) {
 
 require_once _PS_MODULE_DIR_ . 'doofinder/src/autoloader.php';
 
-function upgrade_module_4_11_0($module)
+function upgrade_module_4_12_0($module)
 {
-    DoofinderConfig::debug('Initiating 4.11.0 upgrade');
+    DoofinderConfig::debug('Initiating 4.12.0 upgrade');
     // Delete old *.php files
     unlinkFiles();
     DoofinderConfig::debug('Old files deleted successfully.');
