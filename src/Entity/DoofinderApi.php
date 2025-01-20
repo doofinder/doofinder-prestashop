@@ -422,6 +422,7 @@ class DoofinderApi
      */
     public function toQuerystring($page = null)
     {
+        $toParams = [];
         foreach ($this->searchOptions as $paramName => $paramValue) {
             if ($paramName == 'query') {
                 $toParams[$this->queryParameter] = $paramValue;

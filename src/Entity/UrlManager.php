@@ -43,22 +43,24 @@ class UrlManager
      *
      * @param int $shopId
      * @param int $language
-     * @param int $currency
      *
      * @return string
      */
-    public static function getFeedUrl($shopId, $language, $currency)
+    public static function getFeedUrl($shopId, $language, $currency = null)
     {
         $shop = new \Shop($shopId);
         \Context::getContext()->shop = $shop;
 
-        $feed_url = \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', [
-            'currency' => \Tools::strtoupper($currency),
+        $params = [          
             'language' => \Tools::strtoupper($language),
             'dfsec_hash' => \Configuration::get('DF_API_KEY'),
-        ]);
+        ];
 
-        return $feed_url;
+        if( $currency ){
+            $params['currency'] = \Tools::strtoupper($currency);
+        }
+
+        return \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', $params);
     }
 
     /**
