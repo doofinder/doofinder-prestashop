@@ -275,7 +275,7 @@ class DoofinderInstallation
                 DoofinderConfig::debug('Update feed urls response:');
                 DoofinderConfig::debug(print_r($response, true));
             } else {
-                $errorMsg = "Update feed urls failed with code {$response->getResponseCode()} and message '{$response->getResponseMessage()}'";
+                $errorMsg = sprintf('Update feed urls failed with code %1$s and message "%2$s"', $response->getResponseCode(), $response->getResponseMessage());
                 $decodedResponse = json_decode($response->response);
                 DoofinderConfig::debug($errorMsg);
                 DoofinderConfig::debug($decodedResponse);

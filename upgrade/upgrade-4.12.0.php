@@ -98,7 +98,7 @@ function unlinkFiles()
     ];
 
     foreach ($files as $fileName) {
-        $filePath = _PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . $fileName;
+        $filePath = _PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . realpath($fileName);
         if (!file_exists($filePath)) {
             continue;
         }

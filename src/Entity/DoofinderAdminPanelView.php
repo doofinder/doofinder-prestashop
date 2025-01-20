@@ -88,7 +88,7 @@ class DoofinderAdminPanelView
         $skipUrl .= $separator . http_build_query($skipUrlParams);
 
         $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
-        $token = \Tools::encrypt($redirect);
+        $token = DfTools::encrypt($redirect);
         $paramsPopup = 'email=' . $context->employee->email . '&token=' . $token;
 
         $context->smarty->assign('oldPS', $oldPS);
@@ -97,7 +97,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('is_new_shop', $isNewShop);
         $context->smarty->assign('shop_id', $shopId);
         $context->smarty->assign('checkConnection', DoofinderConfig::checkOutsideConnection());
-        $context->smarty->assign('tokenAjax', \Tools::encrypt('doofinder-ajax'));
+        $context->smarty->assign('tokenAjax', DfTools::encrypt('doofinder-ajax'));
         $context->smarty->assign('skipurl', $skipUrl);
         $context->smarty->assign('paramsPopup', $paramsPopup);
 
