@@ -445,14 +445,6 @@ class DoofinderAdminPanelView
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('CURL disable HTTPS check', 'doofinderadminpanelview'),
-                        'name' => 'DF_DSBL_HTTPS_CURL',
-                        'desc' => $this->module->l('If your server have an untrusted certificate and you have connection problems with the API, please enable this', 'doofinderadminpanelview'),
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->module->l('Debug CURL error response', 'doofinderadminpanelview'),
                         'name' => 'DF_DEBUG_CURL',
                         'desc' => $this->module->l('To debug if your server has symptoms of connection problems', 'doofinderadminpanelview'),
