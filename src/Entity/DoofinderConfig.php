@@ -138,7 +138,6 @@ class DoofinderConfig
         return [
             'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
             'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
-            'DF_DSBL_HTTPS_CURL' => \Configuration::get('DF_DSBL_HTTPS_CURL'),
             'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
             'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
         ];

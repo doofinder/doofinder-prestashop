@@ -193,8 +193,7 @@ if ($cfg_product_variations == 1) {
     $header[] = 'item_group_id';
 }
 $header = array_merge($header, [
-    'title', 'link', 'description', 'alternate_description',
-    'meta_keywords', 'meta_title', 'meta_description', 'image_link', 'main_category',
+    'title', 'link', 'description', 'alternate_description', 'meta_title', 'meta_description', 'image_link', 'main_category',
     'categories', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
     'supplier_reference', 'extra_title_1', 'extra_title_2', 'tags',
 ]);
@@ -370,9 +369,6 @@ foreach ($rows as $row) {
         echo DfTools::cleanString(
             $row[$cfg_short_description ? 'description' : 'description_short']
         ) . DfTools::TXT_SEPARATOR;
-
-        // META KEYWORDS
-        echo DfTools::cleanString($row['meta_keywords']) . DfTools::TXT_SEPARATOR;
 
         // META TITLE
         echo DfTools::cleanString($row['meta_title']) . DfTools::TXT_SEPARATOR;

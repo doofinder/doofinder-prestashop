@@ -16,6 +16,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApi;
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderInstallation;
 
@@ -40,7 +41,7 @@ class DoofinderAjaxModuleFrontController extends ModuleFrontController
         $autoinstaller = Tools::getValue('autoinstaller');
         $shopId = Tools::getValue('shop_id', null);
         if ($autoinstaller) {
-            if (Tools::getValue('token') == Tools::encrypt('doofinder-ajax')) {
+            if (Tools::getValue('token') == DfTools::encrypt('doofinder-ajax')) {
                 header('Content-Type:application/json; charset=utf-8');
                 DoofinderInstallation::autoinstaller($shopId);
                 $this->ajaxRender(json_encode(['success' => true]));
