@@ -1477,7 +1477,7 @@ class DfTools
      */
     public static function getFormattedMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
     {
-        $multiprice = self::getMultiprice($productId, $includeTaxes, $currencies);
+        $multiprice = self::getMultiprice($productId, $includeTaxes, $currencies, $variantId);
 
         return self::formatMultiprice($multiprice);
     }
