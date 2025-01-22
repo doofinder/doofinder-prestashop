@@ -171,12 +171,6 @@ class DoofinderApi
         curl_setopt($session, CURLOPT_HEADER, false); // Tell curl not to return headers
         curl_setopt($session, CURLOPT_RETURNTRANSFER, true); // Tell curl to return the response
         curl_setopt($session, CURLOPT_HTTPHEADER, $this->reqHeaders()); // Adding request headers
-        // IF YOU MAKE REQUEST FROM LOCALHOST OR HAVE SERVER CERTIFICATE ISSUE
-        $disableSSLVerify = \Configuration::get('DF_DSBL_HTTPS_CURL');
-        if ($disableSSLVerify) {
-            curl_setopt($session, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($session, CURLOPT_SSL_VERIFYPEER, 0);
-        }
         $response = curl_exec($session);
         $httpCode = curl_getinfo($session, CURLINFO_HTTP_CODE);
         $debugCurlError = \Configuration::get('DF_DEBUG_CURL');

@@ -88,7 +88,7 @@ class DoofinderAdminPanelView
         $skipUrl .= $separator . http_build_query($skipUrlParams);
 
         $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
-        $token = \Tools::encrypt($redirect);
+        $token = DfTools::encrypt($redirect);
         $paramsPopup = 'email=' . $context->employee->email . '&token=' . $token;
 
         $context->smarty->assign('oldPS', $oldPS);
@@ -97,7 +97,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('is_new_shop', $isNewShop);
         $context->smarty->assign('shop_id', $shopId);
         $context->smarty->assign('checkConnection', DoofinderConfig::checkOutsideConnection());
-        $context->smarty->assign('tokenAjax', \Tools::encrypt('doofinder-ajax'));
+        $context->smarty->assign('tokenAjax', DfTools::encrypt('doofinder-ajax'));
         $context->smarty->assign('skipurl', $skipUrl);
         $context->smarty->assign('paramsPopup', $paramsPopup);
 
@@ -440,14 +440,6 @@ class DoofinderAdminPanelView
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->module->l('Debug Mode. Write info logs in doofinder.log file', 'doofinderadminpanelview'),
                         'name' => 'DF_DEBUG',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('CURL disable HTTPS check', 'doofinderadminpanelview'),
-                        'name' => 'DF_DSBL_HTTPS_CURL',
-                        'desc' => $this->module->l('If your server have an untrusted certificate and you have connection problems with the API, please enable this', 'doofinderadminpanelview'),
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],

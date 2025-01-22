@@ -108,7 +108,6 @@ class DfProductBuild
         $p['link'] = $this->getLink($product);
         $p['description'] = DfTools::cleanString($product['description_short']);
         $p['alternate_description'] = DfTools::cleanString($product['description']);
-        $p['meta_keywords'] = DfTools::cleanString($product['meta_keywords']);
         $p['meta_title'] = DfTools::cleanString($product['meta_title']);
         $p['meta_description'] = DfTools::cleanString($product['meta_description']);
         $p['image_link'] = $this->getImageLink($product);

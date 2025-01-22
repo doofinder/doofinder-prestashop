@@ -32,6 +32,18 @@ class DfTools
     protected static $rootCategoryIds;
     protected static $cachedCategoryPaths = [];
 
+    /**
+     * Hash password.
+     *
+     * @param string $passwd String to hash
+     *
+     * @return string Hashed password
+     */
+    public static function encrypt($passwd)
+    {
+        return md5(_COOKIE_KEY_ . $passwd);
+    }
+
     //
     // Validation
     //
@@ -500,7 +512,6 @@ class DfTools
         pl.description,
         pl.description_short,
         pl.meta_title,
-        pl.meta_keywords,
         pl.meta_description,
         GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
         pl.link_rewrite,
@@ -565,7 +576,6 @@ class DfTools
         pl.description,
         pl.description_short,
         pl.meta_title,
-        pl.meta_keywords,
         pl.meta_description,
         GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
         pl.link_rewrite,
@@ -633,7 +643,6 @@ class DfTools
         pl.description,
         pl.description_short,
         pl.meta_title,
-        pl.meta_keywords,
         pl.meta_description,
         GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
         pl.link_rewrite,
@@ -1482,7 +1491,7 @@ class DfTools
      * it would produce
      * "price_EUR=5/sale_price_EUR=3/price_GBP=4.3/sale_price_GBP=2.7"
      *
-     * @param int $multiprice Multiprice map to be formatted
+     * @param array $multiprice Multiprice map to be formatted
      *
      * @return string
      */

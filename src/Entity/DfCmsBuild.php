@@ -70,7 +70,6 @@ class DfCmsBuild
         $c['description'] = DfTools::cleanString($cms->meta_description);
         $c['meta_title'] = DfTools::cleanString($cms->meta_title);
         $c['meta_description'] = DfTools::cleanString($cms->meta_description);
-        $c['tags'] = DfTools::cleanString($cms->meta_keywords);
         $c['content'] = DfTools::cleanString($cms->content);
         $c['link'] = $this->link->getCMSLink($cms);
 

@@ -76,7 +76,6 @@ class DfCategoryBuild
         $c['description'] = DfTools::cleanString($category->description);
         $c['meta_title'] = DfTools::cleanString($category->meta_title);
         $c['meta_description'] = DfTools::cleanString($category->meta_description);
-        $c['tags'] = DfTools::cleanString($category->meta_keywords);
         $c['link'] = $this->link->getCategoryLink($category);
         $c['image_link'] = $category->id_image ? $this->link->getCatImageLink($category->link_rewrite, $category->id_image, $tableName) : '';
 
