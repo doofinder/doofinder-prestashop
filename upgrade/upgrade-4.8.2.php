@@ -30,8 +30,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once _PS_MODULE_DIR_ . 'doofinder/autoloader.php';
-
 function upgrade_module_4_8_2($module)
 {
     $installationId = Configuration::get('DF_INSTALLATION_ID');

@@ -124,7 +124,7 @@ class DoofinderInstallation
     private static function _createStore($shop)
     {
         $client = new EasyREST();
-        $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+        $apiKey = DfTools::getFormattedApiKey();
         $languages = \Language::getLanguages(true, $shop['id_shop']);
         $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
@@ -225,7 +225,7 @@ class DoofinderInstallation
         foreach ($shops as $shop) {
             $feed_urls = [];
             $client = new EasyREST();
-            $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+            $apiKey = DfTools::getFormattedApiKey();
             $languages = \Language::getLanguages(true, $shop['id_shop']);
             $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
             $shopId = $shop['id_shop'];

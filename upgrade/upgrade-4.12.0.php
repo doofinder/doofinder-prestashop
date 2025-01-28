@@ -31,19 +31,17 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once _PS_MODULE_DIR_ . 'doofinder/src/autoloader.php';
-
 function upgrade_module_4_12_0($module)
 {
     DoofinderConfig::debug('Initiating 4.12.0 upgrade');
-    // Delete old *.php files
-    unlinkFiles();
-    DoofinderConfig::debug('Old files deleted successfully.');
 
     // Update feed URLs
     DoofinderInstallation::updateFeedUrls();
-
     DoofinderConfig::debug('Feed URLs updated successfully.');
+
+    // Delete old *.php files
+    unlinkFiles();
+    DoofinderConfig::debug('Old files deleted successfully.');
 
     return true;
 }
@@ -98,16 +96,16 @@ function unlinkFiles()
     ];
 
     foreach ($files as $fileName) {
-        $filePath = _PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . realpath($fileName);
-        if (!file_exists($filePath)) {
+        $filePath = realpath(_PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . $fileName);
+        if (!file_exists($filePath) || is_dir($filePath)) {
             continue;
         }
 
         if (!unlink($filePath)) {
-            error_log('Couldn\'t delete file: ' . $filePath);
-            throw new Exception('Error when deleting file: ' . $fileName);
+            DoofinderConfig::debug('Couldn\'t delete file: ' . $filePath);
+            continue;
         }
 
-        error_log('Deleted file: ' . $filePath);
+        DoofinderConfig::debug('Deleted file: ' . $filePath);
     }
 }

@@ -13,6 +13,7 @@
  * @license   GPLv3
  */
 
+use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApiLanding;
 use PrestaShop\Module\Doofinder\Src\Entity\SearchEngine;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
@@ -200,8 +201,7 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
 
     private function getApiCall($name, $hashid)
     {
-        $apiKey = explode('-', Configuration::get('DF_API_KEY'));
-        $apiKey = end($apiKey);
+        $apiKey = DfTools::getFormattedApiKey();
         $region = Configuration::get('DF_REGION');
 
         $api = new DoofinderApiLanding($hashid, $apiKey, $region);

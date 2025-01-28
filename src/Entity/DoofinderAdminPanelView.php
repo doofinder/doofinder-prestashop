@@ -185,7 +185,7 @@ class DoofinderAdminPanelView
     {
         $installationId = \Configuration::get('DF_INSTALLATION_ID', null, (int) $shop->id_shop_group, (int) $shop->id);
         $multishopEnable = \Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
-        $apiKey = \Configuration::get('DF_AI_APIKEY');
+        $apiKey = DfTools::getFormattedApiKey();
 
         return !$installationId && $multishopEnable && $apiKey;
     }
