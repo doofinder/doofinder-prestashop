@@ -1484,7 +1484,7 @@ class DfTools
 
     /**
      * Returns the API Key without the region part.
-     * 
+     *
      * @return string
      */
     public static function getFormattedApiKey()
