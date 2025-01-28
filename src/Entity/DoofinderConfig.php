@@ -62,7 +62,7 @@ class DoofinderConfig
      */
     public static function setDefaultShopConfig($shopGroupId, $shopId)
     {
-        $apiKey = \Configuration::getGlobalValue('DF_AI_APIKEY');
+        $apiKey = DfTools::getFormattedApiKey();
         $apiEndpoint = \Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
         $apiEndpointArray = explode('-', $apiEndpoint);
         $region = $apiEndpointArray[0];
@@ -91,7 +91,6 @@ class DoofinderConfig
      */
     public static function saveApiConfig($apiKey, $apiEndpoint, $adminEndpoint)
     {
-        \Configuration::updateGlobalValue('DF_AI_APIKEY', $apiKey);
         \Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $apiEndpoint);
         \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
 

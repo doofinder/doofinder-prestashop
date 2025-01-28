@@ -1483,6 +1483,17 @@ class DfTools
     }
 
     /**
+     * Returns the API Key without the region part.
+     * 
+     * @return string
+     */
+    public static function getFormattedApiKey()
+    {
+        $apiKey = explode('-', \Configuration::get('DF_API_KEY'));
+        return end($apiKey);
+    }
+
+    /**
      * Transforms a given multiprice map into the correct format to be processed
      * to the format required by the CSV feed.
      *
