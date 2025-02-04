@@ -222,7 +222,7 @@ class DoofinderInstallation
         DoofinderConfig::debug('Update Feed urls for the following SHOPS:');
         DoofinderConfig::debug(print_r($shops, true));
         $apiKey = DfTools::getFormattedApiKey();
-        
+
         if (empty($apiKey)) {
             $errorMsg = 'Unable to update feed urls: Missing API KEY';
             DoofinderConfig::debug($errorMsg);

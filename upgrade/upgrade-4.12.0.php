@@ -35,7 +35,7 @@ function upgrade_module_4_12_0($module)
 {
     DoofinderConfig::debug('Initiating 4.12.0 upgrade');
 
-    // Update feed URLs    
+    // Update feed URLs
     DoofinderInstallation::updateFeedUrls();
 
     try {
