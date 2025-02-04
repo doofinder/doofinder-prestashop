@@ -219,9 +219,6 @@ class DoofinderInstallation
     {
         $shops = \Shop::getShops();
 
-        DoofinderConfig::debug('SHOPS:');
-        DoofinderConfig::debug(print_r($shops, true));
-
         foreach ($shops as $shop) {
             $feed_urls = [];
             $client = new EasyREST();
@@ -231,6 +228,11 @@ class DoofinderInstallation
             $shopId = $shop['id_shop'];
             $shopGroupId = $shop['id_shop_group'];
             $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $shopGroupId, $shopId);
+
+            if (empty($installationID)) {
+                continue;
+            }
+
             DoofinderConfig::debug("Updating feed urls for shop: {$shopId} and group: {$shopGroupId}");
 
             foreach ($languages as $lang) {
