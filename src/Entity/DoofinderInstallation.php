@@ -219,18 +219,29 @@ class DoofinderInstallation
     {
         $shops = \Shop::getShops();
 
-        DoofinderConfig::debug('SHOPS:');
+        DoofinderConfig::debug('Update Feed urls for the following SHOPS:');
         DoofinderConfig::debug(print_r($shops, true));
+        $apiKey = DfTools::getFormattedApiKey();
+
+        if (empty($apiKey)) {
+            $errorMsg = 'Unable to update feed urls: Missing API KEY';
+            DoofinderConfig::debug($errorMsg);
+            throw new \Exception($errorMsg);
+        }
 
         foreach ($shops as $shop) {
             $feed_urls = [];
             $client = new EasyREST();
-            $apiKey = DfTools::getFormattedApiKey();
             $languages = \Language::getLanguages(true, $shop['id_shop']);
             $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
             $shopId = $shop['id_shop'];
             $shopGroupId = $shop['id_shop_group'];
             $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $shopGroupId, $shopId);
+
+            if (empty($installationID)) {
+                continue;
+            }
+
             DoofinderConfig::debug("Updating feed urls for shop: {$shopId} and group: {$shopGroupId}");
 
             foreach ($languages as $lang) {

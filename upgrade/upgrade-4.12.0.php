@@ -37,6 +37,14 @@ function upgrade_module_4_12_0($module)
 
     // Update feed URLs
     DoofinderInstallation::updateFeedUrls();
+
+    try {
+        DoofinderInstallation::updateFeedUrls();
+    } catch (Exception $exception) {
+        PrestaShopLogger::addLog($exception->getMessage(), 3, $exception->getCode(), 'Module', $module->id);
+        return false;
+    }
+
     DoofinderConfig::debug('Feed URLs updated successfully.');
 
     // Delete old *.php files
