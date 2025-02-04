@@ -219,6 +219,9 @@ class DoofinderInstallation
     {
         $shops = \Shop::getShops();
 
+        DoofinderConfig::debug('Update Feed urls for the following SHOPS:');
+        DoofinderConfig::debug(print_r($shops, true));
+
         foreach ($shops as $shop) {
             $feed_urls = [];
             $client = new EasyREST();
