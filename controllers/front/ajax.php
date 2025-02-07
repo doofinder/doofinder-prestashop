@@ -44,14 +44,32 @@ class DoofinderAjaxModuleFrontController extends ModuleFrontController
             if (Tools::getValue('token') == DfTools::encrypt('doofinder-ajax')) {
                 header('Content-Type:application/json; charset=utf-8');
                 DoofinderInstallation::autoinstaller($shopId);
-                $this->ajaxRender(json_encode(['success' => true]));
-                exit;
+                $this->compatRender(json_encode(['success' => true]));
             } else {
-                $this->ajaxRender(json_encode([
+                $this->compatRender(json_encode([
                     'success' => false, 'errors' => ['Forbidden access. Invalid token for autoinstaller.'],
                 ]));
-                exit;
             }
         }
+    }
+
+    /**
+     * The native function exists only after PrestaShop 1.7, so in order
+     * to keep compatibility with PrestaShop 1.6 we must keep `ajaxDie` as a fallback.
+     *
+     * @param string|null $value
+     * @param string|null $controller
+     * @param string|null $method
+     *
+     * @throws PrestaShopException
+     */
+    private function compatRender($value = null, $controller = null, $method = null)
+    {
+        if (method_exists($this, 'ajaxRender')) {
+            $this->ajaxRender($value, $controller, $method);
+            exit;
+        }
+
+        $this->ajaxDie($value, $controller, $method);
     }
 }
