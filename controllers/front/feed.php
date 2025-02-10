@@ -49,8 +49,13 @@ class DoofinderFeedModuleFrontController extends ModuleFrontController
         }
         $feed = ob_get_clean();
         header('Content-Type: text/csv; charset=utf-8');
-        $this->ajaxRender($feed);
-        exit;
+        if (method_exists($this, 'ajaxRender')) {
+            $this->ajaxRender($feed);
+            exit;
+        } else {
+            // Workaround for PS 1.6 as ajaxRender is not available
+            $this->ajaxDie($feed);
+        }
     }
 
     private static function get_plugin_dir()
