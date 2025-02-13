@@ -48,7 +48,6 @@ class DoofinderFeedModuleFrontController extends ModuleFrontController
                 break;
         }
         $feed = ob_get_clean();
-        header('Content-Type: text/csv; charset=utf-8');
         if (method_exists($this, 'ajaxRender')) {
             $this->ajaxRender($feed);
             exit;
