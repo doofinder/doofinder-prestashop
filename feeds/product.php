@@ -520,9 +520,9 @@ foreach ($rows as $row) {
                 $min_variant = $min_price_variant_by_product_id[$product_id];
 
                 if (
-                    !is_null($min_variant['onsale_price']) &&
-                    !is_null($min_variant['price']) &&
-                    (empty($onsale_price) || $min_variant['onsale_price'] < $onsale_price)
+                    !is_null($min_variant['onsale_price'])
+                    && !is_null($min_variant['price'])
+                    && (empty($onsale_price) || $min_variant['onsale_price'] < $onsale_price)
                 ) {
                     $product_price = $min_variant['price'];
                     $onsale_price = $min_variant['onsale_price'];
