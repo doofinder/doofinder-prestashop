@@ -24,6 +24,16 @@ if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
 }
 
+// To prevent printing errors or warnings that may corrupt the feed.
+$debug = DfTools::getBooleanFromRequest('debug', false);
+if ($debug) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+}
+
 // OUTPUT
 if (isset($_SERVER['HTTPS'])) {
     header('Strict-Transport-Security: max-age=500');

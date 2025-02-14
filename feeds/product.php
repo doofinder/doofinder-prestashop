@@ -156,6 +156,7 @@ $debug = DfTools::getBooleanFromRequest('debug', false);
 $limit = Tools::getValue('limit', false);
 $offset = Tools::getValue('offset', false);
 
+// To prevent printing errors or warnings that may corrupt the feed.
 if ($debug) {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -264,7 +265,6 @@ $header = array_merge($header, $extra_header);
 
 if (!$limit || ($offset !== false && (int) $offset === 0)) {
     echo implode(DfTools::TXT_SEPARATOR, $header) . PHP_EOL;
-    DfTools::flush();
 }
 
 // PRODUCTS
@@ -583,6 +583,5 @@ foreach ($rows as $row) {
         }
 
         echo PHP_EOL;
-        DfTools::flush();
     }
 }
