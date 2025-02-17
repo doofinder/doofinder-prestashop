@@ -277,7 +277,11 @@ $min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantP
 
 foreach ($rows as $row) {
     $product_id = $row['id_product'];
-    $variant_id = $row['id_product_attribute'];
+    if (DfTools::isParent($row)) {
+        $variant_id = null;
+    } else {
+        $variant_id = $row['id_product_attribute'];
+    }
     $product_price = DfTools::getPrice($product_id, $cfg_prices_w_taxes, $variant_id);
     $onsale_price = DfTools::getOnsalePrice($product_id, $cfg_prices_w_taxes, $variant_id);
     $multiprice = DfTools::getFormattedMultiprice($product_id, $cfg_prices_w_taxes, $currencies, $variant_id);
