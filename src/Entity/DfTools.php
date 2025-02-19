@@ -638,7 +638,7 @@ class DfTools
         p.upc,
         p.reference,
         p.supplier_reference,
-        1 AS df_group_leader,
+        IF(ISNULL(pan.attribute_n), false, true) AS df_group_leader,
         pl.name,
         pl.description,
         pl.description_short,
@@ -672,6 +672,8 @@ class DfTools
             (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
         LEFT JOIN _DB_PREFIX_product_supplier psp
           ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
+        LEFT JOIN (SELECT id_product, COUNT(*) as attribute_n FROM _DB_PREFIX_product_attribute GROUP BY id_product) pan 
+          ON p.id_product = pan.id_product
       WHERE
         __IS_ACTIVE__
         __VISIBILITY__
