@@ -546,6 +546,7 @@ foreach ($rows as $row) {
             echo DfTools::cleanString($row['variation_upc']);
             echo DfTools::TXT_SEPARATOR;
             echo DfTools::cleanString($row['df_group_leader']);
+
             $variation_attributes = DfTools::getAttributesForProductVariation(
                 $row['id_product_attribute'],
                 $lang->id,
