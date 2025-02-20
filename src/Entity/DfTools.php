@@ -1409,15 +1409,18 @@ class DfTools
 
     public static function maybeAddVariantsFirstParent($products, $idLang, $idShop)
     {
-        $parentIndices = array_keys(
-            array_filter($products, function ($product) {
-                return self::isParent($product);
-            })
-        );
-        if (empty($parentIndices)) {
+        $firstParentIndex = null;
+        foreach ($products as $i => $product) {
+            if (self::isParent($product)) {
+                $firstParentIndex = $i;
+                break;
+            }
+        }
+
+        if (is_null($firstParentIndex)) {
             return $products;
         }
-        $firstParentIndex = $parentIndices[0];
+        
         $parentProduct = $products[$firstParentIndex];
         if ((int)$parentProduct['variant_count'] === $firstParentIndex) {
             return $products;
