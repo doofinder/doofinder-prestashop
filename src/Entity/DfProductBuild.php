@@ -177,6 +177,27 @@ class DfProductBuild
         return $p;
     }
 
+    /**
+     * Applies specific transformations to a product's data for CSV export.
+     *
+     * This method performs several modifications on the product array, like:
+     * - If multi-price is enabled, formats the multiprice field.
+     * - Joins category values using a predefined separator.
+     * - If variants information exists, it slugifies and joins them using "%%".
+     * - Casts the group leader flag to an integer.
+     * - Iterates over extra headers to process attribute values:
+     *   - For each non-empty extra header, it concatenates key-value pairs in the format "key=value",
+     *     with the value cleaned and any "/" characters escaped.
+     * - Processes features (if present and an array) by converting them into an attributes string
+     *   formatted as "key=value" pairs joined with "/". The original features key is removed.
+     * - Ensures the final product fields are ordered according to the given headers.
+     *
+     * @param array $product      The associative array representing the product data.
+     * @param array $extraHeaders An array of additional headers to process in the product data.
+     * @param array $allHeaders   An array specifying the order of CSV fields.
+     *
+     * @return array The transformed product array ready for CSV export.
+     */
     public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
     {
         if ($this->multipriceEnabled) {
