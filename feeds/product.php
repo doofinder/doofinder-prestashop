@@ -281,15 +281,14 @@ $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $
 $rows = arrayMergeByIdProduct($rows, $extraRows);
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies, $lang->id, $shop->id) : [];
-
+$minPriceVariantByProductId = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies, $lang->id, $shop->id) : [];
 $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 
 $dfProductBuild = new DfProductBuild($shop->id, $lang->id, $currency->id);
 
 $csv = fopen('php://output', 'w');
 foreach ($rows as $row) {
-    $product = $dfProductBuild->buildProduct($row, $additionalAttributesHeaders, $additionalHeaders);
+    $product = $dfProductBuild->buildProduct($row, $minPriceVariantByProductId, $additionalAttributesHeaders, $additionalHeaders);
     $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
     fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
 }

@@ -73,14 +73,16 @@ class DfProductBuild
 
         $products = $this->getProductData();
 
+        $minPriceVariantByProductId = DfTools::getMinVariantPrices($products, $this->useTax, $this->currencies, $this->idLang, $this->idShop);
+
         foreach ($products as $product) {
-            $payload[] = $this->buildProduct($product);
+            $payload[] = $this->buildProduct($product, $minPriceVariantByProductId);
         }
 
         return json_encode($payload);
     }
 
-    public function buildProduct($product, $extraAttributesHeader = array(), $extraHeaders = array())
+    public function buildProduct($product, $minPriceVariantByProductId = array(), $extraAttributesHeader = array(), $extraHeaders = array())
     {
         $p = [];
 
@@ -125,6 +127,19 @@ class DfProductBuild
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);
             }
+
+            if (DfTools::isParent($product) && array_key_exists($p['id'], $minPriceVariantByProductId)) {
+                $minVariant = $minPriceVariantByProductId[$p['id']];
+                if (
+                    !is_null($minVariant['onsale_price'])
+                    && !is_null($minVariant['price'])
+                    && (empty($p['sale_price']) || $minVariant['onsale_price'] < $p['sale_price'])
+                ) {
+                    $p['price'] = $minVariant['price'];
+                    $p['sale_price'] = ($minVariant['onsale_price'] === $minVariant['price']) ? null : $minVariant['onsale_price'];
+                    $p['df_multiprice'] = $minVariant['multiprice'];
+                }
+            }
         }
 
         if ($this->productVariations) {
@@ -141,7 +156,7 @@ class DfProductBuild
             $p = array_merge($p, $attributes);
 
             foreach ($extraAttributesHeader as $extraAttributeHeader) {
-                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $attributes)) {
+                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $p) && array_key_exists($extraAttributeHeader, $attributes)) {
                     $p[$extraAttributeHeader] = $attributes[$extraAttributeHeader];
                     continue;
                 }
@@ -165,7 +180,7 @@ class DfProductBuild
     public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
     {
         if ($this->multipriceEnabled) {
-            $product['df_multiprice'] = DfTools::formatMultiprice($product['df_multiprice']);
+            $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
         }
         $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
 
