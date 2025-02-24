@@ -1542,7 +1542,7 @@ class DfTools
      *
      * @return string
      */
-    private static function formatMultiprice($multiprice)
+    public static function formatMultiprice($multiprice)
     {
         $multiprices = [];
 

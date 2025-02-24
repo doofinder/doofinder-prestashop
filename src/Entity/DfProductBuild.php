@@ -44,6 +44,17 @@ class DfProductBuild
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
+        $this->attributesShown = \Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
+        $this->displayPrices = \Configuration::get('DF_GS_DISPLAY_PRICES');
+        $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
+        $this->link = \Context::getContext()->link;
+        $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
+        $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
+        $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
+        $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
+        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX') || DoofinderConstants::NO;
+        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $this->featuresKeys = $this->getFeaturesKeys();
     }
 
     /**
@@ -58,8 +69,6 @@ class DfProductBuild
 
     public function build()
     {
-        $this->assign();
-
         $payload = [];
 
         $products = $this->getProductData();
@@ -71,39 +80,14 @@ class DfProductBuild
         return json_encode($payload);
     }
 
-    private function assign()
-    {
-        $this->attributesShown = \Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
-        $this->displayPrices = \Configuration::get('DF_GS_DISPLAY_PRICES');
-        $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
-        $this->link = \Context::getContext()->link;
-        $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
-        $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
-        $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX') || DoofinderConstants::NO;
-        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
-        $this->featuresKeys = $this->getFeaturesKeys();
-    }
-
-    private function getProductData()
-    {
-        $products = DfTools::getAvailableProductsForLanguage(
-            $this->idLang,
-            $this->idShop,
-            false,
-            false,
-            $this->products
-        );
-
-        return $products;
-    }
-
-    private function buildProduct($product)
+    public function buildProduct($product, $extraAttributesHeader = array(), $extraHeaders = array())
     {
         $p = [];
 
         $p['id'] = $this->getId($product);
+        if ($this->productVariations) {
+            $p['item_group_id'] = $this->getItemGroupId($product);
+        }
         $p['title'] = DfTools::cleanString($product['name']);
         $p['link'] = $this->getLink($product);
         $p['description'] = DfTools::cleanString($product['description_short']);
@@ -128,12 +112,12 @@ class DfProductBuild
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
         $p['tags'] = DfTools::cleanString($product['tags']);
-        $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);
 
         if (DfTools::versionGte('1.7.0.0')) {
             $p['isbn'] = DfTools::cleanString($product['isbn']);
         }
 
+        $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
@@ -143,29 +127,96 @@ class DfProductBuild
             }
         }
 
-        if ($this->showProductFeatures) {
-            $p = array_merge($p, $this->getFeatures($product));
-        }
-
         if ($this->productVariations) {
-            $p['item_group_id'] = $this->getItemGroupId($product);
-            $p['group_id'] = $this->getItemGroupId($product);
-
             $p['variation_reference'] = $product['variation_reference'];
             $p['variation_supplier_reference'] = $product['variation_supplier_reference'];
             $p['variation_mpn'] = $product['variation_mpn'];
             $p['variation_ean13'] = $product['variation_ean13'];
             $p['variation_upc'] = $product['variation_upc'];
-            $p['df_group_leader'] = (!is_null($product['df_group_leader'] && $product['df_group_leader']) ? true : false);
-
+            $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int)$product['df_group_leader']);
+            $p['df_variants_information'] = $this->getVariantsInformation($product);
+            
             $attributes = $this->getAttributes($product);
 
             $p = array_merge($p, $attributes);
 
-            $p['df_variants_information'] = $this->getVariantsInformation($product);
+            foreach ($extraAttributesHeader as $extraAttributeHeader) {
+                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $attributes)) {
+                    $p[$extraAttributeHeader] = $attributes[$extraAttributeHeader];
+                    continue;
+                }
+            }
+        }
+
+        if ($this->showProductFeatures) {
+            $p['features'] = $this->getFeatures($product);
+        }
+        
+        foreach ($extraHeaders as $extraHeader) {
+            if (!empty($p[$extraHeader])) {
+                continue;
+            }
+            $p[$extraHeader] = isset($product[$extraHeader]) ? DfTools::cleanString($product[$extraHeader]) : '';
         }
 
         return $p;
+    }
+
+    public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
+    {
+        if ($this->multipriceEnabled) {
+            $product['df_multiprice'] = DfTools::formatMultiprice($product['df_multiprice']);
+        }
+        $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
+
+        if (array_key_exists('df_variants_information', $product)) {
+            $product['df_variants_information'] = implode('%%', array_map('slugify', $product['df_variants_information']));
+        }
+
+        $product['df_group_leader'] = (int)$product['df_group_leader'];
+
+        foreach ($extraHeaders as $extraHeader) {
+            if (empty($product[$extraHeader])) {
+                continue;
+            }
+            $attributeValue = '';
+            foreach ($product[$extraHeader] as $index => $value) {
+                $attributeValue .= slugify($index) . '=' . str_replace('/', '\/', DfTools::cleanString($value)) . '/';
+            }
+            $product[$extraHeader] = $attributeValue;
+        }
+
+        if (array_key_exists('features', $product) && is_array($product['features'])) {
+            $product['attributes'] = implode('/', array_map(fn ($key, $value) => "$key=$value", array_keys($product['features']), $product['features']));
+            unset($product['features']);
+        }
+
+        $product = self::ensureCsvFieldsOrder($product, $allHeaders);
+        
+        return $product;
+    }
+
+    private static function ensureCsvFieldsOrder($product, $allHeaders)
+    {
+        $productWithSortedAttributes = array();
+        foreach ($allHeaders as $header) {
+            $productWithSortedAttributes[$header] = array_key_exists($header, $product) ? $product[$header] : "";
+        }
+
+        return $productWithSortedAttributes;
+    }
+
+    private function getProductData()
+    {
+        $products = DfTools::getAvailableProductsForLanguage(
+            $this->idLang,
+            $this->idShop,
+            false,
+            false,
+            $this->products
+        );
+
+        return $products;
     }
 
     private function getId($product)
