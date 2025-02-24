@@ -187,7 +187,16 @@ class DfProductBuild
         }
 
         if (array_key_exists('features', $product) && is_array($product['features'])) {
-            $product['attributes'] = implode('/', array_map(fn ($key, $value) => "$key=$value", array_keys($product['features']), $product['features']));
+
+            $formattedAttributes = array_map(
+                function ($key, $value) {
+                    return $key . '=' . $value;
+                },
+                array_keys($product['features']),
+                $product['features']
+            );
+
+            $product['attributes'] = implode('/', $formattedAttributes);
             unset($product['features']);
         }
 
