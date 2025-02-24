@@ -1420,13 +1420,15 @@ class DfTools
         if (is_null($firstParentIndex)) {
             return $products;
         }
-        
+
         $parentProduct = $products[$firstParentIndex];
-        if ((int)$parentProduct['variant_count'] === $firstParentIndex) {
+        $variantCount = (int) $parentProduct['variant_count'];
+
+        if ($variantCount === $firstParentIndex) {
             return $products;
         }
 
-        $childProducts = self::getAvailableProductsForLanguage($idLang, $idShop, false, false, array($parentProduct['id_product']), false);
+        $childProducts = self::getAvailableProductsForLanguage($idLang, $idShop, false, false, [$parentProduct['id_product']], false);
         return array_merge($childProducts, $products);
     }
 
