@@ -39,30 +39,6 @@ if (function_exists('set_time_limit')) {
 
 DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
-function slugify($text)
-{
-    // replace non letter or digits by -
-    $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
-
-    // trim
-    $text = trim($text, '-');
-
-    // transliterate
-    $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-
-    // lowercase
-    $text = Tools::strtolower($text);
-
-    // remove unwanted characters
-    $text = preg_replace('~[^-\w]+~', '', $text);
-
-    if (empty($text)) {
-        return 'n-a';
-    }
-
-    return $text;
-}
-
 /**
  *  @author camlafit <https://github.com/camlafit>
  *  Merge multidemensionnal array by value on each row
@@ -105,57 +81,34 @@ if (!$shop->id) {
     exit('NOT PROPERLY CONFIGURED');
 }
 
-// CONFIG
+// GENERAL PURPOSE VARIABLES + CONTEXT
 $lang = DfTools::getLanguageFromRequest();
 $context->language = $lang;
-$country = Configuration::get('PS_COUNTRY_DEFAULT');
+$country =(int) DfTools::cfg($shop->id, 'PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
 $currency = DfTools::getCurrencyForLanguageFromRequest($lang);
-$multiprice_enabled = Configuration::get('DF_MULTIPRICE_ENABLED');
 $currencies = Currency::getCurrenciesByIdShop($context->shop->id);
 
-$cfg_short_description = (DfTools::cfg(
-    $shop->id,
-    'DF_GS_DESCRIPTION_TYPE',
-    DoofinderConstants::GS_SHORT_DESCRIPTION
-) == DoofinderConstants::GS_SHORT_DESCRIPTION);
-
-$cfg_display_prices = DfTools::getBooleanFromRequest(
+/* ---------- START CONFIG ---------- */
+$shouldDisplayPrices = DfTools::getBooleanFromRequest(
     'prices',
     (bool) DfTools::cfg($shop->id, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES)
 );
-$cfg_prices_w_taxes = DfTools::getBooleanFromRequest(
+$shouldPricesUseTaxes = DfTools::getBooleanFromRequest(
     'taxes',
     (bool) DfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES)
 );
-$cfg_image_size = DfTools::cfg($shop->id, 'DF_GS_IMAGE_SIZE');
-$cfg_mod_rewrite = DfTools::cfg($shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
-$cfg_product_variations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
-$cfg_product_features = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
-$cfg_debug = DfTools::cfg($shop->id, 'DF_DEBUG');
-$cfg_features_shown = explode(',', DfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
-
-$cfg_group_attributes_shown = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
-
-$limit_group_attributes = false;
-if (
-    is_array($cfg_group_attributes_shown)
-    && count($cfg_group_attributes_shown) > 0
-    && $cfg_group_attributes_shown[0] !== ''
-) {
-    $group_attributes = AttributeGroup::getAttributesGroups($lang->id);
-    $group_attributes_slug = [];
-    foreach ($group_attributes as $g) {
-        if (in_array($g['id_attribute_group'], $cfg_group_attributes_shown)) {
-            $group_attributes_slug[] = slugify($g['name']);
-        }
-    }
-    $limit_group_attributes = true;
-}
-
+$isMultipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+$shouldShowProductVariations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
+$shouldShowProductFeatures = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
+$isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
+$shouldFeaturesBeShown = explode(',', DfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
+$shouldGroupAttributesBeShown = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
+$shouldLimitGroupAttributes = false;
 $debug = DfTools::getBooleanFromRequest('debug', false);
 $limit = Tools::getValue('limit', false);
 $offset = Tools::getValue('offset', false);
+/* ---------- END CONFIG ---------- */
 
 // To prevent printing errors or warnings that may corrupt the feed.
 if ($debug) {
@@ -166,7 +119,25 @@ if ($debug) {
     ini_set('display_errors', 0);
 }
 
-if ($cfg_debug) {
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+if (
+    is_array($shouldGroupAttributesBeShown)
+    && count($shouldGroupAttributesBeShown) > 0
+    && $shouldGroupAttributesBeShown[0] !== ''
+) {
+    $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
+    $groupAttributesSlug = [];
+    foreach ($groupAttributes as $g) {
+        if (in_array($g['id_attribute_group'], $shouldGroupAttributesBeShown)) {
+            $groupAttributesSlug[] = DfTools::slugify($g['name']);
+        }
+    }
+    $shouldLimitGroupAttributes = true;
+}
+
+if ($isDebugEnabled) {
     error_log("Starting feed.\n", 3, 'doofinder.log');
 }
 
@@ -179,7 +150,7 @@ header('Content-Type:text/plain; charset=utf-8');
 
 // HEADER
 $header = ['id'];
-if ($cfg_product_variations == 1) {
+if ($shouldShowProductVariations == 1) {
     $header[] = 'item_group_id';
 }
 $header = array_merge($header, [
@@ -194,15 +165,18 @@ if (DfTools::versionGte('1.7.0.0')) {
 
 $header[] = 'stock_quantity';
 
-if ($cfg_display_prices) {
+if ($shouldDisplayPrices) {
     $header[] = 'price';
     $header[] = 'sale_price';
-    $header[] = 'df_multiprice';
+
+    if ($isMultipriceEnabled) {
+        $header[] = 'df_multiprice';
+    }
 }
 
 $additionalAttributesHeaders = [];
 
-if ($cfg_product_variations == 1) {
+if ($shouldShowProductVariations == 1) {
     $header[] = 'variation_reference';
     $header[] = 'variation_supplier_reference';
     $header[] = 'variation_mpn';
@@ -210,31 +184,31 @@ if ($cfg_product_variations == 1) {
     $header[] = 'variation_upc';
     $header[] = 'df_group_leader';
     $header[] = 'df_variants_information';
-    $attribute_keys = DfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
-    $alt_attribute_keys = [];
+    $attributeKeys = DfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
+    $altAttributeKeys = [];
 
-    foreach ($attribute_keys as $key) {
-        $header_value = slugify($key);
-        if ($limit_group_attributes && !in_array($header_value, $group_attributes_slug)) {
+    foreach ($attributeKeys as $key) {
+        $headerValue = DfTools::slugify($key);
+        if ($shouldLimitGroupAttributes && !in_array($headerValue, $groupAttributesSlug)) {
             continue;
         }
-        $alt_attribute_keys[] = $key;
-        $additionalAttributesHeaders[] = $header_value;
+        $altAttributeKeys[] = $key;
+        $additionalAttributesHeaders[] = $headerValue;
     }
-    $attribute_keys = $alt_attribute_keys;
+    $attributeKeys = $altAttributeKeys;
 }
 
-if ($cfg_product_features) {
-    $all_feature_keys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
+if ($shouldShowProductFeatures) {
+    $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
 
     if (
-        is_array($cfg_features_shown)
-        && count($cfg_features_shown) > 0
-        && $cfg_features_shown[0] !== ''
+        is_array($shouldFeaturesBeShown)
+        && count($shouldFeaturesBeShown) > 0
+        && $shouldFeaturesBeShown[0] !== ''
     ) {
-        $feature_keys = DfTools::getSelectedFeatures($all_feature_keys, $cfg_features_shown);
+        $featurekeys = DfTools::getSelectedFeatures($allFeatureKeys, $shouldFeaturesBeShown);
     } else {
-        $feature_keys = $all_feature_keys;
+        $featurekeys = $allFeatureKeys;
     }
     $additionalAttributesHeaders[] = 'attributes';
 }
@@ -243,7 +217,23 @@ $header = array_merge($header, $additionalAttributesHeaders);
 
 /**
  * @author camlafit <https://github.com/camlafit>
- * Extend Doofinder feed
+ * Allows users to extend Doofinder feed by adding extra headers and extra rows. Example:
+ *
+ * public function hookActionDoofinderExtendFeed($params)
+ * {
+ *     $params['extra_headers'] = ['header_custom1', 'header_custom2'];
+ *     $params['extra_rows'] = [
+ *         [
+ *             'id_product' => 1,
+ *             'header_custom1' => 'value1'
+ *         ],
+ *         [
+ *             'id_product' => 2,
+ *             'header_custom2' => 'value2'
+ *         ]
+ *     ];
+ * }
+ *
  *
  * To add an new header, module can do an array_merge on $extraHeader
  * To add an new data to a product, module must create a multidimensionnal array as this :
@@ -281,7 +271,7 @@ $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $
 $rows = arrayMergeByIdProduct($rows, $extraRows);
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$minPriceVariantByProductId = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies, $lang->id, $shop->id) : [];
+$minPriceVariantByProductId = $shouldDisplayPrices ? DfTools::getMinVariantPrices($rows, $shouldPricesUseTaxes, $currencies, $lang->id, $shop->id) : [];
 $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 
 $dfProductBuild = new DfProductBuild($shop->id, $lang->id, $currency->id);

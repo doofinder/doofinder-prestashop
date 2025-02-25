@@ -137,7 +137,9 @@ class DfProductBuild
                 ) {
                     $p['price'] = $minVariant['price'];
                     $p['sale_price'] = ($minVariant['onsale_price'] === $minVariant['price']) ? null : $minVariant['onsale_price'];
-                    $p['df_multiprice'] = $minVariant['multiprice'];
+                    if ($this->multipriceEnabled) {
+                        $p['df_multiprice'] = $minVariant['multiprice'];
+                    }
                 }
             }
         }
@@ -206,7 +208,7 @@ class DfProductBuild
         $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
 
         if (array_key_exists('df_variants_information', $product)) {
-            $product['df_variants_information'] = implode('%%', array_map('slugify', $product['df_variants_information']));
+            $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
         }
 
         $product['df_group_leader'] = (int)$product['df_group_leader'];
@@ -217,7 +219,7 @@ class DfProductBuild
             }
             $attributeValue = '';
             foreach ($product[$extraHeader] as $index => $value) {
-                $attributeValue .= slugify($index) . '=' . str_replace('/', '\/', DfTools::cleanString($value)) . '/';
+                $attributeValue .= DfTools::slugify($index) . '=' . str_replace('/', '\/', DfTools::cleanString($value)) . '/';
             }
             $product[$extraHeader] = $attributeValue;
         }
@@ -437,10 +439,10 @@ class DfProductBuild
         foreach (DfTools::getFeaturesForProduct($product['id_product'], $this->idLang, $keys) as $key => $values) {
             if (count($values) > 1) {
                 foreach ($values as $value) {
-                    $features[$this->slugify($key)][] = DfTools::cleanString($value);
+                    $features[DfTools::slugify($key)][] = DfTools::cleanString($value);
                 }
             } else {
-                $features[$this->slugify($key)] = DfTools::cleanString($values[0]);
+                $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
             }
         }
 
@@ -470,7 +472,7 @@ class DfProductBuild
         $altAttributes = [];
 
         foreach ($attributes as $attribute) {
-            $altAttributes[$this->slugify($attribute['group_name'])] = $attribute['name'];
+            $altAttributes[DfTools::slugify($attribute['group_name'])] = $attribute['name'];
         }
 
         return $altAttributes;
@@ -500,33 +502,9 @@ class DfProductBuild
 
             $names = array_column($attributes, 'name');
 
-            return array_map([$this, 'slugify'], $names);
+            return array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $names);
         }
 
         return [];
-    }
-
-    private function slugify($text)
-    {
-        // replace non letter or digits by -
-        $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
-
-        // trim
-        $text = trim($text, '-');
-
-        // transliterate
-        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-
-        // lowercase
-        $text = \Tools::strtolower($text);
-
-        // remove unwanted characters
-        $text = preg_replace('~[^-\w]+~', '', $text);
-
-        if (empty($text)) {
-            return 'n-a';
-        }
-
-        return $text;
     }
 }
