@@ -118,6 +118,32 @@ class DfTools
         return $sizes;
     }
 
+    public static function getHashidKeys()
+    {
+        $hashidKeys = [];
+        $context = \Context::getContext();
+        $currencies = \Currency::getCurrenciesByIdShop($context->shop->id);
+        $languages = \Language::getLanguages(true, $context->shop->id);
+        foreach ($languages as $language) {
+            if (0 === (int) $language['active']) {
+                continue;
+            }
+            foreach ($currencies as $currency) {
+                if (1 === (int) $currency['deleted'] || 0 === (int) $currency['active']) {
+                    continue;
+                }
+                $currencyIso = strtoupper($currency['iso_code']);
+                $langFullIso = strtoupper($language['language_code']);
+                $hashidKeys[] = [
+                    'currency' => $currencyIso,
+                    'language' => $langFullIso,
+                    'key' => 'DF_HASHID_' . $currencyIso . '_' . $langFullIso,
+                ];
+            }
+        }
+        return $hashidKeys;
+    }
+
     /**
      * Returns an assoc. array. Keys are currency ISO codes. Values are currency
      * names.

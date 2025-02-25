@@ -55,6 +55,7 @@ class DoofinderAdminPanelView
             return $stop;
         }
         $adv = \Tools::getValue('adv', 0);
+        $skip = \Tools::getValue('skip', 0);
 
         $context->smarty->assign('adv', $adv);
 
@@ -112,7 +113,7 @@ class DoofinderAdminPanelView
             }
 
             $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure_administration_panel.tpl');
-            $output .= $this->renderFormDataFeed($adv);
+            $output .= $this->renderFormDataFeed($adv, $skip);
             if ($adv) {
                 $output .= $this->renderFormAdvanced();
             }
@@ -213,7 +214,7 @@ class DoofinderAdminPanelView
      *
      * @return string
      */
-    protected function renderFormDataFeed($adv = false)
+    protected function renderFormDataFeed($adv = false, $skip = false)
     {
         $helper = new \HelperForm();
         $context = \Context::getContext();
@@ -226,7 +227,7 @@ class DoofinderAdminPanelView
         $helper->identifier = $this->module->getIdentifier();
         // $helper->submit_action = 'submitDoofinderModuleDataFeed';
         $helper->currentIndex = $context->link->getAdminLink('AdminModules', false)
-            . (($adv) ? '&adv=1' : '')
+            . (($adv) ? '&adv=1' : '') . (($skip) ? '&skip=1' : '')
             . '&configure=' . $this->module->name . '&tab_module=' . $this->module->tab . '&module_name=' . $this->module->name;
         $helper->token = \Tools::getAdminTokenLite('AdminModules');
 
@@ -474,6 +475,8 @@ class DoofinderAdminPanelView
      */
     protected function getConfigFormStoreInfo()
     {
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+        $isManualInstallation = (bool) \Tools::getValue('skip', 0);
         $inputs = [
             [
                 'type' => 'text',
@@ -481,26 +484,48 @@ class DoofinderAdminPanelView
                 'name' => 'DF_INSTALLATION_ID',
                 'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
                 'lang' => false,
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
+                'readonly' => !$isAdvParamPresent && !$isManualInstallation,
             ],
             [
                 'type' => 'text',
                 'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
                 'name' => 'DF_API_KEY',
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
+                'readonly' => !$isAdvParamPresent && !$isManualInstallation,
             ],
             [
-                'type' => 'text',
+                'type' => 'select',
                 'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                 'name' => 'DF_REGION',
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
+                'options' => [
+                    'query' => [
+                        0 => ['id' => 'eu1', 'name' => $this->module->l('Europe', 'doofinderadminpanelview')],
+                        1 => ['id' => 'us1', 'name' => $this->module->l('United States', 'doofinderadminpanelview')],
+                        2 => ['id' => 'ap1', 'name' => $this->module->l('Asia - Pacific', 'doofinderadminpanelview')],
+                    ],
+                    'id' => 'id',
+                    'name' => 'name'
+                ],
+                'readonly' => !$isAdvParamPresent && !$isManualInstallation,
             ],
-            [
-                'type' => 'html',
-                'label' => $this->module->l('Feed URLs to use on Doofinder Admin panel', 'doofinderadminpanelview'),
-                'name' => 'DF_FEED_READONLY_URLS',
-                'html_content' => $this->feedUrlsFormatHtml($this->getFeedURLs()),
-            ],
+        ];
+
+        if ($isAdvParamPresent || $isManualInstallation) {
+            $hashidKeys = DfTools::getHashidKeys();
+            foreach ($hashidKeys as $hashidKey) {
+                $inputs[] = [
+                    'type' => 'text',
+                    'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey['currency'] . '-' . $hashidKey['language'],
+                    'name' => $hashidKey['key'],
+                    'readonly' => !$isAdvParamPresent && !$isManualInstallation,
+                ];
+            }
+        }
+
+        $inputs[] = [
+            'type' => 'html',
+            'label' => $this->module->l('Feed URLs to use on Doofinder Admin panel', 'doofinderadminpanelview'),
+            'name' => 'DF_FEED_READONLY_URLS',
+            'html_content' => $this->feedUrlsFormatHtml($this->getFeedURLs()),
         ];
 
         return [

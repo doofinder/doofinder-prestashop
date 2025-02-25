@@ -149,11 +149,21 @@ class DoofinderConfig
      */
     public static function getConfigFormValuesStoreInfo()
     {
-        return [
+        $config = [
             'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
             'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
             'DF_REGION' => \Configuration::get('DF_REGION'),
         ];
+        $hashidKeys = DfTools::getHashidKeys();
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+        $isManualInstallation = (bool) \Tools::getValue('skip', 0);
+        if ($isAdvParamPresent || $isManualInstallation) {
+            foreach ($hashidKeys as $hashidKey) {
+                $config[$hashidKey['key']] = \Configuration::get($hashidKey['key']);
+            }
+        }
+
+        return $config;
     }
 
     /**
