@@ -716,7 +716,7 @@ class DfTools
           ON (p.id_product = pa.id_product)
         LEFT JOIN _DB_PREFIX_product_supplier psp
           ON (p.id_product = psp.id_product AND pa.id_product_attribute = psp.id_product_attribute)
-        INNER JOIN _DB_PREFIX_product_attribute_shop pas
+        LEFT JOIN _DB_PREFIX_product_attribute_shop pas
           ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
