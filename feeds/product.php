@@ -256,12 +256,6 @@ Hook::exec('actionDoofinderExtendFeed', [
 
 $header = array_merge($header, $extraHeader);
 
-$csv = fopen('php://output', 'w');
-if (!$limit || ($offset !== false && (int) $offset === 0)) {
-    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
-}
-fclose($csv);
-
 // PRODUCTS
 $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
 
@@ -274,6 +268,10 @@ $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 $dfProductBuild = new DfProductBuild($shop->id, $lang->id, $currency->id);
 
 $csv = fopen('php://output', 'w');
+if (!$limit || (false !== $offset && 0 === (int) $offset)) {
+    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
+}
+
 foreach ($rows as $row) {
     $product = $dfProductBuild->buildProduct($row, $minPriceVariantByProductId, $additionalAttributesHeaders, $additionalHeaders);
     $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
