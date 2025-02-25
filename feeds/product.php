@@ -102,8 +102,8 @@ $isMultipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 $shouldShowProductVariations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
 $shouldShowProductFeatures = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
 $isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
-$shouldFeaturesBeShown = explode(',', DfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
-$shouldGroupAttributesBeShown = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
+$featuresShownArray = explode(',', DfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
+$attributesShownArray = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
 $shouldLimitGroupAttributes = false;
 $debug = DfTools::getBooleanFromRequest('debug', false);
 $limit = Tools::getValue('limit', false);
@@ -120,14 +120,14 @@ if ($debug) {
 }
 
 if (
-    is_array($shouldGroupAttributesBeShown)
-    && count($shouldGroupAttributesBeShown) > 0
-    && $shouldGroupAttributesBeShown[0] !== ''
+    is_array($attributesShownArray)
+    && count($attributesShownArray) > 0
+    && $attributesShownArray[0] !== ''
 ) {
     $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
     $groupAttributesSlug = [];
     foreach ($groupAttributes as $g) {
-        if (in_array($g['id_attribute_group'], $shouldGroupAttributesBeShown)) {
+        if (in_array($g['id_attribute_group'], $attributesShownArray)) {
             $groupAttributesSlug[] = DfTools::slugify($g['name']);
         }
     }
@@ -199,11 +199,11 @@ if ($shouldShowProductFeatures) {
     $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
 
     if (
-        is_array($shouldFeaturesBeShown)
-        && count($shouldFeaturesBeShown) > 0
-        && $shouldFeaturesBeShown[0] !== ''
+        is_array($featuresShownArray)
+        && count($featuresShownArray) > 0
+        && $featuresShownArray[0] !== ''
     ) {
-        $featurekeys = DfTools::getSelectedFeatures($allFeatureKeys, $shouldFeaturesBeShown);
+        $featurekeys = DfTools::getSelectedFeatures($allFeatureKeys, $featuresShownArray);
     } else {
         $featurekeys = $allFeatureKeys;
     }
