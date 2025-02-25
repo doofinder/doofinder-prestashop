@@ -84,7 +84,7 @@ if (!$shop->id) {
 // GENERAL PURPOSE VARIABLES + CONTEXT
 $lang = DfTools::getLanguageFromRequest();
 $context->language = $lang;
-$country =(int) DfTools::cfg($shop->id, 'PS_COUNTRY_DEFAULT');
+$country = (int) DfTools::cfg($shop->id, 'PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
 $currency = DfTools::getCurrencyForLanguageFromRequest($lang);
 $currencies = Currency::getCurrenciesByIdShop($context->shop->id);
@@ -147,7 +147,7 @@ header('Content-Type:text/plain; charset=utf-8');
 
 // HEADER
 $header = ['id'];
-if ($shouldShowProductVariations == 1) {
+if (1 === $shouldShowProductVariations) {
     $header[] = 'item_group_id';
 }
 $header = array_merge($header, [
@@ -173,7 +173,7 @@ if ($shouldDisplayPrices) {
 
 $additionalAttributesHeaders = [];
 
-if ($shouldShowProductVariations == 1) {
+if (1 === $shouldShowProductVariations) {
     $header[] = 'variation_reference';
     $header[] = 'variation_supplier_reference';
     $header[] = 'variation_mpn';
