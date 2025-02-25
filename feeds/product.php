@@ -119,9 +119,6 @@ if ($debug) {
     ini_set('display_errors', 0);
 }
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 if (
     is_array($shouldGroupAttributesBeShown)
     && count($shouldGroupAttributesBeShown) > 0
