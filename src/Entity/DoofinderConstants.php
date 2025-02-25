@@ -27,7 +27,7 @@ class DoofinderConstants
     const DOOPHOENIX_REGION_URL = 'https://%ssearch.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '4.13.0';
+    const VERSION = '5.0.2';
     const NAME = 'doofinder';
     const YES = 1;
     const NO = 0;

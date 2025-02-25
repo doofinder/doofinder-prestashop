@@ -15,6 +15,8 @@
 
 namespace PrestaShop\Module\Doofinder\Src\Entity;
 
+use Context;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -27,7 +29,11 @@ class DoofinderConfig
             return;
         }
 
-        $debug = \Configuration::get('DF_DEBUG');
+        $context = Context::getContext();
+        $idShop = $context->shop->id;
+        $idShopGroup = $context->shop->id_shop_group;
+
+        $debug = \Configuration::get('DF_DEBUG', null, $idShopGroup, $idShop);
         if (!empty($debug) && $debug) {
             $message = is_string($message) ? $message : print_r($message, true);
             error_log("$message\n", 3, _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . 'doofinder' . DIRECTORY_SEPARATOR . $logFile);
@@ -111,19 +117,19 @@ class DoofinderConfig
      *
      * @return array
      */
-    public static function getConfigFormValuesDataFeed()
+    public static function getConfigFormValuesDataFeed($idShop)
     {
         return [
-            'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
-            'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES'),
-            'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
-            'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
-            'DF_SHOW_PRODUCT_VARIATIONS' => \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS'),
-            'DF_GROUP_ATTRIBUTES_SHOWN[]' => explode(',', \Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN')),
-            'DF_SHOW_PRODUCT_FEATURES' => \Configuration::get('DF_SHOW_PRODUCT_FEATURES'),
-            'DF_FEATURES_SHOWN[]' => explode(',', \Configuration::get('DF_FEATURES_SHOWN')),
-            'DF_GS_IMAGE_SIZE' => \Configuration::get('DF_GS_IMAGE_SIZE'),
-            'DF_UPDATE_ON_SAVE_DELAY' => \Configuration::get('DF_UPDATE_ON_SAVE_DELAY'),
+            'DF_SHOW_LAYER' => DfTools::getConfigByShop('DF_SHOW_LAYER', $idShop, true),
+            'DF_GS_DISPLAY_PRICES' => DfTools::getConfigByShop('DF_GS_DISPLAY_PRICES', $idShop),
+            'DF_GS_PRICES_USE_TAX' => DfTools::getConfigByShop('DF_GS_PRICES_USE_TAX', $idShop),
+            'DF_FEED_FULL_PATH' => DfTools::getConfigByShop('DF_FEED_FULL_PATH', $idShop),
+            'DF_SHOW_PRODUCT_VARIATIONS' => DfTools::getConfigByShop('DF_SHOW_PRODUCT_VARIATIONS', $idShop),
+            'DF_GROUP_ATTRIBUTES_SHOWN[]' => explode(',', DfTools::getConfigByShop('DF_GROUP_ATTRIBUTES_SHOWN', $idShop)),
+            'DF_SHOW_PRODUCT_FEATURES' => DfTools::getConfigByShop('DF_SHOW_PRODUCT_FEATURES', $idShop),
+            'DF_FEATURES_SHOWN[]' => explode(',', DfTools::getConfigByShop('DF_FEATURES_SHOWN', $idShop)),
+            'DF_GS_IMAGE_SIZE' => DfTools::getConfigByShop('DF_GS_IMAGE_SIZE', $idShop),
+            'DF_UPDATE_ON_SAVE_DELAY' => DfTools::getConfigByShop('DF_UPDATE_ON_SAVE_DELAY', $idShop),
         ];
     }
 
@@ -132,13 +138,13 @@ class DoofinderConfig
      *
      * @return array
      */
-    public static function getConfigFormValuesAdvanced()
+    public static function getConfigFormValuesAdvanced($idShop)
     {
         return [
-            'DF_SHOW_LAYER_MOBILE' => \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true),
-            'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
-            'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
-            'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
+            'DF_SHOW_LAYER_MOBILE' => DfTools::getConfigByShop('DF_SHOW_LAYER_MOBILE', $idShop, true),
+            'DF_DEBUG' => DfTools::getConfigByShop('DF_DEBUG', $idShop),
+            'DF_DEBUG_CURL' => DfTools::getConfigByShop('DF_DEBUG_CURL', $idShop),
+            'DF_ENABLED_V9' => DfTools::getConfigByShop('DF_ENABLED_V9', $idShop),
         ];
     }
 
@@ -147,10 +153,10 @@ class DoofinderConfig
      *
      * @return array
      */
-    public static function getConfigFormValuesStoreInfo()
+    public static function getConfigFormValuesStoreInfo($idShop)
     {
         return [
-            'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
+            'DF_INSTALLATION_ID' => DfTools::getConfigByShop('DF_INSTALLATION_ID', $idShop),
             'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
             'DF_REGION' => \Configuration::get('DF_REGION'),
         ];

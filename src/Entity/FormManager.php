@@ -44,23 +44,24 @@ class FormManager
         $formUpdated = '';
         $messages = '';
         $context = \Context::getContext();
+        $idShop = $context->shop->id;
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
             UpdateOnSave::indexApiInvokeReindexing();
         }
         if (((bool) \Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesDataFeed());
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesDataFeed($idShop));
             $formUpdated = 'data_feed_tab';
         }
 
         if (((bool) \Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesAdvanced());
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesAdvanced($idShop));
             $formUpdated = 'advanced_tab';
             $context->smarty->assign('adv', 1);
         }
 
         if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo());
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
             $formUpdated = 'store_info_tab';
         }
 

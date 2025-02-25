@@ -1329,6 +1329,17 @@ class DfTools
         return $v;
     }
 
+    public static function getConfigByShop($key, $idShop, $default = '')
+    {
+        if (\Configuration::hasKey($key, null, null, $idShop)) {
+            return \Configuration::get($key, null, null, $idShop, $default);
+        } elseif (\Configuration::hasKey($key) && (int) \Configuration::get('PS_SHOP_DEFAULT') === (int) $idShop) {
+            return \Configuration::get($key);
+        }
+
+        return $default;
+    }
+
     public static function walkApplyHtmlEntities(&$item, $key)
     {
         if (is_string($item)) {

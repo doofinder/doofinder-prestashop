@@ -217,6 +217,7 @@ class DoofinderAdminPanelView
     {
         $helper = new \HelperForm();
         $context = \Context::getContext();
+        $idShop = $context->shop->id;
         $helper->show_toolbar = false;
         $helper->table = $this->module->getTable();
         $helper->module = $this->module;
@@ -234,7 +235,7 @@ class DoofinderAdminPanelView
         $html = $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/dummy/pre_tab.tpl');
         // Data feed form
         $helper->tpl_vars = [
-            'fields_value' => DoofinderConfig::getConfigFormValuesDataFeed(),
+            'fields_value' => DoofinderConfig::getConfigFormValuesDataFeed($idShop),
             'languages' => $context->controller->getLanguages(),
             'id_language' => $context->language->id,
         ];
@@ -243,7 +244,7 @@ class DoofinderAdminPanelView
             $validUpdateOnSave = UpdateOnSave::isValid();
             $html .= $helper->generateForm([$this->getConfigFormDataFeed($validUpdateOnSave)]);
             // Store information
-            $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesStoreInfo();
+            $helper->tpl_vars['fields_value'] = DoofinderConfig::getConfigFormValuesStoreInfo($idShop);
             $html .= $helper->generateForm([$this->getConfigFormStoreInfo()]);
         } else {
             $context->controller->warnings[] = $this->module->l("This shop is new and it hasn't been synchronized with Doofinder yet.", 'doofinderadminpanelview');
@@ -275,7 +276,7 @@ class DoofinderAdminPanelView
         $helper->token = \Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = [
-            'fields_value' => DoofinderConfig::getConfigFormValuesAdvanced(),
+            'fields_value' => DoofinderConfig::getConfigFormValuesAdvanced($context->shop->id),
             'languages' => $context->controller->getLanguages(),
             'id_language' => $context->language->id,
         ];
