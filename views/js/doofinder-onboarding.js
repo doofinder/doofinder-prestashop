@@ -77,13 +77,14 @@ function launchAutoinstaller() {
       //reload without resending post data
       history.go(0);
     } else {
-      if (data.errors && data.errors.length > 0) {
+      if ("string" === typeof data.errors) {
+        $(".loading-installer").hide();
+        $("#installation-errors").append("<li>" + data.errors + "</li>");
+      } else if (data.errors && data.errors.length > 0) {
         $(".loading-installer").hide();
         for (const error in data.errors) {
           if (Object.hasOwnProperty.call(data.errors, error)) {
-            $("#installation-errors").append(
-              "<li>" + data.errors[error] + "</li>"
-            );
+            $("#installation-errors").append("<li>" + data.errors[error] + "</li>");
           }
         }
       }
