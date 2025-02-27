@@ -216,11 +216,15 @@ $header = array_merge($header, $additionalAttributesHeaders);
  * @author camlafit <https://github.com/camlafit>
  * Allows users to extend Doofinder feed by adding extra headers and extra rows.
  * The hook can be defined in a different custom module or directly in the theme PHP files.
+ * Don't forget to register the hook via registerHook method:
+ *
+ * `$this->registerHook('actionDoofinderExtendFeed');`
+ *
  * Example of the function:
  *
  * public function hookActionDoofinderExtendFeed($params)
  * {
- *     $params['extra_headers'] = ['header_custom1', 'header_custom2'];
+ *     $params['extra_header'] = ['header_custom1', 'header_custom2'];
  *     $params['extra_rows'] = [
  *         [
  *             'id_product' => 1,
