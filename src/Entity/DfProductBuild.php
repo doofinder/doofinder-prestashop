@@ -160,7 +160,6 @@ class DfProductBuild
             foreach ($extraAttributesHeader as $extraAttributeHeader) {
                 if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $p) && array_key_exists($extraAttributeHeader, $attributes)) {
                     $p[$extraAttributeHeader] = $attributes[$extraAttributeHeader];
-                    continue;
                 }
             }
         }
@@ -212,17 +211,6 @@ class DfProductBuild
         }
 
         $product['df_group_leader'] = (int)$product['df_group_leader'];
-
-        foreach ($extraHeaders as $extraHeader) {
-            if (empty($product[$extraHeader]) || !is_array($product[$extraHeader])) {
-                continue;
-            }
-            $attributeValue = '';
-            foreach ($product[$extraHeader] as $index => $value) {
-                $attributeValue .= DfTools::slugify($index) . '=' . str_replace('/', '\/', DfTools::cleanString($value)) . '/';
-            }
-            $product[$extraHeader] = $attributeValue;
-        }
 
         if (array_key_exists('features', $product) && is_array($product['features'])) {
 
