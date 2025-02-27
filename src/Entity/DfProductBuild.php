@@ -214,7 +214,7 @@ class DfProductBuild
         $product['df_group_leader'] = (int)$product['df_group_leader'];
 
         foreach ($extraHeaders as $extraHeader) {
-            if (empty($product[$extraHeader])) {
+            if (empty($product[$extraHeader]) || !is_array($product[$extraHeader])) {
                 continue;
             }
             $attributeValue = '';
