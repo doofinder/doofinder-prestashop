@@ -46,6 +46,7 @@ class FormManager
         $context = \Context::getContext();
 
         $isFirstTime = (bool) \Tools::getValue('first_time', 0);
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
         $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', false);
 
         if ($isFirstTime) {
@@ -89,7 +90,7 @@ class FormManager
             }
             $value = trim($value);
             // Special case for Hashids due to the Multiprice
-            if ($multipriceEnabled && str_contains($postKey, 'DF_HASHID')) {
+            if ($isAdvParamPresent && $multipriceEnabled && str_contains($postKey, 'DF_HASHID')) {
                 self::updateHashIds($postKey, $value);
                 continue;
             }

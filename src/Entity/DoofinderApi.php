@@ -639,9 +639,17 @@ class DoofinderApi
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
                     }
                 } else {
-                    $msg = $module->l('Empty Api Key or empty Search Engine - ', 'doofinderapi') . $langFullIso;
-                    $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                    $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+                    if (!$apiKey) {
+                        $msg = $module->l('Empty Api Key', 'doofinderapi');
+                        $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                    }
+                    if ($isAdvParamPresent && !$hashid) {
+                        $msg = $module->l('Empty Search Engine', 'doofinderapi') . '-' . $langFullIso;
+                        $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                    }
                 }
+                
             }
         }
         if ($onlyOneLang) {

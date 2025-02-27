@@ -510,7 +510,7 @@ class DoofinderAdminPanelView
             ],
         ];
 
-        if ($isAdvParamPresent || $isManualInstallation) {
+        if ($isAdvParamPresent) {
             if ($multipriceEnabled) {
                 $hashidKeys = self::getMultipriceKeys();
                 $keyToUse = 'keyMultiprice';
