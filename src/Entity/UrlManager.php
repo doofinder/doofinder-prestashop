@@ -86,6 +86,11 @@ class UrlManager
         return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/feed-url-update');
     }
 
+    public static function getEnableMultipriceUrl($region)
+    {
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/enable-multiprice');
+    }
+
     /**
      * Gets an URL with its region filled in. You can also append a path (optional).
      * If the region is provided as '' it will return a regionless URL.

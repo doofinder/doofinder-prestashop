@@ -51,4 +51,13 @@ $(document).ready(function() {
     return parent;
   }
 
+  $('#DF_API_KEY').on('change', function() {
+    const apiKey = $('#DF_API_KEY').val().trim();
+    if (!/eu1-|ap1-|us1-/.test(apiKey)) {
+      return;
+    }
+    const region = apiKey.split('-').shift();
+    $('#DF_REGION').val(region);
+  });
+
 });

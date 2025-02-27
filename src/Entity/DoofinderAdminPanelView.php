@@ -99,7 +99,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('shop_id', $shopId);
         $context->smarty->assign('checkConnection', DoofinderConfig::checkOutsideConnection());
         $context->smarty->assign('tokenAjax', DfTools::encrypt('doofinder-ajax'));
-        $context->smarty->assign('skipurl', $skipUrl);
+        $context->smarty->assign('skipurl', $skipUrl . '&first_time=1');
         $context->smarty->assign('paramsPopup', $paramsPopup);
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
@@ -477,6 +477,7 @@ class DoofinderAdminPanelView
     {
         $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
         $isManualInstallation = (bool) \Tools::getValue('skip', 0);
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', false);
         $inputs = [
             [
                 'type' => 'text',
@@ -510,12 +511,21 @@ class DoofinderAdminPanelView
         ];
 
         if ($isAdvParamPresent || $isManualInstallation) {
-            $hashidKeys = DfTools::getHashidKeys();
+            if ($multipriceEnabled) {
+                $hashidKeys = self::getMultipriceKeys();
+                $keyToUse = 'keyMultiprice';
+                $labelToUse = 'labelMultiprice';
+            } else {
+                $hashidKeys = DfTools::getHashidKeys();
+                $keyToUse = 'key';
+                $labelToUse = 'label';
+            }
+
             foreach ($hashidKeys as $hashidKey) {
                 $inputs[] = [
                     'type' => 'text',
-                    'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey['currency'] . '-' . $hashidKey['language'],
-                    'name' => $hashidKey['key'],
+                    'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey[$labelToUse],
+                    'name' => $hashidKey[$keyToUse],
                     'readonly' => !$isAdvParamPresent && !$isManualInstallation,
                 ];
             }
@@ -540,6 +550,18 @@ class DoofinderAdminPanelView
                 ],
             ],
         ];
+    }
+
+    private static function getMultipriceKeys()
+    {
+        $hashidKeys = DfTools::getHashidKeys();
+        $arrayKeys = [];
+
+        foreach ($hashidKeys as $hashidKey) {
+            $arrayKeys[$hashidKey['keyMultiprice']] = $hashidKey;
+        }
+
+        return $arrayKeys;
     }
 
     private function getBooleanFormValue()

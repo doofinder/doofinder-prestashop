@@ -137,7 +137,10 @@ class DfTools
                 $hashidKeys[] = [
                     'currency' => $currencyIso,
                     'language' => $langFullIso,
+                    'label' => $currencyIso . ' - ' . $langFullIso,
+                    'labelMultiprice' => $langFullIso,
                     'key' => 'DF_HASHID_' . $currencyIso . '_' . $langFullIso,
+                    'keyMultiprice' => 'DF_HASHID_' . $langFullIso,
                 ];
             }
         }
