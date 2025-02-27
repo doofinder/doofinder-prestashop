@@ -165,6 +165,10 @@ class DoofinderConfig
         }
         if ($isAdvParamPresent || $isManualInstallation) {
             foreach ($hashidKeys as $hashidKey) {
+                // To avoid overriding already defined values in multiprice cases
+                if (!empty($config[$hashidKey[$keyToUse]])) {
+                    continue;
+                }
                 $config[$hashidKey[$keyToUse]] = \Configuration::get($hashidKey['key']);
             }
         }
