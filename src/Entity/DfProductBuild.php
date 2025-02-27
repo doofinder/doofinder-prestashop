@@ -228,6 +228,13 @@ class DfProductBuild
 
             $formattedAttributes = array_map(
                 function ($key, $value) {
+                    if (is_array($value)) {
+                        $keyValueToReturn = [];
+                        foreach ($value as $singleValue) {
+                            $keyValueToReturn[] = $key . '=' . $singleValue;
+                        }
+                        return implode('/', $keyValueToReturn);
+                    }
                     return $key . '=' . $value;
                 },
                 array_keys($product['features']),
