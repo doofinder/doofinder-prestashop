@@ -1,6 +1,5 @@
 <?php
 
-global $_MODULE;
 $_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Install Doofinder in your shop with no effort';
@@ -29,8 +28,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_acc697e9b9f3dae4b46e08f
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_cf565402d32b79d33f626252949a6941'] = 'Save configuration';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_9dfc5d5738312210c3c75e68a468691d'] = 'Advanced Options';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38461ba2356'] = 'Debug Mode. Write info logs in doofinder.log file';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b0939b990335e5c6a8f76fa5c81835b3'] = 'CURL disable HTTPS check';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_958cf5c1405c86e460b294803caedc45'] = 'If your server have an untrusted certificate and you have connection problems with the API, please enable this';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Debug CURL error response';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'To debug if your server has symptoms of connection problems';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Doofinder script in mobile version';
@@ -39,6 +36,10 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe835
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'You can find this identifier in our control panel. Inside the side menu labeled \"Store settings\".';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_e0daaf59114081fac112928e638c8d85'] = 'Doofinder Api Key';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f447ac856e7e72435904956e3b15f433'] = 'Region';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_912d59cdf1d3f551fae21f6f0062258f'] = 'Europe';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f253efe302d32ab264a76e0ce65be769'] = 'United States';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_b76537b9476bbfd7f7ab2c1f2d33f6c4'] = 'Asia - Pacific';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_56ed20387ac80a77f5e50a52f2baa976'] = 'Hashid for Search Engine';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_08c1cf7707bb72744cd07192c8580580'] = 'Feed URLs to use on Doofinder Admin panel';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_80a11d2a54a677f6fadd9c041c0d6b98'] = 'Store Information';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_41bfb72cd54183db3f00393c9a052495'] = 'Save Store Info Widget Options';
@@ -47,7 +48,8 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_4c48400a2f3c25d9ee65425
 $_MODULE['<{doofinder}prestashop>doofinderapi_8412280eb3a42b954b37c5a5549f292e'] = 'Error: Credentials OK but limit query reached for Search Engine - ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_e43b9767da79f0184ebaa0e9d5abed3e'] = 'Connection successful for Search Engine - ';
 $_MODULE['<{doofinder}prestashop>doofinderapi_cfa4587136de2d97cdb650add327f593'] = 'Error: no connection for Search Engine - ';
-$_MODULE['<{doofinder}prestashop>doofinderapi_24fd2c7b489981c568b971ac3178f5df'] = 'Empty Api Key or empty Search Engine - ';
+$_MODULE['<{doofinder}prestashop>doofinderapi_a6d588a0cb186e29ec7250b0d171fd62'] = 'Empty Api Key';
+$_MODULE['<{doofinder}prestashop>doofinderapi_6efd49d043658d2cf2d1836ebbd586a7'] = 'Empty Search Engine';
 $_MODULE['<{doofinder}prestashop>formmanager_fcea235fdf24a526070153f5b60355f4'] = 'You\'ve just changed a data feed option. It may be necessary to reprocess the index to apply these changes effectively.';
 $_MODULE['<{doofinder}prestashop>formmanager_2378c5bcb7b183304da2a2b94262f024'] = 'Launch reindexing';
 $_MODULE['<{doofinder}prestashop>formmanager_039b452cd9646bf1a60dd09146311ee7'] = 'Settings updated!';
@@ -58,7 +60,6 @@ $_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] 
 $_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'How to configure the search layer filters';
 $_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Learn the basics about Live Layer';
 $_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'Or contact directly with us. We will be glad to help you';
-$_MODULE['<{doofinder}prestashop>support_tab_6dcce363217b8653bba30f4edf38ded4'] = 'Support email';
 $_MODULE['<{doofinder}prestashop>configure_ba0801f239c99cb689010161d3ee1471'] = 'On Boarding';
 $_MODULE['<{doofinder}prestashop>configure_8cd892b7b97ef9489ae4479d3f4ef0fc'] = 'store';
 $_MODULE['<{doofinder}prestashop>configure_db5eb84117d06047c97c9a0191b5fffe'] = 'Support';
