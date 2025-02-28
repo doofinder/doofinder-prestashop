@@ -558,7 +558,7 @@ class DfTools
             UNION
             SELECT
                 ps.id_product,
-                (SELECT COUNT(*) FROM ps_product prod LEFT OUTER JOIN ps_product_attribute pa
+                (SELECT COUNT(*) FROM _DB_PREFIX_product prod LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
                 ON (prod.id_product = pa.id_product) WHERE prod.id_product = p.id_product) AS variant_count,
                 ps.show_price,
                 0,

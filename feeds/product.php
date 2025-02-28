@@ -273,11 +273,11 @@ $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $
 $rows = arrayMergeByIdProduct($rows, $extra_rows);
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$min_price_variant_by_product_id = $cfg_display_prices ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies, $lang->id, $shop->id) : [];
+$min_price_variant_by_product_id = ($cfg_product_variations && $cfg_display_prices) ? DfTools::getMinVariantPrices($rows, $cfg_prices_w_taxes, $currencies, $lang->id, $shop->id) : [];
 
 foreach ($rows as $row) {
     $product_id = $row['id_product'];
-    if (DfTools::isParent($row)) {
+    if (!$cfg_product_variations || DfTools::isParent($row)) {
         $variant_id = null;
     } else {
         $variant_id = $row['id_product_attribute'];
