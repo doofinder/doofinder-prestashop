@@ -514,9 +514,17 @@ class DoofinderAdminPanelView
                     'id' => 'id',
                     'name' => 'name'
                 ],
-                'readonly' => !$isAdvParamPresent && !$isManualInstallation,
+                'disabled' => !$isAdvParamPresent && !$isManualInstallation,
             ],
         ];
+
+        // This is necessary since disabled fields are not sent in the submit, thus causing errors.
+        if (!$isAdvParamPresent && !$isManualInstallation) {
+            $inputs[] = [
+                'type' => 'hidden',
+                'name' => 'DF_REGION',
+            ];
+        }
 
         if ($isAdvParamPresent) {
             if ($multipriceEnabled) {

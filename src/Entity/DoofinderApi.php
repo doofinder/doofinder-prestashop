@@ -609,6 +609,7 @@ class DoofinderApi
         $messages = '';
         $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
         $context = \Context::getContext();
+        $apiKeyMsgAlreadyShown = false;
         foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
                 $langIso = \Tools::strtoupper($lang['iso_code']);
@@ -645,12 +646,13 @@ class DoofinderApi
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
                     }
                 } else {
-                    if (!$apiKey) {
+                    if (!$apiKeyMsgAlreadyShown && !$apiKey) {
                         $msg = $module->l('Empty Api Key', 'doofinderapi');
                         $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                        $apiKeyMsgAlreadyShown = true;
                     }
                     if ($isAdvParamPresent && !$hashid) {
-                        $msg = $module->l('Empty Search Engine', 'doofinderapi') . '-' . $langFullIso;
+                        $msg = $module->l('Empty Search Engine', 'doofinderapi') . ' - ' . $langFullIso;
                         $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
                     }
                 }
