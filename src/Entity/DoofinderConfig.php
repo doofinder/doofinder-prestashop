@@ -139,6 +139,7 @@ class DoofinderConfig
             'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
             'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
             'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
+            'DF_MULTIPRICE_ENABLED' => \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true),
         ];
     }
 

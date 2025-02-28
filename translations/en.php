@@ -1,5 +1,6 @@
 <?php
 
+global $_MODULE;
 $_MODULE = [];
 $_MODULE['<{doofinder}prestashop>doofinder_dd31d974a78cdd704acaa6bf15da506c'] = 'Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinder_537d60a5ce0c6b6cf2d6790d5b38b93f'] = 'Install Doofinder in your shop with no effort';
@@ -31,6 +32,8 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Debug CURL error response';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'To debug if your server has symptoms of connection problems';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Doofinder script in mobile version';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_fe8f8482b64a14a0b5514d5654de56b8'] = 'Enable multicurrency';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_5158d161ee2c6900a2fd2c45e97a6908'] = 'Do not change this option unless our support team has given you a specific guidance';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Save Internal Search Options';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'Doofinder Store ID';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'You can find this identifier in our control panel. Inside the side menu labeled \"Store settings\".';

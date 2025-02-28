@@ -32,6 +32,8 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Depurar respuesta de error en el CURL';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'Para depurar si tu servidor tiene problemas de conexión';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Script de Doofinder en versión móvil';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_fe8f8482b64a14a0b5514d5654de56b8'] = 'Habilitar multidivisa';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_5158d161ee2c6900a2fd2c45e97a6908'] = 'No cambies esta opción a menos que nuestro equipo de soporte te lo indicado';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Guardar opciones de búsqueda interna';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'Store ID de Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'Puedes encontrar este identificador en nuestro Panel de Control, dentro del menú superior etiquetado como \"Store settings\"';

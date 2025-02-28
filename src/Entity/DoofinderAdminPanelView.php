@@ -459,6 +459,14 @@ class DoofinderAdminPanelView
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
+                    [
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->module->l('Enable multicurrency', 'doofinderadminpanelview'),
+                        'name' => 'DF_MULTIPRICE_ENABLED',
+                        'desc' => $this->module->l('Do not change this option unless our support team has given you a specific guidance', 'doofinderadminpanelview'),
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ],
                 ],
                 'submit' => [
                     'title' => $this->module->l('Save Internal Search Options', 'doofinderadminpanelview'),

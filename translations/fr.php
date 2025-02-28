@@ -32,6 +32,8 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_f4f6f81745dcb96aaf1cd38
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bfa398fb4ff673ac66baeedbc80f0b77'] = 'Réponse d’erreur CURL en mode débogage';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_170246e7e517d7cd317e3a6ae3ebcb4c'] = 'Pour déboguer si votre serveur présente des symptômes de problèmes de connexion';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae21e0ee96b018923d90e29d3550a56c'] = 'Script de Doofinder dans la version mobile';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_fe8f8482b64a14a0b5514d5654de56b8'] = 'Activer le multidevise';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_5158d161ee2c6900a2fd2c45e97a6908'] = 'Ne modifiez pas cette option à moins que notre équipe d\'assistance ne vous ait fourni des instructions spécifiques';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_48c07cbd1f0f4b03d59befc3e72e9b87'] = 'Sauvegarder les options de recherche interne';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_79958197e198decc81fe8357f5e18a56'] = 'ID de magasin Doofinder';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_27b4149f9ec9505a33aded4775a47104'] = 'Vous trouverez cet identifiant dans votre Panel de Contrôle, sous le menu \"Live Layer\"';
