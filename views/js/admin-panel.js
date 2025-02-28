@@ -62,7 +62,21 @@ $(document).ready(function() {
       return;
     }
     const region = apiKey.split('-').shift();
+    const previousRegion = $regionNode.val();
     $regionNode.val(region);
+    
+    if (previousRegion === region) {
+      return;
+    }
+
+    // Small animation to catch user attention
+    $regionNode.animate({
+      opacity:"0.5"
+    }, 1000, function() {
+      $regionNode.animate({
+        opacity:"1"
+      }, 1000);
+    });
   });
 
 });
