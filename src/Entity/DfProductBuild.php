@@ -82,7 +82,7 @@ class DfProductBuild
         return json_encode($payload);
     }
 
-    public function buildProduct($product, $minPriceVariantByProductId = array(), $extraAttributesHeader = array(), $extraHeaders = array())
+    public function buildProduct($product, $minPriceVariantByProductId = [], $extraAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
