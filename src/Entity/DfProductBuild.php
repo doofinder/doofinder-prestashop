@@ -36,6 +36,7 @@ class DfProductBuild
     private $stockManagement;
     private $useTax;
     private $multipriceEnabled;
+    private $featuresShown;
     private $featuresKeys;
 
     public function __construct($idShop, $idLang, $idCurrency)
@@ -44,17 +45,118 @@ class DfProductBuild
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
-        $this->attributesShown = \Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
-        $this->displayPrices = \Configuration::get('DF_GS_DISPLAY_PRICES');
+        $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
+        $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
         $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
         $this->link = \Context::getContext()->link;
         $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
-        $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
+        $this->productVariations = (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
+        $this->showProductFeatures = (bool) \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX');
+        $this->useTax = (bool) DfTools::cfg($idShop, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES);
         $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $this->featuresShown = explode(',', DfTools::cfg($idShop, 'DF_FEATURES_SHOWN', ''));
         $this->featuresKeys = $this->getFeaturesKeys();
+    }
+
+    /**
+     * Get the list of currencies available for the shop.
+     *
+     * @return array
+     */
+    public function getCurrencies()
+    {
+        return $this->currencies;
+    }
+
+    /**
+     * Get the configured attributes to be shown.
+     *
+     * @return string
+     */
+    public function getAttributesShown()
+    {
+        return $this->attributesShown;
+    }
+
+    /**
+     * Check if prices should be displayed.
+     *
+     * @return bool
+     */
+    public function shouldDisplayPrices()
+    {
+        return $this->displayPrices;
+    }
+
+    /**
+     * Get the configured image size.
+     *
+     * @return string
+     */
+    public function getImageSize()
+    {
+        return $this->imageSize;
+    }
+
+    /**
+     * Get the configured features to be shown.
+     *
+     * @return array
+     */
+    public function getFeaturesShown()
+    {
+        return $this->featuresShown;
+    }
+
+    /**
+     * Check if product variations should be shown.
+     *
+     * @return bool
+     */
+    public function shouldShowProductVariations()
+    {
+        return $this->productVariations;
+    }
+
+    /**
+     * Check if product features should be shown.
+     *
+     * @return bool
+     */
+    public function shouldShowProductFeatures()
+    {
+        return $this->showProductFeatures;
+    }
+
+    /**
+     * Check if stock management is enabled.
+     *
+     * @return mixed
+     */
+    public function getStockManagement()
+    {
+        return $this->stockManagement;
+    }
+
+    /**
+     * Check if prices should include tax.
+     *
+     * @return bool
+     */
+    public function shouldUseTaxes()
+    {
+        return $this->useTax;
+    }
+
+    /**
+     * Check if the multiprice feature is enabled.
+     *
+     * @return bool
+     */
+    public function isMultipriceEnabled()
+    {
+        return $this->multipriceEnabled;
     }
 
     /**
@@ -442,11 +544,10 @@ class DfProductBuild
 
     private function getFeaturesKeys()
     {
-        $cfgFeaturesShown = explode(',', \Configuration::get('DF_FEATURES_SHOWN'));
         $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
 
-        if (is_array($cfgFeaturesShown) && count($cfgFeaturesShown) > 0 && $cfgFeaturesShown[0] !== '') {
-            return DfTools::getSelectedFeatures($allFeatureKeys, $cfgFeaturesShown);
+        if (is_array($this->featuresShown) && count($this->featuresShown) > 0 && $this->featuresShown[0] !== '') {
+            return DfTools::getSelectedFeatures($allFeatureKeys, $this->featuresShown);
         } else {
             return $allFeatureKeys;
         }
