@@ -15,7 +15,6 @@
 
 use PrestaShop\Module\Doofinder\Src\Entity\DfProductBuild;
 use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -87,28 +86,27 @@ $context->language = $lang;
 $country = (int) DfTools::cfg($shop->id, 'PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
 $currency = DfTools::getCurrencyForLanguageFromRequest($lang);
-$currencies = Currency::getCurrenciesByIdShop($context->shop->id);
 
-/* ---------- START CONFIG ---------- */
-$shouldDisplayPrices = DfTools::getBooleanFromRequest(
-    'prices',
-    (bool) DfTools::cfg($shop->id, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES)
-);
-$shouldPricesUseTaxes = DfTools::getBooleanFromRequest(
-    'taxes',
-    (bool) DfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES)
-);
-$isMultipriceEnabled = Configuration::get('DF_MULTIPRICE_ENABLED');
-$shouldShowProductVariations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
-$shouldShowProductFeatures = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
-$isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
-$featuresShownArray = explode(',', DfTools::cfg($shop->id, 'DF_FEATURES_SHOWN'));
-$attributesShownArray = explode(',', DfTools::cfg($shop->id, 'DF_GROUP_ATTRIBUTES_SHOWN'));
+$dfProductBuild = new DfProductBuild($shop->id, $lang->id, $currency->id);
+
+/* ---------- START SHARED CONFIG ---------- */
+$currencies = $dfProductBuild->getCurrencies();
+$shouldDisplayPrices = $dfProductBuild->shouldDisplayPrices();
+$shouldPricesUseTaxes = $dfProductBuild->shouldUseTaxes();
+$isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
+$shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
+$shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
+$featuresShownArray = $dfProductBuild->getFeaturesShown();
+$attributesShownArray = explode(',', $dfProductBuild->getAttributesShown());
+/* ---------- END SHARED CONFIG ---------- */
+
+/* ---------- START CSV-SPECIFIC CONFIG ---------- */
 $shouldLimitGroupAttributes = false;
-$debug = DfTools::getBooleanFromRequest('debug', false);
+$isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
+$debug = DfTools::getBooleanFromRequest('debug');
 $limit = Tools::getValue('limit', false);
 $offset = Tools::getValue('offset', false);
-/* ---------- END CONFIG ---------- */
+/* ---------- END CSV-SPECIFIC CONFIG ---------- */
 
 // To prevent printing errors or warnings that may corrupt the feed.
 if ($debug) {
@@ -147,7 +145,7 @@ header('Content-Type:text/plain; charset=utf-8');
 
 // HEADER
 $header = ['id'];
-if (1 === $shouldShowProductVariations) {
+if ($shouldShowProductVariations) {
     $header[] = 'item_group_id';
 }
 $header = array_merge($header, [
@@ -173,7 +171,7 @@ if ($shouldDisplayPrices) {
 
 $additionalAttributesHeaders = [];
 
-if (1 === $shouldShowProductVariations) {
+if ($shouldShowProductVariations) {
     $header[] = 'variation_reference';
     $header[] = 'variation_supplier_reference';
     $header[] = 'variation_mpn';
@@ -267,10 +265,8 @@ $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $
 $rows = arrayMergeByIdProduct($rows, $extraRows);
 
 // In case there is no need to display prices, avoid calculating the mins by variant
-$minPriceVariantByProductId = (1 === $shouldShowProductVariations && $shouldDisplayPrices) ? DfTools::getMinVariantPrices($rows, $shouldPricesUseTaxes, $currencies, $lang->id, $shop->id) : [];
+$minPriceVariantByProductId = ($shouldShowProductVariations && $shouldDisplayPrices) ? DfTools::getMinVariantPrices($rows, $shouldPricesUseTaxes, $currencies, $lang->id, $shop->id) : [];
 $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
-
-$dfProductBuild = new DfProductBuild($shop->id, $lang->id, $currency->id);
 
 $csv = fopen('php://output', 'w');
 if (!$limit || (false !== $offset && 0 === (int) $offset)) {
