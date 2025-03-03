@@ -52,7 +52,7 @@ class DfProductBuild
         $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX') || DoofinderConstants::NO;
+        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX');
         $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
         $this->featuresKeys = $this->getFeaturesKeys();
     }
@@ -213,22 +213,18 @@ class DfProductBuild
         $product['df_group_leader'] = (int)$product['df_group_leader'];
 
         if (array_key_exists('features', $product) && is_array($product['features'])) {
-
-            $formattedAttributes = array_map(
-                function ($key, $value) {
-                    if (is_array($value)) {
-                        $keyValueToReturn = [];
-                        foreach ($value as $singleValue) {
-                            $keyValueToReturn[] = $key . '=' . $singleValue;
-                        }
-                        return implode('/', $keyValueToReturn);
+            $formattedAttributes = [];
+            foreach ($product['features'] as $key => $value) {
+                if (is_array($value)) {
+                    $keyValueToReturn = [];
+                    foreach ($value as $singleValue) {
+                        $keyValueToReturn[] = $key . '=' . $singleValue;
                     }
-                    return $key . '=' . $value;
-                },
-                array_keys($product['features']),
-                $product['features']
-            );
-
+                    $formattedAttributes[] = implode('/', $keyValueToReturn);
+                } else {
+                    $formattedAttributes[] = $key . '=' . $value;
+                }
+            }
             $product['attributes'] = implode('/', $formattedAttributes);
             unset($product['features']);
         }
