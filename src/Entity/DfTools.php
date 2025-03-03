@@ -1376,9 +1376,9 @@ class DfTools
             $variantId = $product['id_product_attribute'];
             $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
             $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
-            $variantMultiprice = self::getFormattedMultiprice($productId, $includeTaxes, $currencies, $variantId);
+            $variantMultiprice = self::getMultiprice($productId, $includeTaxes, $currencies, $variantId);
 
-            if (key_exists($productId, $minPricesByProductId)) {
+            if (array_key_exists($productId, $minPricesByProductId)) {
                 $currentMinPrices = $minPricesByProductId[$productId];
 
                 /*
@@ -1499,28 +1499,6 @@ class DfTools
     }
 
     /**
-     * Given a product and a list of currencies, returns the multiprice field
-     * in the correct format to be used in the feed CSV.
-     *
-     * An example of a value for this field is
-     * "price_EUR=5/sale_price_EUR=3/price_GBP=4.3/sale_price_GBP=2.7"
-     * for a list containing two currencies ["EUR", "GBP"].
-     *
-     * @param int $productId Id of the product to calculate the multiprice for
-     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
-     * @param array $currencies List of currencies to consider for the multiprice calculation
-     * @param int $variantId When specified, the multiprice will be calculated for that variant
-     *
-     * @return string
-     */
-    public static function getFormattedMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
-    {
-        $multiprice = self::getMultiprice($productId, $includeTaxes, $currencies, $variantId);
-
-        return self::formatMultiprice($multiprice);
-    }
-
-    /**
      * Returns the API Key without the region part.
      *
      * @return string
@@ -1544,7 +1522,7 @@ class DfTools
      *
      * @return string
      */
-    private static function formatMultiprice($multiprice)
+    public static function getFormattedMultiprice($multiprice)
     {
         $multiprices = [];
 
@@ -1555,6 +1533,30 @@ class DfTools
         }
 
         return implode('/', $multiprices);
+    }
+
+    public static function slugify($text)
+    {
+        // replace non letter or digits by -
+        $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
+
+        // trim
+        $text = trim($text, '-');
+
+        // transliterate
+        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+
+        // lowercase
+        $text = \Tools::strtolower($text);
+
+        // remove unwanted characters
+        $text = preg_replace('~[^-\w]+~', '', $text);
+
+        if (empty($text)) {
+            return 'n-a';
+        }
+
+        return $text;
     }
 
     private static function getVariantUrl($product, $context)
