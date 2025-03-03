@@ -150,9 +150,9 @@ class DfProductBuild
             $p['variation_mpn'] = $product['variation_mpn'];
             $p['variation_ean13'] = $product['variation_ean13'];
             $p['variation_upc'] = $product['variation_upc'];
-            $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int)$product['df_group_leader']);
+            $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
             $p['df_variants_information'] = $this->getVariantsInformation($product);
-            
+
             $attributes = $this->getAttributes($product);
 
             $p = array_merge($p, $attributes);
@@ -167,7 +167,7 @@ class DfProductBuild
         if ($this->showProductFeatures) {
             $p['features'] = $this->getFeatures($product);
         }
-        
+
         foreach ($extraHeaders as $extraHeader) {
             if (!empty($p[$extraHeader])) {
                 continue;
@@ -193,11 +193,11 @@ class DfProductBuild
      *   formatted as "key=value" pairs joined with "/". The original features key is removed.
      * - Ensures the final product fields are ordered according to the given headers.
      *
-     * @param array $product      The associative array representing the product data.
-     * @param array $extraHeaders An array of additional headers to process in the product data.
-     * @param array $allHeaders   An array specifying the order of CSV fields.
+     * @param array $product the associative array representing the product data
+     * @param array $extraHeaders an array of additional headers to process in the product data
+     * @param array $allHeaders an array specifying the order of CSV fields
      *
-     * @return array The transformed product array ready for CSV export.
+     * @return array the transformed product array ready for CSV export
      */
     public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
     {
@@ -210,7 +210,7 @@ class DfProductBuild
             $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
         }
 
-        $product['df_group_leader'] = (int)$product['df_group_leader'];
+        $product['df_group_leader'] = (int) $product['df_group_leader'];
 
         if (array_key_exists('features', $product) && is_array($product['features'])) {
             $formattedAttributes = [];
@@ -230,15 +230,15 @@ class DfProductBuild
         }
 
         $product = self::ensureCsvFieldsOrder($product, $allHeaders);
-        
+
         return $product;
     }
 
     private static function ensureCsvFieldsOrder($product, $allHeaders)
     {
-        $productWithSortedAttributes = array();
+        $productWithSortedAttributes = [];
         foreach ($allHeaders as $header) {
-            $productWithSortedAttributes[$header] = array_key_exists($header, $product) ? $product[$header] : "";
+            $productWithSortedAttributes[$header] = array_key_exists($header, $product) ? $product[$header] : '';
         }
 
         return $productWithSortedAttributes;

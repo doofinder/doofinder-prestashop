@@ -98,7 +98,7 @@ $shouldPricesUseTaxes = DfTools::getBooleanFromRequest(
     'taxes',
     (bool) DfTools::cfg($shop->id, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES)
 );
-$isMultipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+$isMultipriceEnabled = Configuration::get('DF_MULTIPRICE_ENABLED');
 $shouldShowProductVariations = (int) DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_VARIATIONS');
 $shouldShowProductFeatures = DfTools::cfg($shop->id, 'DF_SHOW_PRODUCT_FEATURES');
 $isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
@@ -236,7 +236,6 @@ $header = array_merge($header, $additionalAttributesHeaders);
  *         ]
  *     ];
  * }
- *
  *
  * To add an new header, module can do an array_merge on $extraHeader
  * To add an new data to a product, module must create a multidimensionnal array as this :
