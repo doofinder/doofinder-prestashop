@@ -115,7 +115,7 @@ class DoofinderConfig
     {
         return [
             'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
-            'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES'),
+            'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES', null, null, null, true),
             'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
             'DF_SHOW_PRODUCT_VARIATIONS' => \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS'),
