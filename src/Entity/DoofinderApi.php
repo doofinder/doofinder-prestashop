@@ -609,12 +609,15 @@ class DoofinderApi
         $messages = '';
         $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
         $context = \Context::getContext();
+        $apiKeyMsgAlreadyShown = false;
         foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
                 $langIso = \Tools::strtoupper($lang['iso_code']);
                 $langFullIso = (isset($lang['language_code'])) ? \Tools::strtoupper($lang['language_code']) : $langIso;
                 $hashid = \Configuration::get('DF_HASHID_' . $currency . '_' . $langFullIso);
+                $this->hashid = $hashid;
                 $apiKey = \Configuration::get('DF_API_KEY');
+                $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
                 if ($hashid && $apiKey) {
                     try {
                         $dfOptions = $this->getOptions();
@@ -625,12 +628,16 @@ class DoofinderApi
                                 $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
                             } else {
                                 $result = true;
-                                $msg = $module->l('Connection successful for Search Engine - ', 'doofinderapi') . $langFullIso;
-                                $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
+                                if ($isAdvParamPresent) {
+                                    $msg = $module->l('Connection successful for Search Engine - ', 'doofinderapi') . $langFullIso;
+                                    $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
+                                }
                             }
                         } else {
-                            $msg = $module->l('Error: no connection for Search Engine - ', 'doofinderapi') . $langFullIso;
-                            $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                            if ($isAdvParamPresent) {
+                                $msg = $module->l('Error: no connection for Search Engine - ', 'doofinderapi') . $langFullIso;
+                                $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                            }
                         }
                     } catch (DoofinderException $e) {
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($e->getMessage() . ' - Search Engine ' . $langFullIso);
@@ -639,9 +646,17 @@ class DoofinderApi
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
                     }
                 } else {
-                    $msg = $module->l('Empty Api Key or empty Search Engine - ', 'doofinderapi') . $langFullIso;
-                    $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                    if (!$apiKeyMsgAlreadyShown && !$apiKey) {
+                        $msg = $module->l('Empty Api Key', 'doofinderapi');
+                        $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                        $apiKeyMsgAlreadyShown = true;
+                    }
+                    if ($isAdvParamPresent && !$hashid) {
+                        $msg = $module->l('Empty Search Engine', 'doofinderapi') . ' - ' . $langFullIso;
+                        $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                    }
                 }
+                
             }
         }
         if ($onlyOneLang) {

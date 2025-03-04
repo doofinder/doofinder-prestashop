@@ -115,7 +115,7 @@ class DoofinderConfig
     {
         return [
             'DF_SHOW_LAYER' => \Configuration::get('DF_SHOW_LAYER', null, null, null, true),
-            'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES'),
+            'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES', null, null, null, true),
             'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
             'DF_SHOW_PRODUCT_VARIATIONS' => \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS'),
@@ -139,6 +139,7 @@ class DoofinderConfig
             'DF_DEBUG' => \Configuration::get('DF_DEBUG'),
             'DF_DEBUG_CURL' => \Configuration::get('DF_DEBUG_CURL'),
             'DF_ENABLED_V9' => \Configuration::get('DF_ENABLED_V9'),
+            'DF_MULTIPRICE_ENABLED' => \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true),
         ];
     }
 
@@ -149,11 +150,30 @@ class DoofinderConfig
      */
     public static function getConfigFormValuesStoreInfo()
     {
-        return [
+        $config = [
             'DF_INSTALLATION_ID' => \Configuration::get('DF_INSTALLATION_ID'),
             'DF_API_KEY' => \Configuration::get('DF_API_KEY'),
             'DF_REGION' => \Configuration::get('DF_REGION'),
         ];
+
+        $hashidKeys = DfTools::getHashidKeys();
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', false);
+        $keyToUse = 'key';
+        if ($multipriceEnabled) {
+            $keyToUse = 'keyMultiprice';
+        }
+        if ($isAdvParamPresent) {
+            foreach ($hashidKeys as $hashidKey) {
+                // To avoid overriding already defined values in multiprice cases
+                if (!empty($config[$hashidKey[$keyToUse]])) {
+                    continue;
+                }
+                $config[$hashidKey[$keyToUse]] = \Configuration::get($hashidKey['key']);
+            }
+        }
+
+        return $config;
     }
 
     /**
