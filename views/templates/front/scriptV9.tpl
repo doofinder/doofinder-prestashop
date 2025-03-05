@@ -85,7 +85,7 @@
             })
           });
         } catch (error) {
-          
+          console.error('Failed to send data to Klaviyo:', error);
         }
       }
     });
