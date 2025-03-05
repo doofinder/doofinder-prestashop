@@ -45,6 +45,14 @@ class DoofinderAdminPanelView
     /**
      * Handles the module's configuration page
      *
+     * the `&first_time=1` parameter has been introduced for these purposes:
+     * - It is displayed only once and is automatically removed upon form submission or
+     *   module reopening.
+     * - It ensures initial settings, such as enabling `multiprice` by default and removing indexation in progress popup.
+     *   (See `FormManager` class, `postProcess` function)
+     * - It prevents the indexing popup from appearing when essential data, such as
+     *   `installation ID`, is missing, ensuring that indexing does not occur prematurely.
+     *
      * @return string The page's HTML content
      */
     public function getContent()
@@ -208,9 +216,21 @@ class DoofinderAdminPanelView
     }
 
     /**
-     * Render the data feed configuration form
+     * Render the data feed configuration form.
+     *
+     * The `skip` feature allows bypassing the onboarding screen and directly accessing the
+     * configuration page by appending `&skip=1` to the URL. Unlocks the fields for
+     * `installation ID`, `API Key`, and `region` like `&adv=1`.
+     *
+     * The differences of `&skip=1` and `&adv=1` are:
+     * - These fields can now be edited without requiring `&adv=1`, while the access to the
+     *   advanced tab remains restricted, as it is intended for the Support team.
+     * - The hashids section is now "transparent" for the customers and only becomes explicitly visible when
+     *   `&adv=1` is set, without being affected by `&skip=1`.
+     * - The `&skip=1` parameter persists during form submissions to maintain expected behavior.
      *
      * @param bool $adv
+     * @param bool $skip
      *
      * @return string
      */
@@ -512,7 +532,7 @@ class DoofinderAdminPanelView
                         2 => ['id' => 'ap1', 'name' => $this->module->l('Asia - Pacific', 'doofinderadminpanelview')],
                     ],
                     'id' => 'id',
-                    'name' => 'name'
+                    'name' => 'name',
                 ],
                 'disabled' => !$isAdvParamPresent && !$isManualInstallation,
             ],

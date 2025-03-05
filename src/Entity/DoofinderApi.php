@@ -656,7 +656,6 @@ class DoofinderApi
                         $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
                     }
                 }
-                
             }
         }
         if ($onlyOneLang) {
