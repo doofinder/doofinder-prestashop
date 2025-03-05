@@ -36,6 +36,7 @@ class DfProductBuild
     private $stockManagement;
     private $useTax;
     private $multipriceEnabled;
+    private $featuresShown;
     private $featuresKeys;
 
     public function __construct($idShop, $idLang, $idCurrency)
@@ -44,6 +45,118 @@ class DfProductBuild
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
+        $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
+        $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
+        $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
+        $this->link = \Context::getContext()->link;
+        $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
+        $this->productVariations = (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
+        $this->showProductFeatures = (bool) \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
+        $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
+        $this->useTax = (bool) DfTools::cfg($idShop, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES);
+        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $this->featuresShown = explode(',', DfTools::cfg($idShop, 'DF_FEATURES_SHOWN', ''));
+        $this->featuresKeys = $this->getFeaturesKeys();
+    }
+
+    /**
+     * Get the list of currencies available for the shop.
+     *
+     * @return array
+     */
+    public function getCurrencies()
+    {
+        return $this->currencies;
+    }
+
+    /**
+     * Get the configured attributes to be shown.
+     *
+     * @return string
+     */
+    public function getAttributesShown()
+    {
+        return $this->attributesShown;
+    }
+
+    /**
+     * Check if prices should be displayed.
+     *
+     * @return bool
+     */
+    public function shouldDisplayPrices()
+    {
+        return $this->displayPrices;
+    }
+
+    /**
+     * Get the configured image size.
+     *
+     * @return string
+     */
+    public function getImageSize()
+    {
+        return $this->imageSize;
+    }
+
+    /**
+     * Get the configured features to be shown.
+     *
+     * @return array
+     */
+    public function getFeaturesShown()
+    {
+        return $this->featuresShown;
+    }
+
+    /**
+     * Check if product variations should be shown.
+     *
+     * @return bool
+     */
+    public function shouldShowProductVariations()
+    {
+        return $this->productVariations;
+    }
+
+    /**
+     * Check if product features should be shown.
+     *
+     * @return bool
+     */
+    public function shouldShowProductFeatures()
+    {
+        return $this->showProductFeatures;
+    }
+
+    /**
+     * Check if stock management is enabled.
+     *
+     * @return mixed
+     */
+    public function getStockManagement()
+    {
+        return $this->stockManagement;
+    }
+
+    /**
+     * Check if prices should include tax.
+     *
+     * @return bool
+     */
+    public function shouldUseTaxes()
+    {
+        return $this->useTax;
+    }
+
+    /**
+     * Check if the multiprice feature is enabled.
+     *
+     * @return bool
+     */
+    public function isMultipriceEnabled()
+    {
+        return $this->multipriceEnabled;
     }
 
     /**
@@ -58,52 +171,27 @@ class DfProductBuild
 
     public function build()
     {
-        $this->assign();
-
         $payload = [];
 
         $products = $this->getProductData();
 
+        $minPriceVariantByProductId = DfTools::getMinVariantPrices($products, $this->useTax, $this->currencies, $this->idLang, $this->idShop);
+
         foreach ($products as $product) {
-            $payload[] = $this->buildProduct($product);
+            $payload[] = $this->buildProduct($product, $minPriceVariantByProductId);
         }
 
         return json_encode($payload);
     }
 
-    private function assign()
-    {
-        $this->attributesShown = \Configuration::get('DF_GROUP_ATTRIBUTES_SHOWN');
-        $this->displayPrices = \Configuration::get('DF_GS_DISPLAY_PRICES');
-        $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
-        $this->link = \Context::getContext()->link;
-        $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
-        $this->productVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        $this->showProductFeatures = \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
-        $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
-        $this->useTax = \Configuration::get('DF_GS_PRICES_USE_TAX') || DoofinderConstants::NO;
-        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
-        $this->featuresKeys = $this->getFeaturesKeys();
-    }
-
-    private function getProductData()
-    {
-        $products = DfTools::getAvailableProductsForLanguage(
-            $this->idLang,
-            $this->idShop,
-            false,
-            false,
-            $this->products
-        );
-
-        return $products;
-    }
-
-    private function buildProduct($product)
+    public function buildProduct($product, $minPriceVariantByProductId = [], $extraAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
         $p['id'] = $this->getId($product);
+        if ($this->productVariations) {
+            $p['item_group_id'] = $this->getItemGroupId($product);
+        }
         $p['title'] = DfTools::cleanString($product['name']);
         $p['link'] = $this->getLink($product);
         $p['description'] = DfTools::cleanString($product['description_short']);
@@ -128,12 +216,12 @@ class DfProductBuild
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
         $p['tags'] = DfTools::cleanString($product['tags']);
-        $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);
 
         if (DfTools::versionGte('1.7.0.0')) {
             $p['isbn'] = DfTools::cleanString($product['isbn']);
         }
 
+        $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
@@ -141,31 +229,134 @@ class DfProductBuild
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);
             }
-        }
 
-        if ($this->showProductFeatures) {
-            $p = array_merge($p, $this->getFeatures($product));
+            if (DfTools::isParent($product) && array_key_exists($p['id'], $minPriceVariantByProductId)) {
+                $minVariant = $minPriceVariantByProductId[$p['id']];
+                if (
+                    !is_null($minVariant['onsale_price'])
+                    && !is_null($minVariant['price'])
+                    && (empty($p['sale_price']) || $minVariant['onsale_price'] < $p['sale_price'])
+                ) {
+                    $p['price'] = $minVariant['price'];
+                    $p['sale_price'] = ($minVariant['onsale_price'] === $minVariant['price']) ? null : $minVariant['onsale_price'];
+                    if ($this->multipriceEnabled) {
+                        $p['df_multiprice'] = $minVariant['multiprice'];
+                    }
+                }
+            }
         }
 
         if ($this->productVariations) {
-            $p['item_group_id'] = $this->getItemGroupId($product);
-            $p['group_id'] = $this->getItemGroupId($product);
-
             $p['variation_reference'] = $product['variation_reference'];
             $p['variation_supplier_reference'] = $product['variation_supplier_reference'];
             $p['variation_mpn'] = $product['variation_mpn'];
             $p['variation_ean13'] = $product['variation_ean13'];
             $p['variation_upc'] = $product['variation_upc'];
-            $p['df_group_leader'] = (!is_null($product['df_group_leader'] && $product['df_group_leader']) ? true : false);
+            $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
+            $p['df_variants_information'] = $this->getVariantsInformation($product);
 
             $attributes = $this->getAttributes($product);
 
             $p = array_merge($p, $attributes);
 
-            $p['df_variants_information'] = $this->getVariantsInformation($product);
+            foreach ($extraAttributesHeader as $extraAttributeHeader) {
+                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $p) && array_key_exists($extraAttributeHeader, $attributes)) {
+                    $p[$extraAttributeHeader] = $attributes[$extraAttributeHeader];
+                }
+            }
+        }
+
+        if ($this->showProductFeatures) {
+            $p['features'] = $this->getFeatures($product);
+        }
+
+        foreach ($extraHeaders as $extraHeader) {
+            if (!empty($p[$extraHeader])) {
+                continue;
+            }
+            $p[$extraHeader] = isset($product[$extraHeader]) ? DfTools::cleanString($product[$extraHeader]) : '';
         }
 
         return $p;
+    }
+
+    /**
+     * Applies specific transformations to a product's data for CSV export.
+     *
+     * This method performs several modifications on the product array, like:
+     * - If multi-price is enabled, formats the multiprice field.
+     * - Joins category values using a predefined separator.
+     * - If variants information exists, it slugifies and joins them using "%%".
+     * - Casts the group leader flag to an integer.
+     * - Iterates over extra headers to process attribute values:
+     *   - For each non-empty extra header, it concatenates key-value pairs in the format "key=value",
+     *     with the value cleaned and any "/" characters escaped.
+     * - Processes features (if present and an array) by converting them into an attributes string
+     *   formatted as "key=value" pairs joined with "/". The original features key is removed.
+     * - Ensures the final product fields are ordered according to the given headers.
+     *
+     * @param array $product the associative array representing the product data
+     * @param array $extraHeaders an array of additional headers to process in the product data
+     * @param array $allHeaders an array specifying the order of CSV fields
+     *
+     * @return array the transformed product array ready for CSV export
+     */
+    public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
+    {
+        if ($this->multipriceEnabled) {
+            $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
+        }
+        $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
+
+        if (array_key_exists('df_variants_information', $product)) {
+            $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
+        }
+
+        $product['df_group_leader'] = (int) $product['df_group_leader'];
+
+        if (array_key_exists('features', $product) && is_array($product['features'])) {
+            $formattedAttributes = [];
+            foreach ($product['features'] as $key => $value) {
+                if (is_array($value)) {
+                    $keyValueToReturn = [];
+                    foreach ($value as $singleValue) {
+                        $keyValueToReturn[] = $key . '=' . $singleValue;
+                    }
+                    $formattedAttributes[] = implode('/', $keyValueToReturn);
+                } else {
+                    $formattedAttributes[] = $key . '=' . $value;
+                }
+            }
+            $product['attributes'] = implode('/', $formattedAttributes);
+            unset($product['features']);
+        }
+
+        $product = self::ensureCsvFieldsOrder($product, $allHeaders);
+
+        return $product;
+    }
+
+    private static function ensureCsvFieldsOrder($product, $allHeaders)
+    {
+        $productWithSortedAttributes = [];
+        foreach ($allHeaders as $header) {
+            $productWithSortedAttributes[$header] = array_key_exists($header, $product) ? $product[$header] : '';
+        }
+
+        return $productWithSortedAttributes;
+    }
+
+    private function getProductData()
+    {
+        $products = DfTools::getAvailableProductsForLanguage(
+            $this->idLang,
+            $this->idShop,
+            false,
+            false,
+            $this->products
+        );
+
+        return $products;
     }
 
     private function getId($product)
@@ -341,10 +532,10 @@ class DfProductBuild
         foreach (DfTools::getFeaturesForProduct($product['id_product'], $this->idLang, $keys) as $key => $values) {
             if (count($values) > 1) {
                 foreach ($values as $value) {
-                    $features[$this->slugify($key)][] = DfTools::cleanString($value);
+                    $features[DfTools::slugify($key)][] = DfTools::cleanString($value);
                 }
             } else {
-                $features[$this->slugify($key)] = DfTools::cleanString($values[0]);
+                $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
             }
         }
 
@@ -353,11 +544,10 @@ class DfProductBuild
 
     private function getFeaturesKeys()
     {
-        $cfgFeaturesShown = explode(',', \Configuration::get('DF_FEATURES_SHOWN'));
         $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
 
-        if (is_array($cfgFeaturesShown) && count($cfgFeaturesShown) > 0 && $cfgFeaturesShown[0] !== '') {
-            return DfTools::getSelectedFeatures($allFeatureKeys, $cfgFeaturesShown);
+        if (is_array($this->featuresShown) && count($this->featuresShown) > 0 && $this->featuresShown[0] !== '') {
+            return DfTools::getSelectedFeatures($allFeatureKeys, $this->featuresShown);
         } else {
             return $allFeatureKeys;
         }
@@ -374,7 +564,7 @@ class DfProductBuild
         $altAttributes = [];
 
         foreach ($attributes as $attribute) {
-            $altAttributes[$this->slugify($attribute['group_name'])] = $attribute['name'];
+            $altAttributes[DfTools::slugify($attribute['group_name'])] = $attribute['name'];
         }
 
         return $altAttributes;
@@ -404,33 +594,9 @@ class DfProductBuild
 
             $names = array_column($attributes, 'name');
 
-            return array_map([$this, 'slugify'], $names);
+            return array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $names);
         }
 
         return [];
-    }
-
-    private function slugify($text)
-    {
-        // replace non letter or digits by -
-        $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
-
-        // trim
-        $text = trim($text, '-');
-
-        // transliterate
-        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-
-        // lowercase
-        $text = \Tools::strtolower($text);
-
-        // remove unwanted characters
-        $text = preg_replace('~[^-\w]+~', '', $text);
-
-        if (empty($text)) {
-            return 'n-a';
-        }
-
-        return $text;
     }
 }
