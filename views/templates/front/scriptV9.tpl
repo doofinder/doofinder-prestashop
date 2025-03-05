@@ -53,4 +53,38 @@
   </script>
   <script src="https://{$df_region|escape:'htmlall':'UTF-8'}-config.doofinder.com/2.x/{$installation_ID|escape:'htmlall':'UTF-8'}.js" async></script>
   <!-- END OF DOOFINDER UNIQUE SCRIPT -->
+
+  <!-- START INTEGRATION WITH KLAVIYO -->
+  <script>
+  window.addEventListener('load', async (event) => {
+    if (typeof klaviyo !== 'undefined' && typeof klCustomer !== 'undefined' && await klaviyo.isIdentified() === false && klCustomer && klCustomer.email !== "") {
+      const companyId = await klaviyo.account();
+      let userId = window.localStorage.getItem('df-random-userid');
+      userId = JSON.parse(userId);
+      
+      await klaviyo.identify({
+          "email": klCustomer.email
+      });
+          
+      fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
+        method: 'POST',
+        headers: {
+          accept: 'application/vnd.api+json',
+          revision: '2025-01-15',
+          'content-type': 'application/vnd.api+json'
+        },
+        body: JSON.stringify({
+          data: {
+            type: "profile",
+            attributes: {
+              email: klCustomer.email,
+              external_id: userId
+            }
+          }
+        })
+      });
+    }
+  });
+  </script>
+  <!-- END INTEGRATION WITH KLAVIYO -->
 {/if}
