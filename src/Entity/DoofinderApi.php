@@ -646,16 +646,16 @@ class DoofinderApi
                         if ($dfOptions) {
                             $opt = json_decode($dfOptions, true);
                             if (isset($opt['query_limit_reached']) && $opt['query_limit_reached']) {
-                                $messagesArray['errorQueryLimit']['languages'][] = $langFullIso;
+                                $messagesArray['errorQueryLimit']['languages'][] = sprintf('(%s)', $langFullIso);
                             } else {
                                 $result = true;
                                 if ($isAdvParamPresent) {
-                                    $messagesArray['success']['languages'][] = $langFullIso;
+                                    $messagesArray['success']['languages'][] = sprintf('(%s)', $langFullIso);
                                 }
                             }
                         } else {
                             if ($isAdvParamPresent) {
-                                $messagesArray['errorNoConnection']['languages'][] = $langFullIso;
+                                $messagesArray['errorNoConnection']['languages'][] = sprintf('(%s)', $langFullIso);
                             }
                         }
                     } catch (DoofinderException $e) {
@@ -671,7 +671,7 @@ class DoofinderApi
                         $apiKeyMsgAlreadyShown = true;
                     }
                     if ($isAdvParamPresent && !$hashid) {
-                        $messagesArray['emptySearchEngine']['languages'][] = $langFullIso;
+                        $messagesArray['emptySearchEngine']['languages'][] = sprintf('(%s)', $langFullIso);
                     }
                 }
             }
