@@ -94,6 +94,7 @@ class DoofinderAdminPanelView
         ];
         $skipUrl = $context->link->getAdminLink('AdminModules', true);
         $separator = strpos($skipUrl, '?') === false ? '?' : '&';
+        // This URL will be used in `onboarding_tab.tpl` to skip the automatic store wizard.
         $skipUrl .= $separator . http_build_query($skipUrlParams);
 
         $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
