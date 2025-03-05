@@ -65,24 +65,28 @@
       await klaviyo.identify({
           "email": klCustomer.email
       });
-          
-      fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
-        method: 'POST',
-        headers: {
-          accept: 'application/vnd.api+json',
-          revision: '2025-01-15',
-          'content-type': 'application/vnd.api+json'
-        },
-        body: JSON.stringify({
-          data: {
-            type: "profile",
-            attributes: {
-              email: klCustomer.email,
-              external_id: userId
+
+      try {
+        await fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
+          method: 'POST',
+          headers: {
+            accept: 'application/vnd.api+json',
+            revision: '2025-01-15',
+            'content-type': 'application/vnd.api+json'
+          },
+          body: JSON.stringify({
+            data: {
+              type: "profile",
+              attributes: {
+                email: klCustomer.email,
+                external_id: userId
+              }
             }
-          }
-        })
-      });
+          })
+        });
+      } catch (error) {
+        
+      }
     }
   });
   </script>
