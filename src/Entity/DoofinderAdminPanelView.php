@@ -103,7 +103,7 @@ class DoofinderAdminPanelView
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
         if ($configured) {
-            $feedIndexed = \Configuration::get('DF_FEED_INDEXED', false);
+            $feedIndexed = \Configuration::get('DF_FEED_INDEXED', null, null, null, false);
             if (empty($feedIndexed)) {
                 $controllerUrl = $context->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1';
                 $context->smarty->assign('update_feed_url', $controllerUrl . '&action=UpdateConfigurationField');
