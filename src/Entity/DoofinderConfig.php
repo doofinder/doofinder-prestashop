@@ -117,16 +117,22 @@ class DoofinderConfig
      */
     public static function getConfigFormValuesDataFeed($idShop)
     {
+        /*
+        Some parameters are still using the `Configuration::get()` instead of the
+        new `DfTools::getConfigByShop()` one. The reason behind this is that the ones
+        using the `Configuration::get()` have default global pre-configured values that
+        must be taken into account too.
+        */
         return [
             'DF_SHOW_LAYER' => DfTools::getConfigByShop('DF_SHOW_LAYER', $idShop, true),
-            'DF_GS_DISPLAY_PRICES' => DfTools::getConfigByShop('DF_GS_DISPLAY_PRICES', $idShop),
-            'DF_GS_PRICES_USE_TAX' => DfTools::getConfigByShop('DF_GS_PRICES_USE_TAX', $idShop),
-            'DF_FEED_FULL_PATH' => DfTools::getConfigByShop('DF_FEED_FULL_PATH', $idShop),
+            'DF_GS_DISPLAY_PRICES' => \Configuration::get('DF_GS_DISPLAY_PRICES'),
+            'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
+            'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
             'DF_SHOW_PRODUCT_VARIATIONS' => DfTools::getConfigByShop('DF_SHOW_PRODUCT_VARIATIONS', $idShop),
             'DF_GROUP_ATTRIBUTES_SHOWN[]' => explode(',', DfTools::getConfigByShop('DF_GROUP_ATTRIBUTES_SHOWN', $idShop)),
             'DF_SHOW_PRODUCT_FEATURES' => DfTools::getConfigByShop('DF_SHOW_PRODUCT_FEATURES', $idShop),
             'DF_FEATURES_SHOWN[]' => explode(',', DfTools::getConfigByShop('DF_FEATURES_SHOWN', $idShop)),
-            'DF_GS_IMAGE_SIZE' => DfTools::getConfigByShop('DF_GS_IMAGE_SIZE', $idShop),
+            'DF_GS_IMAGE_SIZE' => \Configuration::get('DF_GS_IMAGE_SIZE'),
             'DF_UPDATE_ON_SAVE_DELAY' => DfTools::getConfigByShop('DF_UPDATE_ON_SAVE_DELAY', $idShop),
         ];
     }
