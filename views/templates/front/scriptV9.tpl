@@ -56,39 +56,39 @@
 
   <!-- START INTEGRATION WITH KLAVIYO -->
   <script>
-  window.addEventListener('load', async (event) => {
-    if (typeof klaviyo !== 'undefined' && typeof klCustomer !== 'undefined' && await klaviyo.isIdentified() === false && klCustomer && klCustomer.email !== "") {
-      const companyId = await klaviyo.account();
-      let userId = window.localStorage.getItem('df-random-userid');
-      userId = JSON.parse(userId);
-      
-      await klaviyo.identify({
-          "email": klCustomer.email
-      });
-
-      try {
-        await fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
-          method: 'POST',
-          headers: {
-            accept: 'application/vnd.api+json',
-            revision: '2025-01-15',
-            'content-type': 'application/vnd.api+json'
-          },
-          body: JSON.stringify({
-            data: {
-              type: "profile",
-              attributes: {
-                email: klCustomer.email,
-                external_id: userId
-              }
-            }
-          })
-        });
-      } catch (error) {
+    window.addEventListener('load', async (event) => {
+      if (typeof klaviyo !== 'undefined' && typeof klCustomer !== 'undefined' && await klaviyo.isIdentified() === false && klCustomer && klCustomer.email !== "") {
+        const companyId = await klaviyo.account();
+        let userId = window.localStorage.getItem('df-random-userid');
+        userId = JSON.parse(userId);
         
+        await klaviyo.identify({
+            "email": klCustomer.email
+        });
+
+        try {
+          await fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
+            method: 'POST',
+            headers: {
+              accept: 'application/vnd.api+json',
+              revision: '2025-01-15',
+              'content-type': 'application/vnd.api+json'
+            },
+            body: JSON.stringify({
+              data: {
+                type: "profile",
+                attributes: {
+                  email: klCustomer.email,
+                  external_id: userId
+                }
+              }
+            })
+          });
+        } catch (error) {
+          
+        }
       }
-    }
-  });
+    });
   </script>
   <!-- END INTEGRATION WITH KLAVIYO -->
 {/if}
