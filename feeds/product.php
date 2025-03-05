@@ -258,6 +258,8 @@ Hook::exec('actionDoofinderExtendFeed', [
 ]);
 
 $header = array_merge($header, $extraHeader);
+// To avoid indexation failures
+$header = array_unique($header);
 
 // PRODUCTS
 $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
