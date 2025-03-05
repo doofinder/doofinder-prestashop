@@ -84,15 +84,25 @@ class DoofinderConfig
      */
     public static function setSharedDefaultConfig($shopGroupId, $shopId)
     {
-        \Configuration::updateValue('DF_ENABLE_HASH', true, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_GS_DISPLAY_PRICES', true, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_GS_PRICES_USE_TAX', true, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_FEED_FULL_PATH', true, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', DoofinderConstants::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(DfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_MULTIPRICE_ENABLED', true, false, $shopGroupId, $shopId);
+        $defaultConfigs = self::getDefaultConfigData();
+        foreach ($defaultConfigs as $key => $value) {
+            \Configuration::updateValue($key, $value, false, $shopGroupId, $shopId);
+        }
+    }
+
+    /**
+     * Set the default values that don't need the API Key to be calculated in the configuration, but
+     * unlike `setSharedDefaultConfig` function, it sets fallback data globally, not at shop level nor
+     * shop group level.
+     *
+     * @return void
+     */
+    public static function setSharedGlobalDefaultConfig()
+    {
+        $defaultConfigs = self::getDefaultConfigData();
+        foreach ($defaultConfigs as $key => $value) {
+            \Configuration::updateGlobalValue($key, $value);
+        }
     }
 
     /**
@@ -204,5 +214,26 @@ class DoofinderConfig
 
         return $result && $result->originalResponse && isset($result->headers['code'])
             && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
+    }
+
+    /**
+     * Gets the default config data as key-value pairs to
+     * keep the single source of truth.
+     *
+     * @return array
+     */
+    private static function getDefaultConfigData()
+    {
+        return [
+            'DF_ENABLE_HASH' => true,
+            'DF_GS_DISPLAY_PRICES' => true,
+            'DF_GS_PRICES_USE_TAX' => true,
+            'DF_FEED_FULL_PATH' => true,
+            'DF_SHOW_PRODUCT_VARIATIONS' => 0,
+            'DF_GS_DESCRIPTION_TYPE' => DoofinderConstants::GS_SHORT_DESCRIPTION,
+            'DF_FEED_MAINCATEGORY_PATH' => false,
+            'DF_GS_IMAGE_SIZE' => key(DfTools::getAvailableImageSizes()),
+            'DF_MULTIPRICE_ENABLED' => true,
+        ];
     }
 }

@@ -610,6 +610,28 @@ class DoofinderApi
         $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
         $context = \Context::getContext();
         $apiKeyMsgAlreadyShown = false;
+        $messagesArray = [
+            'errorQueryLimit' => [
+                'message' => $module->l('Error: Credentials OK but limit query reached for Search Engine - ', 'doofinderapi'),
+                'displayFunction' => 'displayErrorCtm',
+                'languages' => [],
+            ],
+            'errorNoConnection' => [
+                'message' => $module->l('Error: no connection for Search Engine - ', 'doofinderapi'),
+                'displayFunction' => 'displayErrorCtm',
+                'languages' => [],
+            ],
+            'emptySearchEngine' => [
+                'message' => $module->l('Empty Search Engine', 'doofinderapi') . ' - ',
+                'displayFunction' => 'displayWarningCtm',
+                'languages' => [],
+            ],
+            'success' => [
+                'message' => $module->l('Connection successful for Search Engine - ', 'doofinderapi'),
+                'displayFunction' => 'displayConfirmationCtm',
+                'languages' => [],
+            ],
+        ];
         foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
                 $langIso = \Tools::strtoupper($lang['iso_code']);
@@ -624,19 +646,16 @@ class DoofinderApi
                         if ($dfOptions) {
                             $opt = json_decode($dfOptions, true);
                             if (isset($opt['query_limit_reached']) && $opt['query_limit_reached']) {
-                                $msg = $module->l('Error: Credentials OK but limit query reached for Search Engine - ', 'doofinderapi') . $langFullIso;
-                                $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                                $messagesArray['errorQueryLimit']['languages'][] = $langFullIso;
                             } else {
                                 $result = true;
                                 if ($isAdvParamPresent) {
-                                    $msg = $module->l('Connection successful for Search Engine - ', 'doofinderapi') . $langFullIso;
-                                    $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
+                                    $messagesArray['success']['languages'][] = $langFullIso;
                                 }
                             }
                         } else {
                             if ($isAdvParamPresent) {
-                                $msg = $module->l('Error: no connection for Search Engine - ', 'doofinderapi') . $langFullIso;
-                                $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                                $messagesArray['errorNoConnection']['languages'][] = $langFullIso;
                             }
                         }
                     } catch (DoofinderException $e) {
@@ -652,12 +671,20 @@ class DoofinderApi
                         $apiKeyMsgAlreadyShown = true;
                     }
                     if ($isAdvParamPresent && !$hashid) {
-                        $msg = $module->l('Empty Search Engine', 'doofinderapi') . ' - ' . $langFullIso;
-                        $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                        $messagesArray['emptySearchEngine']['languages'][] = $langFullIso;
                     }
                 }
             }
         }
+
+        foreach ($messagesArray as $messageArray) {
+            if (empty($messageArray['languages'])) {
+                continue;
+            }
+            $msg = $messageArray['message'] . implode(', ', $messageArray['languages']);
+            $messages .= DoofinderAdminPanelView::{$messageArray['displayFunction']}($msg);
+        }
+
         if ($onlyOneLang) {
             return $result;
         } else {

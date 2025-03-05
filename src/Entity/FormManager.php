@@ -50,13 +50,13 @@ class FormManager
         $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 
         if ($isFirstTime) {
-            \Configuration::updateGlobalValue('DF_FEED_INDEXED', true);
             $shops = \Shop::getShops();
             foreach ($shops as $shop) {
                 $shopGroupId = $shop['id_shop_group'];
                 $shopId = $shop['id_shop'];
                 DoofinderConfig::setSharedDefaultConfig($shopGroupId, $shopId);
             }
+            DoofinderConfig::setSharedGlobalDefaultConfig();
         }
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
