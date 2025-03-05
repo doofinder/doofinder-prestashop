@@ -15,8 +15,6 @@
 
 namespace PrestaShop\Module\Doofinder\Src\Entity;
 
-use Context;
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -29,7 +27,7 @@ class DoofinderConfig
             return;
         }
 
-        $context = Context::getContext();
+        $context = \Context::getContext();
         $idShop = $context->shop->id;
         $idShopGroup = $context->shop->id_shop_group;
 
