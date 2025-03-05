@@ -47,11 +47,11 @@ class FormManager
 
         $isFirstTime = (bool) \Tools::getValue('first_time', 0);
         $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', false);
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 
         if ($isFirstTime) {
-            \Configuration::updateValue('DF_FEED_INDEXED', true);
-            \Configuration::updateValue('DF_MULTIPRICE_ENABLED', true);
+            \Configuration::updateGlobalValue('DF_FEED_INDEXED', true);
+            \Configuration::updateGlobalValue('DF_MULTIPRICE_ENABLED', true);
         }
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {

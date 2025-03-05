@@ -506,7 +506,7 @@ class DoofinderAdminPanelView
     {
         $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
         $isManualInstallation = (bool) \Tools::getValue('skip', 0);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', false);
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
         $inputs = [
             [
                 'type' => 'text',
