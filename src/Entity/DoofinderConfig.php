@@ -67,13 +67,28 @@ class DoofinderConfig
         $apiEndpointArray = explode('-', $apiEndpoint);
         $region = $apiEndpointArray[0];
 
+        \Configuration::updateValue('DF_REGION', $region, false, $shopGroupId, $shopId);
+        \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $shopGroupId, $shopId);
+        self::setSharedDefaultConfig($shopGroupId, $shopId);
+    }
+
+    /**
+     * Set the default values that don't need the API Key to be calculated in the configuration.
+     * This function is useful for manual installations where the API key is not present until
+     * the user enters it manually.
+     *
+     * @param int $shopGroupId
+     * @param int $shopId
+     *
+     * @return void
+     */
+    public static function setSharedDefaultConfig($shopGroupId, $shopId)
+    {
         \Configuration::updateValue('DF_ENABLE_HASH', true, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_DISPLAY_PRICES', true, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_PRICES_USE_TAX', true, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_FEED_FULL_PATH', true, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_SHOW_PRODUCT_VARIATIONS', 0, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_REGION', $region, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_DESCRIPTION_TYPE', DoofinderConstants::GS_SHORT_DESCRIPTION, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', false, false, $shopGroupId, $shopId);
         \Configuration::updateValue('DF_GS_IMAGE_SIZE', key(DfTools::getAvailableImageSizes()), false, $shopGroupId, $shopId);
