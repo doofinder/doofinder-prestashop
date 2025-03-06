@@ -609,28 +609,54 @@ class DoofinderApi
         $messages = '';
         $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
         $context = \Context::getContext();
+        $apiKeyMsgAlreadyShown = false;
+        $messagesArray = [
+            'errorQueryLimit' => [
+                'message' => $module->l('Error: Credentials OK but limit query reached for Search Engine - ', 'doofinderapi'),
+                'displayFunction' => 'displayErrorCtm',
+                'languages' => [],
+            ],
+            'errorNoConnection' => [
+                'message' => $module->l('Error: no connection for Search Engine - ', 'doofinderapi'),
+                'displayFunction' => 'displayErrorCtm',
+                'languages' => [],
+            ],
+            'emptySearchEngine' => [
+                'message' => $module->l('Empty Search Engine', 'doofinderapi') . ' - ',
+                'displayFunction' => 'displayWarningCtm',
+                'languages' => [],
+            ],
+            'success' => [
+                'message' => $module->l('Connection successful for Search Engine - ', 'doofinderapi'),
+                'displayFunction' => 'displayConfirmationCtm',
+                'languages' => [],
+            ],
+        ];
         foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
             if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
                 $langIso = \Tools::strtoupper($lang['iso_code']);
                 $langFullIso = (isset($lang['language_code'])) ? \Tools::strtoupper($lang['language_code']) : $langIso;
                 $hashid = \Configuration::get('DF_HASHID_' . $currency . '_' . $langFullIso);
+                $this->hashid = $hashid;
                 $apiKey = \Configuration::get('DF_API_KEY');
+                $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
                 if ($hashid && $apiKey) {
                     try {
                         $dfOptions = $this->getOptions();
                         if ($dfOptions) {
                             $opt = json_decode($dfOptions, true);
                             if (isset($opt['query_limit_reached']) && $opt['query_limit_reached']) {
-                                $msg = $module->l('Error: Credentials OK but limit query reached for Search Engine - ', 'doofinderapi') . $langFullIso;
-                                $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                                $messagesArray['errorQueryLimit']['languages'][] = sprintf('(%s)', $langFullIso);
                             } else {
                                 $result = true;
-                                $msg = $module->l('Connection successful for Search Engine - ', 'doofinderapi') . $langFullIso;
-                                $messages .= DoofinderAdminPanelView::displayConfirmationCtm($msg);
+                                if ($isAdvParamPresent) {
+                                    $messagesArray['success']['languages'][] = sprintf('(%s)', $langFullIso);
+                                }
                             }
                         } else {
-                            $msg = $module->l('Error: no connection for Search Engine - ', 'doofinderapi') . $langFullIso;
-                            $messages .= DoofinderAdminPanelView::displayErrorCtm($msg);
+                            if ($isAdvParamPresent) {
+                                $messagesArray['errorNoConnection']['languages'][] = sprintf('(%s)', $langFullIso);
+                            }
                         }
                     } catch (DoofinderException $e) {
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($e->getMessage() . ' - Search Engine ' . $langFullIso);
@@ -639,11 +665,26 @@ class DoofinderApi
                         $messages .= DoofinderAdminPanelView::displayErrorCtm($msg . $langFullIso);
                     }
                 } else {
-                    $msg = $module->l('Empty Api Key or empty Search Engine - ', 'doofinderapi') . $langFullIso;
-                    $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                    if (!$apiKeyMsgAlreadyShown && !$apiKey) {
+                        $msg = $module->l('Empty Api Key', 'doofinderapi');
+                        $messages .= DoofinderAdminPanelView::displayWarningCtm($msg);
+                        $apiKeyMsgAlreadyShown = true;
+                    }
+                    if ($isAdvParamPresent && !$hashid) {
+                        $messagesArray['emptySearchEngine']['languages'][] = sprintf('(%s)', $langFullIso);
+                    }
                 }
             }
         }
+
+        foreach ($messagesArray as $messageArray) {
+            if (empty($messageArray['languages'])) {
+                continue;
+            }
+            $msg = $messageArray['message'] . implode(', ', $messageArray['languages']);
+            $messages .= DoofinderAdminPanelView::{$messageArray['displayFunction']}($msg);
+        }
+
         if ($onlyOneLang) {
             return $result;
         } else {

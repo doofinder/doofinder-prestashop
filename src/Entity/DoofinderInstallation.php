@@ -104,6 +104,7 @@ class DoofinderInstallation
         if (!empty($shop_id)) {
             $shop = \Shop::getShop($shop_id);
             self::_createStore($shop);
+            DoofinderConfig::setSharedGlobalDefaultConfig();
 
             return;
         }
@@ -112,6 +113,7 @@ class DoofinderInstallation
         foreach ($shops as $shop) {
             self::_createStore($shop);
         }
+        DoofinderConfig::setSharedGlobalDefaultConfig();
     }
 
     /**

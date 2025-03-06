@@ -118,6 +118,35 @@ class DfTools
         return $sizes;
     }
 
+    public static function getHashidKeys()
+    {
+        $hashidKeys = [];
+        $context = \Context::getContext();
+        $currencies = \Currency::getCurrenciesByIdShop($context->shop->id);
+        $languages = \Language::getLanguages(true, $context->shop->id);
+        foreach ($languages as $language) {
+            if (0 === (int) $language['active']) {
+                continue;
+            }
+            foreach ($currencies as $currency) {
+                if (1 === (int) $currency['deleted'] || 0 === (int) $currency['active']) {
+                    continue;
+                }
+                $currencyIso = strtoupper($currency['iso_code']);
+                $langFullIso = strtoupper($language['language_code']);
+                $hashidKeys[] = [
+                    'currency' => $currencyIso,
+                    'language' => $langFullIso,
+                    'label' => $currencyIso . ' - ' . $langFullIso,
+                    'labelMultiprice' => $langFullIso,
+                    'key' => 'DF_HASHID_' . $currencyIso . '_' . $langFullIso,
+                    'keyMultiprice' => 'DF_HASHID_' . $langFullIso,
+                ];
+            }
+        }
+        return $hashidKeys;
+    }
+
     /**
      * Returns an assoc. array. Keys are currency ISO codes. Values are currency
      * names.
@@ -1327,6 +1356,32 @@ class DfTools
         }
 
         return $v;
+    }
+
+    /**
+     * Retrieves a configuration value for a specific shop.
+     *
+     * This method checks whether the given key exists in the configuration for the specified shop.
+     * If the key exists for the shop, it returns the corresponding value.
+     * If not, returns the specified `$default` value.
+     * However, only if the provided shop ID matches the default shop it also checks whether the key exists globally (if the shop specific value is not found).
+     * If the key does not exist in any of the conditions, it returns the provided default value.
+     *
+     * @param string $key the configuration key to retrieve
+     * @param int $idShop the ID of the shop for which the configuration should be retrieved
+     * @param mixed $default the default value to return if the key is not found (default is an empty string)
+     *
+     * @return string|false the configuration value for the given key and shop, or the default value if not found
+     */
+    public static function getConfigByShop($key, $idShop, $default = '')
+    {
+        if (\Configuration::hasKey($key, null, null, $idShop)) {
+            return \Configuration::get($key, null, null, $idShop, $default);
+        } elseif (\Configuration::hasKey($key) && (int) \Configuration::get('PS_SHOP_DEFAULT') === (int) $idShop) {
+            return \Configuration::get($key);
+        }
+
+        return $default;
     }
 
     public static function walkApplyHtmlEntities(&$item, $key)

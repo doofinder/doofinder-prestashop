@@ -44,23 +44,40 @@ class FormManager
         $formUpdated = '';
         $messages = '';
         $context = \Context::getContext();
+        $idShop = $context->shop->id;
+
+        $isFirstTime = (bool) \Tools::getValue('first_time', 0);
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+
+        if ($isFirstTime) {
+            $shops = \Shop::getShops();
+            foreach ($shops as $shop) {
+                $shopGroupId = $shop['id_shop_group'];
+                $shopId = $shop['id_shop'];
+                DoofinderConfig::setSharedDefaultConfig($shopGroupId, $shopId);
+            }
+            \Configuration::updateGlobalValue('DF_FEED_INDEXED', true);
+            DoofinderConfig::setSharedGlobalDefaultConfig();
+        }
+
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
             UpdateOnSave::indexApiInvokeReindexing();
         }
         if (((bool) \Tools::isSubmit('submitDoofinderModuleDataFeed')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesDataFeed());
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesDataFeed($idShop));
             $formUpdated = 'data_feed_tab';
         }
 
         if (((bool) \Tools::isSubmit('submitDoofinderModuleAdvanced')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesAdvanced());
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesAdvanced($idShop));
             $formUpdated = 'advanced_tab';
             $context->smarty->assign('adv', 1);
         }
 
         if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo());
+            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
             $formUpdated = 'store_info_tab';
         }
 
@@ -80,6 +97,11 @@ class FormManager
                 \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', 0);
             }
             $value = trim($value);
+            // Special case for Hashids due to the Multiprice
+            if ($isAdvParamPresent && $multipriceEnabled && str_contains($postKey, 'DF_HASHID')) {
+                self::updateHashIds($postKey, $value);
+                continue;
+            }
             \Configuration::updateValue($postKey, $value);
         }
 
@@ -111,5 +133,16 @@ class FormManager
         }
 
         return $messages;
+    }
+
+    private static function updateHashIds($postKey, $value)
+    {
+        $hashidKeys = DfTools::getHashidKeys();
+        $hashidKeys = array_filter($hashidKeys, function ($hashidKey) use ($postKey) {
+            return $hashidKey['keyMultiprice'] === $postKey;
+        });
+        foreach ($hashidKeys as $hashidKey) {
+            \Configuration::updateValue($hashidKey['key'], $value);
+        }
     }
 }
