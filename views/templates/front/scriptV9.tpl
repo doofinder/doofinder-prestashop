@@ -67,7 +67,7 @@
         });
 
         try {
-          await fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
+          const response = await fetch('https://a.klaviyo.com/client/profiles?company_id=' + companyId, {
             method: 'POST',
             headers: {
               accept: 'application/vnd.api+json',
@@ -84,6 +84,10 @@
               }
             })
           });
+
+          if (!response.ok) {
+            console.error('Failed to send data to Klaviyo:', response.text());
+          }
         } catch (error) {
           console.error('Failed to send data to Klaviyo:', error);
         }
