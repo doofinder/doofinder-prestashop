@@ -57,7 +57,7 @@
   <!-- START INTEGRATION WITH KLAVIYO -->
   <script>
     window.addEventListener('load', async (event) => {
-      if (typeof klaviyo !== 'undefined' && typeof klCustomer !== 'undefined' && await klaviyo.isIdentified() === false && klCustomer && klCustomer.email !== "") {
+      if ('undefined' !== typeof klaviyo && 'undefined' !== typeof klCustomer && false === await klaviyo.isIdentified() && klCustomer && "" !== klCustomer.email) {
         const companyId = await klaviyo.account();
         let userId = window.localStorage.getItem('df-random-userid');
         userId = JSON.parse(userId);
