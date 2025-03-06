@@ -63,13 +63,17 @@ class HookManager
      */
     public static function getHookCommonSmartyAssigns($languageCode, $currencyCode, $productLinks, $extraParams = false)
     {
+        $context = \Context::getContext();
+        $idShopGroup = $context->shop->id_shop_group;
+        $idShop = $context->shop->id;
+
         $lang = \Tools::strtoupper($languageCode);
         $currency = \Tools::strtoupper($currencyCode);
-        $searchEngineId = \Configuration::get('DF_HASHID_' . $currency . '_' . $lang);
+        $searchEngineId = \Configuration::get('DF_HASHID_' . $currency . '_' . $lang, null, $idShopGroup, $idShop);
         $dfRegion = \Configuration::get('DF_REGION');
-        $script = \Configuration::get('DOOFINDER_SCRIPT_' . $lang);
-        $extraCss = \Configuration::get('DF_EXTRA_CSS');
-        $installationID = \Configuration::get('DF_INSTALLATION_ID');
+        $script = \Configuration::get('DOOFINDER_SCRIPT_' . $lang, null, $idShopGroup, $idShop);
+        $extraCss = \Configuration::get('DF_EXTRA_CSS', null, $idShopGroup, $idShop);
+        $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $idShopGroup, $idShop);
         $selfPath = dirname($_SERVER['SCRIPT_FILENAME']);
         if (!is_dir($selfPath)) {
             $selfPath = dirname(__FILE__);
