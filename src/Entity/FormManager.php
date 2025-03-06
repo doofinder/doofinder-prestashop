@@ -45,6 +45,22 @@ class FormManager
         $messages = '';
         $context = \Context::getContext();
 
+        $isFirstTime = (bool) \Tools::getValue('first_time', 0);
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+
+        if ($isFirstTime) {
+            $shops = \Shop::getShops();
+            foreach ($shops as $shop) {
+                $shopGroupId = $shop['id_shop_group'];
+                $shopId = $shop['id_shop'];
+                DoofinderConfig::setSharedDefaultConfig($shopGroupId, $shopId);
+            }
+            \Configuration::updateGlobalValue('DF_FEED_INDEXED', true);
+            DoofinderConfig::setSharedGlobalDefaultConfig();
+        }
+
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
             UpdateOnSave::indexApiInvokeReindexing();
         }
@@ -80,6 +96,11 @@ class FormManager
                 \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', 0);
             }
             $value = trim($value);
+            // Special case for Hashids due to the Multiprice
+            if ($isAdvParamPresent && $multipriceEnabled && str_contains($postKey, 'DF_HASHID')) {
+                self::updateHashIds($postKey, $value);
+                continue;
+            }
             \Configuration::updateValue($postKey, $value);
         }
 
@@ -111,5 +132,16 @@ class FormManager
         }
 
         return $messages;
+    }
+
+    private static function updateHashIds($postKey, $value)
+    {
+        $hashidKeys = DfTools::getHashidKeys();
+        $hashidKeys = array_filter($hashidKeys, function ($hashidKey) use ($postKey) {
+            return $hashidKey['keyMultiprice'] === $postKey;
+        });
+        foreach ($hashidKeys as $hashidKey) {
+            \Configuration::updateValue($hashidKey['key'], $value);
+        }
     }
 }

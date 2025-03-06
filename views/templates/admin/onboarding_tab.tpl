@@ -71,6 +71,7 @@
 				</div>
 				<div class="col-md-12" style="margin-top:35px">
 					<p>
+						{* Go to DoofinderAdminPanelView class to see the details about the formation of the $skipurl *}
 						<a href="{html_entity_decode($skipurl|escape:'htmlall':'UTF-8')}" style="font-size: 10px;font-style: italic;">{l s='I want to skip the autoinstaller, take me to the module manual configuration.' mod='doofinder'}</a>
 					</p>
 				</div>
