@@ -45,6 +45,14 @@ class DoofinderAdminPanelView
     /**
      * Handles the module's configuration page
      *
+     * the `&first_time=1` parameter has been introduced for these purposes:
+     * - It is displayed only once and is automatically removed upon form submission or
+     *   module reopening.
+     * - It ensures initial settings, such as enabling `multiprice` by default and removing indexation in progress popup.
+     *   (See `FormManager` class, `postProcess` function)
+     * - It prevents the indexing popup from appearing when essential data, such as
+     *   `installation ID`, is missing, ensuring that indexing does not occur prematurely.
+     *
      * @return string The page's HTML content
      */
     public function getContent()
@@ -55,6 +63,7 @@ class DoofinderAdminPanelView
             return $stop;
         }
         $adv = \Tools::getValue('adv', 0);
+        $skip = \Tools::getValue('skip', 0);
 
         $context->smarty->assign('adv', $adv);
 
@@ -85,6 +94,7 @@ class DoofinderAdminPanelView
         ];
         $skipUrl = $context->link->getAdminLink('AdminModules', true);
         $separator = strpos($skipUrl, '?') === false ? '?' : '&';
+        // This URL will be used in `onboarding_tab.tpl` to skip the automatic store wizard.
         $skipUrl .= $separator . http_build_query($skipUrlParams);
 
         $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
@@ -98,7 +108,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('shop_id', $shopId);
         $context->smarty->assign('checkConnection', DoofinderConfig::checkOutsideConnection());
         $context->smarty->assign('tokenAjax', DfTools::encrypt('doofinder-ajax'));
-        $context->smarty->assign('skipurl', $skipUrl);
+        $context->smarty->assign('skipurl', $skipUrl . '&first_time=1');
         $context->smarty->assign('paramsPopup', $paramsPopup);
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
@@ -112,7 +122,7 @@ class DoofinderAdminPanelView
             }
 
             $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure_administration_panel.tpl');
-            $output .= $this->renderFormDataFeed($adv);
+            $output .= $this->renderFormDataFeed($adv, $skip);
             if ($adv) {
                 $output .= $this->renderFormAdvanced();
             }
@@ -207,13 +217,25 @@ class DoofinderAdminPanelView
     }
 
     /**
-     * Render the data feed configuration form
+     * Render the data feed configuration form.
+     *
+     * The `skip` feature allows bypassing the onboarding screen and directly accessing the
+     * configuration page by appending `&skip=1` to the URL. Unlocks the fields for
+     * `installation ID`, `API Key`, and `region` like `&adv=1`.
+     *
+     * The differences of `&skip=1` and `&adv=1` are:
+     * - These fields can now be edited without requiring `&adv=1`, while the access to the
+     *   advanced tab remains restricted, as it is intended for the Support team.
+     * - The hashids section is now "transparent" for the customers and only becomes explicitly visible when
+     *   `&adv=1` is set, without being affected by `&skip=1`.
+     * - The `&skip=1` parameter persists during form submissions to maintain expected behavior.
      *
      * @param bool $adv
+     * @param bool $skip
      *
      * @return string
      */
-    protected function renderFormDataFeed($adv = false)
+    protected function renderFormDataFeed($adv = false, $skip = false)
     {
         $helper = new \HelperForm();
         $context = \Context::getContext();
@@ -227,7 +249,7 @@ class DoofinderAdminPanelView
         $helper->identifier = $this->module->getIdentifier();
         // $helper->submit_action = 'submitDoofinderModuleDataFeed';
         $helper->currentIndex = $context->link->getAdminLink('AdminModules', false)
-            . (($adv) ? '&adv=1' : '')
+            . (($adv) ? '&adv=1' : '') . (($skip) ? '&skip=1' : '')
             . '&configure=' . $this->module->name . '&tab_module=' . $this->module->tab . '&module_name=' . $this->module->name;
         $helper->token = \Tools::getAdminTokenLite('AdminModules');
 
@@ -459,6 +481,14 @@ class DoofinderAdminPanelView
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
+                    [
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
+                        'label' => $this->module->l('Enable multicurrency', 'doofinderadminpanelview'),
+                        'name' => 'DF_MULTIPRICE_ENABLED',
+                        'desc' => $this->module->l('Do not change this option unless our support team has given you a specific guidance', 'doofinderadminpanelview'),
+                        'is_bool' => true,
+                        'values' => $this->getBooleanFormValue(),
+                    ],
                 ],
                 'submit' => [
                     'title' => $this->module->l('Save Internal Search Options', 'doofinderadminpanelview'),
@@ -475,6 +505,9 @@ class DoofinderAdminPanelView
      */
     protected function getConfigFormStoreInfo()
     {
+        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
+        $isManualInstallation = (bool) \Tools::getValue('skip', 0);
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
         $inputs = [
             [
                 'type' => 'text',
@@ -482,26 +515,65 @@ class DoofinderAdminPanelView
                 'name' => 'DF_INSTALLATION_ID',
                 'desc' => $this->module->l('You can find this identifier in our control panel. Inside the side menu labeled "Store settings".', 'doofinderadminpanelview'),
                 'lang' => false,
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
+                'readonly' => !$isAdvParamPresent && !$isManualInstallation,
             ],
             [
                 'type' => 'text',
                 'label' => $this->module->l('Doofinder Api Key', 'doofinderadminpanelview'),
                 'name' => 'DF_API_KEY',
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
+                'readonly' => !$isAdvParamPresent && !$isManualInstallation,
             ],
             [
-                'type' => 'text',
+                'type' => 'select',
                 'label' => $this->module->l('Region', 'doofinderadminpanelview'),
                 'name' => 'DF_REGION',
-                'readonly' => !(bool) \Tools::getValue('adv', 0),
+                'options' => [
+                    'query' => [
+                        0 => ['id' => 'eu1', 'name' => $this->module->l('Europe', 'doofinderadminpanelview')],
+                        1 => ['id' => 'us1', 'name' => $this->module->l('United States', 'doofinderadminpanelview')],
+                        2 => ['id' => 'ap1', 'name' => $this->module->l('Asia - Pacific', 'doofinderadminpanelview')],
+                    ],
+                    'id' => 'id',
+                    'name' => 'name',
+                ],
+                'disabled' => !$isAdvParamPresent && !$isManualInstallation,
             ],
-            [
-                'type' => 'html',
-                'label' => $this->module->l('Feed URLs to use on Doofinder Admin panel', 'doofinderadminpanelview'),
-                'name' => 'DF_FEED_READONLY_URLS',
-                'html_content' => $this->feedUrlsFormatHtml($this->getFeedURLs()),
-            ],
+        ];
+
+        // This is necessary since disabled fields are not sent in the submit, thus causing errors.
+        if (!$isAdvParamPresent && !$isManualInstallation) {
+            $inputs[] = [
+                'type' => 'hidden',
+                'name' => 'DF_REGION',
+            ];
+        }
+
+        if ($isAdvParamPresent) {
+            if ($multipriceEnabled) {
+                $hashidKeys = self::getMultipriceKeys();
+                $keyToUse = 'keyMultiprice';
+                $labelToUse = 'labelMultiprice';
+            } else {
+                $hashidKeys = DfTools::getHashidKeys();
+                $keyToUse = 'key';
+                $labelToUse = 'label';
+            }
+
+            foreach ($hashidKeys as $hashidKey) {
+                $inputs[] = [
+                    'type' => 'text',
+                    'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey[$labelToUse],
+                    'name' => $hashidKey[$keyToUse],
+                    'readonly' => !$isAdvParamPresent && !$isManualInstallation,
+                ];
+            }
+        }
+
+        $inputs[] = [
+            'type' => 'html',
+            'label' => $this->module->l('Feed URLs to use on Doofinder Admin panel', 'doofinderadminpanelview'),
+            'name' => 'DF_FEED_READONLY_URLS',
+            'html_content' => $this->feedUrlsFormatHtml($this->getFeedURLs()),
         ];
 
         return [
@@ -516,6 +588,18 @@ class DoofinderAdminPanelView
                 ],
             ],
         ];
+    }
+
+    private static function getMultipriceKeys()
+    {
+        $hashidKeys = DfTools::getHashidKeys();
+        $arrayKeys = [];
+
+        foreach ($hashidKeys as $hashidKey) {
+            $arrayKeys[$hashidKey['keyMultiprice']] = $hashidKey;
+        }
+
+        return $arrayKeys;
     }
 
     private function getBooleanFormValue()
