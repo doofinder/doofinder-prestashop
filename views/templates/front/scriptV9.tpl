@@ -86,7 +86,7 @@
           });
 
           if (!response.ok) {
-            console.error('Failed to send data to Klaviyo:', response.text());
+            console.error('Failed to send data to Klaviyo:', await response.text());
           }
         } catch (error) {
           console.error('Failed to send data to Klaviyo:', error);
