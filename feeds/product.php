@@ -246,9 +246,15 @@ $header = array_merge($header, $additionalAttributesHeaders);
  * )
  * As each module can extend $extraHeader and $extraRows don't forget to merge them
  */
+
+ // PRODUCTS
+$rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
+
 $extraHeader = [];
 $extraRows = [];
+
 Hook::exec('actionDoofinderExtendFeed', [
+    'rows' => &$rows,
     'extra_header' => &$extraHeader,
     'extra_rows' => &$extraRows,
     'id_lang' => $lang->id,
@@ -260,9 +266,6 @@ Hook::exec('actionDoofinderExtendFeed', [
 $header = array_merge($header, $extraHeader);
 // To avoid indexation failures
 $header = array_unique($header);
-
-// PRODUCTS
-$rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
 
 $rows = arrayMergeByIdProduct($rows, $extraRows);
 
