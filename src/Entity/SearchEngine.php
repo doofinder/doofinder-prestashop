@@ -63,7 +63,9 @@ class SearchEngine
     public static function setSearchEnginesByConfig()
     {
         $context = \Context::getContext();
-        $installationID = \Configuration::get('DF_INSTALLATION_ID');
+        $idShopGroup = $context->shop->id_shop_group;
+        $idShop = $context->shop->id;
+        $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $idShopGroup, $idShop);
         $apiKey = \Configuration::get('DF_API_KEY');
         $region = \Configuration::get('DF_REGION');
 
@@ -72,7 +74,7 @@ class SearchEngine
         foreach ($data['config']['search_engines'] as $lang => $currencies) {
             foreach ($currencies as $currency => $hashid) {
                 $hashidKey = 'DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang);
-                \Configuration::updateValue($hashidKey, $hashid, false, $context->shop->id_shop_group, $context->shop->id);
+                \Configuration::updateValue($hashidKey, $hashid, false, $idShopGroup, $idShop);
             }
         }
 
