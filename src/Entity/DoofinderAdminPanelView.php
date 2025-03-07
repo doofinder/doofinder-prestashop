@@ -62,6 +62,11 @@ class DoofinderAdminPanelView
         if ($stop) {
             return $stop;
         }
+        $isModuleEnabledInShop = DfTools::isModuleEnabledInShop($context->shop->id);
+        if (!$isModuleEnabledInShop) {
+            return $this->getWarningModuleNotEnabledHtml();
+        }
+
         $adv = \Tools::getValue('adv', 0);
         $skip = \Tools::getValue('skip', 0);
 
@@ -110,6 +115,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('tokenAjax', DfTools::encrypt('doofinder-ajax'));
         $context->smarty->assign('skipurl', $skipUrl . '&first_time=1');
         $context->smarty->assign('paramsPopup', $paramsPopup);
+        $context->smarty->assign('doofinderAdminUrl', sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, ''));
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
         if ($configured) {
@@ -146,6 +152,13 @@ class DoofinderAdminPanelView
         }
 
         return $stop;
+    }
+
+    public function getWarningModuleNotEnabledHtml()
+    {
+        $context = \Context::getContext();
+        $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a shop context where the module is deactivated. Activate it to gain access to the module features', 'doofinderadminpanelview'));
+        return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
     }
 
     public static function displayErrorCtm($error, $link = false, $raw = false)
@@ -207,11 +220,18 @@ class DoofinderAdminPanelView
      */
     protected function isConfigured()
     {
+        $context = \Context::getContext();
+        $idShop = $context->shop->id;
+        $multishopEnable = (bool) \Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
+        $defaultShopId = (int) \Configuration::get('PS_SHOP_DEFAULT');
         $skip = \Tools::getValue('skip');
         if ($skip) {
             \Configuration::updateValue('DF_ENABLE_HASH', 0);
         }
         $sql = 'SELECT id_configuration FROM ' . _DB_PREFIX_ . 'configuration WHERE name = \'DF_ENABLE_HASH\'';
+        if ($multishopEnable && is_numeric($idShop) && $defaultShopId !== (int) $idShop) {
+            $sql .= ' AND id_shop = ' . (int) $idShop;
+        }
 
         return \Db::getInstance()->getValue($sql);
     }

@@ -177,4 +177,5 @@
 	{if $shop_id}
 	const shop_id = {$shop_id|escape:'htmlall':'UTF-8'};
 	{/if}
+	const doofinderAdminUrl = "{$doofinderAdminUrl|escape:'javascript':'UTF-8'}";
 </script>

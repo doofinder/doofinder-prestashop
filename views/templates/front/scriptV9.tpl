@@ -62,7 +62,7 @@
         let userId = window.localStorage.getItem('df-random-userid');
         userId = JSON.parse(userId);
         
-        await klaviyo.identify({
+        klaviyo.identify({
             "email": klCustomer.email
         });
 

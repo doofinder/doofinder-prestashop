@@ -93,16 +93,16 @@ class DoofinderInstallation
 
     /**
      * Start the installation process
-     * If shop_id is null, install all shops
+     * If shopId is null, installation is exceuted in all shops where the module is enabled
      *
-     * @param int $shop_id
+     * @param int $shopId
      *
      * @return void
      */
-    public static function autoinstaller($shop_id = null)
+    public static function autoinstaller($shopId = null)
     {
-        if (!empty($shop_id)) {
-            $shop = \Shop::getShop($shop_id);
+        if (!empty($shopId)) {
+            $shop = \Shop::getShop($shopId);
             self::_createStore($shop);
             DoofinderConfig::setSharedGlobalDefaultConfig();
 
@@ -111,6 +111,9 @@ class DoofinderInstallation
 
         $shops = \Shop::getShops();
         foreach ($shops as $shop) {
+            if (!DfTools::isModuleEnabledInShop($shop['id_shop'])) {
+                continue;
+            }
             self::_createStore($shop);
         }
         DoofinderConfig::setSharedGlobalDefaultConfig();

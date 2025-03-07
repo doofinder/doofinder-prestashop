@@ -68,11 +68,17 @@ class DoofinderConfig
     {
         $apiKey = DfTools::getFormattedApiKey();
         $apiEndpoint = \Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
-        $apiEndpointArray = explode('-', $apiEndpoint);
-        $region = $apiEndpointArray[0];
+        $region = 'eu1';
+        if ('prod' === DoofinderConstants::ENV) {
+            $apiEndpointArray = explode('-', $apiEndpoint);
+            $region = $apiEndpointArray[0];
+        }
+        $fullApiKey = $region . '-' . $apiKey;
 
         \Configuration::updateValue('DF_REGION', $region, false, $shopGroupId, $shopId);
-        \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $shopGroupId, $shopId);
+        \Configuration::updateValue('DF_API_KEY', $fullApiKey, false, $shopGroupId, $shopId);
+        \Configuration::updateGlobalValue('DF_REGION', $region);
+        \Configuration::updateGlobalValue('DF_API_KEY', $fullApiKey);
         self::setSharedDefaultConfig($shopGroupId, $shopId);
     }
 

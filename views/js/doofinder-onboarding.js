@@ -41,8 +41,11 @@ function popupDoofinder(type) {
     "?" +
     paramsPopup +
     "&mktcod=PSHOP&utm_source=prestashop_module&utm_campaing=freetrial&utm_content=autoinstaller";
-  var domain = "https://admin.doofinder.com/plugins/" + type + "/prestashop";
-  var winObj = popupCenter(domain + params, "Doofinder", 400, 850);
+  if ('undefined' === typeof doofinderAdminUrl) {
+    doofinderAdminUrl = 'https://admin.doofinder.com';
+  }
+  var domain = doofinderAdminUrl + "/plugins/" + type + "/prestashop";
+  popupCenter(domain + params, "Doofinder", 400, 850);
 }
 
 function initializeAutoinstallerMessages() {
