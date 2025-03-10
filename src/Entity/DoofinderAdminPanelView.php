@@ -206,11 +206,12 @@ class DoofinderAdminPanelView
      */
     protected function showNewShopForm($shop)
     {
-        $installationId = \Configuration::get('DF_INSTALLATION_ID', null, (int) $shop->id_shop_group, (int) $shop->id);
+        $installationKey = 'DF_INSTALLATION_ID';
+        $hasInstallationinstallationId = \Configuration::hasKey($installationKey, null, (int) $shop->id_shop_group, (int) $shop->id) || ((int) \Configuration::get('PS_SHOP_DEFAULT') === (int) $shop->id && \Configuration::hasKey($installationKey));
         $multishopEnable = \Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
         $apiKey = DfTools::getFormattedApiKey();
 
-        return !$installationId && $multishopEnable && $apiKey;
+        return !$hasInstallationinstallationId && $multishopEnable && $apiKey;
     }
 
     /**
