@@ -157,7 +157,7 @@ class DoofinderAdminPanelView
     public function getWarningModuleNotEnabledHtml()
     {
         $context = \Context::getContext();
-        $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a shop context where the module is deactivated. Activate it to gain access to the module features', 'doofinderadminpanelview'));
+        $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a shop context where the module is deactivated. Please activate it to access its features.', 'doofinderadminpanelview'));
         return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
     }
 
