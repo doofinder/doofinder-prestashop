@@ -1614,6 +1614,36 @@ class DfTools
         return $text;
     }
 
+    /**
+     * Checks if the module is enabled for a specific shop.
+     *
+     * This method determines whether the Doofinder module is enabled for a given shop by:
+     * - Checking a cache key to see if the result is already stored.
+     * - If not cached, querying the database to check if the module is assigned to the specified shop.
+     * - Storing the result in the cache to optimize future calls.
+     *
+     * @param int $shopId the ID of the shop to check
+     *
+     * @return bool true if the module is enabled for the shop, false otherwise
+     */
+    public static function isModuleEnabledInShop($shopId)
+    {
+        $moduleName = DoofinderConstants::NAME;
+        $cacheKey = 'Module::isEnabled' . $moduleName . '_' . $shopId;
+        if (!\Cache::isStored($cacheKey)) {
+            $active = false;
+            $idModule = \Module::getModuleIdByName($moduleName);
+            if (\Db::getInstance()->getValue('SELECT `id_module` FROM `' . _DB_PREFIX_ . 'module_shop` WHERE `id_module` = ' . (int) $idModule . ' AND `id_shop` = ' . (int) $shopId)) {
+                $active = true;
+            }
+            \Cache::store($cacheKey, (bool) $active);
+
+            return (bool) $active;
+        }
+
+        return \Cache::retrieve($cacheKey);
+    }
+
     private static function getVariantUrl($product, $context)
     {
         $context = \Context::getContext();
