@@ -1647,7 +1647,7 @@ class DfTools
     public static function str_contains($haystack, $needle)
     {
         if (function_exists('str_contains')) {
-            return str_contains($haystack, $needle);
+            return \str_contains($haystack, $needle);
         }
 
         return '' === $needle || false !== strpos($haystack, $needle);
