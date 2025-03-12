@@ -98,7 +98,7 @@ class FormManager
             }
             $value = trim($value);
             // Special case for Hashids due to the Multiprice
-            if ($isAdvParamPresent && $multipriceEnabled && str_contains($postKey, 'DF_HASHID')) {
+            if ($isAdvParamPresent && $multipriceEnabled && DfTools::str_contains($postKey, 'DF_HASHID')) {
                 self::updateHashIds($postKey, $value);
                 continue;
             }

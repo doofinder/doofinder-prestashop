@@ -1644,6 +1644,15 @@ class DfTools
         return \Cache::retrieve($cacheKey);
     }
 
+    public static function str_contains($haystack, $needle)
+    {
+        if (function_exists('str_contains')) {
+            return str_contains($haystack, $needle);
+        }
+
+        return '' === $needle || false !== strpos($haystack, $needle);
+    }
+
     private static function getVariantUrl($product, $context)
     {
         $context = \Context::getContext();
