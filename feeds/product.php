@@ -272,7 +272,7 @@ $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 
 $csv = fopen('php://output', 'w');
 if (!$limit || (false !== $offset && 0 === (int) $offset)) {
-    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
+    fputcsv($csv, $header, DfTools::TXT_SEPARATOR, '"', '');
 }
 
 foreach ($rows as $row) {
