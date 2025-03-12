@@ -315,7 +315,7 @@ class DfProductBuild
             $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
         }
 
-        $product['df_group_leader'] = (array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::YES;
+        $product['df_group_leader'] = (array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
 
         if (array_key_exists('features', $product) && is_array($product['features'])) {
             $formattedAttributes = [];
