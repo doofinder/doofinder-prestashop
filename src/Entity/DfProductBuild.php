@@ -175,7 +175,10 @@ class DfProductBuild
 
         $products = $this->getProductData();
 
-        $minPriceVariantByProductId = DfTools::getMinVariantPrices($products, $this->useTax, $this->currencies, $this->idLang, $this->idShop);
+        $minPriceVariantByProductId = [];
+        if ($this->productVariations) {
+            $minPriceVariantByProductId = DfTools::getMinVariantPrices($products, $this->useTax, $this->currencies, $this->idLang, $this->idShop);
+        }
 
         foreach ($products as $product) {
             $payload[] = $this->buildProduct($product, $minPriceVariantByProductId);
@@ -312,7 +315,7 @@ class DfProductBuild
             $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
         }
 
-        $product['df_group_leader'] = (int) $product['df_group_leader'];
+        $product['df_group_leader'] = (array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
 
         if (array_key_exists('features', $product) && is_array($product['features'])) {
             $formattedAttributes = [];
