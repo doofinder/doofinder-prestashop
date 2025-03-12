@@ -278,6 +278,6 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 foreach ($rows as $row) {
     $product = $dfProductBuild->buildProduct($row, $minPriceVariantByProductId, $additionalAttributesHeaders, $additionalHeaders);
     $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
-    fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
+    fputcsv($csv, $product, DfTools::TXT_SEPARATOR, '"', '');
 }
 fclose($csv);
