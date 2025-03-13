@@ -1108,6 +1108,7 @@ class DfTools
         $text = trim($text);
         $text = preg_replace('/^["\']+/', '', $text); // remove first quotes
         $text = str_replace(self::TXT_SEPARATOR, '&#124;', $text);
+        $text = stripcslashes($text);
 
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
@@ -1642,6 +1643,15 @@ class DfTools
         }
 
         return \Cache::retrieve($cacheKey);
+    }
+
+    public static function str_contains($haystack, $needle)
+    {
+        if (function_exists('str_contains')) {
+            return \str_contains($haystack, $needle);
+        }
+
+        return '' === $needle || false !== strpos($haystack, $needle);
     }
 
     private static function getVariantUrl($product, $context)
