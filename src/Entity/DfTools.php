@@ -1108,6 +1108,7 @@ class DfTools
         $text = trim($text);
         $text = preg_replace('/^["\']+/', '', $text); // remove first quotes
         $text = str_replace(self::TXT_SEPARATOR, '&#124;', $text);
+        $text = stripcslashes($text);
 
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
