@@ -34,8 +34,5 @@ jobs:
 
       - run: composer install
 
-      - name: cs-fixer:init
-        run: php vendor/bin/prestashop-coding-standards cs-fixer:init
-
       - name: PHP-CS-Fixer
         run: php vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --rules=@PSR2
