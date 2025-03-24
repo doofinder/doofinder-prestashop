@@ -1,0 +1,29 @@
+.df-checkboxes-table {
+  padding: 8px 16px;
+  font-size: 12px;
+  line-height: 1.42857;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #bbcdd2;
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.df-checkboxes-table table {
+  width: 100%;
+}
+
+.df-checkboxes-table td {
+  padding: 2px;
+}
+
+.df-checkboxes-table label {
+  font-weight: normal;
+}
+
+.df-checkboxes-table input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}

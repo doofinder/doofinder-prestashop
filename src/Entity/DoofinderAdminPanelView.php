@@ -78,6 +78,7 @@ class DoofinderAdminPanelView
         $output = $msg;
         $oldPS = false;
         $context->controller->addJS($this->module->getPath() . 'views/js/admin-panel.js');
+        $context->controller->addCSS($this->module->getPath() . 'views/css/admin-panel.css');
 
         if (_PS_VERSION_ < 1.6) {
             $oldPS = true;
@@ -404,15 +405,15 @@ class DoofinderAdminPanelView
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => 'select',
+                        'type' => 'html',
                         'label' => $this->module->l('Define which combinations of product attributes you want to index for', 'doofinderadminpanelview'),
                         'name' => 'DF_GROUP_ATTRIBUTES_SHOWN',
-                        'multiple' => true,
-                        'options' => [
+                        'html_content' => $this->checkboxSelectorFormatHtml([
                             'query' => \AttributeGroup::getAttributesGroups(\Context::getContext()->language->id),
                             'id' => 'id_attribute_group',
                             'name' => 'name',
-                        ],
+                            'field' => 'DF_GROUP_ATTRIBUTES_SHOWN',
+                        ]),
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -464,6 +465,32 @@ class DoofinderAdminPanelView
                 ],
             ],
         ];
+    }
+
+    private function checkboxSelectorFormatHtml($configs)
+    {
+        $context = \Context::getContext();
+        $valueSelector = $configs['id'];
+        $nameSelector = $configs['name'];
+        $fieldName = $configs['field'];
+        $query = $configs['query'];
+        $checkedOptions = explode(',', DfTools::getConfigByShop($fieldName, $context->shop->id));
+        $htmlToShow = '<div class="df-checkboxes-table fixed-width-xl"><table>';
+        $i = 0;
+
+        /* Sort attributes */
+        usort($query, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+
+        foreach ($query as $field) {
+            $checkedAttribute = (in_array($field[$valueSelector], $checkedOptions)) ? ' checked' : '';
+            $htmlToShow .= '<tr><td><input id="label-for-' . strtolower($fieldName) . '-' . $i . '" name="' . $fieldName . '[]" type="checkbox" value="' . $field[$valueSelector] . '"' . $checkedAttribute . '></td><td><label for="label-for-' . strtolower($fieldName) . '-' . $i . '">' . $field[$nameSelector] . '</label></td></tr>';
+            ++$i;
+        }
+        $htmlToShow .= '</table></div>';
+
+        return $htmlToShow;
     }
 
     /**
