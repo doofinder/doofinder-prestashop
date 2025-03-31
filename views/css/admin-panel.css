@@ -15,6 +15,10 @@
   width: 100%;
 }
 
+.df-checkboxes-table tr td:first-child {
+  width: 28px;
+}
+
 .df-checkboxes-table td {
   padding: 2px;
 }
