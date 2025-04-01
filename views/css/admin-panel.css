@@ -7,7 +7,7 @@
   background-image: none;
   border: 1px solid #bbcdd2;
   border-radius: 4px;
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
@@ -30,4 +30,8 @@
 .df-checkboxes-table input[type="checkbox"] {
   width: 20px;
   height: 20px;
+}
+
+.row-checkbox-toggle td {
+  padding-bottom: 32px;
 }

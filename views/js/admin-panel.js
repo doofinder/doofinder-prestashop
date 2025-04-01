@@ -79,4 +79,9 @@ $(document).ready(function() {
     });
   });
 
+  $('.df-checkboxes-table [data-checkboxes-toggle]').on('click', function(event){
+    const $parentTable = $(this).closest('.df-checkboxes-table');
+    const isChecked = $(this).is(':checked');
+    $parentTable.find('input[type="checkbox"]').prop('checked', isChecked);
+  });
 });

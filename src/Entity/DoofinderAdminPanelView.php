@@ -423,18 +423,18 @@ class DoofinderAdminPanelView
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => 'select',
+                        'type' => 'html',
                         'label' => $this->module->l('Select features will be shown in feed', 'doofinderadminpanelview'),
                         'name' => 'DF_FEATURES_SHOWN',
-                        'multiple' => true,
-                        'options' => [
+                        'html_content' => $this->checkboxSelectorFormatHtml([
                             'query' => \Feature::getFeatures(
                                 $context->language->id,
                                 $context->shop->id
                             ),
                             'id' => 'id_feature',
                             'name' => 'name',
-                        ],
+                            'field' => 'DF_FEATURES_SHOWN',
+                        ]),
                     ],
                     [
                         'type' => 'select',
@@ -482,6 +482,14 @@ class DoofinderAdminPanelView
         usort($query, function ($a, $b) {
             return strcmp($a['name'], $b['name']);
         });
+
+        $countQuery = count($query);
+
+        // If there is only one element, there is no need to show the Select All/None toggle.
+        if ($countQuery > 1) {
+            $checkedAttribute = (count($checkedOptions) === $countQuery) ? ' checked' : '';
+            $htmlToShow .= '<tr class="row-checkbox-toggle"><td><input type="checkbox" data-checkboxes-toggle="true" id="label-for-toggle-' . strtolower($valueSelector) . '" ' . $checkedAttribute . '></td><td><label for="label-for-toggle-' . strtolower($valueSelector) . '"><strong>' . $this->module->l('Select All/None', 'doofinderadminpanelview') . '</strong></label></td></tr>';
+        }
 
         foreach ($query as $field) {
             $checkedAttribute = (in_array($field[$valueSelector], $checkedOptions)) ? ' checked' : '';
