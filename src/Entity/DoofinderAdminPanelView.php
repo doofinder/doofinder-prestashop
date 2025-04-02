@@ -488,7 +488,7 @@ class DoofinderAdminPanelView
         // If there is only one element, there is no need to show the Select All/None toggle.
         if ($countQuery > 1) {
             $checkedAttribute = (count($checkedOptions) === $countQuery) ? ' checked' : '';
-            $htmlToShow .= '<tr class="row-checkbox-toggle"><td><input type="checkbox" data-checkboxes-toggle="true" id="label-for-toggle-' . strtolower($valueSelector) . '" ' . $checkedAttribute . '></td><td><label for="label-for-toggle-' . strtolower($valueSelector) . '"><strong>' . $this->module->l('Select All/None', 'doofinderadminpanelview') . '</strong></label></td></tr>';
+            $htmlToShow .= '<tr class="row-checkbox-toggle"><td><input type="checkbox" data-checkboxes-toggle="true" id="label-for-toggle-' . strtolower($valueSelector) . '" ' . $checkedAttribute . '></td><td><label for="label-for-toggle-' . strtolower($valueSelector) . '">' . $this->module->l('Select All/None', 'doofinderadminpanelview') . '</label></td></tr>';
         }
 
         foreach ($query as $field) {

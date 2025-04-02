@@ -24,14 +24,11 @@
 }
 
 .df-checkboxes-table label {
+  margin-bottom: 0;
   font-weight: normal;
 }
 
 .df-checkboxes-table input[type="checkbox"] {
   width: 20px;
   height: 20px;
-}
-
-.row-checkbox-toggle td {
-  padding-bottom: 32px;
 }
