@@ -668,14 +668,15 @@ class DoofinderAdminPanelView
 
     private function getBooleanFormValue()
     {
+        $randomNumber = mt_rand(0, 100000);
         $option = [
             [
-                'id' => 'active_on',
+                'id' => 'active_on_' . $randomNumber,
                 'value' => true,
                 'label' => $this->module->l('Enabled', 'doofinderadminpanelview'),
             ],
             [
-                'id' => 'active_off',
+                'id' => 'active_off_' . $randomNumber,
                 'value' => false,
                 'label' => $this->module->l('Disabled', 'doofinderadminpanelview'),
             ],
