@@ -368,11 +368,11 @@ class DoofinderAdminPanelView
         $selectFullFieldsForAttributesShown = array_merge($selectCommonFieldsForAttributesShownOptions, ['field' => 'DF_GROUP_ATTRIBUTES_SHOWN']);
 
         $selectCommonFieldsForFeaturesShownOptions = ['query' => \Feature::getFeatures(
-                                $context->language->id,
-                                $context->shop->id
-                            ),
-                            'id' => 'id_feature',
-                            'name' => 'name'];
+            $context->language->id,
+            $context->shop->id
+        ),
+            'id' => 'id_feature',
+            'name' => 'name'];
         $selectFullFieldsForFeaturesShown = array_merge($selectCommonFieldsForFeaturesShownOptions, ['field' => 'DF_FEATURES_SHOWN']);
 
         return [
