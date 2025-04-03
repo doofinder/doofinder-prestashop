@@ -422,7 +422,7 @@ class DoofinderAdminPanelView
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
                         'label' => $this->module->l('Define which combinations of product attributes you want to index for', 'doofinderadminpanelview'),
-                        'name' => $selectFullFieldsForFeaturesShown['field'],
+                        'name' => $selectFullFieldsForAttributesShown['field'] . (version_compare(_PS_VERSION_, '1.6.0', '>=') ? '' : '[]'),
                         'multiple' => true,
                         'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForAttributesShown),
                         'options' => $selectCommonFieldsForAttributesShownOptions,
@@ -437,7 +437,7 @@ class DoofinderAdminPanelView
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
                         'label' => $this->module->l('Select features will be shown in feed', 'doofinderadminpanelview'),
-                        'name' => $selectFullFieldsForFeaturesShown['field'],
+                        'name' => $selectFullFieldsForFeaturesShown['field'] . (version_compare(_PS_VERSION_, '1.6.0', '>=') ? '' : '[]'),
                         'multiple' => true,
                         'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForFeaturesShown),
                         'options' => $selectCommonFieldsForFeaturesShownOptions,
