@@ -130,7 +130,10 @@ class DoofinderConfig
         \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
 
         $apiEndpointArray = explode('-', $apiEndpoint);
-        $region = $apiEndpointArray[0];
+        $region = 'eu1';
+        if ('prod' === DoofinderConstants::ENV) {
+            $region = $apiEndpointArray[0];
+        }
         $shops = \Shop::getShops();
 
         foreach ($shops as $shop) {
@@ -138,6 +141,7 @@ class DoofinderConfig
             $sgid = $shop['id_shop_group'];
 
             \Configuration::updateValue('DF_API_KEY', $region . '-' . $apiKey, false, $sgid, $sid);
+            \Configuration::updateGlobalValue('DF_API_KEY', $region . '-' . $apiKey);
         }
     }
 

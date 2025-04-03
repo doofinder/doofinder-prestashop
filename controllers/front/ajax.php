@@ -68,8 +68,12 @@ class DoofinderAjaxModuleFrontController extends ModuleFrontController
         if (method_exists($this, 'ajaxRender')) {
             $this->ajaxRender($value, $controller, $method);
             exit;
+        } elseif (method_exists($this, 'ajaxDie')) {
+            $this->ajaxDie($value, $controller, $method);
+            exit;
         }
 
-        $this->ajaxDie($value, $controller, $method);
+        echo $value;
+        exit;
     }
 }

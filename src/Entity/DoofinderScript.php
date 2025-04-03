@@ -32,10 +32,16 @@ class DoofinderScript
      */
     public static function searchLayerMustBeInitialized()
     {
-        $displayGeneral = \Configuration::get('DF_SHOW_LAYER', null, null, null, true);
-        $displayMobile = \Configuration::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
+        $displayGeneral = \ConfigurationCore::get('DF_SHOW_LAYER', null, null, null, true);
+        $displayMobile = \ConfigurationCore::get('DF_SHOW_LAYER_MOBILE', null, null, null, true);
         $context = \Context::getContext();
-        $isMobile = method_exists($context, 'isMobile') ? $context->isMobile() : $context->getMobileDetect()->isMobile();
+        // PrestaShop 1.5 isn't responsive anyway
+        $isMobile = false;
+        if (method_exists($context, 'isMobile')) {
+            $isMobile = $context->isMobile();
+        } elseif (method_exists($context, 'getMobileDetect')) {
+            $isMobile = $context->getMobileDetect()->isMobile();
+        }
 
         return $displayGeneral && (!$isMobile || $displayMobile);
     }

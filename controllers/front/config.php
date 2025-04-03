@@ -43,10 +43,10 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
             $tmpToken = DfTools::encrypt($redirect);
             if ($tmpToken == $autoinstallerToken) {
                 $apiToken = Tools::getValue('api_token');
-                $api_endpoint = Tools::getValue('api_endpoint');
-                $admin_endpoint = Tools::getValue('admin_endpoint');
+                $apiEndpoint = Tools::getValue('api_endpoint');
+                $adminEndpoint = Tools::getValue('admin_endpoint');
                 if ($apiToken) {
-                    DoofinderConfig::saveApiConfig($apiToken, $api_endpoint, $admin_endpoint);
+                    DoofinderConfig::saveApiConfig($apiToken, $apiEndpoint, $adminEndpoint);
                 }
                 echo json_encode(['success' => true]);
                 exit;
@@ -102,9 +102,13 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
         if (method_exists($this, 'ajaxRender')) {
             $this->ajaxRender($jsonCfg);
             exit;
-        } else {
+        } elseif (method_exists($this, 'ajaxDie')) {
             // Workaround for PS 1.6 as ajaxRender is not available
             $this->ajaxDie($jsonCfg);
+        } else {
+            // Workaround for PS 1.5
+            echo $jsonCfg;
+            exit;
         }
     }
 }

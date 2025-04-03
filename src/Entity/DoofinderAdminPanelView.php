@@ -360,6 +360,21 @@ class DoofinderAdminPanelView
             ];
         }
 
+        $selectCommonFieldsForAttributesShownOptions = [
+            'query' => \AttributeGroup::getAttributesGroups(\Context::getContext()->language->id),
+            'id' => 'id_attribute_group',
+            'name' => 'name',
+        ];
+        $selectFullFieldsForAttributesShown = array_merge($selectCommonFieldsForAttributesShownOptions, ['field' => 'DF_GROUP_ATTRIBUTES_SHOWN']);
+
+        $selectCommonFieldsForFeaturesShownOptions = ['query' => \Feature::getFeatures(
+                                $context->language->id,
+                                $context->shop->id
+                            ),
+                            'id' => 'id_feature',
+                            'name' => 'name'];
+        $selectFullFieldsForFeaturesShown = array_merge($selectCommonFieldsForFeaturesShownOptions, ['field' => 'DF_FEATURES_SHOWN']);
+
         return [
             'form' => [
                 'legend' => [
@@ -405,15 +420,12 @@ class DoofinderAdminPanelView
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => 'html',
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
                         'label' => $this->module->l('Define which combinations of product attributes you want to index for', 'doofinderadminpanelview'),
-                        'name' => 'DF_GROUP_ATTRIBUTES_SHOWN',
-                        'html_content' => $this->checkboxSelectorFormatHtml([
-                            'query' => \AttributeGroup::getAttributesGroups(\Context::getContext()->language->id),
-                            'id' => 'id_attribute_group',
-                            'name' => 'name',
-                            'field' => 'DF_GROUP_ATTRIBUTES_SHOWN',
-                        ]),
+                        'name' => $selectFullFieldsForFeaturesShown['field'],
+                        'multiple' => true,
+                        'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForAttributesShown),
+                        'options' => $selectCommonFieldsForAttributesShownOptions,
                     ],
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
@@ -423,18 +435,12 @@ class DoofinderAdminPanelView
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => 'html',
+                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
                         'label' => $this->module->l('Select features will be shown in feed', 'doofinderadminpanelview'),
-                        'name' => 'DF_FEATURES_SHOWN',
-                        'html_content' => $this->checkboxSelectorFormatHtml([
-                            'query' => \Feature::getFeatures(
-                                $context->language->id,
-                                $context->shop->id
-                            ),
-                            'id' => 'id_feature',
-                            'name' => 'name',
-                            'field' => 'DF_FEATURES_SHOWN',
-                        ]),
+                        'name' => $selectFullFieldsForFeaturesShown['field'],
+                        'multiple' => true,
+                        'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForFeaturesShown),
+                        'options' => $selectCommonFieldsForFeaturesShownOptions,
                     ],
                     [
                         'type' => 'select',
