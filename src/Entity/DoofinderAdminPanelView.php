@@ -374,6 +374,8 @@ class DoofinderAdminPanelView
             'id' => 'id_feature',
             'name' => 'name'];
         $selectFullFieldsForFeaturesShown = array_merge($selectCommonFieldsForFeaturesShownOptions, ['field' => 'DF_FEATURES_SHOWN']);
+        // For PrestaShop 1.5 Multiselects requires [] appended at the end of the field name.
+        $maybeAppendArrayToMultiselectName = version_compare(_PS_VERSION_, '1.6.0', '>=') ? '' : '[]';
 
         return [
             'form' => [
@@ -422,7 +424,7 @@ class DoofinderAdminPanelView
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
                         'label' => $this->module->l('Define which combinations of product attributes you want to index for', 'doofinderadminpanelview'),
-                        'name' => $selectFullFieldsForAttributesShown['field'] . (version_compare(_PS_VERSION_, '1.6.0', '>=') ? '' : '[]'),
+                        'name' => $selectFullFieldsForAttributesShown['field'] . $maybeAppendArrayToMultiselectName,
                         'multiple' => true,
                         'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForAttributesShown),
                         'options' => $selectCommonFieldsForAttributesShownOptions,
@@ -437,7 +439,7 @@ class DoofinderAdminPanelView
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
                         'label' => $this->module->l('Select features will be shown in feed', 'doofinderadminpanelview'),
-                        'name' => $selectFullFieldsForFeaturesShown['field'] . (version_compare(_PS_VERSION_, '1.6.0', '>=') ? '' : '[]'),
+                        'name' => $selectFullFieldsForFeaturesShown['field'] . $maybeAppendArrayToMultiselectName,
                         'multiple' => true,
                         'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForFeaturesShown),
                         'options' => $selectCommonFieldsForFeaturesShownOptions,
