@@ -79,4 +79,19 @@ $(document).ready(function() {
     });
   });
 
+  $('.df-checkboxes-table [data-checkboxes-toggle]').on('click', function(event){
+    const $parentTable = $(this).closest('.df-checkboxes-table');
+    const isChecked = $(this).is(':checked');
+    $parentTable.find('input[type="checkbox"]').prop('checked', isChecked);
+  });
+
+  const commonCheckboxSelector = 'input[type="checkbox"]:not([data-checkboxes-toggle])';
+
+  $('.df-checkboxes-table ' + commonCheckboxSelector).on('click', function(event){
+    const $parentTable = $(this).closest('.df-checkboxes-table');
+    const checkboxesTotalCount = $parentTable.find(commonCheckboxSelector).length;
+    const checkboxesCheckedcount = $parentTable.find(commonCheckboxSelector + ':checked').length;
+    const allChecked =  checkboxesTotalCount === checkboxesCheckedcount;
+    $parentTable.find('[data-checkboxes-toggle]').prop('checked', allChecked);
+  });
 });
