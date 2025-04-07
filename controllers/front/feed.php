@@ -56,7 +56,7 @@ class DoofinderFeedModuleFrontController extends ModuleFrontController
             $this->ajaxDie($feed);
         } else {
             // Workaround for PS 1.5
-            echo $jsonCfg;
+            echo $feed;
             exit;
         }
     }
