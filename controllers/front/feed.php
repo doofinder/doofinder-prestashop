@@ -51,9 +51,13 @@ class DoofinderFeedModuleFrontController extends ModuleFrontController
         if (method_exists($this, 'ajaxRender')) {
             $this->ajaxRender($feed);
             exit;
-        } else {
+        } elseif (method_exists($this, 'ajaxDie')) {
             // Workaround for PS 1.6 as ajaxRender is not available
             $this->ajaxDie($feed);
+        } else {
+            // Workaround for PS 1.5
+            echo $jsonCfg;
+            exit;
         }
     }
 

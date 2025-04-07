@@ -1,4 +1,4 @@
-label[for="active_on"],label[for="active_off"]{
+label[for^="active_on"],label[for^="active_off"]{
     float: none
 }
 .panel {
