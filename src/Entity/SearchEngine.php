@@ -26,16 +26,20 @@ class SearchEngine
      *
      * @param int $idLang
      * @param int $idCurrency
+     * @param int|null $shopGroupId
+     * @param int|null $shopId
      *
      * @return string
      */
-    public static function getHashId($idLang, $idCurrency)
+    public static function getHashId($idLang, $idCurrency, $shopGroupId = null, $shopId = null)
     {
         $context = \Context::getContext();
         $currIso = strtoupper(LanguageManager::getIsoCodeById($idCurrency));
         $lang = new \Language($idLang);
         $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper($lang->language_code);
-        $hashid = \Configuration::get($hashidKey, $idLang, $context->shop->id_shop_group, $context->shop->id);
+        $shopGroupId = isset($shopGroupId) ? $shopGroupId : $context->shop->id_shop_group;
+        $shopId = isset($shopId) ? $shopId : $context->shop->id;
+        $hashid = \Configuration::get($hashidKey, $idLang, $shopGroupId, $shopId);
 
         if (!$hashid) {
             // If not found, try to obtain hashid without context
@@ -58,13 +62,16 @@ class SearchEngine
     /**
      * Update the hashid of the search engines of the store in the configuration
      *
+     * @param int|null $idShopGroup
+     * @param int|null $idShop
+     *
      * @return true
      */
-    public static function setSearchEnginesByConfig()
+    public static function setSearchEnginesByConfig($idShopGroup = null, $idShop = null)
     {
         $context = \Context::getContext();
-        $idShopGroup = $context->shop->id_shop_group;
-        $idShop = $context->shop->id;
+        $idShopGroup = isset($idShopGroup) ? $idShopGroup : $context->shop->id_shop_group;
+        $idShop = isset($idShop) ? $idShop : $context->shop->id;
         $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $idShopGroup, $idShop);
         $apiKey = \Configuration::get('DF_API_KEY');
         $region = \Configuration::get('DF_REGION');

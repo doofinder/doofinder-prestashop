@@ -235,7 +235,7 @@ class DoofinderInstallation
         }
 
         foreach ($shops as $shop) {
-            $feed_urls = [];
+            $feedUrls = [];
             $client = new EasyREST();
             $languages = \Language::getLanguages(true, $shop['id_shop']);
             $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
@@ -249,6 +249,10 @@ class DoofinderInstallation
 
             DoofinderConfig::debug("Updating feed urls for shop: {$shopId} and group: {$shopGroupId}");
 
+            SearchEngine::setSearchEnginesByConfig($shopGroupId, $shopId);
+
+            $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, $shopGroupId, $shopId);
+
             foreach ($languages as $lang) {
                 if ($lang['active'] == 0) {
                     continue;
@@ -258,28 +262,33 @@ class DoofinderInstallation
                         continue;
                     }
                     $ciso = $cur['iso_code'];
-                    $langFullIso = $lang['iso_code'];
-                    $feedUrl = UrlManager::getFeedUrl($shopId, $langFullIso, $ciso);
-                    $hashidKey = 'DF_HASHID_' . strtoupper($ciso) . '_' . strtoupper($langFullIso);
-                    $hashid = \Configuration::get($hashidKey, null, $shopGroupId, $shopId);
+                    $langFullIso = !empty($lang['language_code']) ? $lang['language_code'] : $lang['iso_code'];
+
+                    $currencyForUrl = $ciso;
+                    if ($multipriceEnabled) {
+                        $currencyForUrl = null;
+                    }
+                    $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code'], $currencyForUrl);
+
+                    $hashid = SearchEngine::getHashId($lang['id_lang'], $cur['id_currency'], $shopGroupId, $shopId);
 
                     DoofinderConfig::debug("Hashid for lang $langFullIso and currency $ciso :  $hashid");
 
-                    $feed_urls[$hashid] = $feedUrl;
+                    $feedUrls[$hashid] = $feedUrl;
                 }
             }
 
-            $json_feed_urls = json_encode([
+            $jsonFeedUrls = json_encode([
                 'installation_id' => $installationID,
-                'urls' => $feed_urls,
+                'urls' => $feedUrls,
             ]);
 
             DoofinderConfig::debug('Update feed urls Start');
-            DoofinderConfig::debug(print_r($json_feed_urls, true));
+            DoofinderConfig::debug(print_r($feedUrls, true));
 
             $response = $client->post(
                 UrlManager::getUpdateFeedUrl(\Configuration::get('DF_REGION')),
-                $json_feed_urls,
+                $jsonFeedUrls,
                 false,
                 false,
                 'application/json',
