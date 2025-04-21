@@ -25,7 +25,6 @@
  */
 
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderInstallation;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -34,15 +33,6 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_4_12_0($module)
 {
     DoofinderConfig::debug('Initiating 4.12.0 upgrade');
-
-    try {
-        DoofinderInstallation::updateFeedUrls();
-    } catch (Exception $exception) {
-        PrestaShopLogger::addLog($exception->getMessage(), 3, $exception->getCode(), 'Module', $module->id);
-        return false;
-    }
-
-    DoofinderConfig::debug('Feed URLs updated successfully.');
 
     // Delete old *.php files
     unlinkFiles();
