@@ -149,7 +149,7 @@ class DoofinderInstallation
             'search_engines' => [],
             'plugin_version' => DoofinderConstants::VERSION,
             'options' => [
-                'url' => preg_replace('#^https?://#', '',  $shopUrl),
+                'url' => preg_replace('#^https?://#', '', $shopUrl),
                 'shop_id' => $shopId
             ]
         ];
