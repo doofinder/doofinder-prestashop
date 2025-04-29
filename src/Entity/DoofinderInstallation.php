@@ -150,7 +150,8 @@ class DoofinderInstallation
             'plugin_version' => DoofinderConstants::VERSION,
             'options' => [
                 'url' => preg_replace('#^https?://#', '', $shopUrl),
-                'shop_id' => $shopId
+                'shop_id' => $shopId,
+                'shop_group_id' => $shopGroupId
             ]
         ];
 
