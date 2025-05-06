@@ -340,7 +340,7 @@ class DfProductBuild
                     $formattedAttributes[] = $key . '=' . $value;
                 }
             }
-            $product['attributes'] = implode('/', $formattedAttributes);
+            $product['attributes'] = str_replace('\"', '"', implode('/', $formattedAttributes));
             unset($product['features']);
         }
 
