@@ -225,6 +225,16 @@ class DfProductBuild
         }
 
         $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);
+
+        // Extra calculation for Pack products.
+        if (class_exists('Pack')
+        && method_exists('Pack', 'isPack')
+        && method_exists('Pack', 'getQuantity')
+        && array_key_exists('id_product_attribute', $product)
+        && \Pack::isPack((int) $product['id_product'])) {
+            $p['stock_quantity'] = \Pack::getQuantity($product['id_product'], $product['id_product_attribute']);
+        }
+
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
