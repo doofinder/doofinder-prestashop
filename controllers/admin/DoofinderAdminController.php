@@ -39,7 +39,8 @@ class DoofinderAdminController extends ModuleAdminController
         $this->ajaxDie(json_encode(['success' => $is_feed_indexed]));
     }
 
-    public function ajaxDie($message){
+    public function ajaxDie($message)
+    {
         if (is_array($message)) {
             $message = json_encode($message);
         }

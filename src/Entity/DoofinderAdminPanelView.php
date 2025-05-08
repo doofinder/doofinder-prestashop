@@ -121,7 +121,7 @@ class DoofinderAdminPanelView
 
         $link = \Context::getContext()->link;
         $context->smarty->assign('ajaxUrl', $link->getPageLink('module-doofinder-ajax'));
-        $context->smarty->assign('configUrl',$link->getPageLink('module-doofinder-config'));
+        $context->smarty->assign('configUrl', $link->getPageLink('module-doofinder-config'));
 
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
         if ($configured) {
@@ -151,7 +151,7 @@ class DoofinderAdminPanelView
     public function getWarningMultishopHtml()
     {
         $stop = false;
-        if(!\Shop::isFeatureActive()){
+        if (!\Shop::isFeatureActive()){
             return $stop;
         }
 

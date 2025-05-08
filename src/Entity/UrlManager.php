@@ -64,11 +64,10 @@ class UrlManager
 
         /*
          * Cleans redundant parameters in URLs for PrestaShop 1.5.3
-         * 
-         * In PrestaShop 1.5.3, 'module' and 'controller' parameters are maintained in URLs even when friendly URLs are 
-         * enabled, which causes navigation errors. 
-         * This function removes these parameters when they are not necessary, specifically when the 'fc=module' 
-         * fragment doesn't exist in the URL (this means that friendly urls are enabled).
+         *
+         * In PrestaShop 1.5.3, 'module' and 'controller' parameters are maintained in URLs even when friendly URLs are
+         * enabled, which causes navigation errors.
+         * This function removes these parameters when they are not necessary, specifically when the 'fc=module'
          */
         if (\Configuration::get('PS_REWRITING_SETTINGS')) {
             $link = preg_replace('/[&?](module|controller)=[^&]+/', '', $link);
