@@ -151,7 +151,7 @@ class DoofinderAdminPanelView
     public function getWarningMultishopHtml()
     {
         $stop = false;
-        if (!\Shop::isFeatureActive()){
+        if (!\Shop::isFeatureActive()) {
             return $stop;
         }
 
