@@ -169,13 +169,15 @@
 		border-color: #1b1851;
 	}
 </style>
-<script type="text/javascript" src="{$module_dir|escape:'javascript':'UTF-8'}views/js/doofinder-onboarding.js" ></script>
 <script type="text/javascript">
 	const df_module_dir = "{$module_dir|escape:'javascript':'UTF-8'}";
 	const paramsPopup = "{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}";
 	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF-8'}";
+	const ajaxUrl = "{$ajaxUrl}";
+	const configUrl = "{$configUrl}";
 	{if $shop_id}
 	const shop_id = {$shop_id|escape:'htmlall':'UTF-8'};
 	{/if}
 	const doofinderAdminUrl = "{$doofinderAdminUrl|escape:'javascript':'UTF-8'}";
 </script>
+<script type="text/javascript" src="{$module_dir|escape:'javascript':'UTF-8'}views/js/doofinder-onboarding.js" ></script>
