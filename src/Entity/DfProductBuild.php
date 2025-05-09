@@ -218,7 +218,16 @@ class DfProductBuild
         $p['supplier_reference'] = DfTools::cleanString($product['supplier_reference']);
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
-        $p['tags'] = DfTools::cleanString($product['tags']);
+
+        $productTags = DfTools::cleanString($product['tags']);
+        $p['tags'] = $productTags;
+
+        if (is_string($productTags)) {
+            // Extra steps to avoid possible duplicates in tags
+            $productTags = explode(',', $productTags);
+            $productTags = array_unique($productTags);
+            $p['tags'] = implode(',', $productTags);
+        }
 
         if (DfTools::versionGte('1.7.0.0')) {
             $p['isbn'] = DfTools::cleanString($product['isbn']);
