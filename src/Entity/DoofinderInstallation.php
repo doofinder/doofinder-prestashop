@@ -198,6 +198,7 @@ class DoofinderInstallation
                 DoofinderConfig::debug("Set installation ID: $installationID");
                 \Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
                 \Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
+                \Configuration::updateValue('DF_SHOW_LAYER_MOBILE', true, false, $shopGroupId, $shopId);
                 SearchEngine::setSearchEnginesByConfig();
             } else {
                 DoofinderConfig::debug('Invalid installation ID');
@@ -378,6 +379,7 @@ class DoofinderInstallation
             'DF_GS_PRICES_USE_TAX',
             'DF_INSTALLATION_ID',
             'DF_SHOW_LAYER',
+            'DF_SHOW_LAYER_MOBILE',
             'DF_REGION',
             'DF_RESTART_OV',
             'DF_SHOW_PRODUCT_FEATURES',
