@@ -218,13 +218,32 @@ class DfProductBuild
         $p['supplier_reference'] = DfTools::cleanString($product['supplier_reference']);
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
-        $p['tags'] = DfTools::cleanString($product['tags']);
+
+        $productTags = DfTools::cleanString($product['tags']);
+        $p['tags'] = $productTags;
+
+        if (is_string($productTags)) {
+            // Extra steps to avoid possible duplicates in tags
+            $productTags = explode(',', $productTags);
+            $productTags = array_unique($productTags);
+            $p['tags'] = implode(',', $productTags);
+        }
 
         if (DfTools::versionGte('1.7.0.0')) {
             $p['isbn'] = DfTools::cleanString($product['isbn']);
         }
 
         $p['stock_quantity'] = DfTools::cleanString($product['stock_quantity']);
+
+        // Extra calculation for Pack products.
+        if (class_exists('Pack')
+        && method_exists('Pack', 'isPack')
+        && method_exists('Pack', 'getQuantity')
+        && array_key_exists('id_product_attribute', $product)
+        && \Pack::isPack((int) $product['id_product'])) {
+            $p['stock_quantity'] = \Pack::getQuantity($product['id_product'], $product['id_product_attribute']);
+        }
+
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
@@ -330,7 +349,7 @@ class DfProductBuild
                     $formattedAttributes[] = $key . '=' . $value;
                 }
             }
-            $product['attributes'] = implode('/', $formattedAttributes);
+            $product['attributes'] = str_replace('\"', '"', implode('/', $formattedAttributes));
             unset($product['features']);
         }
 
