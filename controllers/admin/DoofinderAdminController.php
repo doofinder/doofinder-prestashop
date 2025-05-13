@@ -42,7 +42,7 @@ class DoofinderAdminController extends ModuleAdminController
 
     public function ajaxRender($value = null, $controller = null, $method = null)
     {
-        if (method_exists($this, 'ajaxRender')) {
+        if (method_exists('ModuleAdminController', 'ajaxRender')) {
             return parent::ajaxRender($value, $controller, $method);
         }
 
