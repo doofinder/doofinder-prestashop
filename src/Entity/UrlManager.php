@@ -60,7 +60,20 @@ class UrlManager
             $params['currency'] = \Tools::strtoupper($currency);
         }
 
-        return \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', $params);
+        $link = \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', $params);
+
+        /*
+         * Cleans redundant parameters in URLs for PrestaShop 1.5.3
+         *
+         * In PrestaShop 1.5.3, 'module' and 'controller' parameters are maintained in URLs even when friendly URLs are
+         * enabled, which causes navigation errors.
+         * This function removes these parameters when they are not necessary, specifically when the 'fc=module'
+         */
+        if (\Configuration::get('PS_REWRITING_SETTINGS')) {
+            $link = preg_replace('/[&?](module|controller)=[^&]+/', '', $link);
+        }
+
+        return $link;
     }
 
     /**

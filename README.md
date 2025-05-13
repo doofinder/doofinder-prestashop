@@ -112,3 +112,20 @@ There are three other parameters you probably will want to customize:
 - `dtop`: Is the vertical displacement of the layer from the point where it is placed automatically. You can use a positive or negative number without quotes around it.
 
 If you decide to put the search box included with this plugin for the top of the page you probably will have to adjust these parameters. Remember to do it for each script.
+
+## Module Compatibility
+
+### PHP
+
+The minimum php required for this module is php 5.4
+The maximum php version tested is 8.4
+
+### PrestaShop
+
+From 1.5.0.3 to 9.0.0
+
+For more compatibility details check the following documentation
+
+- [Prestashop 1.x](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/) system requirements.
+- [Prestashop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/) system requirements.
+- [Prestashop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/) system requirements.

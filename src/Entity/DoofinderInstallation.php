@@ -388,11 +388,10 @@ class DoofinderInstallation
             'DF_MULTIPRICE_ENABLED',
         ];
 
-        $hashidVars = array_column(
-            \Db::getInstance()->executeS('
-            SELECT name FROM ' . _DB_PREFIX_ . "configuration where name like 'DF_HASHID_%'"),
-            'name'
-        );
+        $rows = \Db::getInstance()->executeS('SELECT name FROM ' . _DB_PREFIX_ . "configuration WHERE name LIKE 'DF_HASHID_%'");
+        $hashidVars = array_map(function ($row) {
+            return $row['name'];
+        }, $rows);
 
         $configVars = array_merge($configVars, $hashidVars);
 
