@@ -72,7 +72,7 @@ class UrlManager
         if (\Configuration::get('PS_REWRITING_SETTINGS')) {
             $link = preg_replace('/[&?](module|controller)=[^&]+/', '', $link);
         }
-        
+
         return $link;
     }
 

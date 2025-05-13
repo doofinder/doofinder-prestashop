@@ -39,7 +39,6 @@ class DoofinderAdminController extends ModuleAdminController
         $this->ajaxRender(json_encode(['success' => $is_feed_indexed]));
     }
 
-
     public function ajaxRender($value = null, $controller = null, $method = null)
     {
         if (method_exists('ModuleAdminController', 'ajaxRender')) {
