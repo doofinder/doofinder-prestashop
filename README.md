@@ -123,3 +123,9 @@ The maximum php version tested is 8.4
 ### PrestaShop
 
 From 1.5.0.3 to 9.0.0
+
+For more compatibility details check the following documentation
+
+- [Prestashop 1.x](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/) system requirements.
+- [Prestashop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/) system requirements.
+- [Prestashop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/) system requirements.
