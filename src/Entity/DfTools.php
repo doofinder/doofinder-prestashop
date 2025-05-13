@@ -556,7 +556,7 @@ class DfTools
             ORDER BY
                 ps.id_product
         ";
-        $productIdsQuery = self::limitSQL($productIdsQuery , $limit, $offset);
+        $productIdsQuery = self::limitSQL($productIdsQuery, $limit, $offset);
         $productIdsQuery = self::prepareSQL($productIdsQuery, [
             '_ID_SHOP_' => (int) pSQL($idShop),
             '_IS_ACTIVE_' => (string) pSQL($isActive),
@@ -582,8 +582,6 @@ class DfTools
             $productsQuery = self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . " UNION " . $productsQuery;
         }
 
-        // $productsQuery = self::getSQLForProducts($showVariations, $mpn, $isbn);
-        // $productsQuery = self::limitSQL($productsQuery , $limit, $offset);
         $productsQuery = self::prepareSQL($productsQuery, [
             '_ID_LANG_' => (int) pSQL($idLang),
             '_ID_SHOP_' => (int) pSQL($idShop),
