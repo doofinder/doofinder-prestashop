@@ -174,7 +174,7 @@
 	const paramsPopup = "{html_entity_decode($paramsPopup|escape:'htmlall':'UTF-8')}";
 	const installerToken = "{$tokenAjax|escape:'htmlall':'UTF-8'}";
 	const ajaxUrl = "{$ajaxUrl|escape:'url':'UTF-8'}";
-	const configUrl = "{$configUrl}";
+	const configUrl = "{$configUrl|escape:'url':'UTF-8'}";
 	{if $shop_id}
 	const shop_id = {$shop_id|escape:'htmlall':'UTF-8'};
 	{/if}
