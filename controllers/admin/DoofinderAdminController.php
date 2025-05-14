@@ -30,12 +30,26 @@ class DoofinderAdminController extends ModuleAdminController
     public function displayAjaxUpdateConfigurationField()
     {
         Configuration::updateValue('DF_FEED_INDEXED', true);
-        $this->ajaxDie(json_encode(['success' => true]));
+        $this->ajaxRender(json_encode(['success' => true]));
     }
 
     public function displayAjaxCheckConfigurationField()
     {
         $is_feed_indexed = Configuration::get('DF_FEED_INDEXED', null, null, null, false);
-        $this->ajaxDie(json_encode(['success' => $is_feed_indexed]));
+        $this->ajaxRender(json_encode(['success' => $is_feed_indexed]));
+    }
+
+    public function ajaxRender($value = null, $controller = null, $method = null)
+    {
+        if (method_exists('ModuleAdminController', 'ajaxRender')) {
+            return parent::ajaxRender($value, $controller, $method);
+        }
+
+        if (is_array($value)) {
+            $value = json_encode($value);
+        }
+
+        echo $value;
+        exit;
     }
 }
