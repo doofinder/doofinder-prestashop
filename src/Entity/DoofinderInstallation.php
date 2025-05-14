@@ -378,6 +378,7 @@ class DoofinderInstallation
             'DF_GS_PRICES_USE_TAX',
             'DF_INSTALLATION_ID',
             'DF_SHOW_LAYER',
+            'DF_SHOW_LAYER_MOBILE',
             'DF_REGION',
             'DF_RESTART_OV',
             'DF_SHOW_PRODUCT_FEATURES',
