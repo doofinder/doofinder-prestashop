@@ -530,7 +530,7 @@ class DfTools
         $idCategoryDefault = self::versionGte('1.5.0.9') ? 'ps.id_category_default' : 'p.id_category_default';
         // MIN: 1.5.1.0
         $imsCover = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
-        $isActive = self::versionGte('1.5.1.0') ? 'ps.active = 1' : 'p.active = 1';
+        $isActive = self::versionGte('1.5.1.0') ? 'AND ps.active = 1' : 'AND p.active = 1';
 
         if (self::versionGte('1.5.1.0')) {
             $visibility = "AND ps.visibility IN ('search', 'both')";
@@ -546,41 +546,29 @@ class DfTools
             $productIds = '';
         }
 
-        $productIdsQuery = "
-            SELECT id_product FROM _DB_PREFIX_product_shop ps
-                WHERE
-                 ps.id_shop = _ID_SHOP_ AND
-                _IS_ACTIVE_
-                _VISIBILITY_
-                _PRODUCT_IDS_
-            ORDER BY
-                ps.id_product
+        $limitSql = '';
+        if (false !== $limit && is_numeric($limit)) {
+            $limitSql .= ' LIMIT ' . (int) $limit;
+
+            if (false !== $offset && is_numeric($offset)) {
+                $limitSql .= ' OFFSET ' . (int) $offset;
+            }
+        }
+
+        $productsQuery = "
+        SELECT dp.*, tag_summary.tags FROM (". self::getSQLProductShopIds() .") dps
+        INNER JOIN (
+            " . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . " UNION " : "") . "
+            " . self::getSQLForProducts($showVariations, $mpn, $isbn) . "
+        ) dp ON dp.id_product = dps.id_product
+        LEFT JOIN (
+            SELECT pt.id_product, GROUP_CONCAT(tag.name) AS tags
+            FROM _DB_PREFIX_product_tag pt
+            JOIN _DB_PREFIX_tag tag ON tag.id_tag = pt.id_tag
+            WHERE tag.id_lang = _ID_LANG_
+            GROUP BY pt.id_product
+        ) tag_summary ON tag_summary.id_product = dps.id_product
         ";
-        $productIdsQuery = self::limitSQL($productIdsQuery, $limit, $offset);
-        $productIdsQuery = self::prepareSQL($productIdsQuery, [
-            '_ID_SHOP_' => (int) pSQL($idShop),
-            '_IS_ACTIVE_' => (string) pSQL($isActive),
-            '_VISIBILITY_' => (string) pSQL($visibility),
-            '_PRODUCT_IDS_' => (string) pSQL($productIds),
-        ]);
-        $productIdsQuery = str_replace("\'", "'", $productIdsQuery);
-        $productIdsResult = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productIdsQuery, false);
-        $productIdsSubSet = [];
-        foreach ($productIdsResult as $product) {
-            $productIdsSubSet[] = $product['id_product'];
-        }
-
-        if (is_array($productIdsSubSet) && count($productIdsSubSet)) {
-            $productIdsSubSetQuery = 'AND p.id_product IN (' . implode(',', $productIdsSubSet) . ')';
-        } else {
-            return false;
-        }
-
-        $productsQuery = self::getSQLForProducts($showVariations, $mpn, $isbn);
-
-        if ($showVariations) {
-            $productsQuery = self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . " UNION " . $productsQuery;
-        }
 
         $productsQuery = self::prepareSQL($productsQuery, [
             '_ID_LANG_' => (int) pSQL($idLang),
@@ -590,11 +578,28 @@ class DfTools
             '_ID_CATEGORY_DEFAULT_FIELD_' => (string) pSQL($idCategoryDefault),
             '_IS_ACTIVE_' => (string) pSQL($isActive),
             '_VISIBILITY_' => (string) pSQL($visibility),
-            '_PRODUCT_IDS_' => (string) pSQL($productIdsSubSetQuery),
+            '_PRODUCT_IDS_' => (string) pSQL($productIds),
+            '_LIMIT_' => (string) pSQL($limitSql),
         ]);
         $productsQuery = str_replace("\'", "'", $productsQuery);
 
         return  \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
+    }
+
+    private static function getSQLProductShopIds() {
+        return "
+        SELECT
+                id_product
+            FROM
+                ps_product_shop ps
+            WHERE
+                ps.id_shop = _ID_SHOP_
+                _IS_ACTIVE_
+                _VISIBILITY_
+                _PRODUCT_IDS_
+        ORDER BY id_product
+            _LIMIT_
+        ";
     }
 
     private static function getSQLForProducts($showVariations, $mpn, $isbn)
@@ -602,8 +607,7 @@ class DfTools
         return "
         SELECT
             ps.id_product,
-            (SELECT COUNT(*) FROM _DB_PREFIX_product prod LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
-                ON (prod.id_product = pa.id_product) WHERE prod.id_product = p.id_product) AS variant_count,
+            COALESCE(vc.count,0) as variant_count,
             ps.show_price,
             0 AS product_attribute,
             null AS variation_reference,
@@ -621,40 +625,52 @@ class DfTools
             p.upc,
             p.reference,
             psp.product_supplier_reference AS supplier_reference,
-            " . ($showVariations? "IF(ISNULL((SELECT COUNT(*) as attribute_n FROM _DB_PREFIX_product_attribute where id_product = ps.id_product)), false, true)" : "true") . " AS df_group_leader,
+            " . ($showVariations? "IF(ISNULL(vc.count),true, false)" : "true") . " AS df_group_leader,
             pl.name,
             pl.description,
             pl.description_short,
             pl.meta_title,
             pl.meta_description,
-            (SELECT GROUP_CONCAT(name) from _DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_ WHERE pt.id_product = ps.id_product) AS tags,
             pl.link_rewrite,
             cl.link_rewrite AS cat_link_rew,
-            im.id_image,
+            ims.id_image,
             ps.available_for_order,
             sa.out_of_stock,
             sa.quantity as stock_quantity
         FROM
-            _DB_PREFIX_product p
-            INNER JOIN _DB_PREFIX_product_shop ps
-            ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
+            _DB_PREFIX_product_shop ps
+            INNER JOIN _DB_PREFIX_product p
+            ON (p.id_product = ps.id_product)
             LEFT JOIN _DB_PREFIX_product_lang pl
-            ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
+            ON (pl.id_product = ps.id_product AND pl.id_lang = _ID_LANG_)
             LEFT JOIN _DB_PREFIX_manufacturer m
-            ON (p.id_manufacturer = m.id_manufacturer)
+            ON (m.id_manufacturer = p.id_manufacturer)
             LEFT JOIN _DB_PREFIX_category_lang cl
             ON (_ID_CATEGORY_DEFAULT_FIELD_ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-            LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-            ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
+            LEFT JOIN _DB_PREFIX_image_shop ims
+                    ON
+                (ims.id_product = ps.id_product
+                    AND ims.id_shop = _ID_SHOP_
+                    AND _IMS_COVER_)
+            LEFT JOIN _DB_PREFIX_image_lang iml
+                        ON
+                (ims.id_image = iml.id_image AND iml.id_lang = _ID_LANG_)
             LEFT JOIN _DB_PREFIX_stock_available sa
             ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
                 AND (sa.id_shop = _ID_SHOP_ OR
                 (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
             LEFT JOIN _DB_PREFIX_product_supplier psp
             ON (p.id_supplier = psp.id_supplier AND p.id_product = psp.id_product AND psp.id_product_attribute = 0)
-        WHERE
-            1 = 1
-            _PRODUCT_IDS_
+            LEFT JOIN (
+                SELECT
+                    id_product,
+                    count(*) as count
+                FROM
+                    _DB_PREFIX_product_attribute pas
+                GROUP BY
+                    id_product
+            ) vc ON
+            vc.id_product = ps.id_product
     ";
     }
 
@@ -687,7 +703,6 @@ class DfTools
             pl.description_short,
             pl.meta_title,
             pl.meta_description,
-            (SELECT GROUP_CONCAT(name) from _DB_PREFIX_tag tag INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_ WHERE pt.id_product = ps.id_product) AS tags,
             pl.link_rewrite,
             cl.link_rewrite AS cat_link_rew,
             im.id_image,
@@ -721,7 +736,6 @@ class DfTools
                 (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
         WHERE
             pa.id_product_attribute is not null
-            _PRODUCT_IDS_
         ";
     }
 
