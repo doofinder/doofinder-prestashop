@@ -584,7 +584,7 @@ class DfTools
             '_LIMIT_' => (string) pSQL($limitSql),
         ]);
         $productsQuery = str_replace("\'", "'", $productsQuery);
-var_dump($productsQuery);die();
+
         return  \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
     }
 
