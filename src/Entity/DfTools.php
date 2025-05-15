@@ -556,18 +556,20 @@ class DfTools
         }
 
         $productsQuery = "
-        SELECT dp.*, tag_summary.tags FROM (". self::getSQLProductShopIds() .") dps
-        INNER JOIN (
+        SELECT dp.*, tag_summary.tags FROM
+        (
             " . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . " UNION " : "") . "
             " . self::getSQLForProducts($showVariations, $mpn, $isbn) . "
-        ) dp ON dp.id_product = dps.id_product
+        ) dp
         LEFT JOIN (
-            SELECT pt.id_product, GROUP_CONCAT(tag.name) AS tags
+            SELECT pt.id_product, GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags
             FROM _DB_PREFIX_product_tag pt
             JOIN _DB_PREFIX_tag tag ON tag.id_tag = pt.id_tag
             WHERE tag.id_lang = _ID_LANG_
             GROUP BY pt.id_product
-        ) tag_summary ON tag_summary.id_product = dps.id_product
+        ) tag_summary ON tag_summary.id_product = dp.id_product
+        INNER JOIN (". self::getSQLProductShopIds() .") dps
+            ON dps.id_product = dp.id_product
         ";
 
         $productsQuery = self::prepareSQL($productsQuery, [
@@ -582,7 +584,7 @@ class DfTools
             '_LIMIT_' => (string) pSQL($limitSql),
         ]);
         $productsQuery = str_replace("\'", "'", $productsQuery);
-
+var_dump($productsQuery);die();
         return  \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
     }
 
@@ -625,7 +627,7 @@ class DfTools
             p.upc,
             p.reference,
             psp.product_supplier_reference AS supplier_reference,
-            " . ($showVariations? "IF(ISNULL(vc.count),true, false)" : "true") . " AS df_group_leader,
+            " . ($showVariations? "IF(ISNULL(vc.count) OR vc.count > 0,true, false)" : "true") . " AS df_group_leader,
             pl.name,
             pl.description,
             pl.description_short,
