@@ -506,11 +506,13 @@ class DfTools
     {
         $Shop = new \Shop($idShop);
 
+        $showVariations = (bool)self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS');
+
         $isbn = '';
         $isbnPa = '';
         if (self::versionGte('1.7.0.0')) {
             $isbn = 'p.isbn,';
-            if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+            if ($showVariations) {
                 $isbnPa = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
             }
         }
@@ -519,149 +521,16 @@ class DfTools
         $mpnPa = 'pa.reference AS variation_mpn,';
         if (self::versionGte('1.7.7.0')) {
             $mpn = 'p.mpn AS mpn,';
-            if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
+            if ($showVariations) {
                 $mpnPa = 'pa.mpn AS variation_mpn,';
             }
-        }
-
-        $sql = '
-      SELECT
-        ps.id_product,
-        ps.show_price,
-        cl.name as main_category,
-        __ID_CATEGORY_DEFAULT_FIELD__,
-        m.name AS manufacturer,
-        ' . $mpn . '
-        p.ean13 AS ean13,
-        ' . $isbn . "
-        p.upc,
-        p.reference,
-        psp.product_supplier_reference AS supplier_reference,
-        pl.name,
-        pl.description,
-        pl.description_short,
-        pl.meta_title,
-        pl.meta_description,
-        GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
-        pl.link_rewrite,
-        cl.link_rewrite AS cat_link_rew,
-        im.id_image,
-        ps.available_for_order,
-        sa.out_of_stock,
-        sa.quantity as stock_quantity
-      FROM
-        _DB_PREFIX_product p
-        INNER JOIN _DB_PREFIX_product_shop ps
-          ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-        LEFT JOIN _DB_PREFIX_product_lang pl
-          ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-        LEFT JOIN _DB_PREFIX_manufacturer m
-          ON (p.id_manufacturer = m.id_manufacturer)
-        LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-        LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-          ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT JOIN (_DB_PREFIX_tag tag
-            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-          ON (pt.id_product = p.id_product)
-        LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
-            AND (sa.id_shop = _ID_SHOP_ OR
-            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-        LEFT JOIN _DB_PREFIX_product_supplier psp
-          ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
-      WHERE
-        __IS_ACTIVE__
-        __VISIBILITY__
-        __PRODUCT_IDS__
-      GROUP BY
-        p.id_product
-      ORDER BY
-        p.id_product
-    ";
-
-        $sqlVariations = self::getSQLForVariants($mpnPa, $mpn, $isbnPa);
-
-        if ($includeParents) {
-            $sqlVariations .= "
-            UNION
-            SELECT
-                ps.id_product,
-                (SELECT COUNT(*) FROM _DB_PREFIX_product prod LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
-                ON (prod.id_product = pa.id_product) WHERE prod.id_product = p.id_product) AS variant_count,
-                ps.show_price,
-                0,
-                null AS variation_reference,
-                psp.product_supplier_reference AS variation_supplier_reference,
-                null AS variation_mpn,
-                null AS variation_ean13,
-                null AS variation_upc,
-                null AS variation_image_id,
-                cl.name as main_category,
-                __ID_CATEGORY_DEFAULT_FIELD__ as id_category_default,
-                m.name AS manufacturer,
-                $mpn
-                p.ean13 AS ean13,
-                $isbn
-                p.upc,
-                p.reference,
-                p.supplier_reference,
-                IF(ISNULL(pan.attribute_n), false, true) AS df_group_leader,
-                pl.name,
-                pl.description,
-                pl.description_short,
-                pl.meta_title,
-                pl.meta_description,
-                GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
-                pl.link_rewrite,
-                cl.link_rewrite AS cat_link_rew,
-                im.id_image,
-                ps.available_for_order,
-                sa.out_of_stock,
-                sa.quantity as stock_quantity
-            FROM
-                _DB_PREFIX_product p
-                INNER JOIN _DB_PREFIX_product_shop ps
-                ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-                LEFT JOIN _DB_PREFIX_product_lang pl
-                ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-                LEFT JOIN _DB_PREFIX_manufacturer m
-                ON (p.id_manufacturer = m.id_manufacturer)
-                LEFT JOIN _DB_PREFIX_category_lang cl
-                ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-                LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-                ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-                LEFT JOIN (_DB_PREFIX_tag tag
-                    INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-                ON (pt.id_product = p.id_product)
-                LEFT JOIN _DB_PREFIX_stock_available sa
-                ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
-                    AND (sa.id_shop = _ID_SHOP_ OR
-                    (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-                LEFT JOIN _DB_PREFIX_product_supplier psp
-                ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
-                LEFT JOIN (SELECT id_product, COUNT(*) as attribute_n FROM _DB_PREFIX_product_attribute GROUP BY id_product) pan 
-                    ON p.id_product = pan.id_product
-            WHERE
-                __IS_ACTIVE__
-                __VISIBILITY__
-                __PRODUCT_IDS__
-            GROUP BY
-                p.id_product
-            ORDER BY
-                id_product
-            ";
-        }
-
-        if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-            $sql = $sqlVariations;
         }
 
         // MIN: 1.5.0.9
         $idCategoryDefault = self::versionGte('1.5.0.9') ? 'ps.id_category_default' : 'p.id_category_default';
         // MIN: 1.5.1.0
         $imsCover = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
-        $isActive = self::versionGte('1.5.1.0') ? 'ps.active = 1' : 'p.active = 1';
+        $isActive = self::versionGte('1.5.1.0') ? 'AND ps.active = 1' : 'AND p.active = 1';
 
         if (self::versionGte('1.5.1.0')) {
             $visibility = "AND ps.visibility IN ('search', 'both')";
@@ -672,97 +541,205 @@ class DfTools
         }
 
         if (is_array($ids) && count($ids)) {
-            $productIds = 'AND p.id_product IN (' . implode(',', $ids) . ')';
+            $productIds = 'AND ps.id_product IN (' . implode(',', $ids) . ')';
         } else {
             $productIds = '';
         }
 
-        $sql = self::limitSQL($sql, $limit, $offset);
-        $sql = self::prepareSQL($sql, [
+        $limitSql = '';
+        if (false !== $limit && is_numeric($limit)) {
+            $limitSql .= ' LIMIT ' . (int) $limit;
+
+            if (false !== $offset && is_numeric($offset)) {
+                $limitSql .= ' OFFSET ' . (int) $offset;
+            }
+        }
+
+        $productsQuery = "
+        SELECT dp.*, tag_summary.tags FROM
+        (
+            " . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . " UNION " : "") . "
+            " . self::getSQLForProducts($showVariations, $mpn, $isbn) . "
+        ) dp
+        LEFT JOIN (
+            SELECT pt.id_product, GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags
+            FROM _DB_PREFIX_product_tag pt
+            JOIN _DB_PREFIX_tag tag ON tag.id_tag = pt.id_tag
+            WHERE tag.id_lang = _ID_LANG_
+            GROUP BY pt.id_product
+        ) tag_summary ON tag_summary.id_product = dp.id_product
+        INNER JOIN (". self::getSQLProductShopIds() .") dps
+            ON dps.id_product = dp.id_product
+        ";
+
+        $productsQuery = self::prepareSQL($productsQuery, [
             '_ID_LANG_' => (int) pSQL($idLang),
             '_ID_SHOP_' => (int) pSQL($idShop),
             '_ID_SHOPGROUP_' => (int) pSQL($Shop->id_shop_group),
             '_IMS_COVER_' => (string) pSQL($imsCover),
-            '__ID_CATEGORY_DEFAULT_FIELD__' => (string) pSQL($idCategoryDefault),
-            '__IS_ACTIVE__' => (string) pSQL($isActive),
-            '__VISIBILITY__' => (string) pSQL($visibility),
-            '__PRODUCT_IDS__' => (string) pSQL($productIds),
+            '_ID_CATEGORY_DEFAULT_FIELD_' => (string) pSQL($idCategoryDefault),
+            '_IS_ACTIVE_' => (string) pSQL($isActive),
+            '_VISIBILITY_' => (string) pSQL($visibility),
+            '_PRODUCT_IDS_' => (string) pSQL($productIds),
+            '_LIMIT_' => (string) pSQL($limitSql),
         ]);
+        $productsQuery = str_replace("\'", "'", $productsQuery);
 
-        $sql = str_replace("\'", "'", $sql);
+        return  \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
+    }
 
-        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+    private static function getSQLProductShopIds()
+    {
+        return "
+        SELECT
+                id_product
+            FROM
+                ps_product_shop ps
+            WHERE
+                ps.id_shop = _ID_SHOP_
+                _IS_ACTIVE_
+                _VISIBILITY_
+                _PRODUCT_IDS_
+        ORDER BY id_product
+            _LIMIT_
+        ";
+    }
+
+    private static function getSQLForProducts($showVariations, $mpn, $isbn)
+    {
+        return "
+        SELECT
+            ps.id_product,
+            COALESCE(vc.count,0) as variant_count,
+            ps.show_price,
+            0 AS product_attribute,
+            null AS variation_reference,
+            psp.product_supplier_reference AS variation_supplier_reference,
+            null AS variation_mpn,
+            null AS variation_ean13,
+            null AS variation_upc,
+            null AS variation_image_id,
+            cl.name as main_category,
+            _ID_CATEGORY_DEFAULT_FIELD_ as id_category_default,
+            m.name AS manufacturer,
+            $mpn
+            p.ean13 AS ean13,
+            $isbn
+            p.upc,
+            p.reference,
+            psp.product_supplier_reference AS supplier_reference,
+            " . ($showVariations? "IF(ISNULL(vc.count) OR vc.count > 0,true, false)" : "true") . " AS df_group_leader,
+            pl.name,
+            pl.description,
+            pl.description_short,
+            pl.meta_title,
+            pl.meta_description,
+            pl.link_rewrite,
+            cl.link_rewrite AS cat_link_rew,
+            ims.id_image,
+            ps.available_for_order,
+            sa.out_of_stock,
+            sa.quantity as stock_quantity
+        FROM
+            _DB_PREFIX_product_shop ps
+            INNER JOIN _DB_PREFIX_product p
+            ON (p.id_product = ps.id_product)
+            LEFT JOIN _DB_PREFIX_product_lang pl
+            ON (pl.id_product = ps.id_product AND pl.id_lang = _ID_LANG_)
+            LEFT JOIN _DB_PREFIX_manufacturer m
+            ON (m.id_manufacturer = p.id_manufacturer)
+            LEFT JOIN _DB_PREFIX_category_lang cl
+            ON (_ID_CATEGORY_DEFAULT_FIELD_ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
+            LEFT JOIN _DB_PREFIX_image_shop ims
+                    ON
+                (ims.id_product = ps.id_product
+                    AND ims.id_shop = _ID_SHOP_
+                    AND _IMS_COVER_)
+            LEFT JOIN _DB_PREFIX_image_lang iml
+                        ON
+                (ims.id_image = iml.id_image AND iml.id_lang = _ID_LANG_)
+            LEFT JOIN _DB_PREFIX_stock_available sa
+            ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
+                AND (sa.id_shop = _ID_SHOP_ OR
+                (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
+            LEFT JOIN _DB_PREFIX_product_supplier psp
+            ON (p.id_supplier = psp.id_supplier AND p.id_product = psp.id_product AND psp.id_product_attribute = 0)
+            LEFT JOIN (
+                SELECT
+                    id_product,
+                    count(*) as count
+                FROM
+                    _DB_PREFIX_product_attribute pas
+                GROUP BY
+                    id_product
+            ) vc ON
+            vc.id_product = ps.id_product
+    ";
     }
 
     private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
     {
-        return "SELECT
-        ps.id_product,
-        0 AS variant_count,
-        ps.show_price,
-        pa.id_product_attribute,
-        pa.reference AS variation_reference,
-        psp.product_supplier_reference AS variation_supplier_reference,
-        $mpnPa
-        pa.ean13 AS variation_ean13,
-        pa.upc AS variation_upc,
-        pa_im.id_image AS variation_image_id,
-        cl.name as main_category,
-        __ID_CATEGORY_DEFAULT_FIELD__,
-        m.name AS manufacturer,
-        $mpn
-        p.ean13 AS ean13,
-        $isbnPa
-        p.upc AS upc,
-        p.reference AS reference,
-        p.supplier_reference AS supplier_reference,
-        0 AS df_group_leader,
-        pl.name,
-        pl.description,
-        pl.description_short,
-        pl.meta_title,
-        pl.meta_description,
-        GROUP_CONCAT(tag.name SEPARATOR ',') AS tags,
-        pl.link_rewrite,
-        cl.link_rewrite AS cat_link_rew,
-        im.id_image,
-        ps.available_for_order,
-        sa.out_of_stock,
-        sa.quantity as stock_quantity
-      FROM
-        _DB_PREFIX_product p
-        INNER JOIN _DB_PREFIX_product_shop ps
-          ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-        LEFT JOIN _DB_PREFIX_product_lang pl
-          ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-        LEFT JOIN _DB_PREFIX_manufacturer m
-          ON (p.id_manufacturer = m.id_manufacturer)
-        LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-        LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-          ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
-          ON (p.id_product = pa.id_product)
-        LEFT JOIN _DB_PREFIX_product_supplier psp
-          ON (p.id_product = psp.id_product AND pa.id_product_attribute = psp.id_product_attribute)
-        INNER JOIN _DB_PREFIX_product_attribute_shop pas
-          ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)
-        LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
-          ON (pa_im.id_product_attribute = pa.id_product_attribute)
-        LEFT JOIN (_DB_PREFIX_tag tag
-            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-          ON (pt.id_product = p.id_product)
-        LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product
-            AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute)
-            AND (sa.id_shop = _ID_SHOP_ OR
-            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-      WHERE
-        __IS_ACTIVE__
-        __VISIBILITY__
-        __PRODUCT_IDS__
-        AND pa.id_product_attribute is not null
-        GROUP BY pa.id_product_attribute, p.id_product";
+        return "
+        SELECT
+            ps.id_product,
+            0 AS variant_count,
+            ps.show_price,
+            pa.id_product_attribute,
+            pa.reference AS variation_reference,
+            psp.product_supplier_reference AS variation_supplier_reference,
+            $mpnPa
+            pa.ean13 AS variation_ean13,
+            pa.upc AS variation_upc,
+            pa_im.id_image AS variation_image_id,
+            cl.name as main_category,
+            _ID_CATEGORY_DEFAULT_FIELD_,
+            m.name AS manufacturer,
+            $mpn
+            p.ean13 AS ean13,
+            $isbnPa
+            p.upc AS upc,
+            p.reference AS reference,
+            p.supplier_reference AS supplier_reference,
+            0 AS df_group_leader,
+            pl.name,
+            pl.description,
+            pl.description_short,
+            pl.meta_title,
+            pl.meta_description,
+            pl.link_rewrite,
+            cl.link_rewrite AS cat_link_rew,
+            im.id_image,
+            ps.available_for_order,
+            sa.out_of_stock,
+            sa.quantity as stock_quantity
+        FROM
+            _DB_PREFIX_product p
+            INNER JOIN _DB_PREFIX_product_shop ps
+            ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
+            LEFT JOIN _DB_PREFIX_product_lang pl
+            ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
+            LEFT JOIN _DB_PREFIX_manufacturer m
+            ON (p.id_manufacturer = m.id_manufacturer)
+            LEFT JOIN _DB_PREFIX_category_lang cl
+            ON (_ID_CATEGORY_DEFAULT_FIELD_ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
+            LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
+            ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
+            LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
+            ON (p.id_product = pa.id_product)
+            LEFT JOIN _DB_PREFIX_product_supplier psp
+            ON (p.id_supplier = psp.id_supplier AND p.id_product = psp.id_product AND pa.id_product_attribute = psp.id_product_attribute)
+            INNER JOIN _DB_PREFIX_product_attribute_shop pas
+            ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)
+            LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
+            ON (pa_im.id_product_attribute = pa.id_product_attribute)
+            LEFT JOIN _DB_PREFIX_stock_available sa
+            ON (p.id_product = sa.id_product
+                AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute)
+                AND (sa.id_shop = _ID_SHOP_ OR
+                (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
+        WHERE
+            pa.id_product_attribute is not null
+        ";
     }
 
     /**
