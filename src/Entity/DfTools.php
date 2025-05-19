@@ -588,7 +588,8 @@ class DfTools
         return  \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
     }
 
-    private static function getSQLProductShopIds() {
+    private static function getSQLProductShopIds()
+    {
         return "
         SELECT
                 id_product
