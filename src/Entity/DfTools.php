@@ -506,7 +506,7 @@ class DfTools
     {
         $Shop = new \Shop($idShop);
 
-        $showVariations = (bool)self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS');
+        $showVariations = (bool) self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS');
 
         $isbn = '';
         $isbnPa = '';
@@ -555,11 +555,11 @@ class DfTools
             }
         }
 
-        $productsQuery = "
+        $productsQuery = '
         SELECT dp.*, tag_summary.tags FROM
         (
-            " . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . " UNION " : "") . "
-            " . self::getSQLForProducts($showVariations, $mpn, $isbn) . "
+            ' . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . ' UNION ' : '') . '
+            ' . self::getSQLForProducts($showVariations, $mpn, $isbn) . '
         ) dp
         LEFT JOIN (
             SELECT pt.id_product, GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags
@@ -568,9 +568,9 @@ class DfTools
             WHERE tag.id_lang = _ID_LANG_
             GROUP BY pt.id_product
         ) tag_summary ON tag_summary.id_product = dp.id_product
-        INNER JOIN (". self::getSQLProductShopIds() .") dps
+        INNER JOIN (' . self::getSQLProductShopIds() . ') dps
             ON dps.id_product = dp.id_product
-        ";
+        ';
 
         $productsQuery = self::prepareSQL($productsQuery, [
             '_ID_LANG_' => (int) pSQL($idLang),
@@ -583,14 +583,15 @@ class DfTools
             '_PRODUCT_IDS_' => (string) pSQL($productIds),
             '_LIMIT_' => (string) pSQL($limitSql),
         ]);
+
         $productsQuery = str_replace("\'", "'", $productsQuery);
 
-        return  \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($productsQuery);
     }
 
     private static function getSQLProductShopIds()
     {
-        return "
+        return '
         SELECT
                 id_product
             FROM
@@ -602,7 +603,7 @@ class DfTools
                 _PRODUCT_IDS_
         ORDER BY id_product
             _LIMIT_
-        ";
+        ';
     }
 
     private static function getSQLForProducts($showVariations, $mpn, $isbn)
@@ -628,7 +629,7 @@ class DfTools
             p.upc,
             p.reference,
             psp.product_supplier_reference AS supplier_reference,
-            " . ($showVariations? "IF(ISNULL(vc.count) OR vc.count > 0,true, false)" : "true") . " AS df_group_leader,
+            " . ($showVariations ? 'IF(ISNULL(vc.count) OR vc.count > 0,true, false)' : 'true') . ' AS df_group_leader,
             pl.name,
             pl.description,
             pl.description_short,
@@ -674,7 +675,7 @@ class DfTools
                     id_product
             ) vc ON
             vc.id_product = ps.id_product
-    ";
+    ';
     }
 
     private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
