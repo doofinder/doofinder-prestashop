@@ -595,7 +595,7 @@ class DfTools
         SELECT
                 id_product
             FROM
-                ps_product_shop ps
+                _DB_PREFIX_product_shop ps
             WHERE
                 ps.id_shop = _ID_SHOP_
                 _IS_ACTIVE_
