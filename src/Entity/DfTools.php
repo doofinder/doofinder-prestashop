@@ -608,6 +608,7 @@ class DfTools
 
     private static function getSQLForProducts($showVariations, $mpn, $isbn)
     {
+        // cp.id_category > 2: Ignoring root categories
         return "
         SELECT
             ps.id_product,
@@ -685,6 +686,7 @@ class DfTools
 
     private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
     {
+        // cp.id_category > 2: Ignoring root categories
         return "
         SELECT
             ps.id_product,
