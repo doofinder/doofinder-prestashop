@@ -640,7 +640,8 @@ class DfTools
             ims.id_image,
             ps.available_for_order,
             sa.out_of_stock,
-            sa.quantity as stock_quantity
+            sa.quantity as stock_quantity,
+            GROUP_CONCAT(DISTINCT cp.id_category ORDER BY cp.id_category SEPARATOR \',\') AS category_ids
         FROM
             _DB_PREFIX_product_shop ps
             INNER JOIN _DB_PREFIX_product p
@@ -675,7 +676,11 @@ class DfTools
                     id_product
             ) vc ON
             vc.id_product = ps.id_product
-    ';
+            LEFT JOIN _DB_PREFIX_category_product cp
+            ON cp.id_product = ps.id_product AND cp.id_category > 2
+        GROUP BY
+            ps.id_product
+        ';
     }
 
     private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
@@ -712,7 +717,8 @@ class DfTools
             im.id_image,
             ps.available_for_order,
             sa.out_of_stock,
-            sa.quantity as stock_quantity
+            sa.quantity as stock_quantity,
+            GROUP_CONCAT(DISTINCT cp.id_category ORDER BY cp.id_category SEPARATOR \',\') AS category_ids
         FROM
             _DB_PREFIX_product p
             INNER JOIN _DB_PREFIX_product_shop ps
@@ -738,8 +744,12 @@ class DfTools
                 AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute)
                 AND (sa.id_shop = _ID_SHOP_ OR
                 (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
+            LEFT JOIN _DB_PREFIX_category_product cp
+            ON cp.id_product = ps.id_product AND cp.id_category > 2        
         WHERE
             pa.id_product_attribute is not null
+        GROUP BY
+            ps.id_product
         ";
     }
 
@@ -831,52 +841,26 @@ class DfTools
 
         return $path;
     }
-
     /**
      * Returns an array containing the paths for categories for a product in a language for the selected shop.
      *
-     * @param int $idProduct Product ID
+     * @param string $categoryIds Comma separated list of category IDs
      * @param int $idLang Language ID
      * @param int $idShop Shop ID
      *
      * @return array
      */
-    public static function getCategoryLinksForProduct($idProduct, $idLang, $idShop)
+    public static function getCategoryLinksById($categoryIds, $idLang, $idShop)
     {
-        $sql = '
-            SELECT DISTINCT c.id_category
-            FROM ' . _DB_PREFIX_ . 'category c
-            INNER JOIN ' . _DB_PREFIX_ . 'category_product cp ON c.id_category = cp.id_category
-            INNER JOIN ' . _DB_PREFIX_ . 'category_shop cs ON c.id_category = cs.id_category
-            INNER JOIN ' . _DB_PREFIX_ . 'category_lang cl ON c.id_category = cl.id_category
-            WHERE cp.id_product = _ID_PRODUCT_
-            AND cs.id_shop = _ID_SHOP_
-            AND cl.id_lang = _ID_LANG_
-            AND cl.id_shop = _ID_SHOP_
-            AND c.active = 1
-            AND c.id_category > 2
-        ';
-
-        $sql = self::prepareSQL($sql, [
-            '_ID_PRODUCT_' => (int) pSQL($idProduct),
-            '_ID_SHOP_'    => (int) pSQL($idShop),
-            '_ID_LANG_'    => (int) pSQL($idLang),
-        ]);
-
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        if (empty($result)) {
-            return [];
-        }
-    
+        $categoryIds = explode(',', $categoryIds);
         $link = \Context::getContext()->link;
         $urls = [];
-    
-        foreach ($result as $item) {
-            $category = new \Category((int)$item['id_category'], $idLang, $idShop);
+
+        foreach ($categoryIds as $category_id) {
+            $category = new \Category((int) $category_id, $idLang, $idShop);
             $categoryLink = $link->getCategoryLink($category);
             $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
         }
-
         return $urls;
     }
 

@@ -209,8 +209,8 @@ class DfProductBuild
             $this->idShop,
             false
         );
-        $p['category_merchandising'] = DfTools::getCategoryLinksForProduct(
-            $product['id_product'],
+        $p['category_merchandising'] = DfTools::getCategoryLinksById(
+            $product['category_ids'],
             $this->idLang,
             $this->idShop
         );
