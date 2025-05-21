@@ -833,6 +833,54 @@ class DfTools
     }
 
     /**
+     * Returns an array containing the paths for categories for a product in a language for the selected shop.
+     *
+     * @param int $idProduct Product ID
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     *
+     * @return array
+     */
+    public static function getCategoryLinksForProduct($idProduct, $idLang, $idShop)
+    {
+        $sql = '
+            SELECT DISTINCT c.id_category
+            FROM ' . _DB_PREFIX_ . 'category c
+            INNER JOIN ' . _DB_PREFIX_ . 'category_product cp ON c.id_category = cp.id_category
+            INNER JOIN ' . _DB_PREFIX_ . 'category_shop cs ON c.id_category = cs.id_category
+            INNER JOIN ' . _DB_PREFIX_ . 'category_lang cl ON c.id_category = cl.id_category
+            WHERE cp.id_product = _ID_PRODUCT_
+            AND cs.id_shop = _ID_SHOP_
+            AND cl.id_lang = _ID_LANG_
+            AND cl.id_shop = _ID_SHOP_
+            AND c.active = 1
+            AND c.id_category > 2
+        ';
+
+        $sql = self::prepareSQL($sql, [
+            '_ID_PRODUCT_' => (int) pSQL($idProduct),
+            '_ID_SHOP_'    => (int) pSQL($idShop),
+            '_ID_LANG_'    => (int) pSQL($idLang),
+        ]);
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (empty($result)) {
+            return [];
+        }
+    
+        $link = \Context::getContext()->link;
+        $urls = [];
+    
+        foreach ($result as $item) {
+            $category = new \Category((int)$item['id_category'], $idLang, $idShop);
+            $categoryLink = $link->getCategoryLink($category);
+            $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
+        }
+
+        return $urls;
+    }
+
+    /**
      * Returns a string with all the paths for categories for a product in a language
      * for the selected shop. If $flat == false then returns them as an array.
      *

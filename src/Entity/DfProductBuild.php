@@ -209,6 +209,11 @@ class DfProductBuild
             $this->idShop,
             false
         );
+        $p['category_merchandising'] = DfTools::getCategoryLinksForProduct(
+            $product['id_product'],
+            $this->idLang,
+            $this->idShop
+        );
         $p['availability'] = $this->getAvailability($product);
         $p['brand'] = DfTools::cleanString($product['manufacturer']);
         $p['mpn'] = DfTools::cleanString($product['mpn']);
@@ -329,6 +334,7 @@ class DfProductBuild
             $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
         }
         $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
+        $product['category_merchandising'] = implode(DfTools::CATEGORY_SEPARATOR, $product['category_merchandising']);
 
         if (array_key_exists('df_variants_information', $product)) {
             $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
