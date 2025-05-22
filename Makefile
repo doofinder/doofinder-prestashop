@@ -63,7 +63,7 @@ init: doofinder-configure
 
 # Check code consitency for the Doofinder Feed module using PHP Code Sniffer
 consistency:
-	docker run -it --rm -v$(shell pwd):/var/www/composer ghcr.io/devgine/composer-php:v2-php7.4-alpine  sh -c "composer install && vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --rules=@PSR2"
+	docker run -it --rm -v$(shell pwd):/var/www/composer ghcr.io/devgine/composer-php:v2-php$(PHP_VERSION)-alpine  sh -c "composer install && vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --rules=@PSR2"
 
 # Open an interactive shell in the web container as the 'application' user
 dev-console:
