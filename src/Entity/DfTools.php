@@ -555,6 +555,7 @@ class DfTools
             }
         }
 
+        // cp.id_category > 2: Ignoring root categories
         $productsQuery = '
         SELECT dp.*, tag_summary.tags, category_summary.category_ids FROM
         (
@@ -615,7 +616,6 @@ class DfTools
 
     private static function getSQLForProducts($showVariations, $mpn, $isbn)
     {
-        // cp.id_category > 2: Ignoring root categories
         return "
         SELECT
             ps.id_product,
