@@ -556,7 +556,7 @@ class DfTools
         }
 
         $productsQuery = '
-        SELECT dp.*, tag_summary.tags FROM
+        SELECT dp.*, tag_summary.tags, category_summary.category_ids FROM
         (
             ' . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . ' UNION ' : '') . '
             ' . self::getSQLForProducts($showVariations, $mpn, $isbn) . '
@@ -568,6 +568,13 @@ class DfTools
             WHERE tag.id_lang = _ID_LANG_
             GROUP BY pt.id_product
         ) tag_summary ON tag_summary.id_product = dp.id_product
+        LEFT JOIN (
+            SELECT cp.id_product, GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids
+            FROM _DB_PREFIX_category_product cp
+            JOIN _DB_PREFIX_category_lang cl ON cl.id_category = cp.id_category
+            WHERE cl.id_lang = _ID_LANG_ AND cl.id_shop = _ID_SHOP_ AND cp.id_category > 2
+            GROUP BY cp.id_product
+        ) category_summary ON category_summary.id_product = dp.id_product
         INNER JOIN (' . self::getSQLProductShopIds() . ') dps
             ON dps.id_product = dp.id_product
         ';
@@ -641,8 +648,7 @@ class DfTools
             ims.id_image,
             ps.available_for_order,
             sa.out_of_stock,
-            sa.quantity as stock_quantity,
-            GROUP_CONCAT(DISTINCT cp.id_category ORDER BY cp.id_category SEPARATOR \',\') AS category_ids
+            sa.quantity as stock_quantity
         FROM
             _DB_PREFIX_product_shop ps
             INNER JOIN _DB_PREFIX_product p
@@ -677,8 +683,6 @@ class DfTools
                     id_product
             ) vc ON
             vc.id_product = ps.id_product
-            LEFT JOIN _DB_PREFIX_category_product cp
-            ON cp.id_product = ps.id_product AND cp.id_category > 2
         GROUP BY
             ps.id_product
         ';
@@ -686,7 +690,6 @@ class DfTools
 
     private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
     {
-        // cp.id_category > 2: Ignoring root categories
         return "
         SELECT
             ps.id_product,
@@ -719,8 +722,7 @@ class DfTools
             im.id_image,
             ps.available_for_order,
             sa.out_of_stock,
-            sa.quantity as stock_quantity,
-            GROUP_CONCAT(DISTINCT cp.id_category ORDER BY cp.id_category SEPARATOR \',\') AS category_ids
+            sa.quantity as stock_quantity
         FROM
             _DB_PREFIX_product p
             INNER JOIN _DB_PREFIX_product_shop ps
@@ -746,8 +748,6 @@ class DfTools
                 AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute)
                 AND (sa.id_shop = _ID_SHOP_ OR
                 (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-            LEFT JOIN _DB_PREFIX_category_product cp
-            ON cp.id_product = ps.id_product AND cp.id_category > 2        
         WHERE
             pa.id_product_attribute is not null
         GROUP BY
