@@ -683,7 +683,7 @@ class DfTools
                     id_product
             ) vc ON
             vc.id_product = ps.id_product
-        ';
+    ';
     }
 
     private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
