@@ -150,7 +150,7 @@ if ($shouldShowProductVariations) {
 }
 $header = array_merge($header, [
     'title', 'link', 'description', 'alternate_description', 'meta_title', 'meta_description', 'image_link', 'main_category',
-    'categories', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
+    'categories', 'category_merchandising', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
     'supplier_reference', 'extra_title_1', 'extra_title_2', 'tags',
 ]);
 

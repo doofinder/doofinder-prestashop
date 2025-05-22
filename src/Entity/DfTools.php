@@ -555,8 +555,9 @@ class DfTools
             }
         }
 
+        // cp.id_category > 2: Ignoring root categories
         $productsQuery = '
-        SELECT dp.*, tag_summary.tags FROM
+        SELECT dp.*, tag_summary.tags, category_summary.category_ids FROM
         (
             ' . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . ' UNION ' : '') . '
             ' . self::getSQLForProducts($showVariations, $mpn, $isbn) . '
@@ -568,6 +569,13 @@ class DfTools
             WHERE tag.id_lang = _ID_LANG_
             GROUP BY pt.id_product
         ) tag_summary ON tag_summary.id_product = dp.id_product
+        LEFT JOIN (
+            SELECT cp.id_product, GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids
+            FROM _DB_PREFIX_category_product cp
+            JOIN _DB_PREFIX_category_lang cl ON cl.id_category = cp.id_category
+            WHERE cl.id_lang = _ID_LANG_ AND cl.id_shop = _ID_SHOP_ AND cp.id_category > 2
+            GROUP BY cp.id_product
+        ) category_summary ON category_summary.id_product = dp.id_product
         INNER JOIN (' . self::getSQLProductShopIds() . ') dps
             ON dps.id_product = dp.id_product
         ';
@@ -830,6 +838,28 @@ class DfTools
         self::$cachedCategoryPaths[$idCategory] = $path;
 
         return $path;
+    }
+    /**
+     * Returns an array containing the paths for categories for a product in a language for the selected shop.
+     *
+     * @param string $categoryIds Comma separated list of category IDs
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     *
+     * @return array
+     */
+    public static function getCategoryLinksById($categoryIds, $idLang, $idShop)
+    {
+        $categoryIds = explode(',', $categoryIds);
+        $link = \Context::getContext()->link;
+        $urls = [];
+
+        foreach ($categoryIds as $category_id) {
+            $category = new \Category((int) $category_id, $idLang, $idShop);
+            $categoryLink = $link->getCategoryLink($category);
+            $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
+        }
+        return $urls;
     }
 
     /**
