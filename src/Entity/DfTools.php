@@ -683,8 +683,6 @@ class DfTools
                     id_product
             ) vc ON
             vc.id_product = ps.id_product
-        GROUP BY
-            ps.id_product
         ';
     }
 
@@ -750,8 +748,6 @@ class DfTools
                 (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
         WHERE
             pa.id_product_attribute is not null
-        GROUP BY
-            ps.id_product
         ";
     }
 
