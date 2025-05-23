@@ -1,15 +1,5 @@
-*.zip
-config*.xml
-localconfig.json
-node_modules
-/nbproject/private/
-/nbproject
-doofinder.log
-test_doofinder.php
-/deploy
-/dist/*
-!/dist/*latest*.zip
 vendor/
 composer.lock
 .php-cs-fixer.cache
 /html
+.env.local

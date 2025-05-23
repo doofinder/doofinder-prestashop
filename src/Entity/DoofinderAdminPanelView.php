@@ -118,6 +118,10 @@ class DoofinderAdminPanelView
         $context->smarty->assign('paramsPopup', $paramsPopup);
         $context->smarty->assign('doofinderAdminUrl', sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, ''));
 
+        $link = \Context::getContext()->link;
+        $context->smarty->assign('ajaxUrl', $link->getPageLink('module-doofinder-ajax'));
+        $context->smarty->assign('configUrl', $link->getPageLink('module-doofinder-config'));
+
         $output .= $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/configure.tpl');
         if ($configured) {
             $feedIndexed = \Configuration::get('DF_FEED_INDEXED');
@@ -146,6 +150,10 @@ class DoofinderAdminPanelView
     public function getWarningMultishopHtml()
     {
         $stop = false;
+        if (!\Shop::isFeatureActive()) {
+            return $stop;
+        }
+
         if (\Shop::getContext() == \Shop::CONTEXT_GROUP || \Shop::getContext() == \Shop::CONTEXT_ALL) {
             $context = \Context::getContext();
             $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a \'All Shops\' or a \'Group Shop\' context, select directly the shop you want to edit', 'doofinderadminpanelview'));
