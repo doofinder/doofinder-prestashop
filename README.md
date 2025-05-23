@@ -3,7 +3,7 @@
 Plugin that allows to configure the [Doofinder](https://www.doofinder.com) search service in a Prestashop 1.5 store with less effort than configuring it from scratch.
 
 > [!IMPORTANT]
-> If you are in trouble with the module, please [contact Doofinder Support](https://support.doofinder.com/pages/contact-us) from the Doofinder website.
+> If you experience any issue with the module, please [contact Doofinder Support](https://support.doofinder.com/pages/contact-us) from the Doofinder website.
 
 ## How to install and configure Doofinder
 
