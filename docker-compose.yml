@@ -33,8 +33,8 @@ services:
       PS_ENABLE_SSL: 1
       ADMIN_MAIL: ${PS_ADMIN_EMAIL}
       ADMIN_PASSWD: ${PS_ADMIN_PASSWORD}
-      XDEBUG_CONFIG: "client_host=${XDEBUG_HOST} idekey=${XDEBUG_KEY} start_with_request=yes"
-      XDEBUG_MODE: "debug,develop"
+      # XDEBUG_CONFIG: "client_host=${XDEBUG_HOST} idekey=${XDEBUG_KEY} start_with_request=yes"
+      # XDEBUG_MODE: "debug,develop"
     volumes:
       - ./html:/var/www/html
       - ./:/var/www/html/modules/doofinder
