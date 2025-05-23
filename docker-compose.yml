@@ -21,6 +21,7 @@ services:
         PS_VERSION: ${PS_VERSION}
     ports:
       - 9011:80
+      - 4011:443
     environment:
       PS_DEV_MODE: 1
       DB_SERVER: db
