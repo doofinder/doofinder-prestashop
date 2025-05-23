@@ -10,5 +10,6 @@ RUN echo 'memory_limit = -1' >> "$PHP_INI_DIR/conf.d/docker-php-ram-limit.ini"
 
 # XDebug extension
 RUN pecl channel-update pecl.php.net
+# For versions <= 8.0, use xdebug 3.1.5
 RUN echo -e "8.0\n${PHP_VERSION%-*}" | sort -cV && pecl install xdebug || pecl install xdebug-3.1.5
 RUN docker-php-ext-enable xdebug
