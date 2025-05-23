@@ -77,7 +77,7 @@ The admin panel will be available at `https://PS_BASE_URL/admin`. Admin credenti
 
 > [!NOTE]
 > Keep in mind that for versions prior to 1.7 PrestaShop will ask you to delete the `install` folder and rename the `admin` folder located in the `html` directory.
-> For newer versions this is done automatically, and accessin `/admin` will redirect you to the correct url. If this no happens, simply check the admin folder name inside the `html` directory and use it to access to the Admin Dashboard.
+> For newer versions this is done automatically, and accessing `/admin` will redirect you to the correct url. If this no happens, simply check the admin folder name inside the `html` directory and use it to access to the Admin Dashboard.
 
 ## Xdebug ready to use
 
