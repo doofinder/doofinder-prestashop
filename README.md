@@ -62,7 +62,7 @@ The `Makefile` automatically overrides `.env` vars with the ones found in `.env.
 
 You can set up a fresh PrestaShop installation using the provided `Makefile` target `init`. This command will:
 
-- Pulls and build a Presatshop docker image with xdebug extension and maybe other tweaks. This build is configurable using the environment variables `PHP_VERSION` and `PS_VERSION` environment variables.
+- Pulls and build a PrestaShop docker image with xdebug extension and maybe other tweaks. This build is configurable using the environment variables `PHP_VERSION` and `PS_VERSION` environment variables.
 - Starts the containers
 - Runs the installer script thanks to `PS_INSTALL_AUTO` and the definded environment variables.
 
