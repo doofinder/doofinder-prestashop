@@ -468,7 +468,7 @@ class DfProductBuild
                     $this->imageSize
                 );
             }
-        }else{
+        } else {
             $imageLink = DfTools::getImageLink(
                 $product['id_product'],
                 $product['id_image'],

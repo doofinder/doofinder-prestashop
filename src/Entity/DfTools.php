@@ -1277,7 +1277,7 @@ class DfTools
     public static function getImageLink($idProduct, $idImage, $linkRewrite, $imageSize)
     {
         $context = \Context::getContext();
-        if(empty($idProduct) || empty($idImage)) {
+        if (empty($idProduct) || empty($idImage)) {
             return '';
         }
         $url = $context->link->getImageLink($linkRewrite, "$idProduct-$idImage", $imageSize);
