@@ -444,48 +444,44 @@ class DfProductBuild
             $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
 
             if (!empty($idImage)) {
-                $imageLink = DfTools::cleanURL(
-                    DfTools::getImageLink(
-                        $product['id_product_attribute'],
-                        $idImage,
-                        $product['link_rewrite'],
-                        $this->imageSize
-                    )
+                $imageLink = DfTools::getImageLink(
+                    $product['id_product_attribute'],
+                    $idImage,
+                    $product['link_rewrite'],
+                    $this->imageSize
                 );
             } else {
-                $imageLink = DfTools::cleanURL(
-                    DfTools::getImageLink(
-                        $product['id_product_attribute'],
-                        $product['id_image'],
-                        $product['link_rewrite'],
-                        $this->imageSize
-                    )
+                $imageLink = DfTools::getImageLink(
+                    $product['id_product_attribute'],
+                    $product['id_image'],
+                    $product['link_rewrite'],
+                    $this->imageSize
                 );
             }
 
             // For variations with no specific pictures
             if (strpos($imageLink, '/-') > -1) {
-                $imageLink = DfTools::cleanURL(
-                    DfTools::getImageLink(
-                        $product['id_product'],
-                        $product['id_image'],
-                        $product['link_rewrite'],
-                        $this->imageSize
-                    )
+                $imageLink = DfTools::getImageLink(
+                    $product['id_product'],
+                    $product['id_image'],
+                    $product['link_rewrite'],
+                    $this->imageSize
                 );
             }
-
-            return $imageLink;
-        }
-
-        return DfTools::cleanURL(
-            DfTools::getImageLink(
+        }else{
+            $imageLink = DfTools::getImageLink(
                 $product['id_product'],
                 $product['id_image'],
                 $product['link_rewrite'],
                 $this->imageSize
-            )
-        );
+            );
+        }
+
+        if (empty($imageLink)) {
+            return '';
+        }
+         
+        return DfTools::cleanURL($imageLink);
     }
 
     private function getAvailability($product)
