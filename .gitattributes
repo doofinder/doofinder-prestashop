@@ -9,3 +9,5 @@
 /\.vscode		      export-ignore
 /\.php-cs-fixer\.dist\.php	    export-ignore
 /prestashop_architecture\.md	export-ignore
+/templates	export-ignore
+/docker
