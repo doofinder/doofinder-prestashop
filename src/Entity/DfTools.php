@@ -654,7 +654,7 @@ class DfTools
             INNER JOIN _DB_PREFIX_product p
             ON (p.id_product = ps.id_product)
             LEFT JOIN _DB_PREFIX_product_lang pl
-            ON (pl.id_product = ps.id_product AND pl.id_lang = _ID_LANG_)
+            ON (pl.id_product = ps.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
             LEFT JOIN _DB_PREFIX_manufacturer m
             ON (m.id_manufacturer = p.id_manufacturer)
             LEFT JOIN _DB_PREFIX_category_lang cl
@@ -683,6 +683,7 @@ class DfTools
                     id_product
             ) vc ON
             vc.id_product = ps.id_product
+            WHERE ps.id_shop = _ID_SHOP_
     ';
     }
 
@@ -722,9 +723,9 @@ class DfTools
             sa.out_of_stock,
             sa.quantity as stock_quantity
         FROM
-            _DB_PREFIX_product p
-            INNER JOIN _DB_PREFIX_product_shop ps
-            ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
+            _DB_PREFIX_product_shop ps
+            INNER JOIN _DB_PREFIX_product p
+            ON (p.id_product = ps.id_product)
             LEFT JOIN _DB_PREFIX_product_lang pl
             ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
             LEFT JOIN _DB_PREFIX_manufacturer m
@@ -747,7 +748,8 @@ class DfTools
                 AND (sa.id_shop = _ID_SHOP_ OR
                 (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
         WHERE
-            pa.id_product_attribute is not null
+            ps.id_shop = _ID_SHOP_
+            AND pa.id_product_attribute is not null
         ";
     }
 
