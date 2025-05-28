@@ -562,7 +562,6 @@ class DfTools
             ' . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . ' UNION ' : '') . '
             ' . self::getSQLForProducts($showVariations, $mpn, $isbn) . '
         ) dp
-
         INNER JOIN (' . self::getSQLProductShopIds() . ') dps
             ON dps.id_product = dp.id_product
         ';
