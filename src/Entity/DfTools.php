@@ -557,25 +557,12 @@ class DfTools
 
         // cp.id_category > 2: Ignoring root categories
         $productsQuery = '
-        SELECT dp.*, tag_summary.tags, category_summary.category_ids FROM
+        SELECT dp.*, dps.tags, dps.category_ids FROM
         (
             ' . ($showVariations ? self::getSQLForVariants($mpnPa, $mpn, $isbnPa) . ' UNION ' : '') . '
             ' . self::getSQLForProducts($showVariations, $mpn, $isbn) . '
         ) dp
-        LEFT JOIN (
-            SELECT pt.id_product, GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags
-            FROM _DB_PREFIX_product_tag pt
-            JOIN _DB_PREFIX_tag tag ON tag.id_tag = pt.id_tag
-            WHERE tag.id_lang = _ID_LANG_
-            GROUP BY pt.id_product
-        ) tag_summary ON tag_summary.id_product = dp.id_product
-        LEFT JOIN (
-            SELECT cp.id_product, GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids
-            FROM _DB_PREFIX_category_product cp
-            JOIN _DB_PREFIX_category_lang cl ON cl.id_category = cp.id_category
-            WHERE cl.id_lang = _ID_LANG_ AND cl.id_shop = _ID_SHOP_ AND cp.id_category > 2
-            GROUP BY cp.id_product
-        ) category_summary ON category_summary.id_product = dp.id_product
+
         INNER JOIN (' . self::getSQLProductShopIds() . ') dps
             ON dps.id_product = dp.id_product
         ';
@@ -601,15 +588,40 @@ class DfTools
     {
         return '
         SELECT
-                id_product
-            FROM
-                _DB_PREFIX_product_shop ps
+            ps.id_product,
+            GROUP_CONCAT(
+                tag.name
+                ORDER BY
+                tag.name
+            ) AS tags,
+            GROUP_CONCAT(
+                cl.id_category
+                ORDER BY
+                cl.id_category
+            ) AS category_ids
+             FROM
+            _DB_PREFIX_product_shop ps
+            LEFT JOIN _DB_PREFIX_category_product cp ON (cp.id_product = ps.id_product)
+            LEFT JOIN _DB_PREFIX_category_lang cl ON (
+                cl.id_category = cp.id_category
+                AND cl.id_shop = _ID_SHOP_
+                AND cl.id_lang = _ID_LANG_
+                AND cp.id_category > 2
+            )
+            LEFT JOIN _DB_PREFIX_product_tag pt ON (pt.id_product = ps.id_product)
+            LEFT JOIN _DB_PREFIX_tag tag ON (
+                tag.id_tag = pt.id_tag
+                AND tag.id_lang = _ID_LANG_
+            )
             WHERE
-                ps.id_shop = _ID_SHOP_
-                _IS_ACTIVE_
-                _VISIBILITY_
-                _PRODUCT_IDS_
-        ORDER BY id_product
+            ps.id_shop = _ID_SHOP_
+            _IS_ACTIVE_
+            _VISIBILITY_
+            _PRODUCT_IDS_
+            GROUP BY
+            ps.id_product
+            ORDER BY
+            ps.id_product
             _LIMIT_
         ';
     }
