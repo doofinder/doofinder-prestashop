@@ -869,6 +869,9 @@ class DfTools
 
         foreach ($categoryIds as $category_id) {
             $category = new \Category((int) $category_id, $idLang, $idShop);
+            if (!\Validate::isLoadedObject($category)) {
+                continue;
+            }
             $categoryLink = $link->getCategoryLink($category);
             $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
         }
