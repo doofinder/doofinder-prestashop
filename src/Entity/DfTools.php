@@ -1606,6 +1606,9 @@ class DfTools
 
         foreach ($multiprice as $currency => $prices) {
             foreach ($prices as $price_name => $value) {
+                if (!is_numeric($value)) {
+                    continue;
+                }
                 $multiprices[] = $currency . '_' . $price_name . '=' . $value;
             }
         }
