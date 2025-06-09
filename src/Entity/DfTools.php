@@ -1125,16 +1125,28 @@ class DfTools
             return null;
         }
 
+        // Replace control characters with spaces
         $text = preg_replace('/[^\P{C}]+/u', ' ', $text);
-        $text = str_replace(["\t", "\r", "\n"], ' ', $text);
-        $text = strip_tags($text);
-        $text = preg_replace('/\s+/', ' ', $text);
-        $text = trim($text);
-        $text = preg_replace('/^["\']+/', '', $text); // remove first quotes
-        $text = str_replace(self::TXT_SEPARATOR, '&#124;', $text);
-        $text = stripcslashes($text);
-        $text = str_replace('\"', '"', $text);
 
+        // Remove HTML and PHP tags
+        $text = strip_tags($text);
+
+        // Normalize whitespace by replacing consecutive spaces with a single space
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        // Remove leading and trailing whitespace
+        $text = trim($text);
+
+        // Replace text separator with HTML entity for pipe character
+        $text = str_replace(self::TXT_SEPARATOR, '&#124;', $text);
+
+        // Would remove backslashes from escaped chars
+        $text = stripcslashes($text);
+
+        // Double all double quotes (for CSV formatting)
+        $text = str_replace('"', '""', $text);
+
+        // Filter out invalid UTF-8 sequences using a predefined regex pattern
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
 
