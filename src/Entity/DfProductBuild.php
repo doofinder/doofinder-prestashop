@@ -480,7 +480,7 @@ class DfProductBuild
         if (empty($imageLink)) {
             return '';
         }
-         
+
         return DfTools::cleanURL($imageLink);
     }
 
