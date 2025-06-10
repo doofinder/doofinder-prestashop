@@ -585,6 +585,10 @@ class DfProductBuild
             $this->attributesShown
         );
 
+        if (empty($attributes)) {
+            return [];
+        }
+
         $altAttributes = [];
 
         foreach ($attributes as $attribute) {
