@@ -274,11 +274,11 @@ class DfProductBuild
         }
 
         if ($this->productVariations) {
-            $p['variation_reference'] = $product['variation_reference'];
-            $p['variation_supplier_reference'] = $product['variation_supplier_reference'];
-            $p['variation_mpn'] = $product['variation_mpn'];
-            $p['variation_ean13'] = $product['variation_ean13'];
-            $p['variation_upc'] = $product['variation_upc'];
+            $p['variation_reference'] = DfTools::cleanString($product['variation_reference']);
+            $p['variation_supplier_reference'] = DfTools::cleanString($product['variation_supplier_reference']);
+            $p['variation_mpn'] = DfTools::cleanString($product['variation_mpn']);
+            $p['variation_ean13'] = DfTools::cleanString($product['variation_ean13']);
+            $p['variation_upc'] = DfTools::cleanString($product['variation_upc']);
             $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
             $p['df_variants_information'] = $this->getVariantsInformation($product);
 
