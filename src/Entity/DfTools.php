@@ -786,8 +786,6 @@ class DfTools
 
         // Product supplier reference
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
-        // Product supplier reference
-        $query->select('psp.product_supplier_reference AS supplier_reference');
         $query->leftJoin(
             'product_supplier',
             'psp',
