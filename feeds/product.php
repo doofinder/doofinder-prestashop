@@ -437,7 +437,7 @@ if(isset($_GET["old"]) && $_GET["old"] == 1) {
     foreach ($products as $product) {
         $minProductPrices = [];
         if ($shouldShowProductVariations && $product['variant_count'] > 0) {
-            $variations = DfTools::getProductVariationsV2($product['id_product'], $lang->id);
+            $variations = DfTools::getProductVariationsV2($product['id_product']);
             foreach ($variations as $variation) {
                 if ($shouldDisplayPrices) {
                     $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $shouldPricesUseTaxes, $currencies);

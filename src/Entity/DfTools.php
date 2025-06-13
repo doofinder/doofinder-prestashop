@@ -751,7 +751,7 @@ class DfTools
      *
      * @return array|false|mysqli_result|PDOStatement|resource|null
      */
-    public static function getProductVariationsV2($idProduct, $idLang) {
+    public static function getProductVariationsV2($idProduct) {
         $query = new \DbQuery();
 
         $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
