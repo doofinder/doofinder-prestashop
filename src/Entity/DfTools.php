@@ -491,6 +491,224 @@ class DfTools
         return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
+
+    public static function getAvailableProductsForLanguageV2($idLang, $checkLeadership=true, $limit = false, $offset = false, $ids = null)
+    {
+
+        $query = new \DbQuery();
+
+        if (self::versionGte('1.7.7.0')) {
+            $query->select('p.mpn AS mpn');
+        } else {
+            $query->select('p.reference AS mpn');
+        }
+
+        // Product table fields
+        $query->select('p.ean13 AS ean13, p.upc, p.reference');
+
+        // Product shop table fields
+        $query->select('product_shop.id_product, product_shop.show_price, product_shop.available_for_order');
+        $query->join(\Shop::addSqlAssociation('product', 'p'));
+
+        $query->from('product', 'p');
+
+        if (self::versionGte('1.7.0.0')) {
+            $query->select('p.isbn');
+        }
+
+        // Variation fields
+        $query->select('0 AS id_product_attribute');
+
+        // Product image table fields
+        $imsCoverField = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
+
+        $query->select('ANY_VALUE(ims.id_image) AS id_image');
+        $query->leftJoin('image_shop', 'ims',
+            'ims.id_product = product_shop.id_product
+            AND ims.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            AND ' . $imsCoverField
+        );
+
+        // Product supplier reference
+        $query->select('psp.product_supplier_reference AS supplier_reference');
+        $query->leftJoin(
+            'product_supplier',
+            'psp',
+            'p.id_supplier = psp.id_supplier
+            AND p.`id_product` = psp.`id_product`
+            AND psp.`id_product_attribute` = 0'
+        );
+
+        $query->select('ANY_VALUE(sa.out_of_stock) as out_of_stock, ANY_VALUE(sa.quantity) as stock_quantity');
+        $query->leftJoin(
+            'stock_available',
+            'sa',
+            'product_shop.id_product = sa.id_product
+            AND sa.id_product_attribute = 0
+            AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
+        );
+
+        $query->select('pl.name, pl.description, pl.description_short, pl.meta_title, pl.meta_description, pl.link_rewrite');
+        $query->leftJoin(
+            'product_lang',
+            'pl',
+            'p.`id_product` = pl.`id_product` AND pl.`id_lang` = ' . (int) $idLang . \Shop::addSqlRestrictionOnLang('pl')
+        );
+
+        // Category default
+        $idCategoryField = self::versionGte('1.5.0.9')? 'product_shop.id_category_default' : 'p.id_category_default';
+        $query->select('default_category_lang.name as main_category, default_category_lang.link_rewrite AS cat_link_rew');
+        $query->select($idCategoryField  .' as id_category_default');
+        $query->leftJoin(
+            'category_lang',
+            'default_category_lang',
+            $idCategoryField . ' = default_category_lang.id_category
+            AND default_category_lang.id_lang = ' . (int) $idLang . '
+            AND default_category_lang.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')'
+        );
+
+        // Manufacturer
+        $query->select('m.name AS manufacturer');
+        $query->leftJoin('manufacturer', 'm', 'm.`id_manufacturer` = p.`id_manufacturer`');
+
+        $query->select('GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags');
+        $query->leftJoin(
+            'product_tag',
+            'pt',
+            'pt.id_product = product_shop.id_product AND pt.id_lang = ' . (int) $idLang
+        );
+        $query->leftJoin(
+            'tag',
+            'tag',
+            'pt.`id_tag` = tag.`id_tag` AND tag.id_lang = ' . (int) $idLang
+        );
+
+        $query->select('GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids');
+        $query->leftJoin(
+            'category_product',
+            'cp',
+            'cp.id_product = product_shop.id_product'
+        );
+        $query->leftJoin(
+            'category_lang',
+            'cl',
+            'cl.`id_category` = cp.`id_category`
+            AND cl.`id_shop` IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            AND cl.`id_lang` = ' . (int) $idLang . '
+            AND cp.id_category > 2'
+        );
+
+
+        $query->select('IFNULL(vc.count, 0) as variant_count');
+        if ($checkLeadership) {
+            $query->select('IF(ISNULL(vc.count) OR vc.count > 0,true, false) as df_group_leader');
+        } else {
+            $query->select('true as df_group_leader');
+        }
+
+        $query->join('LEFT JOIN (
+                SELECT
+                    id_product,
+                    count(*) as count
+                FROM
+                    ' . _DB_PREFIX_ . 'product_attribute pas
+                GROUP BY
+                    id_product
+            ) vc ON vc.id_product = product_shop.id_product');
+
+
+        $query->select('null AS variation_reference, null AS variation_supplier_reference, null AS variation_mpn,
+            null AS variation_ean13, null AS variation_upc, null AS variation_image_id');
+
+        if (self::versionGte('1.5.1.0')) {
+            $query->where('product_shop.`active` = 1');
+        } else {
+            $query->where('p.`active` = 1');
+        }
+
+        if (self::versionGte('1.5.1.0')) {
+            $query->where("product_shop.`visibility` IN ('search', 'both')");
+        } elseif (self::versionGte('1.5.0.9')) {
+            $query->where("p.`visibility` IN ('search', 'both')");
+        }
+
+        $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) .')');
+
+        $query->orderBy('product_shop.id_product');
+        $query->groupBy('product_shop.id_product');
+
+        if ($limit) {
+            $query->limit((int) $limit, (int) $offset);
+        }
+        // echo "<pre>";
+        // var_dump($query->__toString());
+        // echo "</pre>";
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+    }
+
+    public static function getProductVariationsV2($idProduct, $idLang) {
+        $query = new \DbQuery();
+
+        $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
+
+        $query->select('false as df_group_leader');
+
+        $query->select('0 as variant_count');
+
+        if (self::versionGte('1.7.0.0')) {
+            $query->select('pa.isbn AS isbn');
+        }
+
+        if (self::versionGte('1.7.7.0')) {
+            $query->select('pa.mpn AS variation_mpn');
+        } else {
+            $query->select('pa.reference AS variation_mpn');
+        }
+
+        $query->from('product_attribute', 'pa');
+        // Product shop table fields
+        $query->select('product_attribute_shop.id_product, product_attribute_shop.id_product_attribute');
+        $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
+        $query->where('product_attribute_shop.id_product = ' . (int) $idProduct);
+
+        $query->leftJoin('product', 'p',
+            'p.id_product = product_attribute_shop.id_product'
+        );
+
+        $query->select('pa_im.id_image AS variation_image_id');
+        $query->leftJoin('product_attribute_image', 'pa_im',
+            'pa_im.id_product_attribute = product_attribute_shop.id_product_attribute');
+
+        // Product supplier reference
+        $query->select('psp.product_supplier_reference AS variation_supplier_reference');
+        // Product supplier reference
+        $query->select('psp.product_supplier_reference AS supplier_reference');
+        $query->leftJoin(
+            'product_supplier',
+            'psp',
+            'p.id_supplier = psp.id_supplier
+            AND p.`id_product` = psp.`id_product`
+            AND psp.`id_product_attribute` = product_attribute_shop.id_product_attribute'
+        );
+
+        $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
+        $query->leftJoin(
+            'stock_available',
+            'sa',
+            'p.id_product = sa.id_product
+            AND sa.id_product_attribute = product_attribute_shop.id_product_attribute
+            AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
+        );
+
+        $query->groupBy('product_attribute_shop.id_product, product_attribute_shop.id_product_attribute');
+
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+    }
+
+
+
     /**
      * Returns the products available for a language
      *
@@ -634,7 +852,7 @@ class DfTools
             ps.show_price,
             0 AS product_attribute,
             null AS variation_reference,
-            psp.product_supplier_reference AS variation_supplier_reference,
+            null AS variation_supplier_reference,
             null AS variation_mpn,
             null AS variation_ean13,
             null AS variation_upc,
@@ -1480,13 +1698,28 @@ class DfTools
                     'price' => $variantPrice,
                     'onsale_price' => $variantOnsalePrice,
                     'multiprice' => $variantMultiprice,
-                    'link' => self::getVariantUrl($product, $context),
+                    'id_product_attribute' => self::getVariantUrl($product, $context),
                 ];
             }
         }
 
         return $minPricesByProductId;
     }
+
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
+    {
+        $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
+        $variantOnsalePrice = self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute);
+        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute);
+
+        return [
+            'price' => $variantPrice,
+            'onsale_price' => $variantOnsalePrice,
+            'multiprice' => $variantMultiprice,
+            'id_product_attribute' => $idProductAttribute
+        ];
+    }
+
 
     public static function maybeAddVariantsFirstParent($products, $idLang, $idShop)
     {
