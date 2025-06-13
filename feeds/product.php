@@ -39,6 +39,151 @@ if (function_exists('set_time_limit')) {
 DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
 /**
+ * Global storage for all active measurements.
+ *   - $__metrics_data[$label] holds ['time' => float, 'memory' => int, 'peak' => int]
+ *   - $__metrics_stack is an indexed array of labels, used to pop the most recent.
+ */
+$__metrics_data  = [];
+$__metrics_stack = [];
+
+/**
+ * Begin measuring time & memory.
+ *
+ * @param string|null $label  Optional: a custom label for this measurement.
+ *                            If you pass null (or omit), a unique label is generated.
+ * @return string             The label that was used.  (Use the same label in stop_metrics() if you want.)
+ */
+function start_metrics(string $label = null): string
+{
+    global $__metrics_data, $__metrics_stack;
+
+    // 1) If no label provided, generate one
+    if ($label === null) {
+        // uniqid('m_', true) gives something like "m_5cd1e4d3a1f71.12345600"
+        $label = uniqid('m_', true);
+    }
+
+    // 2) Warn if the same label is already running
+    if (isset($__metrics_data[$label])) {
+        trigger_error("start_metrics(): metrics with label '$label' already started.", E_USER_WARNING);
+    }
+
+    // 3) Capture "before" values
+    $t0 = microtime(true);
+    $m0 = memory_get_usage();
+    $p0 = memory_get_peak_usage();
+
+    // 4) Store them under $__metrics_data
+    $__metrics_data[$label] = [
+        'time'   => $t0,
+        'memory' => $m0,
+        'peak'   => $p0,
+    ];
+
+    // 5) Push this label onto the stack (so stop_metrics() with no args can pop it)
+    $__metrics_stack[] = $label;
+
+    return $label;
+}
+
+/**
+ * Stop measuring time & memory and compute deltas.
+ *
+ * @param string|null $label  Optional: the label you used in start_metrics().
+ *                            If you pass null, this function will pop the most recently started label.
+ * @return array|null         On success, returns an array:
+ *                                [
+ *                                  'label'       => (string) the label used,
+ *                                  'time'        => (float) elapsed seconds,
+ *                                  'memory'      => (int)   bytes of memory allocated,
+ *                                  'peak_memory' => (int)   extra peak memory (bytes)
+ *                                ]
+ *                            On failure (no matching start), returns null and emits a warning.
+ */
+function stop_metrics(string $label = null): ?array
+{
+    global $__metrics_data, $__metrics_stack;
+
+    // 1) If no label provided, pop the most recent one
+    if ($label === null) {
+        if (empty($__metrics_stack)) {
+            trigger_error("stop_metrics(): no active measurements to stop.", E_USER_WARNING);
+            return null;
+        }
+        $label = array_pop($__metrics_stack);
+    } else {
+        // 2) If a label was provided, remove it from the stack if present
+        $idx = array_search($label, $__metrics_stack, true);
+        if ($idx !== false) {
+            array_splice($__metrics_stack, $idx, 1);
+        }
+    }
+
+    // 3) Check that we had a start for this label
+    if (!isset($__metrics_data[$label])) {
+        trigger_error("stop_metrics(): no metrics found for label '$label'.", E_USER_WARNING);
+        return null;
+    }
+
+    // 4) Grab the "before" values
+    $start = $__metrics_data[$label];
+    unset($__metrics_data[$label]);
+
+    // 5) Capture "after" values
+    $t1 = microtime(true);
+    $m1 = memory_get_usage();
+    $p1 = memory_get_peak_usage();
+
+    // 6) Compute deltas
+    $elapsed   = $t1 - $start['time'];
+    $memDelta  = $m1 - $start['memory'];
+    $peakDelta = $p1 - $start['peak'];
+
+    return [
+        'label'       => $label,
+        'time'        => $elapsed,
+        'memory'      => $memDelta,
+        'peak_memory' => $peakDelta,
+    ];
+}
+
+/**
+ * Print a human‐readable summary of the metrics array returned by stop_metrics().
+ *
+ * @param array|null $metrics
+ *     Example of $metrics:
+ *       [
+ *         'label'       => 'my_func',
+ *         'time'        => 0.123456,
+ *         'memory'      => 1048576,     // bytes
+ *         'peak_memory' => 2097152,     // bytes
+ *       ]
+ *
+ * If $metrics is null or not an array, prints a warning.
+ */
+function print_metrics(?array $metrics): void
+{
+    if (!is_array($metrics)) {
+        echo "print_metrics(): no metrics to display.\n";
+        return;
+    }
+
+    $label  = $metrics['label']       ?? '';
+    $time   = $metrics['time']        ?? 0.0;
+    $memory = $metrics['memory']      ?? 0;
+    $peak   = $metrics['peak_memory'] ?? 0;
+
+    if ($label !== '') {
+        echo "Metrics for '{$label}':\n";
+    } else {
+        echo "Metrics:\n";
+    }
+    echo "- Elapsed time:         " . round($time, 6)   . " seconds\n";
+    echo "- Memory used:          " . number_format($memory)  . " bytes\n";
+    echo "- Peak memory increase: " . number_format($peak)    . " bytes\n";
+}
+
+/**
  *  @author camlafit <https://github.com/camlafit>
  *  Merge multidemensionnal array by value on each row
  *  https://stackoverflow.com/questions/7973915/php-merge-arrays-by-value
@@ -260,24 +405,62 @@ Hook::exec('actionDoofinderExtendFeed', [
 $header = array_merge($header, $extraHeader);
 // To avoid indexation failures
 $header = array_unique($header);
-
-// PRODUCTS
-$rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
-
-$rows = arrayMergeByIdProduct($rows, $extraRows);
-
-// In case there is no need to display prices, avoid calculating the mins by variant
-$minPriceVariantByProductId = ($shouldShowProductVariations && $shouldDisplayPrices) ? DfTools::getMinVariantPrices($rows, $shouldPricesUseTaxes, $currencies, $lang->id, $shop->id) : [];
 $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 
 $csv = fopen('php://output', 'w');
 if (!$limit || (false !== $offset && 0 === (int) $offset)) {
     fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
 }
+$startLabel = start_metrics("full");
+if(isset($_GET["old"]) && $_GET["old"] == 1) {
 
-foreach ($rows as $row) {
-    $product = $dfProductBuild->buildProduct($row, $minPriceVariantByProductId, $additionalAttributesHeaders, $additionalHeaders);
-    $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
-    fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
+    // PRODUCTS
+    $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
+
+    $rows = arrayMergeByIdProduct($rows, $extraRows);
+
+    // In case there is no need to display prices, avoid calculating the mins by variant
+    $minPriceVariantByProductId = ($shouldShowProductVariations && $shouldDisplayPrices) ? DfTools::getMinVariantPrices($rows, $shouldPricesUseTaxes, $currencies, $lang->id, $shop->id) : [];
+
+
+    foreach ($rows as $row) {
+        $product = $dfProductBuild->buildProduct($row, $minPriceVariantByProductId, $additionalAttributesHeaders, $additionalHeaders);
+        $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
+        fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
+    }
+} else {
+
+
+
+    $products = DfTools::getAvailableProductsForLanguageV2($lang->id, $shouldShowProductVariations, $limit, $offset);
+    $empty_line = array_fill_keys($header,null);
+    foreach ($products as $product) {
+        $minProductPrices = [];
+        if ($shouldShowProductVariations && $product['variant_count'] > 0) {
+            $variations = DfTools::getProductVariationsV2($product['id_product'], $lang->id);
+            foreach ($variations as $variation) {
+                if ($shouldDisplayPrices) {
+                    $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $shouldPricesUseTaxes, $currencies);
+                    if (!isset($minProductPrices['onsale_price']) || $variantPrices['onsale_price'] < $minProductPrices['onsale_price']) {
+                        $minProductPrices = $variantPrices;
+                    }
+                }
+                $expanded_variation = array_merge($product, $variation);
+                $built_variation = $dfProductBuild->buildProduct($expanded_variation, [], $additionalAttributesHeaders, $additionalHeaders);
+                $csv_product = $dfProductBuild->applySpecificTransformationsForCsv($built_variation, $extraHeader, $header);
+                fputcsv($csv, $csv_product, DfTools::TXT_SEPARATOR, '"', '');
+            }
+            $product = $dfProductBuild->buildProduct($product, [$product['id_product'] => $minProductPrices], $additionalAttributesHeaders, $additionalHeaders);
+        } else{
+            $product = $dfProductBuild->buildProduct($product, [], $additionalAttributesHeaders, $additionalHeaders);
+        }
+
+        $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
+        fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
+    }
+}
+$metrics = stop_metrics("full");
+if ($_GET["debug"] ==1 ) {
+print_metrics($metrics);
 }
 fclose($csv);
