@@ -568,6 +568,26 @@ class DfTools
         self::$_slave_servers_loaded = true;
     }
 
+    /**
+     * Retrieve available products information for a specific language.
+     *
+     * This method fetches products with their associated data including:
+     * - Basic product information (reference, EAN13, UPC, ISBN, etc.)
+     * - Product descriptions and meta information
+     * - Stock information
+     * - Category information
+     * - Manufacturer details
+     * - Product tags
+     * - Variation information
+     *
+     * @param int $idLang Language ID to retrieve product information in
+     * @param bool $checkLeadership Whether to check if product is a variant group leader (true by default)
+     * @param int|bool $limit Maximum number of products to retrieve (false for no limit)
+     * @param int|bool $offset Offset for pagination (false for no offset)
+     * @param array|null $ids Specific product IDs to retrieve (not implemented in current code)
+     *
+     * @return array|false|mysqli_result|PDOStatement|resource|null Array of products with their associated information
+     */
     public static function getAvailableProductsForLanguageV2($idLang, $checkLeadership=true, $limit = false, $offset = false, $ids = null)
     {
 
@@ -723,6 +743,14 @@ class DfTools
         return self::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
     }
 
+    /**
+     * Returns the product variations for a product
+     *
+     * @param int $idProduct ID of the product
+     * @param int $idLang language ID
+     *
+     * @return array|false|mysqli_result|PDOStatement|resource|null
+     */
     public static function getProductVariationsV2($idProduct, $idLang) {
         $query = new \DbQuery();
 
