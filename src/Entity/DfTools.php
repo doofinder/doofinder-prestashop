@@ -542,7 +542,7 @@ class DfTools
             false
         );
         $link = $instance->connect();
-        if ( 'DbPDO' === $class && method_exists($link, 'setAttribute')) {
+        if ('DbPDO' === $class && method_exists($link, 'setAttribute')) {
             // Set the PDO attribute to not use buffered queries
             // This is needed to avoid memory issues with large datasets
 
@@ -551,7 +551,7 @@ class DfTools
         return $instance;
     }
 
-     /**
+    /**
      * Loads configuration settings for slave servers if needed.
      */
     protected static function loadSlaveServers()
@@ -619,7 +619,9 @@ class DfTools
         $imsCoverField = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
 
         $query->select('ANY_VALUE(ims.id_image) AS id_image');
-        $query->leftJoin('image_shop', 'ims',
+        $query->leftJoin(
+            'image_shop',
+            'ims',
             'ims.id_product = product_shop.id_product
             AND ims.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             AND ' . $imsCoverField
@@ -751,7 +753,8 @@ class DfTools
      *
      * @return array|false|mysqli_result|PDOStatement|resource|null
      */
-    public static function getProductVariationsV2($idProduct) {
+    public static function getProductVariationsV2($idProduct)
+    {
         $query = new \DbQuery();
 
         $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
@@ -776,13 +779,18 @@ class DfTools
         $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
         $query->where('product_attribute_shop.id_product = ' . (int) $idProduct);
 
-        $query->leftJoin('product', 'p',
+        $query->leftJoin(
+            'product',
+            'p',
             'p.id_product = product_attribute_shop.id_product'
         );
 
         $query->select('pa_im.id_image AS variation_image_id');
-        $query->leftJoin('product_attribute_image', 'pa_im',
-            'pa_im.id_product_attribute = product_attribute_shop.id_product_attribute');
+        $query->leftJoin(
+            'product_attribute_image',
+            'pa_im',
+            'pa_im.id_product_attribute = product_attribute_shop.id_product_attribute'
+        );
 
         // Product supplier reference
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
