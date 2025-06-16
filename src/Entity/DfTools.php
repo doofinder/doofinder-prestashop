@@ -679,7 +679,7 @@ class DfTools
         $query->leftJoin(
             'tag',
             'tag',
-            'pt.`id_tag` = tag.`id_tag` AND tag.id_lang = ' . (int) $idLang
+            'pt.`id_tag` = tag.`id_tag`'
         );
 
         $query->select('GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids');
