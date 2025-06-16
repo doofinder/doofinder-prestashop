@@ -648,7 +648,7 @@ class DfTools
             p.upc,
             p.reference,
             psp.product_supplier_reference AS supplier_reference,
-            " . ($showVariations ? 'IF(ISNULL(vc.count) OR vc.count > 0,true, false)' : 'true') . ' AS df_group_leader,
+            " . ($showVariations ? 'IF(NOT ISNULL(vc.count) AND vc.count > 0,true, false)' : 'true') . ' AS df_group_leader,
             pl.name,
             pl.description,
             pl.description_short,
