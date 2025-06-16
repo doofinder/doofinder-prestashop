@@ -618,7 +618,7 @@ class DfTools
         // Product image table fields
         $imsCoverField = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
 
-        $query->select('ANY_VALUE(ims.id_image) AS id_image');
+        $query->select('MIN(ims.id_image) AS id_image');
         $query->leftJoin(
             'image_shop',
             'ims',
@@ -637,7 +637,7 @@ class DfTools
             AND psp.`id_product_attribute` = 0'
         );
 
-        $query->select('ANY_VALUE(sa.out_of_stock) as out_of_stock, ANY_VALUE(sa.quantity) as stock_quantity');
+        $query->select('MIN(sa.out_of_stock) as out_of_stock, MIN(sa.quantity) as stock_quantity');
         $query->leftJoin(
             'stock_available',
             'sa',
