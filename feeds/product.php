@@ -448,7 +448,7 @@ if(isset($_GET["old"]) && $_GET["old"] == 1) {
                 $expanded_variation = array_merge($product, $variation);
                 $built_variation = $dfProductBuild->buildProduct($expanded_variation, [], $additionalAttributesHeaders, $additionalHeaders);
                 $csv_product = $dfProductBuild->applySpecificTransformationsForCsv($built_variation, $extraHeader, $header);
-                fputcsv($csv, $csv_product, DfTools::TXT_SEPARATOR, '"', '');
+                fputcsv($csv, $csv_product, DfTools::TXT_SEPARATOR);
             }
             $product = $dfProductBuild->buildProduct($product, [$product['id_product'] => $minProductPrices], $additionalAttributesHeaders, $additionalHeaders);
         } else {
