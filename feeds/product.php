@@ -412,7 +412,7 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
     fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
 }
 $startLabel = start_metrics("full");
-if(isset($_GET["old"]) && $_GET["old"] == 1) {
+if (isset($_GET["old"]) && $_GET["old"] == 1) {
 
     // PRODUCTS
     $rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
@@ -460,7 +460,7 @@ if(isset($_GET["old"]) && $_GET["old"] == 1) {
     }
 }
 $metrics = stop_metrics("full");
-if ($_GET["debug"] ==1 ) {
-print_metrics($metrics);
+if ($_GET["debug"] == 1) {
+    print_metrics($metrics);
 }
 fclose($csv);
