@@ -600,7 +600,7 @@ class DfTools
         }
 
         // Product table fields
-        $query->select('p.ean13 AS ean13, p.upc, p.reference, p.supplier_reference');
+        $query->select('p.ean13 AS ean13, p.upc, p.reference');
 
         // Product shop table fields
         $query->select('product_shop.id_product, product_shop.show_price, product_shop.available_for_order');
@@ -628,7 +628,7 @@ class DfTools
         );
 
         // Product supplier reference
-        $query->select('psp.product_supplier_reference AS supplier_reference');
+        $query->select('COALESCE(psp.product_supplier_reference, p.supplier_reference) as supplier_reference, psp.product_supplier_reference AS variation_supplier_reference');
         $query->leftJoin(
             'product_supplier',
             'psp',
@@ -716,7 +716,7 @@ class DfTools
             ) vc ON vc.id_product = product_shop.id_product');
 
 
-        $query->select('null AS variation_reference, null AS variation_supplier_reference, null AS variation_mpn,
+        $query->select('null AS variation_reference, null AS variation_mpn,
             null AS variation_ean13, null AS variation_upc, null AS variation_image_id');
 
         if (self::versionGte('1.5.1.0')) {
@@ -797,8 +797,7 @@ class DfTools
         $query->leftJoin(
             'product_supplier',
             'psp',
-            'p.id_supplier = psp.id_supplier
-            AND p.`id_product` = psp.`id_product`
+            'p.`id_product` = psp.`id_product`
             AND psp.`id_product_attribute` = product_attribute_shop.id_product_attribute'
         );
 
