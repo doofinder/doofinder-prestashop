@@ -433,7 +433,7 @@ if(isset($_GET["old"]) && $_GET["old"] == 1) {
 
 
     $products = DfTools::getAvailableProductsForLanguageV2($lang->id, $shouldShowProductVariations, $limit, $offset);
-    $empty_line = array_fill_keys($header,null);
+    $empty_line = array_fill_keys($header, null);
     foreach ($products as $product) {
         $minProductPrices = [];
         if ($shouldShowProductVariations && $product['variant_count'] > 0) {
@@ -451,7 +451,7 @@ if(isset($_GET["old"]) && $_GET["old"] == 1) {
                 fputcsv($csv, $csv_product, DfTools::TXT_SEPARATOR, '"', '');
             }
             $product = $dfProductBuild->buildProduct($product, [$product['id_product'] => $minProductPrices], $additionalAttributesHeaders, $additionalHeaders);
-        } else{
+        } else {
             $product = $dfProductBuild->buildProduct($product, [], $additionalAttributesHeaders, $additionalHeaders);
         }
 
