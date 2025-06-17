@@ -460,7 +460,7 @@ if (isset($_GET["old"]) && $_GET["old"] == 1) {
     }
 }
 $metrics = stop_metrics("full");
-if ($_GET["debug"] == 1) {
+if ($_GET["metrics"] == 1) {
     print_metrics($metrics);
 }
 fclose($csv);
