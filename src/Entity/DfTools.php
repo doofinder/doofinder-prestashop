@@ -588,7 +588,7 @@ class DfTools
      *
      * @return array|false|mysqli_result|PDOStatement|resource|null Array of products with their associated information
      */
-    public static function getAvailableProductsForLanguageV2($idLang, $checkLeadership=true, $limit = false, $offset = false, $ids = null)
+    public static function getAvailableProducts($idLang, $checkLeadership=true, $limit = false, $offset = false, $ids = null)
     {
 
         $query = new \DbQuery();
@@ -739,9 +739,7 @@ class DfTools
         if ($limit) {
             $query->limit((int) $limit, (int) $offset);
         }
-        // echo "<pre>";
-        // var_dump($query->__toString());
-        // echo "</pre>";
+
         return self::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
     }
 
@@ -753,7 +751,7 @@ class DfTools
      *
      * @return array|false|mysqli_result|PDOStatement|resource|null
      */
-    public static function getProductVariationsV2($idProduct)
+    public static function getProductVariations($idProduct)
     {
         $query = new \DbQuery();
 
