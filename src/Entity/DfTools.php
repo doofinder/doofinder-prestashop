@@ -628,6 +628,7 @@ class DfTools
         );
 
         // Product supplier reference
+        // See: [PR#181](https://github.com/doofinder/doofinder-prestashop/pull/181)
         $query->select('COALESCE(psp.product_supplier_reference, p.supplier_reference) as supplier_reference, psp.product_supplier_reference AS variation_supplier_reference');
         $query->leftJoin(
             'product_supplier',
