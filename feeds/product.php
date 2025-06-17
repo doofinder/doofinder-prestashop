@@ -269,7 +269,7 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 }
 
 $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
-$empty_line = array_fill_keys($header, null);
+$emptyLine = array_fill_keys($header, null);
 foreach ($products as $product) {
     $minProductPrices = [];
     if ($shouldShowProductVariations && $product['variant_count'] > 0) {
