@@ -934,7 +934,7 @@ class DfTools
                 p.upc,
                 p.reference,
                 p.supplier_reference,
-                IF(ISNULL(pan.attribute_n) OR pan.attribute_n > 0, true, false) AS df_group_leader,
+                IF(NOT ISNULL(pan.attribute_n) AND pan.attribute_n > 0, true, false) AS df_group_leader,
                 pl.name,
                 pl.description,
                 pl.description_short,
