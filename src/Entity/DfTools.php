@@ -1821,7 +1821,7 @@ class DfTools
                     'price' => $variantPrice,
                     'onsale_price' => $variantOnsalePrice,
                     'multiprice' => $variantMultiprice,
-                    'id_product_attribute' => self::getVariantUrl($product, $context),
+                    'link' => self::getVariantUrl($product, $context),
                 ];
             }
         }
