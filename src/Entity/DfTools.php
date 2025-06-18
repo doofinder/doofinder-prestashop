@@ -773,23 +773,24 @@ class DfTools
             $query->select('pa.reference AS variation_mpn');
         }
 
+        // Product attribute table fields
+        $query->select('pa.id_product, pa.id_product_attribute');
         $query->from('product_attribute', 'pa');
         // Product shop table fields
-        $query->select('product_attribute_shop.id_product, product_attribute_shop.id_product_attribute');
         $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
-        $query->where('product_attribute_shop.id_product = ' . (int) $idProduct);
+        $query->where('pa.id_product = ' . (int) $idProduct);
 
         $query->leftJoin(
             'product',
             'p',
-            'p.id_product = product_attribute_shop.id_product'
+            'p.id_product = pa.id_product'
         );
 
         $query->select('pa_im.id_image AS variation_image_id');
         $query->leftJoin(
             'product_attribute_image',
             'pa_im',
-            'pa_im.id_product_attribute = product_attribute_shop.id_product_attribute'
+            'pa_im.id_product_attribute = pa.id_product_attribute'
         );
 
         // Product supplier reference
@@ -798,7 +799,7 @@ class DfTools
             'product_supplier',
             'psp',
             'p.`id_product` = psp.`id_product`
-            AND psp.`id_product_attribute` = product_attribute_shop.id_product_attribute'
+            AND psp.`id_product_attribute` = pa.id_product_attribute'
         );
 
         $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
@@ -806,12 +807,12 @@ class DfTools
             'stock_available',
             'sa',
             'p.id_product = sa.id_product
-            AND sa.id_product_attribute = product_attribute_shop.id_product_attribute
+            AND sa.id_product_attribute = pa.id_product_attribute
             AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
         );
 
-        $query->groupBy('product_attribute_shop.id_product, product_attribute_shop.id_product_attribute');
+        $query->groupBy('pa.id_product_attribute');
 
         return self::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
     }
