@@ -63,7 +63,7 @@ class HookManager
      */
     public static function getHookCommonSmartyAssigns($languageCode, $currencyCode, $productLinks, $extraParams = false)
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $idShopGroup = $context->shop->id_shop_group;
         $idShop = $context->shop->id;
 

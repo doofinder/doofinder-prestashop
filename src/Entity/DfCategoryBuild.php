@@ -59,7 +59,7 @@ class DfCategoryBuild
 
     private function assign()
     {
-        $this->link = \Context::getContext()->link;
+        $this->link = DfTools::getContext()->link;
     }
 
     private function buildCategory($idCategory)

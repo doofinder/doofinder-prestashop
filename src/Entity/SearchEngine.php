@@ -33,7 +33,7 @@ class SearchEngine
      */
     public static function getHashId($idLang, $idCurrency, $shopGroupId = null, $shopId = null)
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $currIso = strtoupper(LanguageManager::getIsoCodeById($idCurrency));
         $lang = new \Language($idLang);
         $hashidKey = 'DF_HASHID_' . $currIso . '_' . strtoupper($lang->language_code);
@@ -69,7 +69,7 @@ class SearchEngine
      */
     public static function setSearchEnginesByConfig($idShopGroup = null, $idShop = null)
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $idShopGroup = isset($idShopGroup) ? $idShopGroup : $context->shop->id_shop_group;
         $idShop = isset($idShop) ? $idShop : $context->shop->id;
         $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $idShopGroup, $idShop);

@@ -27,7 +27,7 @@ class DoofinderConfig
             return;
         }
 
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $idShop = $context->shop->id;
         $idShopGroup = $context->shop->id_shop_group;
 

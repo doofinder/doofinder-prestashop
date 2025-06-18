@@ -121,7 +121,7 @@ class DfTools
     public static function getHashidKeys()
     {
         $hashidKeys = [];
-        $context = \Context::getContext();
+        $context = self::getContext();
         $currencies = \Currency::getCurrenciesByIdShop($context->shop->id);
         $languages = \Language::getLanguages(true, $context->shop->id);
         foreach ($languages as $language) {
@@ -852,6 +852,7 @@ class DfTools
 
         return $path;
     }
+
     /**
      * Returns an array containing the paths for categories for a product in a language for the selected shop.
      *
@@ -864,7 +865,7 @@ class DfTools
     public static function getCategoryLinksById($categoryIds, $idLang, $idShop)
     {
         $categoryIds = explode(',', $categoryIds);
-        $link = \Context::getContext()->link;
+        $link = self::getContext()->link;
         $urls = [];
 
         foreach ($categoryIds as $category_id) {
@@ -1203,7 +1204,7 @@ class DfTools
      */
     public static function getLanguageFromRequest()
     {
-        $context = \Context::getContext();
+        $context = self::getContext();
         $idLang = \Tools::getValue('language', $context->language->id);
 
         if (!is_numeric($idLang)) {
@@ -1231,7 +1232,7 @@ class DfTools
             return new \Currency(\Currency::getIdByIsoCode($idCurrency));
         }
 
-        return new \Currency(\Context::getContext()->currency->id);
+        return new \Currency(self::getContext()->currency->id);
     }
 
     /**
@@ -1258,7 +1259,7 @@ class DfTools
         }
 
         if (!$idCurrency) {
-            $context = \Context::getContext();
+            $context = self::getContext();
             $idCurrency = $context->currency->id;
         }
 
@@ -1275,7 +1276,7 @@ class DfTools
      */
     public static function getModuleLink($path, $ssl = false)
     {
-        $context = \Context::getContext();
+        $context = self::getContext();
         $base = (($ssl && \Configuration::get('PS_SSL_ENABLED')) ? 'https://' : 'http://') . $context->shop->domain;
 
         return $base . _MODULE_DIR_ . basename(dirname(__FILE__)) . '/' . $path;
@@ -1292,7 +1293,7 @@ class DfTools
 
     public static function getImageLink($idProduct, $idImage, $linkRewrite, $imageSize)
     {
-        $context = \Context::getContext();
+        $context = self::getContext();
         if (empty($idProduct) || empty($idImage)) {
             return '';
         }
@@ -1448,7 +1449,7 @@ class DfTools
 
     public static function getMinVariantPrices($products, $includeTaxes, $currencies, $idLang, $idShop)
     {
-        $context = \Context::getContext();
+        $context = self::getContext();
         $minPricesByProductId = [];
         $products = self::maybeAddVariantsFirstParent($products, $idLang, $idShop);
         foreach ($products as $product) {
@@ -1676,6 +1677,11 @@ class DfTools
         return \Cache::retrieve($cacheKey);
     }
 
+    public static function getContext()
+    {
+        return \Context::getContext();
+    }
+
     public static function str_contains($haystack, $needle)
     {
         if (function_exists('str_contains')) {
@@ -1687,7 +1693,7 @@ class DfTools
 
     private static function getVariantUrl($product, $context)
     {
-        $context = \Context::getContext();
+        $context = self::getContext();
         $cfgModRewrite = self::cfg($context->shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
 
         return self::cleanURL(

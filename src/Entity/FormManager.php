@@ -43,7 +43,7 @@ class FormManager
         $formValues = [];
         $formUpdated = '';
         $messages = '';
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $idShop = $context->shop->id;
 
         $isFirstTime = (bool) \Tools::getValue('first_time', 0);

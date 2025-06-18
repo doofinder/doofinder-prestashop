@@ -48,7 +48,7 @@ class DfProductBuild
         $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
         $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
         $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
-        $this->link = \Context::getContext()->link;
+        $this->link = DfTools::getContext()->link;
         $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
         $this->productVariations = (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         $this->showProductFeatures = (bool) \Configuration::get('DF_SHOW_PRODUCT_FEATURES');

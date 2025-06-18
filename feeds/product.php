@@ -73,7 +73,7 @@ function arrayMergeByIdProduct($array1 = [], $array2 = [])
     return $result;
 }
 
-$context = Context::getContext();
+$context = DfTools::getContext();
 
 $shop = new Shop((int) $context->shop->id);
 if (!$shop->id) {

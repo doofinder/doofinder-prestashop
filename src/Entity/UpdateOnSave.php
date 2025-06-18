@@ -326,7 +326,7 @@ class UpdateOnSave
      */
     public static function indexApiInvokeReindexing()
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $region = \Configuration::get('DF_REGION');
         $apiKey = \Configuration::get('DF_API_KEY');
         $api = new DoofinderApiIndex($apiKey, $region);
@@ -356,7 +356,7 @@ class UpdateOnSave
         $region = \Configuration::get('DF_REGION');
         $apiKey = \Configuration::get('DF_API_KEY');
         $api = new DoofinderInstallation($apiKey, $region);
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $installationId = \Configuration::get('DF_INSTALLATION_ID', null, $context->shop->id_shop_group, $context->shop->id);
         $decodeResponse = $api->isValidUpdateOnSave($installationId);
 

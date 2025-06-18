@@ -44,7 +44,7 @@ header('Content-Type:text/plain; charset=utf-8');
 DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
 // CONTEXT
-$context = Context::getContext();
+$context = DfTools::getContext();
 $shop = new Shop((int) $context->shop->id);
 if (!$shop->id) {
     exit('NOT PROPERLY CONFIGURED');

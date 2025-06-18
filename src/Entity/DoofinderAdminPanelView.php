@@ -58,7 +58,7 @@ class DoofinderAdminPanelView
     public function getContent()
     {
         $stop = $this->getWarningMultishopHtml();
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         if ($stop) {
             return $stop;
         }
@@ -118,7 +118,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('paramsPopup', $paramsPopup);
         $context->smarty->assign('doofinderAdminUrl', sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, ''));
 
-        $link = \Context::getContext()->link;
+        $link = DfTools::getContext()->link;
         $context->smarty->assign('ajaxUrl', $link->getPageLink('module-doofinder-ajax'));
         $context->smarty->assign('configUrl', $link->getPageLink('module-doofinder-config'));
 
@@ -155,7 +155,7 @@ class DoofinderAdminPanelView
         }
 
         if (\Shop::getContext() == \Shop::CONTEXT_GROUP || \Shop::getContext() == \Shop::CONTEXT_ALL) {
-            $context = \Context::getContext();
+            $context = DfTools::getContext();
             $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a \'All Shops\' or a \'Group Shop\' context, select directly the shop you want to edit', 'doofinderadminpanelview'));
             $stop = $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
         }
@@ -165,7 +165,7 @@ class DoofinderAdminPanelView
 
     public function getWarningModuleNotEnabledHtml()
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a shop context where the module is deactivated. Please activate it to access its features.', 'doofinderadminpanelview'));
         return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
     }
@@ -187,7 +187,7 @@ class DoofinderAdminPanelView
 
     public static function displayGeneralMsg($string, $type, $alert, $link = false, $raw = false)
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $context->smarty->assign(
             [
                 'd_type_message' => $type,
@@ -230,7 +230,7 @@ class DoofinderAdminPanelView
      */
     protected function isConfigured()
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $idShop = $context->shop->id;
         $multishopEnable = (bool) \Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE');
         $defaultShopId = (int) \Configuration::get('PS_SHOP_DEFAULT');
@@ -268,7 +268,7 @@ class DoofinderAdminPanelView
     protected function renderFormDataFeed($adv = false, $skip = false)
     {
         $helper = new \HelperForm();
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $idShop = $context->shop->id;
         $helper->show_toolbar = false;
         $helper->table = $this->module->getTable();
@@ -292,7 +292,7 @@ class DoofinderAdminPanelView
             'id_language' => $context->language->id,
         ];
 
-        if (!$this->showNewShopForm(\Context::getContext()->shop)) {
+        if (!$this->showNewShopForm(DfTools::getContext()->shop)) {
             $validUpdateOnSave = UpdateOnSave::isValid();
             $html .= $helper->generateForm([$this->getConfigFormDataFeed($validUpdateOnSave)]);
             // Store information
@@ -314,7 +314,7 @@ class DoofinderAdminPanelView
     protected function renderFormAdvanced()
     {
         $helper = new \HelperForm();
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $helper->show_toolbar = false;
         $helper->table = $this->module->getTable();
         $helper->module = $this;
@@ -347,7 +347,7 @@ class DoofinderAdminPanelView
      */
     protected function getConfigFormDataFeed($validUpdateOnSave = false)
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         if ($validUpdateOnSave) {
             $disabled = false;
             $query = [
@@ -369,7 +369,7 @@ class DoofinderAdminPanelView
         }
 
         $selectCommonFieldsForAttributesShownOptions = [
-            'query' => \AttributeGroup::getAttributesGroups(\Context::getContext()->language->id),
+            'query' => \AttributeGroup::getAttributesGroups(DfTools::getContext()->language->id),
             'id' => 'id_attribute_group',
             'name' => 'name',
         ];
@@ -485,7 +485,7 @@ class DoofinderAdminPanelView
 
     private function checkboxSelectorFormatHtml($configs)
     {
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $valueSelector = $configs['id'];
         $nameSelector = $configs['name'];
         $fieldName = $configs['field'];
@@ -696,7 +696,7 @@ class DoofinderAdminPanelView
     private function getFeedURLs()
     {
         $urls = [];
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         $languages = \Language::getLanguages(true, $context->shop->id);
         $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 

@@ -38,7 +38,7 @@ class DoofinderScript
         } else {
             $displayMobile = true;
         }
-        $context = \Context::getContext();
+        $context = DfTools::getContext();
         // PrestaShop 1.5 isn't responsive anyway
         $isMobile = false;
         if (method_exists($context, 'isMobile')) {

@@ -86,7 +86,7 @@ class DoofinderApiLanding
         }
         $queryName = \Tools::getValue('df_query_name', false);
         DoofinderConfig::debug('Search On API Start');
-        $hashid = SearchEngine::getHashId(\Context::getContext()->language->id, \Context::getContext()->currency->id);
+        $hashid = SearchEngine::getHashId(DfTools::getContext()->language->id, DfTools::getContext()->currency->id);
         $apiKey = \Configuration::get('DF_API_KEY');
         $showVariations = \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         if ((int) $showVariations !== 1) {
@@ -152,7 +152,7 @@ class DoofinderApiLanding
 
             $productPoolAttributes = implode(',', $productPoolAttributes);
 
-            $context = \Context::getContext();
+            $context = DfTools::getContext();
             // Avoids SQL Error
             if ($productPoolAttributes == '') {
                 $productPoolAttributes = '0';
@@ -191,7 +191,7 @@ class DoofinderApiLanding
                     ' . \Shop::addSqlAssociation('product_attribute', 'pa', false, ($showVariations) ? '' :
                             ' product_attribute_shop.default_on = 1') . '
                     ' . \Product::sqlStock('p', 'product_attribute_shop', false, $context->shop) :
-                    \Product::sqlStock('p', 'product', false, \Context::getContext()->shop)) . '
+                    \Product::sqlStock('p', 'product', false, DfTools::getContext()->shop)) . '
                 LEFT JOIN `' . _DB_PREFIX_ . 'manufacturer` m ON m.`id_manufacturer` = p.`id_manufacturer`
                 LEFT JOIN `' . _DB_PREFIX_ . 'image` i ON (i.`id_product` = p.`id_product` '
                 . ((\Combination::isFeatureActive() && $showVariations) ? '' : 'AND i.cover=1') . ') '

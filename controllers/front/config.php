@@ -38,7 +38,7 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
         $module = Module::getInstanceByName('doofinder');
         $autoinstallerToken = Tools::getValue('token');
         if ($autoinstallerToken) {
-            $redirect = Context::getContext()->shop->getBaseURL(true, false)
+            $redirect = DfTools::getContext()->shop->getBaseURL(true, false)
                 . $module->getPathUri() . 'config.php';
             $tmpToken = DfTools::encrypt($redirect);
             if ($tmpToken == $autoinstallerToken) {

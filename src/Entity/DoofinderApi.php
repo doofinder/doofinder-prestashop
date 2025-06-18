@@ -607,8 +607,8 @@ class DoofinderApi
     {
         $result = false;
         $messages = '';
-        $currency = \Tools::strtoupper(\Context::getContext()->currency->iso_code);
-        $context = \Context::getContext();
+        $currency = \Tools::strtoupper(DfTools::getContext()->currency->iso_code);
+        $context = DfTools::getContext();
         $apiKeyMsgAlreadyShown = false;
         $messagesArray = [
             'errorQueryLimit' => [

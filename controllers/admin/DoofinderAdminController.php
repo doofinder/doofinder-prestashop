@@ -12,6 +12,9 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
+use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -20,7 +23,7 @@ class DoofinderAdminController extends ModuleAdminController
 {
     public function __construct()
     {
-        $this->context = Context::getContext();
+        $this->context = DfTools::getContext();
         $this->module = Module::getInstanceByName('doofinder');
         $this->bootstrap = true;
         $this->lang = false;

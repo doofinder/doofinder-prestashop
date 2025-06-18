@@ -49,7 +49,7 @@ class UrlManager
     public static function getFeedUrl($shopId, $language, $currency = null)
     {
         $shop = new \Shop($shopId);
-        \Context::getContext()->shop = $shop;
+        DfTools::getContext()->shop = $shop;
 
         $params = [
             'language' => \Tools::strtoupper($language),
@@ -60,7 +60,7 @@ class UrlManager
             $params['currency'] = \Tools::strtoupper($currency);
         }
 
-        $link = \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', $params);
+        $link = DfTools::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'feed', $params);
 
         /*
          * Cleans redundant parameters in URLs for PrestaShop 1.5.3
@@ -84,9 +84,9 @@ class UrlManager
     public static function getProcessCallbackUrl($shopId)
     {
         $shop = new \Shop($shopId);
-        \Context::getContext()->shop = $shop;
+        DfTools::getContext()->shop = $shop;
 
-        return \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'callback', []);
+        return DfTools::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'callback', []);
     }
 
     public static function getInstallUrl($region)
