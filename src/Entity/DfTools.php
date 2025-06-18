@@ -702,7 +702,7 @@ class DfTools
 
         $query->select('IFNULL(vc.count, 0) as variant_count');
         if ($checkLeadership) {
-            $query->select('IF(ISNULL(vc.count) OR vc.count > 0,true, false) as df_group_leader');
+            $query->select('IF(NOT ISNULL(vc.count) AND vc.count > 0,true, false) as df_group_leader');
         } else {
             $query->select('true as df_group_leader');
         }
