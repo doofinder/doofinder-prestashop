@@ -1203,7 +1203,7 @@ class DfTools
             if (!\Validate::isLoadedObject($category)) {
                 continue;
             }
-            if ( (bool)\Configuration::get('PS_REWRITING_SETTINGS') ) {
+            if ((bool)\Configuration::get('PS_REWRITING_SETTINGS')) {
                 $categoryLink = $link->getCategoryLink($category);
                 $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
             } else {
