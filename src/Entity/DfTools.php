@@ -684,7 +684,7 @@ class DfTools
             'pt.`id_tag` = tag.`id_tag` AND tag.`id_lang` = ' . (int) $idLang
         );
 
-        $query->select('GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids');
+        $query->select('GROUP_CONCAT(DISTINCT(cl.id_category) ORDER BY cl.id_category) AS category_ids');
         $query->leftJoin(
             'category_product',
             'cp',
@@ -1202,8 +1202,12 @@ class DfTools
             if (!\Validate::isLoadedObject($category)) {
                 continue;
             }
-            $categoryLink = $link->getCategoryLink($category);
-            $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
+            if ( (bool)\Configuration::get('PS_REWRITING_SETTINGS') ) {
+                $categoryLink = $link->getCategoryLink($category);
+                $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
+            } else {
+                $urls[] = $category_id;
+            }
         }
         return $urls;
     }
