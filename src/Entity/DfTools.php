@@ -619,10 +619,11 @@ class DfTools
         $imsCoverField = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
 
         $query->select('MIN(ims.id_image) AS id_image');
+        $query->leftJoin('image', 'im', 'im.id_product = p.id_product');
         $query->leftJoin(
             'image_shop',
             'ims',
-            'ims.id_product = product_shop.id_product
+            'im.id_image = ims.id_image
             AND ims.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             AND ' . $imsCoverField
         );
@@ -675,12 +676,12 @@ class DfTools
         $query->leftJoin(
             'product_tag',
             'pt',
-            'pt.id_product = product_shop.id_product AND pt.id_lang = ' . (int) $idLang
+            'pt.id_product = product_shop.id_product'
         );
         $query->leftJoin(
             'tag',
             'tag',
-            'pt.`id_tag` = tag.`id_tag`'
+            'pt.`id_tag` = tag.`id_tag` AND tag.`id_lang` = ' . (int) $idLang
         );
 
         $query->select('GROUP_CONCAT(cl.id_category ORDER BY cl.id_category) AS category_ids');
@@ -890,7 +891,7 @@ class DfTools
         LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
           ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
         LEFT JOIN (_DB_PREFIX_tag tag
-            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND pt.id_lang = _ID_LANG_)
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
           ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
@@ -960,7 +961,7 @@ class DfTools
                 LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
                 ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
                 LEFT JOIN (_DB_PREFIX_tag tag
-                    INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND pt.id_lang = _ID_LANG_)
+                    INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
                 ON (pt.id_product = p.id_product)
                 LEFT JOIN _DB_PREFIX_stock_available sa
                 ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
@@ -1078,7 +1079,7 @@ class DfTools
         LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
           ON (pa_im.id_product_attribute = pa.id_product_attribute)
         LEFT JOIN (_DB_PREFIX_tag tag
-            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND pt.id_lang = _ID_LANG_)
+            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
           ON (pt.id_product = p.id_product)
         LEFT JOIN _DB_PREFIX_stock_available sa
           ON (p.id_product = sa.id_product
