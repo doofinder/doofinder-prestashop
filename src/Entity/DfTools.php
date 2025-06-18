@@ -704,7 +704,7 @@ class DfTools
         if ($checkLeadership) {
             $query->select('IF(NOT ISNULL(vc.count) AND vc.count > 0,true, false) as df_group_leader');
         } else {
-            $query->select('true as df_group_leader');
+            $query->select('false as df_group_leader');
         }
 
         $query->join('LEFT JOIN (
