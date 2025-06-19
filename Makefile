@@ -65,6 +65,9 @@ init: doofinder-configure
 consistency:
 	docker run -it --rm -v$(shell pwd):/var/www/composer ghcr.io/devgine/composer-php:v2-php$(PHP_VERSION)-alpine  sh -c "composer install && vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --rules=@PSR2"
 
+dump-autoload:
+	docker run -it --rm -v$(shell pwd):/app composer:lts sh -c "composer install --no-dev && composer dump-autoload --optimize --no-dev"
+
 # Open an interactive shell in the web container as the 'application' user
 dev-console:
 	$(docker_exec_web) bash

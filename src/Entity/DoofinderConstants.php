@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Src\Entity;
+namespace PrestaShop\Module\Doofinder\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,7 +22,7 @@ if (!defined('_PS_VERSION_')) {
 class DoofinderConstants
 {
     // Feel free to change this value to your own local env or ngrok
-    const ENV = 'prod'; // Useful to set eu1 as the default region in the Autoinstaller if the value is different than 'prod'
+    const ENV = 'dev'; // Useful to set eu1 as the default region in the Autoinstaller if the value is different than 'prod'
     const DOOMANAGER_REGION_URL = 'https://%sadmin.doofinder.com';
     const DOOPLUGINS_REGION_URL = 'https://%splugins.doofinder.com';
     const DOOPHOENIX_REGION_URL = 'https://%ssearch.doofinder.com';

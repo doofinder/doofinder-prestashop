@@ -1,8 +1,17 @@
 {
-    "require-dev": {
-        "prestashop/php-dev-tools": "^4.3"
+  "name": "prestashop/doofinder",
+  "version": "5.1.14",
+  "description": "Doofinder module for PrestaShop",
+  "require-dev": {
+    "prestashop/php-dev-tools": "^4.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "PrestaShop\\Module\\Doofinder\\": "src/"
     },
     "config": {
-        "prepend-autoloader": false
-    }
+      "prepend-autoloader": false
+    },
+    "type": "prestashop-module"
+  }
 }

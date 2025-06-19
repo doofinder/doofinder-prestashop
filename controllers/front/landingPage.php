@@ -13,9 +13,9 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApiLanding;
-use PrestaShop\Module\Doofinder\Src\Entity\SearchEngine;
+use PrestaShop\Module\Doofinder\Entity\DfTools;
+use PrestaShop\Module\Doofinder\Entity\DoofinderApiLanding;
+use PrestaShop\Module\Doofinder\Entity\SearchEngine;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductListingPresenter;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
