@@ -6,15 +6,16 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Db {
+class Db
+{
 
-     /** @var array List of server settings */
-     public static $_servers = [];
+    /** @var array List of server settings */
+    public static $_servers = [];
 
-     /** @var null Flag used to load slave servers only once.
-      * See loadSlaveServers() method
-      */
-     public static $_slave_servers_loaded = null;
+    /** @var null Flag used to load slave servers only once.
+     * See loadSlaveServers() method
+     */
+    public static $_slave_servers_loaded = null;
 
     /**
      * Creates a new database instance.
