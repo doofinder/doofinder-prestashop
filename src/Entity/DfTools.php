@@ -32,14 +32,6 @@ class DfTools
     protected static $rootCategoryIds;
     protected static $cachedCategoryPaths = [];
 
-    /** @var array List of server settings */
-    public static $_servers = [];
-
-    /** @var null Flag used to load slave servers only once.
-     * See loadSlaveServers() method
-     */
-    public static $_slave_servers_loaded = null;
-
     /**
      * Hash password.
      *
@@ -499,75 +491,6 @@ class DfTools
         return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
     }
 
-
-    /**
-     * Creates a new database instance.
-     *
-     * This method initializes and returns a new database connection instance, either to the master server
-     * or to a slave server based on the parameter. It manages connection pooling and sets up
-     * unbuffered queries for PDO connections to handle large datasets efficiently.
-     *
-     * @param bool $master Whether to connect to the master server (true) or a slave server (false)
-     * @return \Db Database instance with active connection
-     */
-    protected static function getNewDbInstance($master = true)
-    {
-        static $id = 0;
-
-        // This MUST not be declared with the class members because some defines (like _DB_SERVER_) may not exist yet (the constructor can be called directly with params)
-        if (!self::$_servers) {
-            self::$_servers = [
-                ['server' => _DB_SERVER_, 'user' => _DB_USER_, 'password' => _DB_PASSWD_, 'database' => _DB_NAME_], /* MySQL Master server */
-            ];
-        }
-
-        if (!$master) {
-            self::loadSlaveServers();
-        }
-
-        $total_servers = count(self::$_servers);
-        if ($master || $total_servers == 1) {
-            $id_server = 0;
-        } else {
-            ++$id;
-            $id_server = ($total_servers > 2 && ($id % $total_servers) != 0) ? $id % $total_servers : 1;
-        }
-
-        $class = \Db::getClass();
-        $instance = new $class(
-            self::$_servers[$id_server]['server'],
-            self::$_servers[$id_server]['user'],
-            self::$_servers[$id_server]['password'],
-            self::$_servers[$id_server]['database'],
-            false
-        );
-        $link = $instance->connect();
-        if ('DbPDO' === $class && method_exists($link, 'setAttribute')) {
-            // Set the PDO attribute to not use buffered queries
-            // This is needed to avoid memory issues with large datasets
-
-            $link->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        }
-        return $instance;
-    }
-
-    /**
-     * Loads configuration settings for slave servers if needed.
-     */
-    protected static function loadSlaveServers()
-    {
-        if (self::$_slave_servers_loaded !== null) {
-            return;
-        }
-
-        // Add here your slave(s) server(s) in this file
-        if (file_exists(_PS_ROOT_DIR_ . '/config/db_slave_server.inc.php')) {
-            self::$_servers = array_merge(self::$_servers, require (_PS_ROOT_DIR_ . '/config/db_slave_server.inc.php'));
-        }
-
-        self::$_slave_servers_loaded = true;
-    }
-
     /**
      * Retrieve available products information for a specific language.
      *
@@ -735,6 +658,10 @@ class DfTools
 
         $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) .')');
 
+        if (null !== $ids) {
+            $query->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
+        }
+
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
@@ -742,7 +669,7 @@ class DfTools
             $query->limit((int) $limit, (int) $offset);
         }
 
-        return self::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        return DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
     }
 
     /**
@@ -814,285 +741,7 @@ class DfTools
 
         $query->groupBy('pa.id_product_attribute');
 
-        return self::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
-    }
-
-
-
-    /**
-     * Returns the products available for a language
-     *
-     * @param int language ID
-     * @param int Optional. Default false. Number of products to get.
-     * @param int Optional. Default false. Offset to start the select from.
-     * @param string Optional. Fields to select.
-     * @param array Optional. Filter product ids.
-     *
-     * @return array of rows (assoc arrays)
-     */
-    public static function getAvailableProductsForLanguage($idLang, $idShop, $limit = false, $offset = false, $ids = null, $includeParents = true)
-    {
-        $Shop = new \Shop($idShop);
-
-
-
-        $isbn = '';
-        $isbnPa = '';
-        if (self::versionGte('1.7.0.0')) {
-            $isbn = 'p.isbn,';
-            if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-                $isbnPa = 'IF(isnull(pa.id_product), p.isbn , pa.isbn) AS isbn,';
-            }
-        }
-
-        $mpn = 'p.reference as mpn,';
-        $mpnPa = 'pa.reference AS variation_mpn,';
-        if (self::versionGte('1.7.7.0')) {
-            $mpn = 'p.mpn AS mpn,';
-            if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-                $mpnPa = 'pa.mpn AS variation_mpn,';
-            }
-        }
-
-        $sql = '
-      SELECT
-        ps.id_product,
-        ps.show_price,
-        cl.name as main_category,
-        __ID_CATEGORY_DEFAULT_FIELD__,
-        m.name AS manufacturer,
-        ' . $mpn . '
-        p.ean13 AS ean13,
-        ' . $isbn . "
-        p.upc,
-        p.reference,
-        psp.product_supplier_reference AS supplier_reference,
-        pl.name,
-        pl.description,
-        pl.description_short,
-        pl.meta_title,
-        pl.meta_description,
-        GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags,
-        pl.link_rewrite,
-        cl.link_rewrite AS cat_link_rew,
-        im.id_image,
-        ps.available_for_order,
-        sa.out_of_stock,
-        sa.quantity as stock_quantity
-      FROM
-        _DB_PREFIX_product p
-        INNER JOIN _DB_PREFIX_product_shop ps
-          ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-        LEFT JOIN _DB_PREFIX_product_lang pl
-          ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-        LEFT JOIN _DB_PREFIX_manufacturer m
-          ON (p.id_manufacturer = m.id_manufacturer)
-        LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-        LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-          ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT JOIN (_DB_PREFIX_tag tag
-            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-          ON (pt.id_product = p.id_product)
-        LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
-            AND (sa.id_shop = _ID_SHOP_ OR
-            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-        LEFT JOIN _DB_PREFIX_product_supplier psp
-          ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
-      WHERE
-        __IS_ACTIVE__
-        __VISIBILITY__
-        __PRODUCT_IDS__
-      GROUP BY
-        p.id_product
-      ORDER BY
-        p.id_product
-    ";
-
-        $sqlVariations = self::getSQLForVariants($mpnPa, $mpn, $isbnPa);
-
-        if ($includeParents) {
-            $sqlVariations .= "
-            UNION
-            SELECT
-                ps.id_product,
-                (SELECT COUNT(*) FROM _DB_PREFIX_product prod LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
-                ON (prod.id_product = pa.id_product) WHERE prod.id_product = p.id_product) AS variant_count,
-                ps.show_price,
-                0,
-                null AS variation_reference,
-                psp.product_supplier_reference AS variation_supplier_reference,
-                null AS variation_mpn,
-                null AS variation_ean13,
-                null AS variation_upc,
-                null AS variation_image_id,
-                cl.name as main_category,
-                __ID_CATEGORY_DEFAULT_FIELD__ as id_category_default,
-                m.name AS manufacturer,
-                $mpn
-                p.ean13 AS ean13,
-                $isbn
-                p.upc,
-                p.reference,
-                p.supplier_reference,
-                IF(NOT ISNULL(pan.attribute_n) AND pan.attribute_n > 0, true, false) AS df_group_leader,
-                pl.name,
-                pl.description,
-                pl.description_short,
-                pl.meta_title,
-                pl.meta_description,
-                GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags,
-                pl.link_rewrite,
-                cl.link_rewrite AS cat_link_rew,
-                im.id_image,
-                ps.available_for_order,
-                sa.out_of_stock,
-                sa.quantity as stock_quantity
-            FROM
-                _DB_PREFIX_product p
-                INNER JOIN _DB_PREFIX_product_shop ps
-                ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-                LEFT JOIN _DB_PREFIX_product_lang pl
-                ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-                LEFT JOIN _DB_PREFIX_manufacturer m
-                ON (p.id_manufacturer = m.id_manufacturer)
-                LEFT JOIN _DB_PREFIX_category_lang cl
-                ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-                LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-                ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-                LEFT JOIN (_DB_PREFIX_tag tag
-                    INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-                ON (pt.id_product = p.id_product)
-                LEFT JOIN _DB_PREFIX_stock_available sa
-                ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0
-                    AND (sa.id_shop = _ID_SHOP_ OR
-                    (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-                LEFT JOIN _DB_PREFIX_product_supplier psp
-                ON (p.id_product = psp.id_product AND psp.id_product_attribute = 0)
-                LEFT JOIN (SELECT id_product, COUNT(*) as attribute_n FROM _DB_PREFIX_product_attribute GROUP BY id_product) pan
-                    ON p.id_product = pan.id_product
-            WHERE
-                __IS_ACTIVE__
-                __VISIBILITY__
-                __PRODUCT_IDS__
-            GROUP BY
-                p.id_product
-            ORDER BY
-                id_product
-            ";
-        }
-
-        if (self::cfg($idShop, 'DF_SHOW_PRODUCT_VARIATIONS') == 1) {
-            $sql = $sqlVariations;
-        }
-
-        // MIN: 1.5.0.9
-        $idCategoryDefault = self::versionGte('1.5.0.9') ? 'ps.id_category_default' : 'p.id_category_default';
-        // MIN: 1.5.1.0
-        $imsCover = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
-        $isActive = self::versionGte('1.5.1.0') ? 'ps.active = 1' : 'p.active = 1';
-
-        if (self::versionGte('1.5.1.0')) {
-            $visibility = "AND ps.visibility IN ('search', 'both')";
-        } elseif (self::versionGte('1.5.0.9')) {
-            $visibility = "AND p.visibility IN ('search', 'both')";
-        } else {
-            $visibility = '';
-        }
-
-        if (is_array($ids) && count($ids)) {
-            $productIds = 'AND p.id_product IN (' . implode(',', $ids) . ')';
-        } else {
-            $productIds = '';
-        }
-
-        $sql = self::limitSQL($sql, $limit, $offset);
-        $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($idLang),
-            '_ID_SHOP_' => (int) pSQL($idShop),
-            '_ID_SHOPGROUP_' => (int) pSQL($Shop->id_shop_group),
-            '_IMS_COVER_' => (string) pSQL($imsCover),
-            '__ID_CATEGORY_DEFAULT_FIELD__' => (string) pSQL($idCategoryDefault),
-            '__IS_ACTIVE__' => (string) pSQL($isActive),
-            '__VISIBILITY__' => (string) pSQL($visibility),
-            '__PRODUCT_IDS__' => (string) pSQL($productIds),
-        ]);
-
-        $sql = str_replace("\'", "'", $sql);
-
-        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-    }
-
-    private static function getSQLForVariants($mpnPa, $mpn, $isbnPa)
-    {
-        return "SELECT
-        ps.id_product,
-        0 AS variant_count,
-        ps.show_price,
-        pa.id_product_attribute,
-        pa.reference AS variation_reference,
-        psp.product_supplier_reference AS variation_supplier_reference,
-        $mpnPa
-        pa.ean13 AS variation_ean13,
-        pa.upc AS variation_upc,
-        pa_im.id_image AS variation_image_id,
-        cl.name as main_category,
-        __ID_CATEGORY_DEFAULT_FIELD__,
-        m.name AS manufacturer,
-        $mpn
-        p.ean13 AS ean13,
-        $isbnPa
-        p.upc AS upc,
-        p.reference AS reference,
-        p.supplier_reference AS supplier_reference,
-        0 AS df_group_leader,
-        pl.name,
-        pl.description,
-        pl.description_short,
-        pl.meta_title,
-        pl.meta_description,
-        GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags,
-        pl.link_rewrite,
-        cl.link_rewrite AS cat_link_rew,
-        im.id_image,
-        ps.available_for_order,
-        sa.out_of_stock,
-        sa.quantity as stock_quantity
-      FROM
-        _DB_PREFIX_product p
-        INNER JOIN _DB_PREFIX_product_shop ps
-          ON (p.id_product = ps.id_product AND ps.id_shop = _ID_SHOP_)
-        LEFT JOIN _DB_PREFIX_product_lang pl
-          ON (p.id_product = pl.id_product AND pl.id_shop = _ID_SHOP_ AND pl.id_lang = _ID_LANG_)
-        LEFT JOIN _DB_PREFIX_manufacturer m
-          ON (p.id_manufacturer = m.id_manufacturer)
-        LEFT JOIN _DB_PREFIX_category_lang cl
-          ON (__ID_CATEGORY_DEFAULT_FIELD__ = cl.id_category AND cl.id_shop = _ID_SHOP_ AND cl.id_lang = _ID_LANG_)
-        LEFT JOIN (_DB_PREFIX_image im INNER JOIN _DB_PREFIX_image_shop ims ON im.id_image = ims.id_image)
-          ON (p.id_product = im.id_product AND ims.id_shop = _ID_SHOP_ AND _IMS_COVER_)
-        LEFT OUTER JOIN _DB_PREFIX_product_attribute pa
-          ON (p.id_product = pa.id_product)
-        LEFT JOIN _DB_PREFIX_product_supplier psp
-          ON (p.id_product = psp.id_product AND pa.id_product_attribute = psp.id_product_attribute)
-        INNER JOIN _DB_PREFIX_product_attribute_shop pas
-          ON (pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = _ID_SHOP_)
-        LEFT JOIN _DB_PREFIX_product_attribute_image pa_im
-          ON (pa_im.id_product_attribute = pa.id_product_attribute)
-        LEFT JOIN (_DB_PREFIX_tag tag
-            INNER JOIN _DB_PREFIX_product_tag pt ON tag.id_tag = pt.id_tag AND tag.id_lang = _ID_LANG_)
-          ON (pt.id_product = p.id_product)
-        LEFT JOIN _DB_PREFIX_stock_available sa
-          ON (p.id_product = sa.id_product
-            AND sa.id_product_attribute = IF(isnull(pa.id_product), 0, pa.id_product_attribute)
-            AND (sa.id_shop = _ID_SHOP_ OR
-            (sa.id_shop = 0 AND sa.id_shop_group = _ID_SHOPGROUP_)))
-      WHERE
-        __IS_ACTIVE__
-        __VISIBILITY__
-        __PRODUCT_IDS__
-        AND pa.id_product_attribute is not null
-        GROUP BY pa.id_product_attribute, p.id_product";
+        return DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
     }
 
     /**
@@ -1793,51 +1442,6 @@ class DfTools
         }
     }
 
-    public static function getMinVariantPrices($products, $includeTaxes, $currencies, $idLang, $idShop)
-    {
-        $context = \Context::getContext();
-        $minPricesByProductId = [];
-        $products = self::maybeAddVariantsFirstParent($products, $idLang, $idShop);
-        foreach ($products as $product) {
-            if (self::isParent($product)) {
-                continue;
-            }
-
-            $productId = $product['id_product'];
-            $variantId = $product['id_product_attribute'];
-            $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
-            $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
-            $variantMultiprice = self::getMultiprice($productId, $includeTaxes, $currencies, $variantId);
-
-            if (array_key_exists($productId, $minPricesByProductId)) {
-                $currentMinPrices = $minPricesByProductId[$productId];
-
-                /*
-                Even though, in order to track the minimum, we can only focus on
-                the sale price, we still need both prices of the variant
-                in order to properly and consistently populate the price of
-                the parent to show the proper price vs sale_price when searching
-                in the layer
-                */
-                if ($variantOnsalePrice < $currentMinPrices['onsale_price']) {
-                    $minPricesByProductId[$productId]['price'] = $variantPrice;
-                    $minPricesByProductId[$productId]['onsale_price'] = $variantOnsalePrice;
-                    $minPricesByProductId[$productId]['multiprice'] = $variantMultiprice;
-                    $minPricesByProductId[$productId]['link'] = self::getVariantUrl($product, $context);
-                }
-            } else {
-                $minPricesByProductId[$productId] = [
-                    'price' => $variantPrice,
-                    'onsale_price' => $variantOnsalePrice,
-                    'multiprice' => $variantMultiprice,
-                    'link' => self::getVariantUrl($product, $context),
-                ];
-            }
-        }
-
-        return $minPricesByProductId;
-    }
-
     public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
@@ -1850,32 +1454,6 @@ class DfTools
             'multiprice' => $variantMultiprice,
             'id_product_attribute' => $idProductAttribute
         ];
-    }
-
-
-    public static function maybeAddVariantsFirstParent($products, $idLang, $idShop)
-    {
-        $firstParentIndex = null;
-        foreach ($products as $i => $product) {
-            if (self::isParent($product)) {
-                $firstParentIndex = $i;
-                break;
-            }
-        }
-
-        if (is_null($firstParentIndex)) {
-            return $products;
-        }
-
-        $parentProduct = $products[$firstParentIndex];
-        $variantCount = (int) $parentProduct['variant_count'];
-
-        if ($variantCount === $firstParentIndex) {
-            return $products;
-        }
-
-        $childProducts = self::getAvailableProductsForLanguage($idLang, $idShop, false, false, [$parentProduct['id_product']], false);
-        return array_merge($childProducts, $products);
     }
 
     public static function isParent($product)
