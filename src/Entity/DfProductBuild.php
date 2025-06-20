@@ -173,7 +173,7 @@ class DfProductBuild
     {
         $payload = [];
 
-        \Shop::setContext(Shop::CONTEXT_SHOP, $this->idShop);
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
         foreach ($products as $product) {

@@ -42,20 +42,20 @@ class DfDb
             self::loadSlaveServers();
         }
 
-        $total_servers = count(self::$_servers);
-        if ($master || $total_servers == 1) {
-            $id_server = 0;
+        $totalServers = count(self::$_servers);
+        if ($master || $totalServers == 1) {
+            $idServer = 0;
         } else {
             ++$id;
-            $id_server = ($total_servers > 2 && ($id % $total_servers) != 0) ? $id % $total_servers : 1;
+            $idServer = ($totalServers > 2 && ($id % $totalServers) != 0) ? $id % $totalServers : 1;
         }
 
         $class = \Db::getClass();
         $instance = new $class(
-            self::$_servers[$id_server]['server'],
-            self::$_servers[$id_server]['user'],
-            self::$_servers[$id_server]['password'],
-            self::$_servers[$id_server]['database'],
+            self::$_servers[$idServer]['server'],
+            self::$_servers[$idServer]['user'],
+            self::$_servers[$idServer]['password'],
+            self::$_servers[$idServer]['database'],
             false
         );
         $link = $instance->connect();
