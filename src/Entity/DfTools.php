@@ -658,6 +658,10 @@ class DfTools
 
         $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) .')');
 
+        if (null !== $ids){
+            $query->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
+        }
+
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
