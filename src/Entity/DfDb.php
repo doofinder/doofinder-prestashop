@@ -7,25 +7,26 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class DfDb {
-     /** @var array List of server settings */
-     public static $_servers = [];
+class DfDb
+{
+    /** @var array List of server settings */
+    public static $_servers = [];
 
-     /** @var null Flag used to load slave servers only once.
-      * See loadSlaveServers() method
-      */
-     public static $_slave_servers_loaded = null;
-
-     /**
-     * Creates a new database instance.
-     *
-     * This method initializes and returns a new database connection instance, either to the master server
-     * or to a slave server based on the parameter. It manages connection pooling and sets up
-     * unbuffered queries for PDO connections to handle large datasets efficiently.
-     *
-     * @param bool $master Whether to connect to the master server (true) or a slave server (false)
-     * @return \Db Database instance with active connection
+    /** @var null Flag used to load slave servers only once.
+     * See loadSlaveServers() method
      */
+    public static $_slave_servers_loaded = null;
+
+    /**
+    * Creates a new database instance.
+    *
+    * This method initializes and returns a new database connection instance, either to the master server
+    * or to a slave server based on the parameter. It manages connection pooling and sets up
+    * unbuffered queries for PDO connections to handle large datasets efficiently.
+    *
+    * @param bool $master Whether to connect to the master server (true) or a slave server (false)
+    * @return \Db Database instance with active connection
+    */
     public static function getNewDbInstance($master = true)
     {
         static $id = 0;

@@ -193,7 +193,8 @@ class DfProductBuild
         return json_encode($payload);
     }
 
-    public function getMinPrice($currentMinPrice, $variation) {
+    public function getMinPrice($currentMinPrice, $variation)
+    {
         if ($this->displayPrices) {
             $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies);
             if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
@@ -206,7 +207,8 @@ class DfProductBuild
         }
     }
 
-    public function buildVariation($product, $variation) {
+    public function buildVariation($product, $variation)
+    {
         $expanded_variation = array_merge($product, $variation, $extraAttributesHeader = [], $extraHeaders = []);
         return $this->buildProduct($expanded_variation, [], $extraAttributesHeader, $extraHeaders);
     }

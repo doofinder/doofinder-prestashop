@@ -658,7 +658,7 @@ class DfTools
 
         $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) .')');
 
-        if (null !== $ids){
+        if (null !== $ids) {
             $query->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
         }
 
@@ -1442,51 +1442,6 @@ class DfTools
         }
     }
 
-    public static function getMinVariantPrices($products, $includeTaxes, $currencies, $idLang, $idShop)
-    {
-        $context = \Context::getContext();
-        $minPricesByProductId = [];
-        $products = self::maybeAddVariantsFirstParent($products, $idLang, $idShop);
-        foreach ($products as $product) {
-            if (self::isParent($product)) {
-                continue;
-            }
-
-            $productId = $product['id_product'];
-            $variantId = $product['id_product_attribute'];
-            $variantPrice = self::getPrice($productId, $includeTaxes, $variantId);
-            $variantOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId);
-            $variantMultiprice = self::getMultiprice($productId, $includeTaxes, $currencies, $variantId);
-
-            if (array_key_exists($productId, $minPricesByProductId)) {
-                $currentMinPrices = $minPricesByProductId[$productId];
-
-                /*
-                Even though, in order to track the minimum, we can only focus on
-                the sale price, we still need both prices of the variant
-                in order to properly and consistently populate the price of
-                the parent to show the proper price vs sale_price when searching
-                in the layer
-                */
-                if ($variantOnsalePrice < $currentMinPrices['onsale_price']) {
-                    $minPricesByProductId[$productId]['price'] = $variantPrice;
-                    $minPricesByProductId[$productId]['onsale_price'] = $variantOnsalePrice;
-                    $minPricesByProductId[$productId]['multiprice'] = $variantMultiprice;
-                    $minPricesByProductId[$productId]['link'] = self::getVariantUrl($product, $context);
-                }
-            } else {
-                $minPricesByProductId[$productId] = [
-                    'price' => $variantPrice,
-                    'onsale_price' => $variantOnsalePrice,
-                    'multiprice' => $variantMultiprice,
-                    'link' => self::getVariantUrl($product, $context),
-                ];
-            }
-        }
-
-        return $minPricesByProductId;
-    }
-
     public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
@@ -1499,32 +1454,6 @@ class DfTools
             'multiprice' => $variantMultiprice,
             'id_product_attribute' => $idProductAttribute
         ];
-    }
-
-
-    public static function maybeAddVariantsFirstParent($products, $idLang, $idShop)
-    {
-        $firstParentIndex = null;
-        foreach ($products as $i => $product) {
-            if (self::isParent($product)) {
-                $firstParentIndex = $i;
-                break;
-            }
-        }
-
-        if (is_null($firstParentIndex)) {
-            return $products;
-        }
-
-        $parentProduct = $products[$firstParentIndex];
-        $variantCount = (int) $parentProduct['variant_count'];
-
-        if ($variantCount === $firstParentIndex) {
-            return $products;
-        }
-
-        $childProducts = self::getAvailableProductsForLanguage($idLang, $idShop, false, false, [$parentProduct['id_product']], false);
-        return array_merge($childProducts, $products);
     }
 
     public static function isParent($product)
