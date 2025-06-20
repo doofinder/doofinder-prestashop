@@ -275,9 +275,9 @@ foreach ($products as $product) {
         $variations = DfTools::getProductVariations($product['id_product']);
         foreach ($variations as $variation) {
             $minPriceVariant = $dfProductBuild->getMinPrice($minPriceVariant, $variation);
-            $built_variation = $dfProductBuild->buildVariation($product, $variation);
-            $csv_product = $dfProductBuild->applySpecificTransformationsForCsv($built_variation, $extraHeader, $header);
-            fputcsv($csv, $csv_product, DfTools::TXT_SEPARATOR);
+            $builtVariation = $dfProductBuild->buildVariation($product, $variation);
+            $csvVariation = $dfProductBuild->applySpecificTransformationsForCsv($builtVariation, $extraHeader, $header);
+            fputcsv($csv, $csvVariation, DfTools::TXT_SEPARATOR);
         }
         $product = $dfProductBuild->buildProduct($product, $minPriceVariant, $additionalAttributesHeaders, $additionalHeaders);
     } else {
