@@ -13,8 +13,8 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Src\Entity\LanguageManager;
+use PrestaShop\Module\Doofinder\Entity\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Entity\LanguageManager;
 
 if (!defined('_PS_VERSION_')) {
     exit;

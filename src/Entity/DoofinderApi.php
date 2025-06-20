@@ -16,7 +16,7 @@
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)
  */
 
-namespace PrestaShop\Module\Doofinder\Src\Entity;
+namespace PrestaShop\Module\Doofinder\Entity;
 
 if (!defined('_PS_VERSION_')) {
     exit;
