@@ -122,5 +122,7 @@ You can test different Prestashop versions along with different PHP versions. Th
 | 8.1.7      | 8.1, 8.0, 7.4, 7.3, 7.2 |
 | 8.0.5      | 8.1, 8.0, 7.4, 7.3, 7.2 |
 | 1.7.8.9    | 7.4, 7.3, 7.2, 7.1      |
-| 1.6        | 7.2, 7.1, 7.0, 5.6, 5.5 |
-| 1.5        | 7.2, 7.1, 7.0, 5.6, 5.5 |
+| 1.6        | 7.2, 7.1, 7.0, 5.6      |
+| 1.5[^ps15] | 7.2, 7.1, 7.0, 5.6, 5.5 |
+
+[^ps15]: Prestashop 1.5: This version is patched to allow auto installation (See Dockerfile). MySQL version must be 5.5. Must be used without SSL.
