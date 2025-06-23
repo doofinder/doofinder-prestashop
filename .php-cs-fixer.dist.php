@@ -7,7 +7,7 @@ $config = new PhpCsFixer\Config('PrestaShop coding standard');
 $config->setRiskyAllowed(true)
     ->setRules($prestashop_rules);
 
-/** @var Symfony\Component\Fsinder\Finder $finder */
+/** @var Symfony\Component\Finder\Finder $finder */
 $finder = $config->setUsingCache(true)->getFinder();
 $finder->in(__DIR__)->exclude('vendor');
 
