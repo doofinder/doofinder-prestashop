@@ -77,6 +77,7 @@ class DfDb
 
             $link->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         }
+
         return $instance;
     }
 

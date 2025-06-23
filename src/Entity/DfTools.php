@@ -144,6 +144,7 @@ class DfTools
                 ];
             }
         }
+
         return $hashidKeys;
     }
 
@@ -513,7 +514,6 @@ class DfTools
      */
     public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
     {
-
         $query = new \DbQuery();
 
         if (self::versionGte('1.7.7.0')) {
@@ -857,6 +857,7 @@ class DfTools
                 $urls[] = $category_id;
             }
         }
+
         return $urls;
     }
 
@@ -1530,6 +1531,7 @@ class DfTools
     public static function getFormattedApiKey()
     {
         $apiKey = explode('-', \Configuration::get('DF_API_KEY'));
+
         return end($apiKey);
     }
 

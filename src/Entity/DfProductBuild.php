@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -190,6 +191,7 @@ class DfProductBuild
                 $payload[] = $this->buildProduct($product, null);
             }
         }
+
         return json_encode($payload);
     }
 
@@ -210,6 +212,7 @@ class DfProductBuild
     public function buildVariation($product, $variation)
     {
         $expanded_variation = array_merge($product, $variation, $extraAttributesHeader = [], $extraHeaders = []);
+
         return $this->buildProduct($expanded_variation, [], $extraAttributesHeader, $extraHeaders);
     }
 
