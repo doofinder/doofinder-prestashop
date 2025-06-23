@@ -133,7 +133,7 @@ class DoofinderConfig
 
         if (preg_match('/([a-z]{2}[0-9])-.*/', $apiEndpoint, $matches)) {
             // If the API endpoint is in the format 'eu1-xxxx', we extract the region
-            $region = $matches[1];;
+            $region = $matches[1];
         } else {
             // Otherwise, we assume the default region is 'eu1'
             $region = 'eu1';

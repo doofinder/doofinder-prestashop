@@ -36,6 +36,7 @@ class DoofinderApiLanding
      * Make a request to the API to get landing data
      *
      * @param string $slug Slug name of the landing page
+     *
      * @return array|null Landing data
      */
     public function getLanding($slug)

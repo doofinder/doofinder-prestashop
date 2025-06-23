@@ -13,7 +13,6 @@
  * @license   GPLv3
  */
 
-
 namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
@@ -31,14 +30,15 @@ class DfDb
     public static $_slave_servers_loaded = false;
 
     /**
-    * Creates a new database instance.
-    * This method initializes and returns a new database connection instance, either to the master server
-    * or to a slave server based on the parameter. It manages connection pooling and sets up
-    * unbuffered queries for PDO connections to handle large datasets efficiently.
-    *
-    * @param bool $master Whether to connect to the master server (true) or a slave server (false)
-    * @return \Db Database instance with active connection
-    */
+     * Creates a new database instance.
+     * This method initializes and returns a new database connection instance, either to the master server
+     * or to a slave server based on the parameter. It manages connection pooling and sets up
+     * unbuffered queries for PDO connections to handle large datasets efficiently.
+     *
+     * @param bool $master Whether to connect to the master server (true) or a slave server (false)
+     *
+     * @return \Db Database instance with active connection
+     */
     public static function getNewDbInstance($master = true)
     {
         static $id = 0;
@@ -96,5 +96,4 @@ class DfDb
 
         self::$_slave_servers_loaded = true;
     }
-
 }

@@ -582,7 +582,7 @@ class DfTools
         // Category default
         $idCategoryField = self::versionGte('1.5.0.9') ? 'product_shop.id_category_default' : 'p.id_category_default';
         $query->select('default_category_lang.name as main_category, default_category_lang.link_rewrite AS cat_link_rew');
-        $query->select($idCategoryField  . ' as id_category_default');
+        $query->select($idCategoryField . ' as id_category_default');
         $query->leftJoin(
             'category_lang',
             'default_category_lang',
@@ -829,6 +829,7 @@ class DfTools
 
         return $path;
     }
+
     /**
      * Returns an array containing the paths for categories for a product in a language for the selected shop.
      *

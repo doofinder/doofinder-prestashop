@@ -97,7 +97,7 @@ $isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
 $shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
 $shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
 $featuresShownArray = $dfProductBuild->getFeaturesShown();
-$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function($a){ return strlen(trim($a)) > 0; });
+$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) { return strlen(trim($a)) > 0; });
 /* ---------- END SHARED CONFIG ---------- */
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
