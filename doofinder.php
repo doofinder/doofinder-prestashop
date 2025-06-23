@@ -39,7 +39,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '5.1.14';
+        $this->version = '5.1.15';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '9.0.0'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -209,6 +209,8 @@ class Doofinder extends Module
      */
     public function hookActionProductSave($params)
     {
+        // $product = (!isset($params['product'])) ? new \Product($params['id_product']) : $params['product'];
+        // $action = $product->active ? 'update' : 'delete';
         $action = $params['product']->active ? 'update' : 'delete';
         PrestaShop\Module\Doofinder\Src\Entity\HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
     }
