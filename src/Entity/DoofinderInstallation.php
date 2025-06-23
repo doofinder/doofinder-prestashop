@@ -135,9 +135,9 @@ class DoofinderInstallation
         $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
-        $primaryLangId = (int)\Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId);
+        $primaryLangId = (int) \Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId);
         $primaryLang = new \Language($primaryLangId);
-        $primaryCurrencyId = (int)\Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId);
+        $primaryCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId);
         $primaryCurrency = new \Currency($primaryCurrencyId);
         $installationID = null;
 

@@ -289,8 +289,7 @@ class DoofinderApi
      * set a filter for the query
      *
      * @param string $filterName the name of the filter to set
-     * @param array $filter if simple array, terms filter assumed
-     *                     if 'from', 'to' in keys, range filter assumed
+     * @param array $filter if simple array, terms filter assumed if 'from', 'to' in keys, range filter assumed
      */
     public function setFilter($filterName, $filter)
     {
@@ -307,9 +306,7 @@ class DoofinderApi
      *
      * @param string $filterName
      *
-     * @return array|false filter conditions: simple array if terms filter,
-     *                'from', 'to' assoc array if range filter,
-     *                or false if no filter definition found
+     * @return array|false filter conditions: simple array if terms filter, 'from', 'to' assoc array if range filter, or false if no filter definition found
      */
     public function getFilter($filterName)
     {
@@ -538,7 +535,7 @@ class DoofinderApi
      */
     public function numPages()
     {
-        return (int)ceil($this->total / $this->getRpp());
+        return (int) ceil($this->total / $this->getRpp());
     }
 
     public function getRpp()

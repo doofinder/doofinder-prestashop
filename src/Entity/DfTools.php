@@ -178,9 +178,9 @@ class DfTools
      * 1.[5].0.13 | 1.5.[0].5 | 1.5.0.[1]
      * 1.[6].0.6  | 1.5.[1].0 | 1.5.0.[5]
      *
-     * @param  string $minVersion Minimum version to compare with the current version
+     * @param string $minVersion Minimum version to compare with the current version
      *
-     * @return bool  true if current version is greater than or equal to $minVersion
+     * @return bool true if current version is greater than or equal to $minVersion
      */
     public static function versionGte($minVersion)
     {
@@ -208,7 +208,6 @@ class DfTools
      */
     public static function getSelectedFeatures($features, $selectedKeys)
     {
-
         $selectedFeatures = [];
 
         foreach ($features as $key => $value) {
@@ -313,8 +312,8 @@ class DfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image
-            where pa.id_product = ' .  $idProduct . '
-                and pa.id_product_attribute = ' .  $idProductAttribute . '
+            where pa.id_product = ' . $idProduct . '
+                and pa.id_product_attribute = ' . $idProductAttribute . '
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -512,7 +511,7 @@ class DfTools
      *
      * @return array|false|\mysqli_result|\PDOStatement|resource|null Array of products with their associated information
      */
-    public static function getAvailableProducts($idLang, $checkLeadership=true, $limit = false, $offset = false, $ids = null)
+    public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
     {
 
         $query = new \DbQuery();
@@ -581,9 +580,9 @@ class DfTools
         );
 
         // Category default
-        $idCategoryField = self::versionGte('1.5.0.9')? 'product_shop.id_category_default' : 'p.id_category_default';
+        $idCategoryField = self::versionGte('1.5.0.9') ? 'product_shop.id_category_default' : 'p.id_category_default';
         $query->select('default_category_lang.name as main_category, default_category_lang.link_rewrite AS cat_link_rew');
-        $query->select($idCategoryField  .' as id_category_default');
+        $query->select($idCategoryField  . ' as id_category_default');
         $query->leftJoin(
             'category_lang',
             'default_category_lang',
@@ -623,7 +622,6 @@ class DfTools
             AND cp.id_category > 2'
         );
 
-
         $query->select('IFNULL(vc.count, 0) as variant_count');
         if ($checkLeadership) {
             $query->select('IF(NOT ISNULL(vc.count) AND vc.count > 0,true, false) as df_group_leader');
@@ -641,7 +639,6 @@ class DfTools
                     id_product
             ) vc ON vc.id_product = product_shop.id_product');
 
-
         $query->select('null AS variation_reference, null AS variation_mpn,
             null AS variation_ean13, null AS variation_upc, null AS variation_image_id');
 
@@ -657,7 +654,7 @@ class DfTools
             $query->where("p.`visibility` IN ('search', 'both')");
         }
 
-        $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) .')');
+        $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
 
         if (null !== $ids) {
             $query->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
@@ -852,7 +849,7 @@ class DfTools
             if (!\Validate::isLoadedObject($category)) {
                 continue;
             }
-            if ((bool)\Configuration::get('PS_REWRITING_SETTINGS')) {
+            if ((bool) \Configuration::get('PS_REWRITING_SETTINGS')) {
                 $categoryLink = $link->getCategoryLink($category);
                 $urls[] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
             } else {
@@ -1454,7 +1451,7 @@ class DfTools
             'price' => $variantPrice,
             'onsale_price' => $variantOnsalePrice,
             'multiprice' => $variantMultiprice,
-            'id_product_attribute' => $idProductAttribute
+            'id_product_attribute' => $idProductAttribute,
         ];
     }
 

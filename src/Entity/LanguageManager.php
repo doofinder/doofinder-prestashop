@@ -30,7 +30,6 @@ class LanguageManager
      */
     public static function getLanguageByHashid($hashid)
     {
-
         $result = \Db::getInstance()->getValue('
             SELECT name
             FROM ' . _DB_PREFIX_ . 'configuration

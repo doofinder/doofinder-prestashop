@@ -32,7 +32,6 @@ class DfDb
 
     /**
     * Creates a new database instance.
-    *
     * This method initializes and returns a new database connection instance, either to the master server
     * or to a slave server based on the parameter. It manages connection pooling and sets up
     * unbuffered queries for PDO connections to handle large datasets efficiently.

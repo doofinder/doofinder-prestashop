@@ -96,7 +96,7 @@ class UpdateOnSave
 
         $languages = \Language::getLanguages(true, $shopId);
         $currencies = \Currency::getCurrenciesByIdShop($shopId);
-        $defaultCurrencyId = (int)\Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId);
+        $defaultCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId);
         $defaultCurrency = new \Currency($defaultCurrencyId);
         $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 
