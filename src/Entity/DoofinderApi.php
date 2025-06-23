@@ -46,9 +46,6 @@ class DoofinderApi
     private $page = 1; // the page of the search results we're at
     private $lastQuery; // the last successful query made
     private $total; // total number of results obtained
-    // The following properties were unused or only written but never read
-    private $queryName = '';
-    private $maxScore = 0;
     private $paramsPrefix = self::DEFAULT_PARAMS_PREFIX;
     private $serializationArray;
     private $queryParameter = 'query'; // the parameter used for querying
@@ -249,8 +246,6 @@ class DoofinderApi
         $this->page = $dfResults->getProperty('page');
         $this->total = $dfResults->getProperty('total');
         $this->searchOptions['query'] = $dfResults->getProperty('query');
-        $this->maxScore = $dfResults->getProperty('max_score');
-        $this->queryName = $dfResults->getProperty('query_name');
         $this->lastQuery = $dfResults->getProperty('query');
 
         return $dfResults;
@@ -575,17 +570,6 @@ class DoofinderApi
     public function setPrefix($prefix)
     {
         $this->paramsPrefix = $prefix;
-    }
-
-    /**
-     * setQueryName
-     *
-     * sets query_name
-     * CAUTION: node will complain if this is wrong
-     */
-    public function setQueryName($queryName)
-    {
-        $this->queryName = $queryName;
     }
 
     /**
