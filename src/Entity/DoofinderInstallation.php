@@ -134,8 +134,10 @@ class DoofinderInstallation
         $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
-        $primaryLang = new \Language(\Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
-        $primaryCurrency = new \Currency(\Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId));
+        $primaryLangId = (int)\Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId);
+        $primaryLang = new \Language($primaryLangId);
+        $primaryCurrencyId = (int)\Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId);
+        $primaryCurrency = new \Currency($primaryCurrencyId);
         $installationID = null;
 
         DoofinderConfig::setDefaultShopConfig($shopGroupId, $shopId);
@@ -314,7 +316,7 @@ class DoofinderInstallation
     public static function installTabs()
     {
         $tab = new \Tab();
-        $tab->active = 0;
+        $tab->active = false;
         $tab->class_name = 'DoofinderAdmin';
         $tab->name = [];
         foreach (\Language::getLanguages() as $lang) {
@@ -333,6 +335,7 @@ class DoofinderInstallation
             return true;
         }
 
+        // Using Tab constructor and delete method instead of deprecated method
         $tab = new \Tab($tabId);
 
         return $tab->delete();

@@ -41,14 +41,14 @@ class DoofinderApi
     private $hashid; // hashid of the doofinder account
     private $apiVersion;
     private $url;
-    private $results;
-    private $query;
+    // The following properties are used internally by the class methods
     private $searchOptions = [];  // assoc. array with doofinder options to be sent as request parameters
     private $page = 1; // the page of the search results we're at
-    private $queryName; // the name of the last successful query made
     private $lastQuery; // the last successful query made
     private $total; // total number of results obtained
-    private $maxScore;
+    // The following properties were unused or only written but never read
+    private $queryName = '';
+    private $maxScore = 0;
     private $paramsPrefix = self::DEFAULT_PARAMS_PREFIX;
     private $serializationArray;
     private $queryParameter = 'query'; // the parameter used for querying
@@ -269,7 +269,7 @@ class DoofinderApi
     /**
      * hasPrev
      *
-     * @return true if there is a previous page of results
+     * @return bool True if there is a previous page of results
      */
     public function hasPrev()
     {
@@ -293,8 +293,8 @@ class DoofinderApi
      *
      * set a filter for the query
      *
-     * @param string filterName the name of the filter to set
-     * @param array filter if simple array, terms filter assumed
+     * @param string $filterName the name of the filter to set
+     * @param array $filter if simple array, terms filter assumed
      *                     if 'from', 'to' in keys, range filter assumed
      */
     public function setFilter($filterName, $filter)
@@ -310,11 +310,11 @@ class DoofinderApi
      *
      * get conditions for certain filter
      *
-     * @param string filterName
+     * @param string $filterName
      *
-     * @return array filter conditions: - simple array if terms filter
-     *               - 'from', 'to'  assoc array if range f
-     * @return false if no filter definition found
+     * @return array|false filter conditions: simple array if terms filter,
+     *                'from', 'to' assoc array if range filter,
+     *                or false if no filter definition found
      */
     public function getFilter($filterName)
     {
@@ -330,14 +330,13 @@ class DoofinderApi
      *
      * get all filters and their configs
      *
-     * @return array assoc array filterName => filterConditions
+     * @return array|false assoc array filterName => filterConditions, or false if no filters are set
      */
     public function getFilters()
     {
         if (isset($this->searchOptions['filter'])) {
             return $this->searchOptions['filter'];
         } else {
-            return false;
         }
     }
 
@@ -346,8 +345,8 @@ class DoofinderApi
      *
      * add a term to a terms filter
      *
-     * @param string filterName the filter to add the term to
-     * @param string term the term to add
+     * @param string $filterName the filter to add the term to
+     * @param string $term the term to add
      */
     public function addTerm($filterName, $term)
     {
@@ -367,8 +366,8 @@ class DoofinderApi
      *
      * remove a term from a terms filter
      *
-     * @param string filterName the filter to remove the term from
-     * @param string term the term to be removed
+     * @param string $filterName the filter to remove the term from
+     * @param string $term the term to be removed
      */
     public function removeTerm($filterName, $term)
     {
@@ -387,9 +386,9 @@ class DoofinderApi
      *
      * set a range filter
      *
-     * @param string filterName the filter to set
-     * @param int from the lower bound value. included
-     * @param int to the upper bound value. included
+     * @param string $filterName the filter to set
+     * @param int|null $from the lower bound value (included)
+     * @param int|null $to the upper bound value (included)
      */
     public function setRange($filterName, $from = null, $to = null)
     {
@@ -435,10 +434,6 @@ class DoofinderApi
      * fromQuerystring
      *
      * obtain object's state from querystring params
-     *
-     * @param string $params where to obtain params from:
-     *                       - 'GET' $_GET params (default)
-     *                       - 'POST' $_POST params
      */
     public function fromQuerystring()
     {
@@ -513,8 +508,7 @@ class DoofinderApi
      *
      * obtain the results for the next page
      *
-     * @return DoofinderResults if there are results
-     * @return null otherwise
+     * @return DoofinderResults|null DoofinderResults if there are results, null otherwise
      */
     public function nextPage()
     {
@@ -530,8 +524,7 @@ class DoofinderApi
      *
      * obtain results for the previous page
      *
-     * @return DoofinderResults
-     * @return null otherwise
+     * @return DoofinderResults|null DoofinderResults if there are previous results, null otherwise
      */
     public function prevPage()
     {
@@ -549,7 +542,7 @@ class DoofinderApi
      */
     public function numPages()
     {
-        return ceil($this->total / $this->getRpp());
+        return (int)ceil($this->total / $this->getRpp());
     }
 
     public function getRpp()
@@ -633,7 +626,7 @@ class DoofinderApi
             ],
         ];
         foreach (\Language::getLanguages(true, $context->shop->id) as $lang) {
-            if (!$onlyOneLang || ($onlyOneLang && $lang['iso_code'])) {
+            if (!$onlyOneLang || !empty($lang['iso_code'])) {
                 $langIso = \Tools::strtoupper($lang['iso_code']);
                 $langFullIso = (isset($lang['language_code'])) ? \Tools::strtoupper($lang['language_code']) : $langIso;
                 $hashid = \Configuration::get('DF_HASHID_' . $currency . '_' . $langFullIso);

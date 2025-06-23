@@ -35,7 +35,8 @@ class DoofinderApiLanding
     /**
      * Make a request to the API to get landing data
      *
-     * @param string Name from Landing
+     * @param string $slug Slug name of the landing page
+     * @return array|null Landing data
      */
     public function getLanding($slug)
     {
@@ -53,8 +54,8 @@ class DoofinderApiLanding
         $response = $client->get(
             $url,
             null,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );
@@ -117,7 +118,7 @@ class DoofinderApiLanding
             }
 
             if ($fail || !$dfResults->isOk()) {
-                return false;
+                return [];
             }
 
             $dfResultsArray = $dfResults->getResults();
@@ -240,7 +241,7 @@ class DoofinderApiLanding
             $result = $db->executeS($sql);
 
             if (!$result) {
-                return false;
+                return [];
             } else {
                 if (version_compare(_PS_VERSION_, '1.7', '<') === true) {
                     $resultProperties = \Product::getProductsProperties((int) $idLang, $result);
@@ -274,7 +275,7 @@ class DoofinderApiLanding
                 'df_query_name' => $dfResults->getProperty('query_name'),
             ];
         } else {
-            return false;
+            return [];
         }
     }
 }

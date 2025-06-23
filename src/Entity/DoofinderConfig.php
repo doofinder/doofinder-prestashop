@@ -243,7 +243,7 @@ class DoofinderConfig
         $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
 
         return $result && $result->originalResponse && isset($result->headers['code'])
-            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
+            && (strpos($result->originalResponse, 'HTTP/2 200') !== false || $result->headers['code'] == 200);
     }
 
     /**
