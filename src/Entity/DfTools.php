@@ -178,9 +178,9 @@ class DfTools
      * 1.[5].0.13 | 1.5.[0].5 | 1.5.0.[1]
      * 1.[6].0.6  | 1.5.[1].0 | 1.5.0.[5]
      *
-     * @param  [type] $minVersion [description]
+     * @param  string $minVersion Minimum version to compare with the current version
      *
-     * @return [type]              [description]
+     * @return bool  true if current version is greater than or equal to $minVersion
      */
     public static function versionGte($minVersion)
     {
@@ -198,15 +198,16 @@ class DfTools
         return true;
     }
 
+    /**
+     * Returns the features selected by user
+     *
+     * @param array features
+     *
+     * @return array of rows (assoc arrays)
+     */
     public static function getSelectedFeatures($features, $selectedKeys)
     {
-        /**
-         * Returns the features selected by user
-         *
-         * @param array features
-         *
-         * @return array of rows (assoc arrays)
-         */
+
         $selectedFeatures = [];
 
         foreach ($features as $key => $value) {
@@ -241,10 +242,9 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($idLang),
-            '_ID_SHOP_' => (int) pSQL($idShop),
+            '_ID_LANG_' => $idLang,
+            '_ID_SHOP_' => $idShop,
         ]);
-
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = [];
         foreach ($result as $elem) {
@@ -277,8 +277,8 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($idLang),
-            '_ID_SHOP_' => (int) pSQL($idShop),
+            '_ID_LANG_' => $idLang,
+            '_ID_SHOP_' => $idShop,
         ]);
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -312,8 +312,8 @@ class DfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image
-            where pa.id_product = ' . (int) pSQL($idProduct) . '
-                and pa.id_product_attribute = ' . (int) pSQL($idProductAttribute) . '
+            where pa.id_product = ' .  $idProduct . '
+                and pa.id_product_attribute = ' .  $idProductAttribute . '
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -324,7 +324,7 @@ class DfTools
         if (isset($result[0])) {
             return $result[0]['id_image'];
         } else {
-            return '';
+            return [];
         }
     }
 
@@ -332,7 +332,7 @@ class DfTools
      * Returns the features of a product
      *
      * @param int $idProduct product ID
-     * @param int language ID
+     * @param int $idLang language ID
      * @param array $featureKeys keys of the features associated to the product
      *
      * @return array of rows (assoc arrays)
@@ -355,8 +355,8 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($idLang),
-            '_ID_PRODUCT' => (int) pSQL($idProduct),
+            '_ID_LANG_' => $idLang,
+            '_ID_PRODUCT' => $idProduct,
         ]);
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -402,8 +402,8 @@ class DfTools
       ';
 
             $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => (int) pSQL($idLang),
-                '_VARIATION_ID' => (int) pSQL($variationId),
+                '_ID_LANG_' => $idLang,
+                '_VARIATION_ID' => $variationId,
             ]);
 
             $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -429,13 +429,13 @@ class DfTools
     /**
      * Returns the product combination attributes
      *
-     * @param int product Attribute ID
-     * @param bool attribute groups IDs
-     * @param int language ID
+     * @param int $variationId product Attribute ID
+     * @param int $idLang language ID
+     * @param string $attrLimit attribute groups IDs
      *
      * @return array of rows (assoc arrays)
      */
-    public static function getAttributesByCombination($variationId, $idLang, $attrLimit = false)
+    public static function getAttributesByCombination($variationId, $idLang, $attrLimit = '')
     {
         if (isset($variationId) && $variationId > 0) {
             $sql = 'SELECT pc.id_product_attribute,
@@ -453,12 +453,12 @@ class DfTools
             WHERE
             pc.id_product_attribute = _VARIATION_ID';
 
-            if ($attrLimit) {
+            if (strlen(trim($attrLimit)) !== 0) {
                 $sql .= ' AND pa.id_attribute_group IN (' . pSQL($attrLimit) . ')';
             }
             $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => (int) pSQL($idLang),
-                '_VARIATION_ID' => (int) pSQL($variationId),
+                '_ID_LANG_' => $idLang,
+                '_VARIATION_ID' => $variationId,
             ]);
 
             return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -470,8 +470,8 @@ class DfTools
     /**
      * Get attributes name
      *
-     * @param array attributes ids
-     * @param int Language ID
+     * @param array $attributesIds attributes ids
+     * @param int $idLang Language ID
      *
      * @return array
      */
@@ -485,7 +485,7 @@ class DfTools
             ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => (int) pSQL($idLang),
+            '_ID_LANG_' => $idLang,
         ]);
 
         return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -509,7 +509,7 @@ class DfTools
      * @param int|bool $offset Offset for pagination (false for no offset)
      * @param array|null $ids Specific product IDs to retrieve (not implemented in current code)
      *
-     * @return array|false|mysqli_result|PDOStatement|resource|null Array of products with their associated information
+     * @return array|false|\mysqli_result|\PDOStatement|resource|null Array of products with their associated information
      */
     public static function getAvailableProducts($idLang, $checkLeadership=true, $limit = false, $offset = false, $ids = null)
     {
@@ -676,9 +676,8 @@ class DfTools
      * Returns the product variations for a product
      *
      * @param int $idProduct ID of the product
-     * @param int $idLang language ID
      *
-     * @return array|false|mysqli_result|PDOStatement|resource|null
+     * @return array|false|\mysqli_result|\PDOStatement|resource|null
      */
     public static function getProductVariations($idProduct)
     {
@@ -808,9 +807,9 @@ class DfTools
       ;';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_CATEGORY_' => (int) pSQL($idCategory),
-            '_ID_SHOP_' => (int) pSQL($idShop),
-            '_ID_LANG_' => (int) pSQL($idLang),
+            '_ID_CATEGORY_' => $idCategory,
+            '_ID_SHOP_' => $idShop,
+            '_ID_LANG_' => $idLang,
             '_EXCLUDED_IDS_' => (string) pSQL(implode(',', $excludedIds)),
         ]);
 
@@ -906,16 +905,16 @@ class DfTools
                 . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
             $mainCategoryInner = self::prepareSQL(
                 $mainInnerSql,
-                ['_ID_PRODUCT_' => (int) pSQL($idProduct), '_ID_SHOP_' => (int) pSQL($idShop)]
+                ['_ID_PRODUCT_' => $idProduct, '_ID_SHOP_' => $idShop]
             );
             $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
         }
 
         $sql = self::prepareSQL($sql, [
-            '_ID_PRODUCT_' => (int) pSQL($idProduct),
+            '_ID_PRODUCT_' => $idProduct,
             '_MAIN_CATEGORY_INNER_' => (string) pSQL($mainCategoryInner),
             '_MAIN_CATEGORY_WHERE_' => (string) pSQL($mainCategoryWhere),
-            '_ID_SHOP_' => (int) pSQL($idShop),
+            '_ID_SHOP_' => $idShop,
         ]);
 
         $sql = str_replace("\'", "'", $sql);
@@ -974,7 +973,7 @@ class DfTools
      */
     public static function hasAttributes($idProduct)
     {
-        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+        return (int) \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
             '
             SELECT COUNT(*)
             FROM `' . _DB_PREFIX_ . 'product_attribute` pa
@@ -989,7 +988,7 @@ class DfTools
      * @param int $idProduct product ID
      * @param string $attributeGroupsId attribute groups IDs
      *
-     * @return array
+     * @return array|false
      */
     public static function hasProductAttributes($idProduct, $attributeGroupsId)
     {
@@ -1623,26 +1622,5 @@ class DfTools
         }
 
         return '' === $needle || false !== strpos($haystack, $needle);
-    }
-
-    private static function getVariantUrl($product, $context)
-    {
-        $context = \Context::getContext();
-        $cfgModRewrite = self::cfg($context->shop->id, 'PS_REWRITING_SETTINGS', DoofinderConstants::YES);
-
-        return self::cleanURL(
-            $context->link->getProductLink(
-                (int) $product['id_product'],
-                $product['link_rewrite'],
-                $product['cat_link_rew'],
-                $product['ean13'],
-                $context->language->id,
-                $context->shop->id,
-                (int) $product['id_product_attribute'],
-                $cfgModRewrite,
-                false,
-                true
-            )
-        );
     }
 }

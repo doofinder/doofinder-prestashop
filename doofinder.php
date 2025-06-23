@@ -282,7 +282,7 @@ class Doofinder extends Module
      *
      * @return void
      */
-    private function configureHookCommon($params = false)
+    private function configureHookCommon($params)
     {
         $this->smarty->assign(
             PrestaShop\Module\Doofinder\Src\Entity\HookManager::getHookCommonSmartyAssigns(

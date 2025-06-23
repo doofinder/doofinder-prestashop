@@ -31,7 +31,7 @@ class DoofinderAjaxModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        $this->ajax = 1;
+        $this->ajax = true;
 
         $checkApiKey = Tools::getValue('check_api_key');
         if ($checkApiKey) {

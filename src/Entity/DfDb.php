@@ -28,7 +28,7 @@ class DfDb
     /** @var null Flag used to load slave servers only once.
      * See loadSlaveServers() method
      */
-    public static $_slave_servers_loaded = null;
+    public static $_slave_servers_loaded = false;
 
     /**
     * Creates a new database instance.
@@ -86,7 +86,7 @@ class DfDb
      */
     protected static function loadSlaveServers()
     {
-        if (self::$_slave_servers_loaded !== null) {
+        if (self::$_slave_servers_loaded == false) {
             return;
         }
 

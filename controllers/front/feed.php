@@ -30,7 +30,7 @@ class DoofinderFeedModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        $this->ajax = 1;
+        $this->ajax = true;
 
         ob_start();
         switch (Tools::getValue('type')) {
