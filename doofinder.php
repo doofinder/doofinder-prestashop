@@ -209,8 +209,6 @@ class Doofinder extends Module
      */
     public function hookActionProductSave($params)
     {
-        // $product = (!isset($params['product'])) ? new \Product($params['id_product']) : $params['product'];
-        // $action = $product->active ? 'update' : 'delete';
         $action = $params['product']->active ? 'update' : 'delete';
         PrestaShop\Module\Doofinder\Src\Entity\HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
     }
