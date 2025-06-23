@@ -52,7 +52,7 @@ class DoofinderApiItems
     /**
      * Make a request to the API to delete the specified items
      *
-     * @param array $payload Items IDs to delete
+     * @param string|null $payload Items IDs to delete
      * @return array Response from the API
      */
     public function deleteBulk($payload)

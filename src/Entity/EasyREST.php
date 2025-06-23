@@ -28,7 +28,6 @@ class EasyREST
     public $params;
     private $contentType;
     private $httpHeaders;
-    private $file;
 
     public function __construct($followLocation = true)
     {
@@ -229,9 +228,6 @@ class EasyREST
     {
         curl_close($this->curl);
         $this->curl = null;
-        if ($this->file != null) {
-            fclose($this->file);
-        }
 
         return $this;
     }
@@ -352,12 +348,13 @@ class EasyREST
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      * @param string $contentType="multpary/form-data" [optional] commom post (multipart/form-data) as default
+     * @param array $httpHeaders=[] [optional] additional HTTP headers to be sent
      *
      * @return EasyREST
      */
-    public static function post($url, $params = null, $user = null, $pwd = null, $contentType = 'multipart/form-data', $httpHeaders = null)
+    public static function post($url, $params = null, $user = null, $password = null, $contentType = 'multipart/form-data', $httpHeaders = [])
     {
-        return self::call('POST', $url, $params, $user, $pwd, $contentType, $httpHeaders);
+        return self::call('POST', $url, $params, $user, $password, $contentType, $httpHeaders);
     }
 
     /**
@@ -371,9 +368,9 @@ class EasyREST
      *
      * @return EasyREST
      */
-    public static function put($url, $body, $user = null, $pwd = null, $contentType = null)
+    public static function put($url, $body, $user = null, $password = null, $contentType = null)
     {
-        return self::call('PUT', $url, $body, $user, $pwd, $contentType);
+        return self::call('PUT', $url, $body, $user, $password, $contentType);
     }
 
     /**
@@ -386,9 +383,9 @@ class EasyREST
      *
      * @return EasyREST
      */
-    public static function get($url, $params = null, $user = null, $pwd = null, $contentType = 'multipart/form-data', $httpHeaders = null)
+    public static function get($url, $params = null, $user = null, $password = null, $contentType = 'multipart/form-data', $httpHeaders = null)
     {
-        return self::call('GET', $url, $params, $user, $pwd, $contentType, $httpHeaders);
+        return self::call('GET', $url, $params, $user, $password, $contentType, $httpHeaders);
     }
 
     /**
@@ -401,7 +398,7 @@ class EasyREST
      *
      * @return EasyREST
      */
-    public static function delete($url, $params = null, $user = null, $pwd = null, $contentType = 'multipart/form-data', $httpHeaders = null)
+    public static function delete($url, $params = null, $user = null, $password = null, $contentType = 'multipart/form-data', $httpHeaders = null)
     {
         return self::call('DELETE', $url, $params, $user, $pwd, $contentType, $httpHeaders);
     }
@@ -415,16 +412,16 @@ class EasyREST
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      * @param string $contentType=null [optional]
-     * @param array $httpHeaders=null [optional]
+     * @param array $httpHeaders=[] [optional]
      *
      * @return EasyREST
      */
-    public static function call($method, $url, $body, $user = null, $pwd = null, $contentType = null, $httpHeaders = null)
+    public static function call($method, $url, $body, $user = null, $password = null, $contentType = null, $httpHeaders = [])
     {
         return self::createClient($url)
             ->setParameters($body)
             ->setMethod($method)
-            ->setCredentials($user, $pwd)
+            ->setCredentials($user, $password)
             ->setContentType($contentType)
             ->setHttpHeaders($httpHeaders)
             ->execute()

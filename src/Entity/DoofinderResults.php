@@ -158,7 +158,7 @@ class DoofinderResults
     /**
      * getFacet
      *
-     * @param string name the facet name whose results are wanted
+     * @param string $facetName the facet name whose results are wanted
      *
      * @return array facet search data
      *               - for terms facets

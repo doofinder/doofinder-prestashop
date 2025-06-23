@@ -33,8 +33,9 @@ class DoofinderInstallation
     /**
      * Make a request to the plugins API to to check that the update on save is valid
      *
-     * @param string $installation_id
-     * @param string $callback_url
+     * @param string $installationId
+     *
+     * @return array|null
      */
     public function isValidUpdateOnSave($installationId)
     {
@@ -50,8 +51,8 @@ class DoofinderInstallation
         $response = $client->get(
             $url,
             null,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );

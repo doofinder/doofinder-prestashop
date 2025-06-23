@@ -32,7 +32,7 @@ class DoofinderConfig
         $idShopGroup = $context->shop->id_shop_group;
 
         $debug = \Configuration::get('DF_DEBUG', null, $idShopGroup, $idShop);
-        if (!empty($debug) && $debug) {
+        if (!empty($debug)) {
             $message = is_string($message) ? $message : print_r($message, true);
             error_log("$message\n", 3, _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . 'doofinder' . DIRECTORY_SEPARATOR . $logFile);
         }
@@ -69,7 +69,7 @@ class DoofinderConfig
         $apiKey = DfTools::getFormattedApiKey();
         $apiEndpoint = \Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
         $region = 'eu1';
-        if ('prod' === DoofinderConstants::ENV) {
+        if ('prod' == DoofinderConstants::ENV) {
             $apiEndpointArray = explode('-', $apiEndpoint);
             $region = $apiEndpointArray[0];
         }
@@ -242,7 +242,7 @@ class DoofinderConfig
         $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
         $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
 
-        return $result && $result->originalResponse && isset($result->headers['code'])
+        return $result->originalResponse && isset($result->headers['code'])
             && (strpos($result->originalResponse, 'HTTP/2 200') !== false || $result->headers['code'] == 200);
     }
 

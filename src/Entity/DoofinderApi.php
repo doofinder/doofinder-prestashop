@@ -332,6 +332,7 @@ class DoofinderApi
         if (isset($this->searchOptions['filter'])) {
             return $this->searchOptions['filter'];
         } else {
+            return false;
         }
     }
 
