@@ -21,8 +21,6 @@ if (!defined('_PS_VERSION_')) {
 
 class DoofinderConstants
 {
-    // Feel free to change this value to your own local env or ngrok
-    const ENV = '${PS_ENV}'; // Useful to set eu1 as the default region in the Autoinstaller if the value is different than 'prod'
     const DOOMANAGER_REGION_URL = '${DOOMANAGER_REGION_URL}';
     const DOOPLUGINS_REGION_URL = '${DOOPLUGINS_REGION_URL}';
     const DOOPHOENIX_REGION_URL = '${DOOPHOENIX_REGION_URL}';

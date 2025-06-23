@@ -68,10 +68,12 @@ class DoofinderConfig
     {
         $apiKey = DfTools::getFormattedApiKey();
         $apiEndpoint = \Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
-        $region = 'eu1';
-        if ('prod' == DoofinderConstants::ENV) {
-            $apiEndpointArray = explode('-', $apiEndpoint);
-            $region = $apiEndpointArray[0];
+        if (preg_match('/([a-z]{2}[0-9])-.*/', $apiEndpoint, $matches)) {
+            // If the API endpoint is in the format 'eu1-xxxx', we extract the region
+            $region = $matches[1];
+        } else {
+            // Otherwise, we assume the default region is 'eu1'
+            $region = 'eu1';
         }
         $fullApiKey = $region . '-' . $apiKey;
 
@@ -129,11 +131,14 @@ class DoofinderConfig
         \Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $apiEndpoint);
         \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
 
-        $apiEndpointArray = explode('-', $apiEndpoint);
-        $region = 'eu1';
-        if ('prod' === DoofinderConstants::ENV) {
-            $region = $apiEndpointArray[0];
+        if (preg_match('/([a-z]{2}[0-9])-.*/', $apiEndpoint, $matches)) {
+            // If the API endpoint is in the format 'eu1-xxxx', we extract the region
+            $region = $matches[1];;
+        } else {
+            // Otherwise, we assume the default region is 'eu1'
+            $region = 'eu1';
         }
+
         $shops = \Shop::getShops();
 
         foreach ($shops as $shop) {
