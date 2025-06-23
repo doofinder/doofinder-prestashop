@@ -16,9 +16,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Entity\DfTools;
+use PrestaShop\Module\Doofinder\Entity\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Entity\DoofinderConstants;
 
 class DoofinderConfigModuleFrontController extends ModuleFrontController
 {

@@ -1,4 +1,5 @@
-vendor/
+!vendor/autoload.php
+!vendor/composer
 composer.lock
 .php-cs-fixer.cache
 /html
