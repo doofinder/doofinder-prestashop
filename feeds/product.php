@@ -118,9 +118,9 @@ if ($debug) {
     ini_set('display_errors', 0);
 }
 
-if ( count($attributesShownArray) > 0 )  {
+$groupAttributesSlug = [];
+if (count($attributesShownArray) > 0) {
     $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
-    $groupAttributesSlug = [];
     foreach ($groupAttributes as $g) {
         if (in_array($g['id_attribute_group'], $attributesShownArray)) {
             $groupAttributesSlug[] = DfTools::slugify($g['name']);

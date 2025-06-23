@@ -201,9 +201,10 @@ class DfTools
     /**
      * Returns the features selected by user
      *
-     * @param array features
+     * @param array $features
+     * @param array $selectedKeys
      *
-     * @return array of rows (assoc arrays)
+     * @return array
      */
     public static function getSelectedFeatures($features, $selectedKeys)
     {
@@ -437,7 +438,7 @@ class DfTools
      */
     public static function getAttributesByCombination($variationId, $idLang, $attrLimit = '')
     {
-        if (isset($variationId) && $variationId > 0) {
+        if ($variationId > 0) {
             $sql = 'SELECT pc.id_product_attribute,
                     pal.name,
                     pagl.name AS group_name
@@ -457,8 +458,8 @@ class DfTools
                 $sql .= ' AND pa.id_attribute_group IN (' . pSQL($attrLimit) . ')';
             }
             $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => $idLang,
-                '_VARIATION_ID' => $variationId,
+                '_ID_LANG_' => (int) $idLang,
+                '_VARIATION_ID' => (int) $variationId,
             ]);
 
             return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -996,6 +997,8 @@ class DfTools
             return false;
         }
 
+        $attributeGroupsId = implode(',', array_map('intval', explode(',', $attributeGroupsId)));
+
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
             '
             SELECT a.id_attribute_group
@@ -1003,7 +1006,7 @@ class DfTools
             LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa ON p.id_product = pa.id_product
             LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON pa.id_product_attribute = pac.id_product_attribute
             LEFT JOIN `' . _DB_PREFIX_ . 'attribute` a ON pac.id_attribute = a.id_attribute
-            WHERE p.id_product = ' . pSQL($idProduct) . ' AND id_attribute_group IN ( ' . pSQL($attributeGroupsId) . ')
+            WHERE p.id_product = ' . (int) $idProduct . ' AND id_attribute_group IN (' . $attributeGroupsId . ')
             GROUP BY a.id_attribute_group
             '
         );

@@ -25,7 +25,7 @@ class DfDb
     /** @var array List of server settings */
     public static $_servers = [];
 
-    /** @var null Flag used to load slave servers only once.
+    /** @var bool Flag used to load slave servers only once.
      * See loadSlaveServers() method
      */
     public static $_slave_servers_loaded = false;
@@ -86,7 +86,7 @@ class DfDb
      */
     protected static function loadSlaveServers()
     {
-        if (self::$_slave_servers_loaded == false) {
+        if (self::$_slave_servers_loaded) {
             return;
         }
 
