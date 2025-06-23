@@ -344,7 +344,7 @@ class EasyREST
      * Convenience method wrapping a commom POST call
      *
      * @param string $url
-     * @param mixed params
+     * @param mixed $params
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      * @param string $contentType="multpary/form-data" [optional] commom post (multipart/form-data) as default
@@ -377,7 +377,7 @@ class EasyREST
      * Convenience method wrapping a commom GET call
      *
      * @param string $url
-     * @param array params
+     * @param mixed $params
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      *
@@ -392,7 +392,7 @@ class EasyREST
      * Convenience method wrapping a commom delete call
      *
      * @param string $url
-     * @param array params
+     * @param mixed $params
      * @param string $user=null [optional]
      * @param string $password=null [optional]
      *
@@ -400,7 +400,7 @@ class EasyREST
      */
     public static function delete($url, $params = null, $user = null, $password = null, $contentType = 'multipart/form-data', $httpHeaders = null)
     {
-        return self::call('DELETE', $url, $params, $user, $pwd, $contentType, $httpHeaders);
+        return self::call('DELETE', $url, $params, $user, $password, $contentType, $httpHeaders);
     }
 
     /**

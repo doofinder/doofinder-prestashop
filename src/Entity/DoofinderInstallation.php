@@ -185,8 +185,8 @@ class DoofinderInstallation
         $response = $client->post(
             UrlManager::getInstallUrl(\Configuration::get('DF_REGION')),
             $jsonCreateStoreRequest,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $apiKey]
         );
@@ -292,8 +292,8 @@ class DoofinderInstallation
             $response = $client->post(
                 UrlManager::getUpdateFeedUrl(\Configuration::get('DF_REGION')),
                 $jsonFeedUrls,
-                false,
-                false,
+                null,
+                null,
                 'application/json',
                 ['Authorization: Token ' . $apiKey]
             );
