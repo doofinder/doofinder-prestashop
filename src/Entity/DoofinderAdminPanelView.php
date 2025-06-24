@@ -167,6 +167,7 @@ class DoofinderAdminPanelView
     {
         $context = \Context::getContext();
         $context->smarty->assign('text_one_shop', $this->module->l('You cannot manage Doofinder from a shop context where the module is deactivated. Please activate it to access its features.', 'doofinderadminpanelview'));
+
         return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
     }
 
@@ -209,7 +210,7 @@ class DoofinderAdminPanelView
     /**
      * Check if the form to create a store installation has to be displayed
      *
-     * @param Shop $shop
+     * @param \Shop $shop
      *
      * @return bool
      */
@@ -317,7 +318,7 @@ class DoofinderAdminPanelView
         $context = \Context::getContext();
         $helper->show_toolbar = false;
         $helper->table = $this->module->getTable();
-        $helper->module = $this;
+        $helper->module = $this->module;
         $helper->default_form_language = $context->language->id;
         $helper->allow_employee_form_lang = \Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
 
@@ -636,7 +637,7 @@ class DoofinderAdminPanelView
                     'type' => 'text',
                     'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey[$labelToUse],
                     'name' => $hashidKey[$keyToUse],
-                    'readonly' => !$isAdvParamPresent && !$isManualInstallation,
+                    'readonly' => !$isManualInstallation,
                 ];
             }
         }

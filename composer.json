@@ -1,8 +1,10 @@
 {
-    "require-dev": {
-        "prestashop/php-dev-tools": "^4.3"
-    },
-    "config": {
-        "prepend-autoloader": false
-    }
+  "require-dev": {
+    "prestashop/php-dev-tools": "^5",
+    "friendsofphp/php-cs-fixer": "^3.0"
+  },
+  "config": {
+    "prepend-autoloader": false,
+    "lock": false
+  }
 }

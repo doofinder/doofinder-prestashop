@@ -24,7 +24,7 @@ class LanguageManager
     /**
      * Get the language associated with a search engine
      *
-     * @param bool $hashid hashid of the Search Engine
+     * @param string $hashid hashid of the Search Engine
      *
      * @return bool|int
      */
@@ -83,7 +83,7 @@ class LanguageManager
      *
      * @param string $locale locale IETF language tag
      *
-     * @return int|false|null
+     * @return string|false
      */
     private static function getLanguageIdByLocale($locale)
     {

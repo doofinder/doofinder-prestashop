@@ -38,7 +38,6 @@ if (function_exists('set_time_limit')) {
 
 DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
-
 /**
  *  @author camlafit <https://github.com/camlafit>
  *  Merge multidemensionnal array by value on each row
@@ -98,7 +97,7 @@ $isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
 $shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
 $shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
 $featuresShownArray = $dfProductBuild->getFeaturesShown();
-$attributesShownArray = explode(',', $dfProductBuild->getAttributesShown());
+$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) { return strlen(trim($a)) > 0; });
 /* ---------- END SHARED CONFIG ---------- */
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
@@ -118,13 +117,9 @@ if ($debug) {
     ini_set('display_errors', 0);
 }
 
-if (
-    is_array($attributesShownArray)
-    && count($attributesShownArray) > 0
-    && $attributesShownArray[0] !== ''
-) {
+$groupAttributesSlug = [];
+if (count($attributesShownArray) > 0) {
     $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
-    $groupAttributesSlug = [];
     foreach ($groupAttributes as $g) {
         if (in_array($g['id_attribute_group'], $attributesShownArray)) {
             $groupAttributesSlug[] = DfTools::slugify($g['name']);

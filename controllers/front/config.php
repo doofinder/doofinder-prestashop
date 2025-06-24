@@ -31,7 +31,7 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        $this->ajax = 1;
+        $this->ajax = true;
 
         header('Content-Type:application/json; charset=utf-8');
 

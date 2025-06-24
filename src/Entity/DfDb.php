@@ -13,7 +13,6 @@
  * @license   GPLv3
  */
 
-
 namespace PrestaShop\Module\Doofinder\Src\Entity;
 
 if (!defined('_PS_VERSION_')) {
@@ -25,21 +24,21 @@ class DfDb
     /** @var array List of server settings */
     public static $_servers = [];
 
-    /** @var null Flag used to load slave servers only once.
+    /** @var bool Flag used to load slave servers only once.
      * See loadSlaveServers() method
      */
-    public static $_slave_servers_loaded = null;
+    public static $_slave_servers_loaded = false;
 
     /**
-    * Creates a new database instance.
-    *
-    * This method initializes and returns a new database connection instance, either to the master server
-    * or to a slave server based on the parameter. It manages connection pooling and sets up
-    * unbuffered queries for PDO connections to handle large datasets efficiently.
-    *
-    * @param bool $master Whether to connect to the master server (true) or a slave server (false)
-    * @return \Db Database instance with active connection
-    */
+     * Creates a new database instance.
+     * This method initializes and returns a new database connection instance, either to the master server
+     * or to a slave server based on the parameter. It manages connection pooling and sets up
+     * unbuffered queries for PDO connections to handle large datasets efficiently.
+     *
+     * @param bool $master Whether to connect to the master server (true) or a slave server (false)
+     *
+     * @return \Db Database instance with active connection
+     */
     public static function getNewDbInstance($master = true)
     {
         static $id = 0;
@@ -78,6 +77,7 @@ class DfDb
 
             $link->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         }
+
         return $instance;
     }
 
@@ -86,7 +86,7 @@ class DfDb
      */
     protected static function loadSlaveServers()
     {
-        if (self::$_slave_servers_loaded !== null) {
+        if (self::$_slave_servers_loaded) {
             return;
         }
 
@@ -97,5 +97,4 @@ class DfDb
 
         self::$_slave_servers_loaded = true;
     }
-
 }

@@ -36,7 +36,7 @@ function upgrade_module_4_4_8($module)
 function installTabs_4_4_8()
 {
     $tab = new Tab();
-    $tab->active = 0;
+    $tab->active = false;
     $tab->class_name = 'DoofinderAdmin';
     $tab->name = [];
     foreach (Language::getLanguages() as $lang) {

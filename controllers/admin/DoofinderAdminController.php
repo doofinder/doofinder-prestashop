@@ -21,7 +21,6 @@ class DoofinderAdminController extends ModuleAdminController
     public function __construct()
     {
         $this->context = Context::getContext();
-        $this->module = Module::getInstanceByName('doofinder');
         $this->bootstrap = true;
         $this->lang = false;
         parent::__construct();
@@ -43,10 +42,6 @@ class DoofinderAdminController extends ModuleAdminController
     {
         if (method_exists('ModuleAdminController', 'ajaxRender')) {
             return parent::ajaxRender($value, $controller, $method);
-        }
-
-        if (is_array($value)) {
-            $value = json_encode($value);
         }
 
         echo $value;
