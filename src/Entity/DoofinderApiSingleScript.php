@@ -61,8 +61,8 @@ class DoofinderApiSingleScript
         $response = $client->post(
             $url,
             $jsonStoreData,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );

@@ -27,7 +27,7 @@ class DoofinderCacheModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        $this->ajax = 1;
+        $this->ajax = true;
 
         if (Tools::isSubmit('landing')) {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {

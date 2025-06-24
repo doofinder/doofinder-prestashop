@@ -51,8 +51,8 @@ class DoofinderApiIndex
         $response = $client->post(
             $url,
             $payload,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );

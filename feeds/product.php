@@ -97,7 +97,7 @@ $isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
 $shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
 $shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
 $featuresShownArray = $dfProductBuild->getFeaturesShown();
-$attributesShownArray = explode(',', $dfProductBuild->getAttributesShown());
+$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) { return strlen(trim($a)) > 0; });
 /* ---------- END SHARED CONFIG ---------- */
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
@@ -117,13 +117,9 @@ if ($debug) {
     ini_set('display_errors', 0);
 }
 
-if (
-    is_array($attributesShownArray)
-    && count($attributesShownArray) > 0
-    && $attributesShownArray[0] !== ''
-) {
+$groupAttributesSlug = [];
+if (count($attributesShownArray) > 0) {
     $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
-    $groupAttributesSlug = [];
     foreach ($groupAttributes as $g) {
         if (in_array($g['id_attribute_group'], $attributesShownArray)) {
             $groupAttributesSlug[] = DfTools::slugify($g['name']);
@@ -260,14 +256,6 @@ Hook::exec('actionDoofinderExtendFeed', [
 $header = array_merge($header, $extraHeader);
 // To avoid indexation failures
 $header = array_unique($header);
-
-// PRODUCTS
-$rows = DfTools::getAvailableProductsForLanguage($lang->id, $shop->id, $limit, $offset);
-
-$rows = arrayMergeByIdProduct($rows, $extraRows);
-
-// In case there is no need to display prices, avoid calculating the mins by variant
-$minPriceVariantByProductId = ($shouldShowProductVariations && $shouldDisplayPrices) ? DfTools::getMinVariantPrices($rows, $shouldPricesUseTaxes, $currencies, $lang->id, $shop->id) : [];
 $additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 
 $csv = fopen('php://output', 'w');
@@ -275,8 +263,22 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
     fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
 }
 
-foreach ($rows as $row) {
-    $product = $dfProductBuild->buildProduct($row, $minPriceVariantByProductId, $additionalAttributesHeaders, $additionalHeaders);
+$products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
+foreach ($products as $product) {
+    $minPriceVariant = null;
+    if ($shouldShowProductVariations && $product['variant_count'] > 0) {
+        $variations = DfTools::getProductVariations($product['id_product']);
+        foreach ($variations as $variation) {
+            $minPriceVariant = $dfProductBuild->getMinPrice($minPriceVariant, $variation);
+            $builtVariation = $dfProductBuild->buildVariation($product, $variation);
+            $csvVariation = $dfProductBuild->applySpecificTransformationsForCsv($builtVariation, $extraHeader, $header);
+            fputcsv($csv, $csvVariation, DfTools::TXT_SEPARATOR);
+        }
+        $product = $dfProductBuild->buildProduct($product, $minPriceVariant, $additionalAttributesHeaders, $additionalHeaders);
+    } else {
+        $product = $dfProductBuild->buildProduct($product, null, $additionalAttributesHeaders, $additionalHeaders);
+    }
+
     $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
     fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
 }

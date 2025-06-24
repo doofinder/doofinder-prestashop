@@ -42,6 +42,7 @@ doofinder-configure:
 doofinder-upgrade: doofinder-configure
 	$(docker_exec_web) php bin/console prestashop:module install doofinder
 	$(docker_exec_web) php bin/console prestashop:module enable doofinder
+	$(docker_exec_web) php bin/console prestashop:module upgrade doofinder
 
 # Disable the Doofinder module, upgrade PrestaShop, and clean the cache
 doofinder-uninstall: doofinder-configure
@@ -59,11 +60,21 @@ cache-flush:
 init: doofinder-configure
 	$(docker_compose) pull --ignore-buildable
 	$(docker_compose) build
+	$(docker_compose) --profile setup run --rm setup
+	@echo "Fixing permissions for the html directory"
+	sudo chgrp -R ${GID} ./html
+	sudo chmod -R g+sw ./html
+	sudo rm -rf ./html/install
+	@echo "Access backend at $(if $(PS_ENABLE_SSL,1), https, http)://$(PS_BASE_URL)/$(PS_FOLDER_ADMIN)"
 	$(docker_compose) up -d
 
 # Check code consitency for the Doofinder Feed module using PHP Code Sniffer
 consistency:
-	docker run -it --rm -v$(shell pwd):/var/www/composer ghcr.io/devgine/composer-php:v2-php$(PHP_VERSION)-alpine  sh -c "composer install && vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --rules=@PSR2"
+	docker run -it --rm -ePHP_CS_FIXER_IGNORE_ENV=1 \
+	-v$(shell pwd):/app -v/app/html -v/app/vendor
+	composer:lts sh -c \
+	"composer install && \
+	vendor/bin/php-cs-fixer fix --diff --using-cache=no"
 
 # Open an interactive shell in the web container as the 'application' user
 dev-console:

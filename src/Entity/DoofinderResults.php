@@ -117,7 +117,7 @@ class DoofinderResults
      *
      * get single property from the results
      *
-     * @param string @propertyName: 'results_per_page', 'query', 'max_score', 'page', 'total', 'hashid'
+     * @param string $propertyName Property name to retrieve, like 'results_per_page', 'query', 'max_score', 'page', 'total', 'hashid'
      *
      * @return mixed the value of the property
      */
@@ -158,7 +158,7 @@ class DoofinderResults
     /**
      * getFacet
      *
-     * @param string name the facet name whose results are wanted
+     * @param string $facetName the facet name whose results are wanted
      *
      * @return array facet search data
      *               - for terms facets

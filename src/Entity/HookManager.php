@@ -31,11 +31,11 @@ class HookManager
     /**
      * Registers the hooks when the plugin is installed
      *
-     * @return true
+     * @return bool
      */
     public function registerHooks()
     {
-        return $this->module->registerHook('displayHeader')
+        $result = $this->module->registerHook('displayHeader')
             && $this->module->registerHook('moduleRoutes')
             && $this->module->registerHook('actionProductSave')
             && $this->module->registerHook('actionProductDelete')
@@ -45,6 +45,8 @@ class HookManager
             && $this->module->registerHook('actionObjectCategoryAddAfter')
             && $this->module->registerHook('actionObjectCategoryUpdateAfter')
             && $this->module->registerHook('actionObjectCategoryDeleteAfter');
+
+        return $result;
     }
 
     /**

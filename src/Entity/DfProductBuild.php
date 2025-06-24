@@ -173,21 +173,49 @@ class DfProductBuild
     {
         $payload = [];
 
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
-        $minPriceVariantByProductId = [];
-        if ($this->productVariations) {
-            $minPriceVariantByProductId = DfTools::getMinVariantPrices($products, $this->useTax, $this->currencies, $this->idLang, $this->idShop);
-        }
-
         foreach ($products as $product) {
-            $payload[] = $this->buildProduct($product, $minPriceVariantByProductId);
+            $minPriceVariant = null;
+            if ($this->productVariations && $product['variant_count'] > 0) {
+                $variations = DfTools::getProductVariations($product['id_product']);
+                foreach ($variations as $variation) {
+                    $minPriceVariant = $this->getMinPrice($minPriceVariant, $variation);
+                    $payload[] = $this->buildVariation($product, $variation);
+                }
+
+                $payload[] = $this->buildProduct($product, $minPriceVariant);
+            } else {
+                $payload[] = $this->buildProduct($product, null);
+            }
         }
 
         return json_encode($payload);
     }
 
-    public function buildProduct($product, $minPriceVariantByProductId = [], $extraAttributesHeader = [], $extraHeaders = [])
+    public function getMinPrice($currentMinPrice, $variation)
+    {
+        if ($this->displayPrices) {
+            $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies);
+            if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
+                return $variantPrices;
+            } else {
+                return $currentMinPrice;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public function buildVariation($product, $variation)
+    {
+        $expanded_variation = array_merge($product, $variation, $extraAttributesHeader = [], $extraHeaders = []);
+
+        return $this->buildProduct($expanded_variation, [], $extraAttributesHeader, $extraHeaders);
+    }
+
+    public function buildProduct($product, $minPriceVariant = null, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
@@ -257,28 +285,27 @@ class DfProductBuild
                 $p['df_multiprice'] = $this->getMultiprice($product);
             }
 
-            if (DfTools::isParent($product) && array_key_exists($p['id'], $minPriceVariantByProductId)) {
-                $minVariant = $minPriceVariantByProductId[$p['id']];
+            if (DfTools::isParent($product) && is_array($minPriceVariant)) {
                 if (
-                    !is_null($minVariant['onsale_price'])
-                    && !is_null($minVariant['price'])
-                    && (empty($p['sale_price']) || $minVariant['onsale_price'] < $p['sale_price'])
+                    !is_null($minPriceVariant['onsale_price'])
+                    && !is_null($minPriceVariant['price'])
+                    && (empty($p['sale_price']) || $minPriceVariant['onsale_price'] < $p['sale_price'])
                 ) {
-                    $p['price'] = $minVariant['price'];
-                    $p['sale_price'] = ($minVariant['onsale_price'] === $minVariant['price']) ? null : $minVariant['onsale_price'];
+                    $p['price'] = $minPriceVariant['price'];
+                    $p['sale_price'] = ($minPriceVariant['onsale_price'] === $minPriceVariant['price']) ? null : $minPriceVariant['onsale_price'];
                     if ($this->multipriceEnabled) {
-                        $p['df_multiprice'] = $minVariant['multiprice'];
+                        $p['df_multiprice'] = $minPriceVariant['multiprice'];
                     }
                 }
             }
         }
 
         if ($this->productVariations) {
-            $p['variation_reference'] = $product['variation_reference'];
-            $p['variation_supplier_reference'] = $product['variation_supplier_reference'];
-            $p['variation_mpn'] = $product['variation_mpn'];
-            $p['variation_ean13'] = $product['variation_ean13'];
-            $p['variation_upc'] = $product['variation_upc'];
+            $p['variation_reference'] = DfTools::cleanString($product['variation_reference']);
+            $p['variation_supplier_reference'] = DfTools::cleanString($product['variation_supplier_reference']);
+            $p['variation_mpn'] = DfTools::cleanString($product['variation_mpn']);
+            $p['variation_ean13'] = DfTools::cleanString($product['variation_ean13']);
+            $p['variation_upc'] = DfTools::cleanString($product['variation_upc']);
             $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
             $p['df_variants_information'] = $this->getVariantsInformation($product);
 
@@ -376,9 +403,9 @@ class DfProductBuild
 
     private function getProductData()
     {
-        $products = DfTools::getAvailableProductsForLanguage(
+        $products = DfTools::getAvailableProducts(
             $this->idLang,
-            $this->idShop,
+            $this->productVariations,
             false,
             false,
             $this->products
@@ -444,48 +471,44 @@ class DfProductBuild
             $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
 
             if (!empty($idImage)) {
-                $imageLink = DfTools::cleanURL(
-                    DfTools::getImageLink(
-                        $product['id_product_attribute'],
-                        $idImage,
-                        $product['link_rewrite'],
-                        $this->imageSize
-                    )
+                $imageLink = DfTools::getImageLink(
+                    $product['id_product_attribute'],
+                    $idImage,
+                    $product['link_rewrite'],
+                    $this->imageSize
                 );
             } else {
-                $imageLink = DfTools::cleanURL(
-                    DfTools::getImageLink(
-                        $product['id_product_attribute'],
-                        $product['id_image'],
-                        $product['link_rewrite'],
-                        $this->imageSize
-                    )
+                $imageLink = DfTools::getImageLink(
+                    $product['id_product_attribute'],
+                    $product['id_image'],
+                    $product['link_rewrite'],
+                    $this->imageSize
                 );
             }
 
             // For variations with no specific pictures
             if (strpos($imageLink, '/-') > -1) {
-                $imageLink = DfTools::cleanURL(
-                    DfTools::getImageLink(
-                        $product['id_product'],
-                        $product['id_image'],
-                        $product['link_rewrite'],
-                        $this->imageSize
-                    )
+                $imageLink = DfTools::getImageLink(
+                    $product['id_product'],
+                    $product['id_image'],
+                    $product['link_rewrite'],
+                    $this->imageSize
                 );
             }
-
-            return $imageLink;
-        }
-
-        return DfTools::cleanURL(
-            DfTools::getImageLink(
+        } else {
+            $imageLink = DfTools::getImageLink(
                 $product['id_product'],
                 $product['id_image'],
                 $product['link_rewrite'],
                 $this->imageSize
-            )
-        );
+            );
+        }
+
+        if (empty($imageLink)) {
+            return '';
+        }
+
+        return DfTools::cleanURL($imageLink);
     }
 
     private function getAvailability($product)
@@ -588,6 +611,10 @@ class DfProductBuild
             $this->idLang,
             $this->attributesShown
         );
+
+        if (empty($attributes)) {
+            return [];
+        }
 
         $altAttributes = [];
 
