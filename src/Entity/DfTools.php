@@ -1645,4 +1645,30 @@ class DfTools
             )
         );
     }
+
+    /**
+     * Validates the Installation ID.
+     * @param string $installationId
+     * @return bool
+     */
+    public static function validateInstallationId($installationId)
+    {
+        if (!empty($installationId) && preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $installationId)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Validates the Api Key.
+     * @param string $apiKey
+     * @return bool
+     */
+    public static function validateApiKey($apiKey)
+    {
+        if (!empty($apiKey) && preg_match('/^[a-zA-Z0-9]{3}-[a-fA-F0-9]{40}$/', $apiKey)) {
+            return true;
+        }
+        return false;
+    }
 }

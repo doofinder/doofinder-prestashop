@@ -76,12 +76,31 @@ class FormManager
             $context->smarty->assign('adv', 1);
         }
 
-        if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
-            $formUpdated = 'store_info_tab';
-        }
-
         $adminPanelView = new DoofinderAdminPanelView($this->module);
+        if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
+            $storeSubmissionErrors = false;
+
+            $installationId = trim(\Tools::getValue('DF_INSTALLATION_ID'));
+            if (DfTools::validateInstallationId($installationId)) {
+                $formValues['DF_INSTALLATION_ID'] = $installationId;
+            } else {
+                $messages .= $adminPanelView->displayErrorCtm($this->module->l('The Store ID ('.$installationId.') must be in UUID format, for example: 3c49f881-5988-4e32-a581-1d577d7d55c0', 'formmanager'));
+                $storeSubmissionErrors = true;
+            }
+
+            $apiKey = trim(\Tools::getValue('DF_API_KEY'));
+            if (DfTools::validateApiKey($apiKey)) {
+                $formValues['DF_API_KEY'] = $apiKey;
+            } else {
+                $messages .= $adminPanelView->displayErrorCtm($this->module->l('The API Key must be in the correct format, for example: eu1-29c05dbdab18cbbb65c95305bb767bab1240a528', 'formmanager'));
+                $storeSubmissionErrors = true;
+            }
+
+            if (!$storeSubmissionErrors) {
+                $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
+                $formUpdated = 'store_info_tab';
+            }
+        }
 
         foreach (array_keys($formValues) as $key) {
             $postKey = str_replace(['[', ']'], '', $key);
