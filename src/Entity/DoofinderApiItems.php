@@ -37,7 +37,9 @@ class DoofinderApiItems
     /**
      * Make a request to the API to update the specified items
      *
-     * @param array items data
+     * @param array $payload Items data to update
+     *
+     * @return array Response from the API
      */
     public function updateBulk($payload)
     {
@@ -51,7 +53,9 @@ class DoofinderApiItems
     /**
      * Make a request to the API to delete the specified items
      *
-     * @param array items ids
+     * @param string|null $payload Items IDs to delete
+     *
+     * @return array Response from the API
      */
     public function deleteBulk($payload)
     {
@@ -69,8 +73,8 @@ class DoofinderApiItems
         $response = $client->post(
             $url,
             $payload,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );

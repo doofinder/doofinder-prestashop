@@ -182,7 +182,7 @@ class DfProductBuild
                 $variations = DfTools::getProductVariations($product['id_product']);
                 foreach ($variations as $variation) {
                     $minPriceVariant = $this->getMinPrice($minPriceVariant, $variation);
-                    $payload[] =  $this->buildVariation($product, $variation);
+                    $payload[] = $this->buildVariation($product, $variation);
                 }
 
                 $payload[] = $this->buildProduct($product, $minPriceVariant);
@@ -190,6 +190,7 @@ class DfProductBuild
                 $payload[] = $this->buildProduct($product, null);
             }
         }
+
         return json_encode($payload);
     }
 
@@ -210,6 +211,7 @@ class DfProductBuild
     public function buildVariation($product, $variation)
     {
         $expanded_variation = array_merge($product, $variation, $extraAttributesHeader = [], $extraHeaders = []);
+
         return $this->buildProduct($expanded_variation, [], $extraAttributesHeader, $extraHeaders);
     }
 
@@ -284,7 +286,6 @@ class DfProductBuild
             }
 
             if (DfTools::isParent($product) && is_array($minPriceVariant)) {
-
                 if (
                     !is_null($minPriceVariant['onsale_price'])
                     && !is_null($minPriceVariant['price'])

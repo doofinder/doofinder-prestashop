@@ -32,7 +32,7 @@ class DoofinderConfig
         $idShopGroup = $context->shop->id_shop_group;
 
         $debug = \Configuration::get('DF_DEBUG', null, $idShopGroup, $idShop);
-        if (!empty($debug) && $debug) {
+        if (!empty($debug)) {
             $message = is_string($message) ? $message : print_r($message, true);
             error_log("$message\n", 3, _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . 'doofinder' . DIRECTORY_SEPARATOR . $logFile);
         }
@@ -68,10 +68,12 @@ class DoofinderConfig
     {
         $apiKey = DfTools::getFormattedApiKey();
         $apiEndpoint = \Configuration::getGlobalValue('DF_AI_API_ENDPOINT');
-        $region = 'eu1';
-        if ('prod' === DoofinderConstants::ENV) {
-            $apiEndpointArray = explode('-', $apiEndpoint);
-            $region = $apiEndpointArray[0];
+        if (preg_match('/([a-z]{2}[0-9])-.*/', $apiEndpoint, $matches)) {
+            // If the API endpoint is in the format 'eu1-xxxx', we extract the region
+            $region = $matches[1];
+        } else {
+            // Otherwise, we assume the default region is 'eu1'
+            $region = 'eu1';
         }
         $fullApiKey = $region . '-' . $apiKey;
 
@@ -129,11 +131,14 @@ class DoofinderConfig
         \Configuration::updateGlobalValue('DF_AI_ADMIN_ENDPOINT', $apiEndpoint);
         \Configuration::updateGlobalValue('DF_AI_API_ENDPOINT', $adminEndpoint);
 
-        $apiEndpointArray = explode('-', $apiEndpoint);
-        $region = 'eu1';
-        if ('prod' === DoofinderConstants::ENV) {
-            $region = $apiEndpointArray[0];
+        if (preg_match('/([a-z]{2}[0-9])-.*/', $apiEndpoint, $matches)) {
+            // If the API endpoint is in the format 'eu1-xxxx', we extract the region
+            $region = $matches[1];
+        } else {
+            // Otherwise, we assume the default region is 'eu1'
+            $region = 'eu1';
         }
+
         $shops = \Shop::getShops();
 
         foreach ($shops as $shop) {
@@ -242,8 +247,8 @@ class DoofinderConfig
         $doomanangerRegionlessUrl = sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, '');
         $result = $client->get(sprintf('%s/auth/login', $doomanangerRegionlessUrl));
 
-        return $result && $result->originalResponse && isset($result->headers['code'])
-            && (strpos($result->originalResponse, 'HTTP/2 200') || $result->headers['code'] == 200);
+        return $result->originalResponse && isset($result->headers['code'])
+            && (strpos($result->originalResponse, 'HTTP/2 200') !== false || $result->headers['code'] == 200);
     }
 
     /**

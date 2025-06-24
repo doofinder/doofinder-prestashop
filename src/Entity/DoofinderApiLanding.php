@@ -35,7 +35,9 @@ class DoofinderApiLanding
     /**
      * Make a request to the API to get landing data
      *
-     * @param string Name from Landing
+     * @param string $slug Slug name of the landing page
+     *
+     * @return array|null Landing data
      */
     public function getLanding($slug)
     {
@@ -53,8 +55,8 @@ class DoofinderApiLanding
         $response = $client->get(
             $url,
             null,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );
@@ -117,7 +119,7 @@ class DoofinderApiLanding
             }
 
             if ($fail || !$dfResults->isOk()) {
-                return false;
+                return [];
             }
 
             $dfResultsArray = $dfResults->getResults();
@@ -127,17 +129,17 @@ class DoofinderApiLanding
                 // For unknown reasons, it can sometimes be defined as 'products' in plural
                 if (in_array($entry['type'], ['product', 'products'], true)) {
                     if (false === strpos($entry['id'], 'VAR-')) {
-                        $productPoolIds[] = (int) pSQL($entry['id']);
+                        $productPoolIds[] = $entry['id'];
                     } else {
                         $idProductAttribute = str_replace('VAR-', '', $entry['id']);
                         if (!in_array($idProductAttribute, $productPoolAttributes)) {
-                            $productPoolAttributes[] = (int) pSQL($idProductAttribute);
+                            $productPoolAttributes[] = $idProductAttribute;
                         }
                         $id_product = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
                             'SELECT id_product FROM ' . _DB_PREFIX_ . 'product_attribute'
-                            . ' WHERE id_product_attribute = ' . (int) pSQL($idProductAttribute)
+                            . ' WHERE id_product_attribute = ' . $idProductAttribute
                         );
-                        $productPoolIds[] = ((!empty($id_product)) ? (int) pSQL($id_product) : 0);
+                        $productPoolIds[] = ((!empty($id_product)) ? $id_product : 0);
                     }
                 }
             }
@@ -185,7 +187,7 @@ class DoofinderApiLanding
                 ' . \Shop::addSqlAssociation('product', 'p') . '
                 INNER JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (
                     p.`id_product` = pl.`id_product`
-                    AND pl.`id_lang` = ' . (int) pSQL($idLang) . \Shop::addSqlRestrictionOnLang('pl') . ') '
+                    AND pl.`id_lang` = ' . $idLang . \Shop::addSqlRestrictionOnLang('pl') . ') '
                 . (\Combination::isFeatureActive() ? ' LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute` pa
                     ON (p.`id_product` = pa.`id_product`)
                     ' . \Shop::addSqlAssociation('product_attribute', 'pa', false, ($showVariations) ? '' :
@@ -200,7 +202,7 @@ class DoofinderApiLanding
                     . ' ON (pai.`id_product_attribute` = product_attribute_shop.`id_product_attribute`) ' : ' ')
                 . \Shop::addSqlAssociation('image', 'i', false, 'i.cover=1') . '
                 LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il'
-                . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) pSQL($idLang) . ') '
+                . ' ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . $idLang . ') '
                 . (\Combination::isFeatureActive() && $showVariations ?
                     'LEFT JOIN (
                         SELECT i.id_image, P.id_product, P.id_product_attribute
@@ -240,7 +242,7 @@ class DoofinderApiLanding
             $result = $db->executeS($sql);
 
             if (!$result) {
-                return false;
+                return [];
             } else {
                 if (version_compare(_PS_VERSION_, '1.7', '<') === true) {
                     $resultProperties = \Product::getProductsProperties((int) $idLang, $result);
@@ -274,7 +276,7 @@ class DoofinderApiLanding
                 'df_query_name' => $dfResults->getProperty('query_name'),
             ];
         } else {
-            return false;
+            return [];
         }
     }
 }
