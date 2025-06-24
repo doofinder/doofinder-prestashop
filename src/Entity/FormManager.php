@@ -84,7 +84,7 @@ class FormManager
             if (DfTools::validateInstallationId($installationId)) {
                 $formValues['DF_INSTALLATION_ID'] = $installationId;
             } else {
-                $messages .= $adminPanelView->displayErrorCtm($this->module->l('The Store ID ('.$installationId.') must be in UUID format, for example: 3c49f881-5988-4e32-a581-1d577d7d55c0', 'formmanager'));
+                $messages .= $adminPanelView->displayErrorCtm($this->module->l('The Store ID must be in UUID format, for example: 3c49f881-5988-4e32-a581-1d577d7d55c0', 'formmanager'));
                 $storeSubmissionErrors = true;
             }
 
