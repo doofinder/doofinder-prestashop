@@ -243,8 +243,8 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => $idLang,
-            '_ID_SHOP_' => $idShop,
+            '_ID_LANG_' => (int) $idLang,
+            '_ID_SHOP_' => (int) $idShop,
         ]);
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = [];
@@ -278,8 +278,8 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => $idLang,
-            '_ID_SHOP_' => $idShop,
+            '_ID_LANG_' => (int) $idLang,
+            '_ID_SHOP_' => (int) $idShop,
         ]);
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -313,8 +313,8 @@ class DfTools
                on pai.id_product_attribute = paic.id_product_attribute
              inner join _DB_PREFIX_image i
                on pai.id_image = i.id_image
-            where pa.id_product = ' . $idProduct . '
-                and pa.id_product_attribute = ' . $idProductAttribute . '
+            where pa.id_product = ' . (int) $idProduct . '
+                and pa.id_product_attribute = ' . (int) $idProductAttribute . '
             group by pa.id_product, pa.id_product_attribute,paic.id_attribute
             ) as P
             inner join _DB_PREFIX_image i
@@ -356,8 +356,8 @@ class DfTools
     ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => $idLang,
-            '_ID_PRODUCT' => $idProduct,
+            '_ID_LANG_' => (int) $idLang,
+            '_ID_PRODUCT' => (int) $idProduct,
         ]);
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -403,8 +403,8 @@ class DfTools
       ';
 
             $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => $idLang,
-                '_VARIATION_ID' => $variationId,
+                '_ID_LANG_' => (int) $idLang,
+                '_VARIATION_ID' => (int) $variationId,
             ]);
 
             $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -486,7 +486,7 @@ class DfTools
             ';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_LANG_' => $idLang,
+            '_ID_LANG_' => (int) $idLang,
         ]);
 
         return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -805,10 +805,10 @@ class DfTools
       ;';
 
         $sql = self::prepareSQL($sql, [
-            '_ID_CATEGORY_' => $idCategory,
-            '_ID_SHOP_' => $idShop,
-            '_ID_LANG_' => $idLang,
-            '_EXCLUDED_IDS_' => (string) pSQL(implode(',', $excludedIds)),
+            '_ID_CATEGORY_' => (int) $idCategory,
+            '_ID_SHOP_' => (int) $idShop,
+            '_ID_LANG_' => (int) $idLang,
+            '_EXCLUDED_IDS_' => pSQL(implode(',', $excludedIds)),
         ]);
 
         $sql = str_replace("\'", "'", $sql);
@@ -905,16 +905,16 @@ class DfTools
                 . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
             $mainCategoryInner = self::prepareSQL(
                 $mainInnerSql,
-                ['_ID_PRODUCT_' => $idProduct, '_ID_SHOP_' => $idShop]
+                ['_ID_PRODUCT_' => (int) $idProduct, '_ID_SHOP_' => (int) $idShop]
             );
             $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
         }
 
         $sql = self::prepareSQL($sql, [
-            '_ID_PRODUCT_' => $idProduct,
-            '_MAIN_CATEGORY_INNER_' => (string) pSQL($mainCategoryInner),
-            '_MAIN_CATEGORY_WHERE_' => (string) pSQL($mainCategoryWhere),
-            '_ID_SHOP_' => $idShop,
+            '_ID_PRODUCT_' => (int) $idProduct,
+            '_MAIN_CATEGORY_INNER_' => pSQL($mainCategoryInner),
+            '_MAIN_CATEGORY_WHERE_' => pSQL($mainCategoryWhere),
+            '_ID_SHOP_' => (int) $idShop,
         ]);
 
         $sql = str_replace("\'", "'", $sql);
