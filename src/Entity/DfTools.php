@@ -669,7 +669,6 @@ class DfTools
 
         $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
         if ($result === false) {
-            error_log("[Doofinder fallback] executeS devolvió false. Intentando con Db::getInstance()");
             $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
         }
         return $result;
