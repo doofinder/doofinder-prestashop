@@ -28,8 +28,8 @@ class DoofinderLayerApi
         $response = $client->get(
             $apiEndpoint,
             null,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $apiKey]
         );
