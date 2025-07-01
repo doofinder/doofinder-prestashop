@@ -667,7 +667,11 @@ class DfTools
             $query->limit((int) $limit, (int) $offset);
         }
 
-        return DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        if ($result === false) {
+            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        }
+        return $result;
     }
 
     /**
