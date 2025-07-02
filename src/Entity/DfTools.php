@@ -514,6 +514,11 @@ class DfTools
      */
     public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
     {
+        
+        if (null === $ids) {
+            $ids = self::getAvailableProductsByIds($idLang, $checkLeadership, $limit, $offset);
+        }
+
         $query = new \DbQuery();
 
         if (self::versionGte('1.7.7.0')) {
@@ -662,10 +667,6 @@ class DfTools
 
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
-
-        if ($limit) {
-            $query->limit((int) $limit, (int) $offset);
-        }
 
         $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
         if ($result === false) {
@@ -1655,5 +1656,55 @@ class DfTools
             return true;
         }
         return false;
+    }
+
+    /**
+     * Get the available products by their IDs. 
+     * When the catalog is large, this is much faster than get the products by offset and limit.
+     *
+     * @param int $idLang The language ID
+     * @param bool $checkLeadership Whether to check for leadership
+     * @param int|false $limit The maximum number of products to return
+     * @param int|false $offset The offset for pagination
+     */
+    public static function getAvailableProductsByIds($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
+    {
+        $idQuery = new \DbQuery();
+        $idQuery->select('product_shop.id_product');
+        $idQuery->from('product', 'p');
+        $idQuery->join(\Shop::addSqlAssociation('product', 'p'));
+        
+        // Apply the same where conditions as the main query
+        if (self::versionGte('1.5.1.0')) {
+            $idQuery->where('product_shop.`active` = 1');
+            $idQuery->where("product_shop.`visibility` IN ('search', 'both')");
+        } else {
+            $idQuery->where('p.`active` = 1');
+            if (self::versionGte('1.5.0.9')) {
+                $idQuery->where("p.`visibility` IN ('search', 'both')");
+            }
+        }
+        
+        $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
+        
+        if (null !== $ids) {
+            $idQuery->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
+        }
+        
+        $idQuery->orderBy('product_shop.id_product');
+        $idQuery->limit((int) $limit, (int) $offset);
+
+        $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery, false, false);
+
+        if (!$response || empty($response)) {
+            return [];
+        }
+
+        $productsIds = [];
+        foreach($response as $product) {
+            $productsIds[] = $product['id_product'];
+        }
+
+        return $productsIds;
     }
 }
