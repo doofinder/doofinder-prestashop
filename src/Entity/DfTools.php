@@ -1659,7 +1659,7 @@ class DfTools
     }
 
     /**
-     * Get the available products by their IDs.
+     * Get the ids of the available products.
      * When the catalog is large, this is much faster than get the products by offset and limit.
      *
      * @param int $idLang The language ID
