@@ -516,7 +516,7 @@ class DfTools
     {
         
         if (null === $ids) {
-            $ids = self::getAvailableProductsByIds($idLang, $checkLeadership, $limit, $offset);
+            $ids = self::getAvailableProductsIds($idLang, $limit, $offset);
         }
 
         $query = new \DbQuery();
@@ -1667,7 +1667,7 @@ class DfTools
      * @param int|false $limit The maximum number of products to return
      * @param int|false $offset The offset for pagination
      */
-    public static function getAvailableProductsByIds($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
+    public static function getAvailableProductsIds($idLang, $limit, $offset)
     {
         $idQuery = new \DbQuery();
         $idQuery->select('product_shop.id_product');
@@ -1685,14 +1685,12 @@ class DfTools
             }
         }
         
-        $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
-        
-        if (null !== $ids) {
-            $idQuery->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
-        }
-        
+        $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');      
         $idQuery->orderBy('product_shop.id_product');
-        $idQuery->limit((int) $limit, (int) $offset);
+        
+        if ($limit) {
+            $idQuery->limit((int) $limit, (int) $offset);
+        }
 
         $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery, false, false);
 
@@ -1701,7 +1699,7 @@ class DfTools
         }
 
         $productsIds = [];
-        
+
         foreach($response as $product) {
             $productsIds[] = $product['id_product'];
         }
