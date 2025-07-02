@@ -1659,7 +1659,7 @@ class DfTools
     }
 
     /**
-     * Get the available products by their IDs. 
+     * Get the available products by their IDs.
      * When the catalog is large, this is much faster than get the products by offset and limit.
      *
      * @param int $idLang The language ID
@@ -1701,6 +1701,7 @@ class DfTools
         }
 
         $productsIds = [];
+        
         foreach($response as $product) {
             $productsIds[] = $product['id_product'];
         }
