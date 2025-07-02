@@ -1685,7 +1685,7 @@ class DfTools
             }
         }
         
-        $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');      
+        $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
         $idQuery->orderBy('product_shop.id_product');
         
         if ($limit) {
@@ -1700,7 +1700,7 @@ class DfTools
 
         $productsIds = [];
 
-        foreach($response as $product) {
+        foreach ($response as $product) {
             $productsIds[] = $product['id_product'];
         }
 
