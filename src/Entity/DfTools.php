@@ -514,7 +514,6 @@ class DfTools
      */
     public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
     {
-        
         if (null === $ids) {
             $ids = self::getAvailableProductsIds($idLang, $limit, $offset);
         }
@@ -1663,7 +1662,6 @@ class DfTools
      * When the catalog is large, this is much faster than get the products by offset and limit.
      *
      * @param int $idLang The language ID
-     * @param bool $checkLeadership Whether to check for leadership
      * @param int|false $limit The maximum number of products to return
      * @param int|false $offset The offset for pagination
      */
@@ -1673,8 +1671,7 @@ class DfTools
         $idQuery->select('product_shop.id_product');
         $idQuery->from('product', 'p');
         $idQuery->join(\Shop::addSqlAssociation('product', 'p'));
-        
-        // Apply the same where conditions as the main query
+
         if (self::versionGte('1.5.1.0')) {
             $idQuery->where('product_shop.`active` = 1');
             $idQuery->where("product_shop.`visibility` IN ('search', 'both')");
@@ -1684,22 +1681,17 @@ class DfTools
                 $idQuery->where("p.`visibility` IN ('search', 'both')");
             }
         }
-        
+
         $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
         $idQuery->orderBy('product_shop.id_product');
-        
+
         if ($limit) {
             $idQuery->limit((int) $limit, (int) $offset);
         }
 
         $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery, false, false);
 
-        if (!$response || empty($response)) {
-            return [];
-        }
-
         $productsIds = [];
-
         foreach ($response as $product) {
             $productsIds[] = $product['id_product'];
         }
