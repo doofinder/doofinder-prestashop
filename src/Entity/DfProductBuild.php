@@ -249,6 +249,7 @@ class DfProductBuild
         $p['upc'] = DfTools::cleanString($product['upc']);
         $p['reference'] = DfTools::cleanString($product['reference']);
         $p['supplier_reference'] = DfTools::cleanString($product['supplier_reference']);
+        $p['supplier_name'] = DfTools::cleanString($product['supplier_name']);
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
 

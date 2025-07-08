@@ -599,6 +599,9 @@ class DfTools
         $query->select('m.name AS manufacturer');
         $query->leftJoin('manufacturer', 'm', 'm.`id_manufacturer` = p.`id_manufacturer`');
 
+        $query->select('s.name AS supplier_name');
+        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
+
         $query->select('GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags');
         $query->leftJoin(
             'product_tag',
@@ -671,6 +674,7 @@ class DfTools
         if ($result === false) {
             $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
         }
+
         return $result;
     }
 
@@ -723,12 +727,15 @@ class DfTools
 
         // Product supplier reference
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
+        $query->select('s.name AS supplier_name');
         $query->leftJoin(
             'product_supplier',
             'psp',
             'p.`id_product` = psp.`id_product`
             AND psp.`id_product_attribute` = pa.id_product_attribute'
         );
+
+        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
 
         $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
         $query->leftJoin(
@@ -1633,7 +1640,9 @@ class DfTools
 
     /**
      * Validates the Installation ID.
+     *
      * @param string $installationId
+     *
      * @return bool
      */
     public static function validateInstallationId($installationId)
@@ -1641,12 +1650,15 @@ class DfTools
         if (!empty($installationId) && preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $installationId)) {
             return true;
         }
+
         return false;
     }
 
     /**
      * Validates the Api Key.
+     *
      * @param string $apiKey
+     *
      * @return bool
      */
     public static function validateApiKey($apiKey)
@@ -1654,6 +1666,7 @@ class DfTools
         if (!empty($apiKey) && preg_match('/^[a-zA-Z0-9]{3}-[a-fA-F0-9]{40}$/', $apiKey)) {
             return true;
         }
+
         return false;
     }
 
