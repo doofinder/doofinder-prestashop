@@ -514,6 +514,10 @@ class DfTools
      */
     public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
     {
+        if (null === $ids) {
+            $ids = self::getAvailableProductsIds($idLang, $limit, $offset);
+        }
+
         $query = new \DbQuery();
 
         if (self::versionGte('1.7.7.0')) {
@@ -595,6 +599,9 @@ class DfTools
         $query->select('m.name AS manufacturer');
         $query->leftJoin('manufacturer', 'm', 'm.`id_manufacturer` = p.`id_manufacturer`');
 
+        $query->select('s.name AS supplier_name');
+        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
+
         $query->select('GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags');
         $query->leftJoin(
             'product_tag',
@@ -663,11 +670,12 @@ class DfTools
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
-        if ($limit) {
-            $query->limit((int) $limit, (int) $offset);
+        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        if ($result === false) {
+            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
         }
 
-        return DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        return $result;
     }
 
     /**
@@ -719,12 +727,15 @@ class DfTools
 
         // Product supplier reference
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
+        $query->select('s.name AS supplier_name');
         $query->leftJoin(
             'product_supplier',
             'psp',
             'p.`id_product` = psp.`id_product`
             AND psp.`id_product_attribute` = pa.id_product_attribute'
         );
+
+        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
 
         $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
         $query->leftJoin(
@@ -1629,7 +1640,9 @@ class DfTools
 
     /**
      * Validates the Installation ID.
+     *
      * @param string $installationId
+     *
      * @return bool
      */
     public static function validateInstallationId($installationId)
@@ -1637,12 +1650,15 @@ class DfTools
         if (!empty($installationId) && preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $installationId)) {
             return true;
         }
+
         return false;
     }
 
     /**
      * Validates the Api Key.
+     *
      * @param string $apiKey
+     *
      * @return bool
      */
     public static function validateApiKey($apiKey)
@@ -1650,6 +1666,49 @@ class DfTools
         if (!empty($apiKey) && preg_match('/^[a-zA-Z0-9]{3}-[a-fA-F0-9]{40}$/', $apiKey)) {
             return true;
         }
+
         return false;
+    }
+
+    /**
+     * Get the ids of the available products.
+     * When the catalog is large, this is much faster than get the products by offset and limit.
+     *
+     * @param int $idLang The language ID
+     * @param int|false $limit The maximum number of products to return
+     * @param int|false $offset The offset for pagination
+     */
+    public static function getAvailableProductsIds($idLang, $limit, $offset)
+    {
+        $idQuery = new \DbQuery();
+        $idQuery->select('product_shop.id_product');
+        $idQuery->from('product', 'p');
+        $idQuery->join(\Shop::addSqlAssociation('product', 'p'));
+
+        if (self::versionGte('1.5.1.0')) {
+            $idQuery->where('product_shop.`active` = 1');
+            $idQuery->where("product_shop.`visibility` IN ('search', 'both')");
+        } else {
+            $idQuery->where('p.`active` = 1');
+            if (self::versionGte('1.5.0.9')) {
+                $idQuery->where("p.`visibility` IN ('search', 'both')");
+            }
+        }
+
+        $idQuery->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
+        $idQuery->orderBy('product_shop.id_product');
+
+        if ($limit) {
+            $idQuery->limit((int) $limit, (int) $offset);
+        }
+
+        $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery, false, false);
+
+        $productsIds = [];
+        foreach ($response as $product) {
+            $productsIds[] = $product['id_product'];
+        }
+
+        return $productsIds;
     }
 }
