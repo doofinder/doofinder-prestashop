@@ -681,6 +681,7 @@ class DfTools
             // Fallback to default DB instance on exception
             $result = \Db::getInstance()->executeS($query);
         }
+
         return $result;
     }
 
@@ -763,6 +764,7 @@ class DfTools
             // Fallback to default DB instance on exception
             $result = \Db::getInstance()->executeS($query);
         }
+
         return $result;
     }
 

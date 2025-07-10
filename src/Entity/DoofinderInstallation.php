@@ -153,9 +153,9 @@ class DoofinderInstallation
             'plugin_version' => DoofinderConstants::VERSION,
             'options' => [
                 'url' => preg_replace('#^https?://#', '', $shopUrl),
-                'shop_id' => (int)$shopId,
-                'shop_group_id' => (int)$shopGroupId
-            ]
+                'shop_id' => (int) $shopId,
+                'shop_group_id' => (int) $shopGroupId,
+            ],
         ];
 
         foreach ($languages as $lang) {
