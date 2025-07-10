@@ -670,11 +670,10 @@ class DfTools
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
-        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
         if ($result === false) {
-            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+            $result = \Db::getInstance()->executeS($query);
         }
-
         return $result;
     }
 
@@ -749,7 +748,11 @@ class DfTools
 
         $query->groupBy('pa.id_product_attribute');
 
-        return DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+        if ($result === false) {
+            $result = \Db::getInstance()->executeS($query);
+        }
+        return $result;
     }
 
     /**
