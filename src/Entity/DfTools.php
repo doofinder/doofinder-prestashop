@@ -671,12 +671,14 @@ class DfTools
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
-        $result = false;
         try {
             $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
-        } catch (\PrestaShopException $e) {}
-
-        if ($result === false) {
+            // If the result is false or null, fallback to default DB instance
+            if (!$result) {
+                $result = \Db::getInstance()->executeS($query);
+            }
+        } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
             $result = \Db::getInstance()->executeS($query);
         }
         return $result;
@@ -751,12 +753,14 @@ class DfTools
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
         );
 
-        $result = false;
         try {
             $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
-        } catch (\PrestaShopException $e) {}
-
-        if ($result === false) {
+            // If the result is false or null, fallback to default DB instance
+            if (!$result) {
+                $result = \Db::getInstance()->executeS($query);
+            }
+        } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
             $result = \Db::getInstance()->executeS($query);
         }
         return $result;
@@ -1712,11 +1716,17 @@ class DfTools
             $idQuery->limit((int) $limit, (int) $offset);
         }
 
-        $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery);
-        if ($response === false) {
-            // Sometimes there are modules that make nasty things
+        try {
+            $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery);
+            // If the result is false or null, fallback to default DB instance
+            if (!$response) {
+                $response = \Db::getInstance()->executeS($idQuery);
+            }
+        } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
             $response = \Db::getInstance()->executeS($idQuery);
         }
+
         $productsIds = [];
         foreach ($response as $product) {
             $productsIds[] = $product['id_product'];
