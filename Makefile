@@ -71,7 +71,7 @@ init: doofinder-configure
 # Check code consitency for the Doofinder Feed module using PHP Code Sniffer
 consistency:
 	docker run -it --rm -ePHP_CS_FIXER_IGNORE_ENV=1 \
-	-v$(shell pwd):/app -v/app/html -v/app/vendor
+	-v$(shell pwd):/app -v/app/html -v/app/vendor \
 	composer:lts sh -c \
 	"composer install && \
 	vendor/bin/php-cs-fixer fix --diff --using-cache=no"

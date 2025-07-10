@@ -516,6 +516,9 @@ class DfTools
     {
         if (null === $ids) {
             $ids = self::getAvailableProductsIds($idLang, $limit, $offset);
+            if (empty($ids)) {
+                return [];
+            }
         }
 
         $query = new \DbQuery();
@@ -663,16 +666,20 @@ class DfTools
 
         $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
 
-        if (null !== $ids) {
-            $query->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
-        }
+        $query->where('product_shop.id_product IN (' . implode(',', array_map('intval', $ids)) . ')');
 
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
-        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
-        if ($result === false) {
-            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        try {
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            // If the result is false or null, fallback to default DB instance
+            if (!$result) {
+                $result = \Db::getInstance()->executeS($query);
+            }
+        } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
+            $result = \Db::getInstance()->executeS($query);
         }
 
         return $result;
@@ -747,9 +754,18 @@ class DfTools
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
         );
 
-        $query->groupBy('pa.id_product_attribute');
+        try {
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            // If the result is false or null, fallback to default DB instance
+            if (!$result) {
+                $result = \Db::getInstance()->executeS($query);
+            }
+        } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
+            $result = \Db::getInstance()->executeS($query);
+        }
 
-        return DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query, false, false);
+        return $result;
     }
 
     /**
@@ -1702,7 +1718,16 @@ class DfTools
             $idQuery->limit((int) $limit, (int) $offset);
         }
 
-        $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery, false, false);
+        try {
+            $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery);
+            // If the result is false or null, fallback to default DB instance
+            if (!$response) {
+                $response = \Db::getInstance()->executeS($idQuery);
+            }
+        } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
+            $response = \Db::getInstance()->executeS($idQuery);
+        }
 
         $productsIds = [];
         foreach ($response as $product) {

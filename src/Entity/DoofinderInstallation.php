@@ -151,6 +151,11 @@ class DoofinderInstallation
             'site_url' => $shopUrl,
             'search_engines' => [],
             'plugin_version' => DoofinderConstants::VERSION,
+            'options' => [
+                'url' => preg_replace('#^https?://#', '', $shopUrl),
+                'shop_id' => (int) $shopId,
+                'shop_group_id' => (int) $shopGroupId,
+            ],
         ];
 
         foreach ($languages as $lang) {
