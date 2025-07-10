@@ -103,7 +103,8 @@ class DoofinderAdminPanelView
         // This URL will be used in `onboarding_tab.tpl` to skip the automatic store wizard.
         $skipUrl .= $separator . http_build_query($skipUrlParams);
 
-        $redirect = $context->shop->getBaseURL(true, false) . $this->module->getPath() . 'config.php';
+        $link = \Context::getContext()->link;
+        $redirect = $link->getPageLink('module-doofinder-config');
         $token = DfTools::encrypt($redirect);
         $paramsPopup = 'email=' . $context->employee->email . '&token=' . $token;
 
@@ -118,7 +119,7 @@ class DoofinderAdminPanelView
         $context->smarty->assign('paramsPopup', $paramsPopup);
         $context->smarty->assign('doofinderAdminUrl', sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, ''));
 
-        $link = \Context::getContext()->link;
+
         $context->smarty->assign('ajaxUrl', $link->getPageLink('module-doofinder-ajax'));
         $context->smarty->assign('configUrl', $link->getPageLink('module-doofinder-config'));
 
