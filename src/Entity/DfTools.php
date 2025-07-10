@@ -671,7 +671,11 @@ class DfTools
         $query->orderBy('product_shop.id_product');
         $query->groupBy('product_shop.id_product');
 
-        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+        $result = false;
+        try {
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+        } catch (\PrestaShopException $e) {}
+
         if ($result === false) {
             $result = \Db::getInstance()->executeS($query);
         }
@@ -747,9 +751,11 @@ class DfTools
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
         );
 
-        $query->groupBy('pa.id_product_attribute');
+        $result = false;
+        try {
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+        } catch (\PrestaShopException $e) {}
 
-        $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
         if ($result === false) {
             $result = \Db::getInstance()->executeS($query);
         }
@@ -1706,8 +1712,11 @@ class DfTools
             $idQuery->limit((int) $limit, (int) $offset);
         }
 
-        $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery, false, false);
-
+        $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery);
+        if ($response === false) {
+            // Sometimes there are modules that make nasty things
+            $response = \Db::getInstance()->executeS($idQuery);
+        }
         $productsIds = [];
         foreach ($response as $product) {
             $productsIds[] = $product['id_product'];
