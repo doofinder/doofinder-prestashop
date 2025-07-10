@@ -119,7 +119,6 @@ class DoofinderAdminPanelView
         $context->smarty->assign('paramsPopup', $paramsPopup);
         $context->smarty->assign('doofinderAdminUrl', sprintf(DoofinderConstants::DOOMANAGER_REGION_URL, ''));
 
-
         $context->smarty->assign('ajaxUrl', $link->getPageLink('module-doofinder-ajax'));
         $context->smarty->assign('configUrl', $link->getPageLink('module-doofinder-config'));
 
