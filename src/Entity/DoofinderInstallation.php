@@ -163,9 +163,11 @@ class DoofinderInstallation
                 continue;
             }
             $langCode = $lang['language_code'];
+            $locale = !empty($lang['locale']) ? $lang['locale'] : $langCode;
             $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code']);
             $storeData['search_engines'][] = [
                 'language' => $langCode,
+                'locale' => $locale,
                 'currency' => $primaryCurrency->iso_code,
                 'feed_url' => $feedUrl,
                 'callback_url' => UrlManager::getProcessCallbackUrl($shopId),
