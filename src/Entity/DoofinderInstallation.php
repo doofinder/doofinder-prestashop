@@ -166,8 +166,7 @@ class DoofinderInstallation
             $locale = !empty($lang['locale']) ? $lang['locale'] : $langCode;
             $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code']);
             $storeData['search_engines'][] = [
-                'language' => $langCode,
-                'locale' => $locale,
+                'language' => $locale,
                 'currency' => $primaryCurrency->iso_code,
                 'feed_url' => $feedUrl,
                 'callback_url' => UrlManager::getProcessCallbackUrl($shopId),
