@@ -201,6 +201,8 @@ class Doofinder extends Module
     {
         $this->context->controller->addJS(PrestaShop\Module\Doofinder\Src\Entity\DoofinderScript::getSingleScriptPath($this->_path));
 
+        $this->context->smarty->assign('static_token', Tools::getToken(false));
+
         return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
     }
 
