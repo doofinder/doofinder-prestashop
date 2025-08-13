@@ -1,10 +1,14 @@
 {
   "require-dev": {
     "prestashop/php-dev-tools": "^5",
-    "friendsofphp/php-cs-fixer": "^3.0"
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "phpdocumentor/shim": "^3.8"
   },
   "config": {
     "prepend-autoloader": false,
-    "lock": false
+    "lock": false,
+    "allow-plugins": {
+      "phpdocumentor/shim": true
+    }
   }
 }
