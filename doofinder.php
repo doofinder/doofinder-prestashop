@@ -25,16 +25,65 @@ the namespace prepended directly:
 https://github.com/gskema/prestashop-1.6-module-boilerplate/blob/master/docs/namespaces.md#how-to-use-php-namespaces-in-prestashop-modules
 */
 
+/**
+ * Doofinder module main class.
+ *
+ * Responsible for module lifecycle (install/uninstall), configuration screen rendering,
+ * hook registration/handling, and integration with Doofinder's frontend layer and APIs.
+ *
+ * @since 1.0.0
+ */
 class Doofinder extends Module
 {
+    /**
+     * HTML buffer used to accumulate configuration output in the back office.
+     *
+     * @var string
+     */
     protected $html = '';
+    /**
+     * Collection of form validation errors to be displayed to the merchant.
+     *
+     * @var array<int, string>
+     */
     protected $postErrors = [];
+    /**
+     * Map of index name to product URL pattern used by the JS layer.
+     *
+     * @var array<string, string>
+     */
     protected $productLinks = [];
+    /**
+     * Compatibility flag with PrestaShop layered navigation.
+     *
+     * @var bool
+     */
     public $ps_layered_full_tree = true;
+    /**
+     * Whether to display the Doofinder search banner.
+     * More info at: https://support.doofinder.com/search/promotional-tools/banners
+     *
+     * @var bool
+     */
     public $searchBanner = false;
+    /**
+     * Relative path to the admin templates directory used in configuration screens.
+     *
+     * @var string
+     */
     public $admin_template_dir = '';
+    /**
+     * Hook manager coordinating hook registration and shared hook logic.
+     *
+     * @var PrestaShop\Module\Doofinder\Src\Entity\HookManager
+     */
     public $hookManager;
 
+    /**
+     * Module constructor.
+     *
+     * Initializes module metadata, declares compatibility and bootstraps the hook manager.
+     */
     public function __construct()
     {
         $this->name = 'doofinder';
@@ -55,9 +104,11 @@ class Doofinder extends Module
     }
 
     /**
-     * Install the module
+     * Install the module and register all required dependencies.
      *
-     * @return bool
+     * Creates database schema, back office tabs and registers hooks.
+     *
+     * @return bool True on success, false otherwise
      */
     public function install()
     {
@@ -68,9 +119,11 @@ class Doofinder extends Module
     }
 
     /**
-     * Uninstall the module and its dependencies
+     * Uninstall the module and its dependencies.
      *
-     * @return bool
+     * Removes database schema, back office tabs and configuration entries.
+     *
+     * @return bool True on success, false otherwise
      */
     public function uninstall()
     {
@@ -83,7 +136,7 @@ class Doofinder extends Module
     /**
      * Sets the product links.
      *
-     * @param array $productLinks
+     * @param array<string, string> $productLinks Map of index name => product URL
      *
      * @return void
      */
@@ -95,8 +148,8 @@ class Doofinder extends Module
     /**
      * Sets a specific product link by index name.
      *
-     * @param string $indexName identifier of the link
-     * @param string $productLink
+     * @param string $indexName Identifier of the Doofinder index
+     * @param string $productLink URL template or absolute link for the index
      *
      * @return void
      */
@@ -108,7 +161,7 @@ class Doofinder extends Module
     /**
      * Gets the product links.
      *
-     * @return array
+     * @return array<string, string> Map of index name => product URL
      */
     public function getProductLinks()
     {
@@ -116,9 +169,11 @@ class Doofinder extends Module
     }
 
     /**
-     * Add controller routes
+     * Add controller routes.
      *
-     * @return array
+     * Allows the module to declare custom front controllers and their routes.
+     *
+     * @return array Module routes definition understood by PrestaShop
      */
     public function hookModuleRoutes()
     {
@@ -129,7 +184,7 @@ class Doofinder extends Module
      * Update the hashid of the search engines of the store in the configuration.
      * It must be declared here too to be used by upgrade 4.5.0.
      *
-     * @return true
+     * @return bool True on success
      */
     public function setSearchEnginesByConfig()
     {
@@ -137,7 +192,9 @@ class Doofinder extends Module
     }
 
     /**
-     * Handles the module's configuration page
+     * Handles the module's configuration page.
+     *
+     * Builds and returns the admin configuration UI for the module.
      *
      * @return string The page's HTML content
      */
@@ -149,9 +206,9 @@ class Doofinder extends Module
     }
 
     /**
-     * Returns the module path
+     * Returns the module path.
      *
-     * @return string
+     * @return string Base path for this module
      */
     public function getPath()
     {
@@ -159,9 +216,9 @@ class Doofinder extends Module
     }
 
     /**
-     * Returns the name of the main table used for modules installed
+     * Returns the name of the main table used for modules installed.
      *
-     * @return string
+     * @return string Table name
      */
     public function getTable()
     {
@@ -169,9 +226,9 @@ class Doofinder extends Module
     }
 
     /**
-     * Returns the identifier of the main table
+     * Returns the identifier of the main table.
      *
-     * @return string
+     * @return string Table identifier field
      */
     public function getIdentifier()
     {
@@ -180,6 +237,13 @@ class Doofinder extends Module
 
     /**
      * @hook displayHeader FrontControllerCore
+     *
+     * Injects Doofinder's single script on the front office when the search layer
+     * must be initialized.
+     *
+     * @param array $params Hook parameters provided by PrestaShop
+     *
+     * @return string Rendered template or empty string when not applicable
      */
     public function hookDisplayHeader($params)
     {
@@ -193,9 +257,10 @@ class Doofinder extends Module
     }
 
     /**
-     * Gets the Doofinder single script path according to the PrestaShop version.
+     * Gets the Doofinder single script path according to the PrestaShop version
+     * and assigns the corresponding template.
      *
-     * @return string
+     * @return string Rendered script template
      */
     public function displaySingleScript()
     {
@@ -206,6 +271,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionProductSave ProductCore
+     *
+     * Sends product changes to Doofinder when a product is saved.
+     *
+     * @param array $params Must contain keys 'product' (Product) and 'id_product' (int)
+     *
+     * @return void
      */
     public function hookActionProductSave($params)
     {
@@ -215,6 +286,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionProductDelete ProductCore
+     *
+     * Notifies Doofinder when a product is deleted.
+     *
+     * @param array $params Must contain key 'id_product' (int)
+     *
+     * @return void
      */
     public function hookActionProductDelete($params)
     {
@@ -223,6 +300,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionObjectCmsAddAfter ObjectModelCore
+     *
+     * Sends newly created CMS pages to Doofinder when active.
+     *
+     * @param array $params Must contain key 'object' (CMS)
+     *
+     * @return void
      */
     public function hookActionObjectCmsAddAfter($params)
     {
@@ -233,6 +316,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionObjectCmsUpdateAfter ObjectModelCore
+     *
+     * Updates or removes CMS pages from Doofinder depending on their active state.
+     *
+     * @param array $params Must contain key 'object' (CMS)
+     *
+     * @return void
      */
     public function hookActionObjectCmsUpdateAfter($params)
     {
@@ -242,6 +331,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionObjectCmsDeleteAfter ObjectModelCore
+     *
+     * Notifies Doofinder when a CMS page is deleted.
+     *
+     * @param array $params Must contain key 'object' (CMS)
+     *
+     * @return void
      */
     public function hookActionObjectCmsDeleteAfter($params)
     {
@@ -250,6 +345,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionObjectCategoryAddAfter ObjectModelCore
+     *
+     * Sends newly created categories to Doofinder when active.
+     *
+     * @param array $params Must contain key 'object' (Category)
+     *
+     * @return void
      */
     public function hookActionObjectCategoryAddAfter($params)
     {
@@ -260,6 +361,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionObjectCategoryUpdateAfter ObjectModelCore
+     *
+     * Updates or removes categories from Doofinder depending on their active state.
+     *
+     * @param array $params Must contain key 'object' (Category)
+     *
+     * @return void
      */
     public function hookActionObjectCategoryUpdateAfter($params)
     {
@@ -269,6 +376,12 @@ class Doofinder extends Module
 
     /**
      * @hook actionObjectCategoryDeleteAfter ObjectModelCore
+     *
+     * Notifies Doofinder when a category is deleted.
+     *
+     * @param array $params Must contain key 'object' (Category)
+     *
+     * @return void
      */
     public function hookActionObjectCategoryDeleteAfter($params)
     {
@@ -276,9 +389,12 @@ class Doofinder extends Module
     }
 
     /**
-     * Sets the variables to assign to the template
+     * Sets the variables to assign to the template.
      *
-     * @param array $params
+     * Prepares common Smarty assignments used by several hooks (language, currency,
+     * product links and request context).
+     *
+     * @param array $params Hook parameters provided by PrestaShop
      *
      * @return void
      */
