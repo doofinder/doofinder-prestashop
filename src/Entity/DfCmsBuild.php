@@ -19,11 +19,33 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Builds structured payload data for CMS pages in a PrestaShop store.
+ *
+ * This class retrieves CMS page information, sanitizes the data using DfTools,
+ * and generates an array or JSON payload with relevant page details such as
+ * title, meta information, content and links.
+ */
 class DfCmsBuild
 {
+    /**
+     * @var int shop ID
+     */
     private $idShop;
+
+    /**
+     * @var int language ID
+     */
     private $idLang;
+
+    /**
+     * @var array list of CMS page IDs to include in the payload
+     */
     private $cmsPages;
+
+    /**
+     * @var \Link prestashop link instance for building URLs
+     */
     private $link;
 
     public function __construct($idShop, $idLang)
@@ -33,15 +55,28 @@ class DfCmsBuild
     }
 
     /**
-     * Set the CMS pages to be included in the payload
+     * Sets the CMS page IDs to be included in the payload.
      *
-     * @param array $arrayCmsPages cms pages ids
+     * @param array $arrayCmsPages list of CMS page IDs
+     *
+     * @return void
      */
     public function setCmsPages($arrayCmsPages)
     {
         $this->cmsPages = $arrayCmsPages;
     }
 
+    /**
+     * Builds the CMS pages payload.
+     *
+     * - Iterates over each provided CMS page ID.
+     * - Retrieves and sanitizes CMS data.
+     * - Generates an array or JSON structure containing page information.
+     *
+     * @param bool $json whether to return the payload as JSON (true) or array (false)
+     *
+     * @return string|array JSON string or array containing CMS page data
+     */
     public function build($json = true)
     {
         $this->assign();
@@ -55,11 +90,26 @@ class DfCmsBuild
         return $json ? json_encode($payload) : $payload;
     }
 
+    /**
+     * Assigns required PrestaShop context properties (e.g., link builder).
+     *
+     * @return void
+     */
     private function assign()
     {
         $this->link = \Context::getContext()->link;
     }
 
+    /**
+     * Builds a single CMS page's data array.
+     *
+     * - Cleans text fields using DfTools.
+     * - Retrieves CMS link and content.
+     *
+     * @param int $idCms CMS page ID
+     *
+     * @return array associative array with CMS page details
+     */
     private function buildCms($idCms)
     {
         $cms = new \CMS($idCms, $this->idLang, $this->idShop);

@@ -19,26 +19,112 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class DfProductBuild
+ *
+ * Builds product payloads for Doofinder export in PrestaShop.
+ *
+ * This class:
+ * - Fetches product data using custom utilities (DfTools, DoofinderConstants).
+ * - Processes attributes, features, variations, pricing, and stock.
+ * - Can build JSON payloads or arrays for CSV export.
+ */
 class DfProductBuild
 {
+    /**
+     * @var int shop ID
+     */
     private $idShop;
+
+    /**
+     * @var int language ID
+     */
     private $idLang;
+
+    /**
+     * @var int currency ID
+     */
     private $idCurrency;
+
+    /**
+     * @var array available currencies in this shop
+     */
     private $currencies;
+
+    /**
+     * @var array product IDs to process
+     */
     private $products;
+
+    /**
+     * @var string attribute group configuration to display
+     */
     private $attributesShown;
+
+    /**
+     * @var bool whether product prices should be displayed
+     */
     private $displayPrices;
+
+    /**
+     * @var string preconfigured image size name
+     */
     private $imageSize;
+
+    /**
+     * @var \Link prestaShop Link object for URL generation
+     */
     private $link;
+
+    /**
+     * @var mixed URL rewriting configuration flag
+     */
     private $linkRewriteConf;
+
+    /**
+     * @var bool whether product variations should be exported
+     */
     private $productVariations;
+
+    /**
+     * @var bool whether product features should be exported
+     */
     private $showProductFeatures;
+
+    /**
+     * @var mixed whether stock management is enabled (from PS configuration)
+     */
     private $stockManagement;
+
+    /**
+     * @var bool whether prices should include tax
+     */
     private $useTax;
+
+    /**
+     * @var mixed whether multi-price export is enabled
+     */
     private $multipriceEnabled;
+
+    /**
+     * @var array IDs of features to export
+     */
     private $featuresShown;
+
+    /**
+     * @var array keys of features selected for export
+     */
     private $featuresKeys;
 
+    /**
+     * Constructor.
+     *
+     * Initializes configuration settings for building product data.
+     *
+     * @param int $idShop Shop ID
+     * @param int $idLang Language ID
+     * @param int $idCurrency Currency ID
+     */
     public function __construct($idShop, $idLang, $idCurrency)
     {
         $this->idShop = $idShop;
@@ -169,6 +255,11 @@ class DfProductBuild
         $this->products = $arrayProducts;
     }
 
+    /**
+     * Build the JSON payload of products for Doofinder export.
+     *
+     * @return string JSON-encoded payload
+     */
     public function build()
     {
         $payload = [];
@@ -194,6 +285,14 @@ class DfProductBuild
         return json_encode($payload);
     }
 
+    /**
+     * Get the minimum price among product variations.
+     *
+     * @param array|null $currentMinPrice Current minimum price array (or null)
+     * @param array $variation Variation data
+     *
+     * @return array|null Minimum price array or null
+     */
     public function getMinPrice($currentMinPrice, $variation)
     {
         if ($this->displayPrices) {
@@ -208,6 +307,14 @@ class DfProductBuild
         }
     }
 
+    /**
+     * Build variation payload from product and variation data.
+     *
+     * @param array $product Base product data
+     * @param array $variation Variation data
+     *
+     * @return array Variation payload
+     */
     public function buildVariation($product, $variation)
     {
         $expanded_variation = array_merge($product, $variation, $extraAttributesHeader = [], $extraHeaders = []);
@@ -215,6 +322,16 @@ class DfProductBuild
         return $this->buildProduct($expanded_variation, [], $extraAttributesHeader, $extraHeaders);
     }
 
+    /**
+     * Build product payload.
+     *
+     * @param array $product Product data
+     * @param array|null $minPriceVariant Minimum price data from variations
+     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $extraHeaders Additional product headers to include
+     *
+     * @return array Processed product payload
+     */
     public function buildProduct($product, $minPriceVariant = null, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
@@ -392,6 +509,17 @@ class DfProductBuild
         return $product;
     }
 
+    /**
+     * Ensure CSV fields are sorted in correct header order.
+     *
+     * This function is required because the number of column must be consistent, so only the attributes
+     * included in the headers will be printed in the exact same order as the headers come.
+     *
+     * @param array $product Product data
+     * @param array $allHeaders Full ordered header list
+     *
+     * @return array Product data with sorted keys
+     */
     private static function ensureCsvFieldsOrder($product, $allHeaders)
     {
         $productWithSortedAttributes = [];
@@ -402,6 +530,11 @@ class DfProductBuild
         return $productWithSortedAttributes;
     }
 
+    /**
+     * Retrieve available products information for a specific language.
+     *
+     * @return array
+     */
     private function getProductData()
     {
         $products = DfTools::getAvailableProducts(
@@ -415,6 +548,13 @@ class DfProductBuild
         return $products;
     }
 
+    /**
+     * Get product ID (variation-safe).
+     *
+     * @param array $product Product data
+     *
+     * @return string|int Product ID or variation identifier
+     */
     private function getId($product)
     {
         if ($this->haveVariations($product)) {
@@ -424,6 +564,13 @@ class DfProductBuild
         return $product['id_product'];
     }
 
+    /**
+     * Get item group ID for variations.
+     *
+     * @param array $product Product data
+     *
+     * @return string|int
+     */
     private function getItemGroupId($product)
     {
         if ($this->haveVariations($product)) {
@@ -433,6 +580,13 @@ class DfProductBuild
         return '';
     }
 
+    /**
+     * Get product link (variation-safe).
+     *
+     * @param array $product Product data
+     *
+     * @return string URL
+     */
     private function getLink($product)
     {
         if ($this->haveVariations($product)) {
@@ -466,6 +620,13 @@ class DfProductBuild
         );
     }
 
+    /**
+     * Get product image link (variation-safe).
+     *
+     * @param array $product Product data
+     *
+     * @return string Image URL or empty string
+     */
     private function getImageLink($product)
     {
         if ($this->haveVariations($product)) {
@@ -512,6 +673,13 @@ class DfProductBuild
         return DfTools::cleanURL($imageLink);
     }
 
+    /**
+     * Get stock availability label.
+     *
+     * @param array $product Product data
+     *
+     * @return string 'in stock' or 'out of stock'
+     */
     private function getAvailability($product)
     {
         $available = (int) $product['available_for_order'] > 0;
@@ -530,6 +698,14 @@ class DfProductBuild
         }
     }
 
+    /**
+     * Get product price (normal or sale).
+     *
+     * @param array $product Product data
+     * @param bool $salePrice Whether to return the sale price
+     *
+     * @return float|bool|null Converted price, false if hidden
+     */
     private function getPrice($product, $salePrice = false)
     {
         if (!$product['show_price']) {
@@ -567,6 +743,13 @@ class DfProductBuild
         }
     }
 
+    /**
+     * Get multiprice field for a product.
+     *
+     * @param array $product Product data
+     *
+     * @return array Multiprice information
+     */
     private function getMultiprice($product)
     {
         $productId = $product['id_product'];
@@ -575,6 +758,16 @@ class DfProductBuild
         return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute);
     }
 
+    /**
+     * Get features for a product.
+     *
+     * Features are a way to describe and filter your Products.
+     * More info at: https://docs.prestashop-project.org/v.8-documentation/user-guide/selling/managing-catalog/managing-product-features
+     *
+     * @param array $product Product data
+     *
+     * @return array Processed features
+     */
     private function getFeatures($product)
     {
         $features = [];
@@ -594,6 +787,11 @@ class DfProductBuild
         return $features;
     }
 
+    /**
+     * Get feature keys for filtering.
+     *
+     * @return array
+     */
     private function getFeaturesKeys()
     {
         $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
@@ -605,6 +803,16 @@ class DfProductBuild
         }
     }
 
+    /**
+     * Get attributes for a product variation.
+     *
+     * Attributes are the basis of product variations.
+     * More info at: https://docs.prestashop-project.org/v.8-documentation/user-guide/selling/managing-catalog/managing-product-attributes
+     *
+     * @param array $product Product data
+     *
+     * @return array Processed attributes
+     */
     private function getAttributes($product)
     {
         $attributes = DfTools::getAttributesByCombination(
@@ -626,6 +834,13 @@ class DfProductBuild
         return $altAttributes;
     }
 
+    /**
+     * Check whether product has variations (and variations export is enabled).
+     *
+     * @param array $product Product data
+     *
+     * @return bool
+     */
     private function haveVariations($product)
     {
         if ($this->productVariations) {
@@ -637,6 +852,13 @@ class DfProductBuild
         return false;
     }
 
+    /**
+     * Get sluggified attribute names for variant information.
+     *
+     * @param array $product Product data
+     *
+     * @return array
+     */
     private function getVariantsInformation($product)
     {
         if (DfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {

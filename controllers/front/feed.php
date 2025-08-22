@@ -19,12 +19,28 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Front controller for serving Doofinder feeds in JSON or XML format.
+ *
+ * Supports multiple feed types, including:
+ * - Products
+ * - Categories
+ * - CMS pages
+ *
+ * Handles AJAX responses compatible with PrestaShop 1.5, 1.6, and 1.7.
+ */
 class DoofinderFeedModuleFrontController extends ModuleFrontController
 {
     /**
-     * Assign template vars related to page content.
+     * Generates and outputs the requested feed based on the 'type' parameter.
+     *
+     * - Determines feed type ('product', 'category', 'page') from request.
+     * - Includes the corresponding feed file.
+     * - Outputs feed content using ajaxRender/ajaxDie or echo for legacy compatibility.
      *
      * @see FrontController::initContent()
+     *
+     * @return void outputs feed content directly and exits
      */
     public function initContent()
     {
@@ -61,6 +77,11 @@ class DoofinderFeedModuleFrontController extends ModuleFrontController
         }
     }
 
+    /**
+     * Returns the full path to the Doofinder module directory.
+     *
+     * @return string module directory path
+     */
     private static function get_plugin_dir()
     {
         return _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . DoofinderConstants::NAME . DIRECTORY_SEPARATOR;

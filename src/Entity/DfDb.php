@@ -19,6 +19,20 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Database connection handler with master-slave support for PrestaShop.
+ *
+ * This class provides static methods to create new database connection instances
+ * and manage master/slave server configurations. It supports:
+ * - Connecting to the master or a slave server.
+ * - Connection pooling with round-robin selection for slaves.
+ * - Automatic loading of slave server configurations.
+ * - Disabling buffered queries for PDO connections to handle large datasets efficiently.
+ *
+ * Usage:
+ * - Call getNewDbInstance(true) to connect to the master.
+ * - Call getNewDbInstance(false) to connect to a slave (if configured).
+ */
 class DfDb
 {
     /** @var array List of server settings */
@@ -83,6 +97,8 @@ class DfDb
 
     /**
      * Loads configuration settings for slave servers if needed.
+     *
+     * @return void
      */
     protected static function loadSlaveServers()
     {
