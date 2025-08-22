@@ -19,6 +19,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Handles communication with the Doofinder for managing conversion pages (deprecated).
+ */
 class DoofinderApiLanding
 {
     private $hashid;
@@ -48,6 +51,13 @@ class DoofinderApiLanding
         return $this->get($url);
     }
 
+    /**
+     * Make a GET request to the API to get landing data
+     *
+     * @param string $slug Slug name of the landing page
+     *
+     * @return array|null Landing data
+     */
     private function get($url)
     {
         $client = new EasyREST();

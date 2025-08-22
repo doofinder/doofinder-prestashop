@@ -19,44 +19,93 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class DfTools
+ *
+ * Utility class for Doofinder PrestaShop module.
+ *
+ * Provides:
+ * - Encryption helper
+ * - Data validation helpers
+ * - SQL preparation tools
+ * - Configuration queries (image sizes, hashids)
+ */
 class DfTools
 {
+    /**
+     * Separator used for category lists.
+     */
     const CATEGORY_SEPARATOR = ' %% ';
+
+    /**
+     * Separator used for category tree paths.
+     */
     const CATEGORY_TREE_SEPARATOR = '>';
+
+    /**
+     * Separator used for text values.
+     */
     const TXT_SEPARATOR = '|';
-    // http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
+
+    /**
+     * Regex to filter valid UTF-8 characters.
+     *
+     * @see http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
+     */
     const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF]
     [\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F]
     [\x80-\xBF]{2})|./x';
 
+    /**
+     * @var array|null cached root category IDs
+     */
     protected static $rootCategoryIds;
+
+    /**
+     * @var array cached category paths for optimization
+     */
     protected static $cachedCategoryPaths = [];
 
     /**
-     * Hash password.
+     * Hash a password using PrestaShop's cookie key.
      *
-     * @param string $passwd String to hash
+     * @param string $passwd Plain password to hash
      *
-     * @return string Hashed password
+     * @return string MD5-hashed password
      */
     public static function encrypt($passwd)
     {
         return md5(_COOKIE_KEY_ . $passwd);
     }
 
-    //
-    // Validation
-    //
+    // ------------------------------------------------------------
+    // Validation helpers
+    // ------------------------------------------------------------
 
+    /**
+     * Validate if a value is a non-empty generic string.
+     *
+     * @param mixed $v Value to validate
+     *
+     * @return bool True if value is a valid generic name
+     */
     public static function isBasicValue($v)
     {
         return $v && \Validate::isGenericName($v);
     }
 
-    //
-    // SQL Tools
-    //
+    // ------------------------------------------------------------
+    // SQL tools
+    // ------------------------------------------------------------
 
+    /**
+     * Replace tokens in an SQL query.
+     *
+     * @param string $sql SQL query with tokens
+     * @param array $args Key-value pairs to replace in the query
+     *
+     * @return string SQL query with replaced tokens
+     */
     public static function prepareSQL($sql, $args = [])
     {
         $keys = ['_DB_PREFIX_'];
@@ -70,6 +119,15 @@ class DfTools
         return str_replace($keys, $values, $sql);
     }
 
+    /**
+     * Append LIMIT and OFFSET clauses to an SQL query.
+     *
+     * @param string $sql SQL query string
+     * @param int|false $limit Maximum number of rows to return
+     * @param int|false $offset Number of rows to skip
+     *
+     * @return string SQL query with LIMIT/OFFSET
+     */
     public static function limitSQL($sql, $limit = false, $offset = false)
     {
         if (false !== $limit && is_numeric($limit)) {
@@ -83,8 +141,9 @@ class DfTools
         return $sql;
     }
 
-    //
-    // SQL Queries
+    // ------------------------------------------------------------
+    // SQL queries
+    // ------------------------------------------------------------
 
     /**
      * Returns an array of image size names to be used in a <select> box. Array (assoc) with the value of each key as value for it
@@ -118,6 +177,13 @@ class DfTools
         return $sizes;
     }
 
+    /**
+     * Generate all hash ID keys for each active language and currency.
+     *
+     * Builds labels and keys for single-price and multiprice modes.
+     *
+     * @return array Array of hash ID keys and labels
+     */
     public static function getHashidKeys()
     {
         $hashidKeys = [];

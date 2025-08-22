@@ -19,11 +19,31 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Handles installations in Doofinder:
+ * - Manages module database tables
+ * - Creates stores in Doofinder Admin
+ * - Updates feed URLs
+ * - Manages module configuration and admin tabs
+ */
 class DoofinderInstallation
 {
+    /**
+     * @var string User's API key for Doofinder authentication
+     */
     private $apiKey;
+
+    /**
+     * @var string Base URL of the Doofinder API for the specified region
+     */
     private $apiUrl;
 
+    /**
+     * DoofinderInstallation constructor.
+     *
+     * @param string $apiKey User's API key for authentication
+     * @param string $region Region code used to determine the API endpoint
+     */
     public function __construct($apiKey, $region)
     {
         $this->apiKey = $apiKey;
@@ -44,6 +64,13 @@ class DoofinderInstallation
         return $this->_get($apiEndpoint);
     }
 
+    /**
+     * Make a GET request
+     *
+     * @param string $url Endpoint URL
+     *
+     * @return array|null data
+     */
     private function _get($url)
     {
         $client = new EasyREST();
@@ -123,7 +150,7 @@ class DoofinderInstallation
     /**
      * Create a store in Doofinder based on the Prestashop shop
      *
-     * @param array $shop
+     * @param array $shop PrestaShop shop data array
      *
      * @return void
      */
@@ -319,6 +346,11 @@ class DoofinderInstallation
         }
     }
 
+    /**
+     * Create the module admin tab in PrestaShop.
+     *
+     * @return bool True if tab was successfully created
+     */
     public static function installTabs()
     {
         $tab = new \Tab();
@@ -334,6 +366,11 @@ class DoofinderInstallation
         return $tab->save();
     }
 
+    /**
+     * Remove the module admin tab from PrestaShop.
+     *
+     * @return bool True if tab was successfully deleted
+     */
     public static function uninstallTabs()
     {
         $tabId = (int) \Tab::getIdFromClassName('DoofinderAdmin');
