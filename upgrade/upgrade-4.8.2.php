@@ -30,6 +30,19 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Upgrade the module to version 4.8.2.
+ *
+ * This upgrade:
+ * - Uses existing installation credentials (installation ID, region, API key)
+ *   to initialize DoofinderApiSingleScript.
+ * - Calls `setSingleScriptFlag()` to mark that the single-script is enabled.
+ * - Stores DF_UNIQUE_SCRIPT = true in configuration.
+ *
+ * @param Doofinder $module the module instance being upgraded
+ *
+ * @return bool true if the flag is set successfully, false otherwise
+ */
 function upgrade_module_4_8_2($module)
 {
     $installationId = Configuration::get('DF_INSTALLATION_ID');
