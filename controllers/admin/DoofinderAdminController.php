@@ -64,9 +64,9 @@ class DoofinderAdminController extends ModuleAdminController
     }
 
     /**
-     * Renders AJAX responses, with compatibility for several PrestaShop version.
+     * Renders AJAX responses, with compatibility for several PrestaShop versions.
      *
-     * Note that `ajaxRender` method is only available from PrestaShop 1.7
+     * Note that `ajaxRender` method is only available since PrestaShop 1.7
      *
      * @param string|null $value the response content to render
      * @param string|null $controller optional controller name for compatibility

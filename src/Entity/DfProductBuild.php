@@ -510,15 +510,16 @@ class DfProductBuild
     }
 
     /**
-     * Ensure CSV fields are sorted in correct header order.
+     * Ensures that CSV fields are sorted in the correct header order.
      *
-     * This function is required because the number of column must be consistent, so only the attributes
-     * included in the headers will be printed in the exact same order as the headers come.
+     * This function is required because the number of columns must remain consistent.
+     * Only the attributes included in the headers will be printed, and they will appear
+     * in the exact same order as defined by the headers.
      *
      * @param array $product Product data
      * @param array $allHeaders Full ordered header list
      *
-     * @return array Product data with sorted keys
+     * @return array Product data with keys sorted to match the headers
      */
     private static function ensureCsvFieldsOrder($product, $allHeaders)
     {
