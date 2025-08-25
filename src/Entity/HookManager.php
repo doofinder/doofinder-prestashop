@@ -19,10 +19,26 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class HookManager
+ *
+ * Handles registration of module hooks, preparation of Smarty variables for hooks,
+ * and updates related to specific PrestaShop events (product, CMS, and category changes).
+ */
 class HookManager
 {
+    /**
+     * Doofinder main module class object
+     *
+     * @var \Doofinder
+     */
     private $module;
 
+    /**
+     * Constructor
+     *
+     * @param \Doofinder $module The main Doofinder module instance
+     */
     public function __construct($module)
     {
         $this->module = $module;
@@ -53,7 +69,7 @@ class HookManager
      * Retrieves common variables for assigning to Smarty templates in a hook context.
      *
      * This function prepares a set of key variables needed for rendering Doofinder-related data in a Smarty template.
-     * These include language and currency codes, search engine ID, region, script and CSS configurations, product links, etc.
+     * These include language and currency codes, search engine hashid, region, script and CSS configurations, product links, etc.
      *
      * @param string $languageCode The language code (e.g., 'en-us', 'fr-fr') to be used in the Smarty template.
      * @param string $currencyCode The currency code (e.g., 'USD', 'EUR') to be used in the Smarty template.
@@ -97,9 +113,11 @@ class HookManager
     }
 
     /**
-     * Add controller routes
+     * Returns an array of routes handled by this module.
      *
-     * @return array
+     * Defines custom URLs that map to specific controllers within the module.
+     *
+     * @return array module routes and their associated controllers, rules, keywords, and parameters
      */
     public static function getHookModuleRoutes()
     {

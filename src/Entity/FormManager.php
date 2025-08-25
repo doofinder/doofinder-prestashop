@@ -19,6 +19,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * FormManager class
+ *
+ * Handles the processing of backoffice configuration forms for the Doofinder module.
+ * Manages form submissions, validation, and configuration updates across different tabs
+ * including store info, data feed, and advanced settings.
+ */
 class FormManager
 {
     /**
@@ -28,6 +35,11 @@ class FormManager
      */
     private $module;
 
+    /**
+     * Constructor
+     *
+     * @param \Doofinder $module The main Doofinder module instance
+     */
     public function __construct($module)
     {
         $this->module = $module;
@@ -36,7 +48,15 @@ class FormManager
     /**
      * Process the backoffice configuration form
      *
-     * @return string
+     * Handles form submissions from different configuration tabs:
+     * - Store information (installation ID, API key)
+     * - Data feed settings
+     * - Advanced parameters
+     * - Reindexing requests
+     *
+     * Validates input data, updates configuration values, and provides user feedback.
+     *
+     * @return string HTML messages for user feedback (errors, warnings, confirmations)
      */
     public function postProcess()
     {
@@ -154,6 +174,17 @@ class FormManager
         return $messages;
     }
 
+    /**
+     * Update Hashids configuration for multiprice scenarios
+     *
+     * When advanced parameters are present and multiprice is enabled,
+     * this method updates all related Hashids configuration keys.
+     *
+     * @param string $postKey The configuration key being updated
+     * @param string $value The new value to set
+     *
+     * @return void
+     */
     private static function updateHashIds($postKey, $value)
     {
         $hashidKeys = DfTools::getHashidKeys();
