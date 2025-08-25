@@ -191,7 +191,7 @@ class DoofinderResults
      *   '_type'=> 'terms',  // type of facet 'terms' or 'range'
      *   'missing'=> 3, // # of elements with no value for this facet
      *   'others'=> 2, // # of terms not present in the search response
-     *   'total'=> 6, // # number of possible terms for this facet
+     *   'total'=> 6, // # of possible terms for this facet
      *   'terms'=> array(
      *     array('count'=>6, 'term'=>'Blue', 'selected'=>false),
      *     // in the response, there are 6 'blue' terms
