@@ -20,7 +20,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * Front controller for serving Doofinder feeds in JSON or XML format.
+ * Front controller for serving Doofinder feeds in CSV format.
  *
  * Supports multiple feed types, including:
  * - Products

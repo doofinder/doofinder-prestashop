@@ -23,7 +23,7 @@ if (!defined('_PS_VERSION_')) {
  * Builds structured payload data for categories in a PrestaShop store.
  *
  * This class retrieves category information, sanitizes the data using DfTools,
- * and generates an array or JSON payload with relevant page details such as
+ * and generates an array or JSON payload for CSV export with relevant page details such as
  * title, meta information, description and links.
  */
 class DfCategoryBuild
@@ -87,7 +87,7 @@ class DfCategoryBuild
     }
 
     /**
-     * Assigns required Prestashop context properties (e.g., link builder).
+     * Assigns required PrestaShop context properties (e.g., link builder).
      *
      * @return void
      */

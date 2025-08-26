@@ -23,7 +23,7 @@ if (!defined('_PS_VERSION_')) {
  * Builds structured payload data for CMS pages in a PrestaShop store.
  *
  * This class retrieves CMS page information, sanitizes the data using DfTools,
- * and generates an array or JSON payload with relevant page details such as
+ * and generates an array or JSON payload for CSV export with relevant page details such as
  * title, meta information, content and links.
  */
 class DfCmsBuild
