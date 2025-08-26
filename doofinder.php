@@ -36,42 +36,20 @@ https://github.com/gskema/prestashop-1.6-module-boilerplate/blob/master/docs/nam
 class Doofinder extends Module
 {
     /**
-     * HTML buffer used to accumulate configuration output in the back office.
-     *
-     * @var string
-     */
-    protected $html = '';
-    /**
-     * Collection of form validation errors to be displayed to the merchant.
-     *
-     * @var array<int, string>
-     */
-    protected $postErrors = [];
-    /**
      * Map of index name to product URL pattern used by the JS layer.
      *
      * @var array<string, string>
      */
     protected $productLinks = [];
     /**
-     * Compatibility flag with PrestaShop layered navigation.
-     *
-     * @var bool
-     */
-    public $ps_layered_full_tree = true;
-    /**
-     * Whether to display the Doofinder search banner.
+     * Whether to display the Doofinder search banner. Used in the Landing API.
      * More info at: https://support.doofinder.com/search/promotional-tools/banners
+     *
+     * @see PrestaShop\Module\Doofinder\Src\Entity\DoofinderApiLanding
      *
      * @var bool
      */
     public $searchBanner = false;
-    /**
-     * Relative path to the admin templates directory used in configuration screens.
-     *
-     * @var string
-     */
-    public $admin_template_dir = '';
     /**
      * Hook manager coordinating hook registration and shared hook logic.
      *
@@ -99,7 +77,6 @@ class Doofinder extends Module
         $this->description = $this->l('Install Doofinder in your shop with no effort');
 
         $this->confirmUninstall = $this->l('Are you sure? This will not cancel your account in Doofinder service');
-        $this->admin_template_dir = '../../../../modules/' . $this->name . '/views/templates/admin/';
         $this->hookManager = new PrestaShop\Module\Doofinder\Src\Entity\HookManager($this);
     }
 
