@@ -27,6 +27,18 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Upgrade the module to version 4.5.0.
+ *
+ * This upgrade step:
+ * - Creates the doofinder_landing table if it does not already exist.
+ * - Registers the 'moduleRoutes' hook.
+ * - Calls setSearchEnginesByConfig() to configure search engines.
+ *
+ * @param Doofinder $module the module instance being upgraded
+ *
+ * @return bool true if all steps succeed, false otherwise
+ */
 function upgrade_module_4_5_0($module)
 {
     return installDb_4_5_0()
@@ -34,6 +46,13 @@ function upgrade_module_4_5_0($module)
         && $module->setSearchEnginesByConfig();
 }
 
+/**
+ * Install database structure for module version 4.5.0.
+ *
+ * Creates a table to store landing page data if it does not exist.
+ *
+ * @return bool true if the query executes successfully, false otherwise
+ */
 function installDb_4_5_0()
 {
     return Db::getInstance()->execute(
