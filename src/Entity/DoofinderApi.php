@@ -52,7 +52,7 @@ class DoofinderApi
     private $apiKey;
 
     /**
-     * @var string Hash ID of the Doofinder account
+     * @var string Hashid of the Search Engine
      */
     private $hashid;
 
@@ -116,12 +116,12 @@ class DoofinderApi
      */
     private $filter;
 
-    // request parameters that doofinder handle
+    // request parameters that Doofinder handle
 
     /**
-     * Constructor. account's hashid and api version set here
+     * Constructor. Search Engine's hashid and api version set here
      *
-     * @param string $hashid the account's hashid
+     * @param string $hashid the Search Engine's hashid
      * @param bool $fromParams if set, the object is unserialized from GET or POST params
      * @param array $init_options. associative array with some options:
      *                             -'prefix' (default: 'dfParam_')=> the prefix to use when serializing.
