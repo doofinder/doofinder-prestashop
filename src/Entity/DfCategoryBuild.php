@@ -19,11 +19,33 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Builds structured payload data for categories in a PrestaShop store.
+ *
+ * This class retrieves category information, sanitizes the data using DfTools,
+ * and generates an array or JSON payload for CSV export with relevant page details such as
+ * title, meta information, description and links.
+ */
 class DfCategoryBuild
 {
+    /**
+     * @var int shop ID
+     */
     private $idShop;
+
+    /**
+     * @var int language ID
+     */
     private $idLang;
+
+    /**
+     * @var array list of category IDs to include in the payload
+     */
     private $categories;
+
+    /**
+     * @var \Link prestashop link instance for building URLs
+     */
     private $link;
 
     public function __construct($idShop, $idLang)
@@ -42,6 +64,13 @@ class DfCategoryBuild
         $this->categories = $arrayCategories;
     }
 
+    /**
+     * Sets the category IDs to be included in the payload.
+     *
+     * @param array $arrayCategories list of category IDs
+     *
+     * @return void
+     */
     public function build($json = true)
     {
         $this->assign();
@@ -57,11 +86,26 @@ class DfCategoryBuild
         return $json ? json_encode($payload) : $payload;
     }
 
+    /**
+     * Assigns required PrestaShop context properties (e.g., link builder).
+     *
+     * @return void
+     */
     private function assign()
     {
         $this->link = \Context::getContext()->link;
     }
 
+    /**
+     * Builds a single category's data array.
+     *
+     * - Cleans text fields using DfTools.
+     * - Retrieves category link and image link.
+     *
+     * @param int $idCategory category ID
+     *
+     * @return array Associative array with category details
+     */
     private function buildCategory($idCategory)
     {
         $category = new \Category($idCategory, $this->idLang, $this->idShop);
