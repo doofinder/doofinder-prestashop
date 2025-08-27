@@ -29,7 +29,6 @@ if (!defined('_PS_VERSION_')) {
  * Usage:
  *   $api = new DoofinderApi($hashid, $apiKey);
  *   $results = $api->query('search term');
- *   $nextPageResults = $api->nextPage();
  */
 class DoofinderApi
 {
@@ -111,11 +110,6 @@ class DoofinderApi
      */
     private $zone;
 
-    /**
-     * @var array Internal copy of filters added via addTerm/setFilter
-     */
-    private $filter;
-
     // request parameters that Doofinder handle
 
     /**
@@ -176,6 +170,114 @@ class DoofinderApi
 
         if ($fromParams) {
             $this->fromQuerystring();
+        }
+    }
+
+    public function getOptions()
+    {
+        return $this->apiCall('options/' . $this->hashid);
+    }
+
+    /**
+     * query. makes the query to the doofinder search server.
+     * also set several search parameters through it's $options argument
+     *
+     * @param string $query the search query
+     * @param int $page the page number or the results to show
+     * @param array $options query options:
+     *                       - 'rpp'=> number of results per page. default 10
+     *                       - 'timeout' => timeout after which the search server drops the conn.
+     *                       defaults to 10 seconds
+     *                       - 'types' => types of index to search at. default: all.
+     *                       - 'filter' => filter to apply. ['color'=>['red','blue'], 'price'=>['from'=>33]]
+     *                       - any other param will be sent as a request parameter
+     *
+     * @return DoofinderResults results
+     */
+    public function query($query = null, $page = null, $options = [])
+    {
+        if ($query) {
+            $this->searchOptions['query'] = $query;
+        }
+        if ($page) {
+            $this->searchOptions['page'] = (int) $page;
+        }
+        foreach ($options as $optionName => $optionValue) {
+            $this->searchOptions[$optionName] = $options[$optionName];
+        }
+
+        $params = $this->searchOptions;
+
+        // translate filters
+        if (!empty($params['filter'])) {
+            foreach ($params['filter'] as $filterName => $filterValue) {
+                $params['filter'][$filterName] = $this->translateFilter($filterValue);
+            }
+        }
+
+        // no query? then match all documents
+        if (!$this->optionExists('query') || !trim($this->searchOptions['query'])) {
+            $params['query_name'] = 'match_all';
+        }
+
+        // if filters without query_name, pre-query first to obtain it.
+        if (empty($params['query_name']) && !empty($params['filter'])) {
+            $filter = $params['filter'];
+            unset($params['filter']);
+            $dfResults = new DoofinderResults($this->apiCall('search', $params));
+            $params['query_name'] = $dfResults->getProperty('query_name');
+            $params['filter'] = $filter;
+        }
+        $dfResults = new DoofinderResults($this->apiCall('search', $params));
+        $this->page = $dfResults->getProperty('page');
+        $this->total = $dfResults->getProperty('total');
+        $this->searchOptions['query'] = $dfResults->getProperty('query');
+        $this->lastQuery = $dfResults->getProperty('query');
+
+        return $dfResults;
+    }
+
+    /**
+     * getFilters
+     *
+     * gets all filters and their configs. Used in Conversion pages.
+     *
+     * @return array|false assoc array filterName => filterConditions, or false if no filters are set
+     */
+    public function getFilters()
+    {
+        if (isset($this->searchOptions['filter'])) {
+            return $this->searchOptions['filter'];
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Populates the object's search options from query string parameters.
+     *
+     * This method reads the serialized state from $this->serializationArray
+     * (typically $_GET, $_POST, or $_REQUEST depending on construction)
+     * and extracts only the parameters that belong to Doofinder (checked via belongsToDoofinder).
+     * The extracted values are stored in $this->searchOptions.
+     *
+     * Example:
+     *   If a query string contains dfParam_rpp=20 and dfParam_page=2,
+     *   after calling this method, $this->searchOptions['rpp'] = 20
+     *   and $this->searchOptions['page'] = 2.
+     *
+     * @return void
+     */
+    public function fromQuerystring()
+    {
+        $doofinderReqParams = array_filter(array_keys($this->serializationArray), [$this, 'belongsToDoofinder']);
+
+        foreach ($doofinderReqParams as $dfReqParam) {
+            $key = 'query';
+            if ($dfReqParam !== $this->queryParameter) {
+                $key = substr($dfReqParam, strlen($this->paramsPrefix));
+            }
+            $this->searchOptions[$key] = $this->serializationArray[$dfReqParam];
         }
     }
 
@@ -275,280 +377,6 @@ class DoofinderApi
         throw new DoofinderException('Error code: ' . $httpCode . ' - ' . $response, $httpCode);
     }
 
-    public function getOptions()
-    {
-        return $this->apiCall('options/' . $this->hashid);
-    }
-
-    /**
-     * query. makes the query to the doofinder search server.
-     * also set several search parameters through it's $options argument
-     *
-     * @param string $query the search query
-     * @param int $page the page number or the results to show
-     * @param array $options query options:
-     *                       - 'rpp'=> number of results per page. default 10
-     *                       - 'timeout' => timeout after which the search server drops the conn.
-     *                       defaults to 10 seconds
-     *                       - 'types' => types of index to search at. default: all.
-     *                       - 'filter' => filter to apply. ['color'=>['red','blue'], 'price'=>['from'=>33]]
-     *                       - any other param will be sent as a request parameter
-     *
-     * @return DoofinderResults results
-     */
-    public function query($query = null, $page = null, $options = [])
-    {
-        if ($query) {
-            $this->searchOptions['query'] = $query;
-        }
-        if ($page) {
-            $this->searchOptions['page'] = (int) $page;
-        }
-        foreach ($options as $optionName => $optionValue) {
-            $this->searchOptions[$optionName] = $options[$optionName];
-        }
-
-        $params = $this->searchOptions;
-
-        // translate filters
-        if (!empty($params['filter'])) {
-            foreach ($params['filter'] as $filterName => $filterValue) {
-                $params['filter'][$filterName] = $this->translateFilter($filterValue);
-            }
-        }
-
-        // no query? then match all documents
-        if (!$this->optionExists('query') || !trim($this->searchOptions['query'])) {
-            $params['query_name'] = 'match_all';
-        }
-
-        // if filters without query_name, pre-query first to obtain it.
-        if (empty($params['query_name']) && !empty($params['filter'])) {
-            $filter = $params['filter'];
-            unset($params['filter']);
-            $dfResults = new DoofinderResults($this->apiCall('search', $params));
-            $params['query_name'] = $dfResults->getProperty('query_name');
-            $params['filter'] = $filter;
-        }
-        $dfResults = new DoofinderResults($this->apiCall('search', $params));
-        $this->page = $dfResults->getProperty('page');
-        $this->total = $dfResults->getProperty('total');
-        $this->searchOptions['query'] = $dfResults->getProperty('query');
-        $this->lastQuery = $dfResults->getProperty('query');
-
-        return $dfResults;
-    }
-
-    /**
-     * hasNext
-     *
-     * @return bool true if there is another page of results
-     */
-    public function hasNext()
-    {
-        return $this->page * $this->getRpp() < $this->total;
-    }
-
-    /**
-     * hasPrev
-     *
-     * @return bool True if there is a previous page of results
-     */
-    public function hasPrev()
-    {
-        return ($this->page - 1) * $this->getRpp() > 0;
-    }
-
-    /**
-     * getPage
-     *
-     * obtain the current page number
-     *
-     * @return int the page number
-     */
-    public function getPage()
-    {
-        return $this->page;
-    }
-
-    /**
-     * setFilter
-     *
-     * set a filter for the query
-     *
-     * @param string $filterName the name of the filter to set
-     * @param array $filter if simple array, terms filter assumed if 'from', 'to' in keys, range filter assumed
-     */
-    public function setFilter($filterName, $filter)
-    {
-        if (!$this->optionExists('filter')) {
-            $this->searchOptions['filter'] = [];
-        }
-        $this->searchOptions['filter'][$filterName] = $filter;
-    }
-
-    /**
-     * getFilter
-     *
-     * get conditions for certain filter
-     *
-     * @param string $filterName
-     *
-     * @return array|false filter conditions: simple array if terms filter, 'from', 'to' assoc array if range filter, or false if no filter definition found
-     */
-    public function getFilter($filterName)
-    {
-        if ($this->optionExists('filter') && isset($this->searchOptions['filter'][$filterName])) {
-            return $this->filter[$filterName];
-        }
-
-        return false;
-    }
-
-    /**
-     * getFilters
-     *
-     * get all filters and their configs
-     *
-     * @return array|false assoc array filterName => filterConditions, or false if no filters are set
-     */
-    public function getFilters()
-    {
-        if (isset($this->searchOptions['filter'])) {
-            return $this->searchOptions['filter'];
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Adds a term to a terms filter.
-     *
-     * If the filter does not exist, it will be created.
-     *
-     * @param string $filterName name of the filter to add the term to
-     * @param string $term term to add to the filter
-     *
-     * @return void
-     */
-    public function addTerm($filterName, $term)
-    {
-        if (!$this->optionExists('filter')) {
-            $this->searchOptions['filter'] = [$filterName => []];
-        }
-        if (!isset($this->searchOptions['filter'][$filterName])) {
-            $this->filter[$filterName] = [];
-            $this->searchOptions['filter'][$filterName] = [];
-        }
-        $this->filter[$filterName][] = $term;
-        $this->searchOptions['filter'][$filterName][] = $term;
-    }
-
-    /**
-     * Removes a term from a terms filter.
-     *
-     * @param string $filterName name of the filter to remove the term from
-     * @param string $term term to remove
-     *
-     * @return void
-     */
-    public function removeTerm($filterName, $term)
-    {
-        if ($this->optionExists('filter') && isset($this->searchOptions['filter'][$filterName])
-            && in_array($term, $this->searchOptions['filter'][$filterName])
-        ) {
-            $this->searchOptions['filter'][$filterName] =
-            array_filter($this->searchOptions['filter'][$filterName], function ($value) use ($term) {
-                return $value !== $term;
-            });
-        }
-    }
-
-    /**
-     * Sets a range filter.
-     *
-     * If the filter does not exist, it will be created.
-     * Note: 'from' and 'to' are inclusive.
-     *
-     * @param string $filterName name of the filter to set
-     * @param int|null $from lower bound value (inclusive)
-     * @param int|null $to upper bound value (inclusive)
-     *
-     * @return void
-     */
-    public function setRange($filterName, $from = null, $to = null)
-    {
-        if (!$this->optionExists('filter')) {
-            $this->searchOptions['filter'] = [$filterName => []];
-        }
-        if (!isset($this->searchOptions['filter'][$filterName])) {
-            $this->searchOptions['filter'][$filterName] = [];
-        }
-        if ($from) {
-            $this->searchOptions['filter'][$filterName]['from'] = $from;
-        }
-        if ($to) {
-            $this->searchOptions['filter'][$filterName]['to'] = $to;
-        }
-    }
-
-    /**
-     * Serializes the object's search options into a query string.
-     *
-     * This method converts the current state of $this->searchOptions into a URL-encoded
-     * query string suitable for GET requests. The main search query is stored under
-     * $this->queryParameter, while other options are prefixed using $this->paramsPrefix.
-     *
-     * @param int|null $page Optional page number to include in the query string.
-     *                       If null, the current page is used.
-     *
-     * @return string URL-encoded query string representing the object's state
-     */
-    public function toQuerystring($page = null)
-    {
-        $toParams = [];
-        foreach ($this->searchOptions as $paramName => $paramValue) {
-            if ($paramName == 'query') {
-                $toParams[$this->queryParameter] = $paramValue;
-            } else {
-                $toParams[$this->paramsPrefix . $paramName] = $paramValue;
-            }
-        }
-        if ($page) {
-            $toParams[$this->paramsPrefix . 'page'] = $page;
-        }
-
-        return http_build_query($toParams);
-    }
-
-    /**
-     * Populates the object's search options from query string parameters.
-     *
-     * This method reads the serialized state from $this->serializationArray
-     * (typically $_GET, $_POST, or $_REQUEST depending on construction)
-     * and extracts only the parameters that belong to Doofinder (checked via belongsToDoofinder).
-     * The extracted values are stored in $this->searchOptions.
-     *
-     * Example:
-     *   If a query string contains dfParam_rpp=20 and dfParam_page=2,
-     *   after calling this method, $this->searchOptions['rpp'] = 20
-     *   and $this->searchOptions['page'] = 2.
-     *
-     * @return void
-     */
-    public function fromQuerystring()
-    {
-        $doofinderReqParams = array_filter(array_keys($this->serializationArray), [$this, 'belongsToDoofinder']);
-
-        foreach ($doofinderReqParams as $dfReqParam) {
-            $key = 'query';
-            if ($dfReqParam !== $this->queryParameter) {
-                $key = substr($dfReqParam, strlen($this->paramsPrefix));
-            }
-            $this->searchOptions[$key] = $this->serializationArray[$dfReqParam];
-        }
-    }
-
     /**
      * Sanitizes an array by removing keys with empty values.
      *
@@ -601,44 +429,6 @@ class DoofinderApi
     }
 
     /**
-     * Get results for the next page, if available
-     *
-     * @return DoofinderResults|null DoofinderResults if there are results, null otherwise
-     */
-    public function nextPage()
-    {
-        if ($this->hasNext()) {
-            return $this->query($this->lastQuery, $this->page + 1);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get results for the previous page, if available
-     *
-     * @return DoofinderResults|null DoofinderResults if there are previous results, null otherwise
-     */
-    public function prevPage()
-    {
-        if ($this->hasPrev()) {
-            return $this->query($this->lastQuery, $this->page - 1);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get total number of pages
-     *
-     * @return int the number of pages
-     */
-    public function numPages()
-    {
-        return (int) ceil($this->total / $this->getRpp());
-    }
-
-    /**
      * Get results per page
      *
      * @return int
@@ -649,31 +439,6 @@ class DoofinderApi
         $rpp = $rpp ? $rpp : self::DEFAULT_RPP;
 
         return $rpp;
-    }
-
-    /**
-     * Sets the API version to use for subsequent requests.
-     *
-     * This method allows changing the API version that will be used
-     * when making calls to the Doofinder search server.
-     *
-     * @param string $apiVersion The API version to use (e.g., '1.0', '3.0', '4', '5', '6').
-     *
-     * @return void
-     */
-    public function setApiVersion($apiVersion)
-    {
-        $this->apiVersion = $apiVersion;
-    }
-
-    /**
-     * Sets the prefix that will be used for serialization to querystring params
-     *
-     * @param string $prefix the prefix
-     */
-    public function setPrefix($prefix)
-    {
-        $this->paramsPrefix = $prefix;
     }
 
     /**
