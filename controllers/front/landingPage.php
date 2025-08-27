@@ -292,7 +292,7 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
      * @param string $name landing page slug
      * @param string $hashid search engine hash ID
      *
-     * @return array|null cached row data or null if not found
+     * @return bool True if the cache was set, false otherwise
      */
     private function setLandingCache($name, $hashid, $data)
     {

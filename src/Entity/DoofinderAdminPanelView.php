@@ -19,22 +19,44 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class DoofinderAdminPanelView
+ *
+ * Provides helper methods and UI utilities for the Doofinder module's admin panel in PrestaShop.
+ * Handles context-specific warnings, admin messages, feed URL generation, and form option rendering.
+ */
 class DoofinderAdminPanelView
 {
-    /*
-    Name an tab are required because they are using internally
-    by Helper class (/classes/helper/Helper.php)
-    */
+    /**
+     * Name of the module tab (used by PrestaShop Helper class).
+     *
+     * @see \Helper
+     *
+     * @var string
+     */
     public $name;
+
+    /**
+     * Tab identifier (used by PrestaShop Helper class, /classes/helper/Helper.php).
+     *
+     * @see \Helper
+     *
+     * @var string
+     */
     public $tab;
 
     /**
-     * Doofinder main module class object
+     * Doofinder main module instance.
      *
      * @var \Doofinder
      */
     private $module;
 
+    /**
+     * Constructor.
+     *
+     * @param \Doofinder $module the main Doofinder module instance
+     */
     public function __construct($module)
     {
         $this->name = $module->name;
@@ -147,6 +169,11 @@ class DoofinderAdminPanelView
         return $output;
     }
 
+    /**
+     * Returns an HTML warning message if the multishop context is invalid.
+     *
+     * @return string|false HTML string if warning is needed, false otherwise
+     */
     public function getWarningMultishopHtml()
     {
         $stop = false;
@@ -163,6 +190,11 @@ class DoofinderAdminPanelView
         return $stop;
     }
 
+    /**
+     * Returns an HTML warning message if the module is disabled in the current shop.
+     *
+     * @return string HTML warning message
+     */
     public function getWarningModuleNotEnabledHtml()
     {
         $context = \Context::getContext();
@@ -171,21 +203,59 @@ class DoofinderAdminPanelView
         return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/message_manage_one_shop.tpl');
     }
 
+    /**
+     * Displays a formatted error message in the admin panel.
+     *
+     * @param string $error the error message
+     * @param string|false $link optional link to display with the message
+     * @param bool $raw if true, output will not be escaped
+     *
+     * @return string HTML content of the formatted message
+     */
     public static function displayErrorCtm($error, $link = false, $raw = false)
     {
         return self::displayGeneralMsg($error, 'error', 'danger', $link, $raw);
     }
 
+    /**
+     * Displays a formatted warning message in the admin panel.
+     *
+     * @param string $warning the warning message
+     * @param string|false $link optional link to display with the message
+     * @param bool $raw if true, output will not be escaped
+     *
+     * @return string HTML content of the formatted message
+     */
     public static function displayWarningCtm($warning, $link = false, $raw = false)
     {
         return self::displayGeneralMsg($warning, 'warning', 'warning', $link, $raw);
     }
 
+    /**
+     * Displays a formatted confirmation message in the admin panel.
+     *
+     * @param string $string the confirmation message
+     * @param string|false $link optional link to display with the message
+     * @param bool $raw if true, output will not be escaped
+     *
+     * @return string HTML content of the formatted message
+     */
     public static function displayConfirmationCtm($string, $link = false, $raw = false)
     {
         return self::displayGeneralMsg($string, 'confirmation', 'success', $link, $raw);
     }
 
+    /**
+     * Displays a generic formatted message in the admin panel.
+     *
+     * @param string $string the message to display
+     * @param string $type The message type (e.g. 'error', 'warning', 'confirmation').
+     * @param string $alert the alert style (Bootstrap alert class: 'danger', 'warning', 'success')
+     * @param string|false $link optional link to display with the message
+     * @param bool $raw if true, output will not be escaped
+     *
+     * @return string HTML content of the formatted message
+     */
     public static function displayGeneralMsg($string, $type, $alert, $link = false, $raw = false)
     {
         $context = \Context::getContext();
@@ -202,6 +272,11 @@ class DoofinderAdminPanelView
         return $context->smarty->fetch(self::getLocalPath() . 'views/templates/admin/display_msg.tpl');
     }
 
+    /**
+     * Returns the local filesystem path to the Doofinder module.
+     *
+     * @return string path to the module directory
+     */
     public static function getLocalPath()
     {
         return _PS_MODULE_DIR_ . DoofinderConstants::NAME . DIRECTORY_SEPARATOR;
@@ -484,6 +559,26 @@ class DoofinderAdminPanelView
         ];
     }
 
+    /**
+     * Generates HTML for a table of checkboxes with an optional "Select All/None" toggle.
+     *
+     * This method:
+     * - Sorts the provided options alphabetically by name.
+     * - Checks which options are selected based on the shop configuration.
+     * - Adds a toggle checkbox row if there is more than one option.
+     * - Renders each option as a table row with a checkbox and label.
+     *
+     * This only works for PrestaShop >= 1.6. For older versions the multiselect is displayed instead
+     * of calling this function.
+     *
+     * @param array $configs Configuration array with the following keys:
+     *                       - 'id'    => string The key in $query to use as the checkbox value.
+     *                       - 'name'  => string The key in $query to use as the label text.
+     *                       - 'field' => string The configuration field name to get stored values.
+     *                       - 'query' => array  Array of associative arrays representing checkbox options.
+     *
+     * @return string HTML string containing the formatted checkbox table
+     */
     private function checkboxSelectorFormatHtml($configs)
     {
         $context = \Context::getContext();
@@ -663,6 +758,11 @@ class DoofinderAdminPanelView
         ];
     }
 
+    /**
+     * Returns an array of multiprice keys indexed by key name.
+     *
+     * @return array<string,array> multiprice key data
+     */
     private static function getMultipriceKeys()
     {
         $hashidKeys = DfTools::getHashidKeys();
@@ -675,6 +775,11 @@ class DoofinderAdminPanelView
         return $arrayKeys;
     }
 
+    /**
+     * Returns a boolean form field option array with random IDs.
+     *
+     * @return array<int,array<string,mixed>> boolean option definitions for a form field
+     */
     private function getBooleanFormValue()
     {
         $randomNumber = mt_rand(0, 100000);
@@ -694,6 +799,11 @@ class DoofinderAdminPanelView
         return $option;
     }
 
+    /**
+     * Generates an array of feed URLs for each language (and currency if multiprice disabled).
+     *
+     * @return array<int,array<string,string>> list of feed URLs with language and optional currency
+     */
     private function getFeedURLs()
     {
         $urls = [];
@@ -724,6 +834,13 @@ class DoofinderAdminPanelView
         return $urls;
     }
 
+    /**
+     * Converts an array of feed URLs into formatted HTML content.
+     *
+     * @param array<int,array<string,string>> $df_feed_urls the list of feed URLs
+     *
+     * @return string HTML list of feed URLs
+     */
     private function feedUrlsFormatHtml($df_feed_urls)
     {
         $htmlContent = '<dl style="max-height:150px; overflow-y: auto;">';

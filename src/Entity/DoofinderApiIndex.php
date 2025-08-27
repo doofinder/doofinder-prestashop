@@ -19,11 +19,29 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Handles communication with the Doofinder Plugins API for reindexing feeds.
+ */
 class DoofinderApiIndex
 {
+    /**
+     * @var string API key used for authentication with Doofinder Plugins API
+     */
     private $apiKey;
+
+    /**
+     * @var string Base URL of the Doofinder API for the specified region
+     */
     private $apiUrl;
 
+    /**
+     * DoofinderApiIndex constructor.
+     *
+     * Initializes the API key and determines the regional API URL.
+     *
+     * @param string $apiKey API key for authentication
+     * @param string $region Region code used to determine the API endpoint
+     */
     public function __construct($apiKey, $region)
     {
         $this->apiKey = $apiKey;
@@ -31,10 +49,14 @@ class DoofinderApiIndex
     }
 
     /**
-     * Make a request to the plugins API to reprocess all the feeds
+     * Invoke reindexing for all feeds in the store.
      *
-     * @param string $installationId
-     * @param string $callbackUrl
+     * Sends a request to the Doofinder Plugins API to reprocess all feeds.
+     *
+     * @param string $installationId Unique identifier of the store installation
+     * @param string $callbackUrl Optional callback URL to receive notifications once the process completes
+     *
+     * @return array|null Returns the decoded JSON response from the API, or null on failure
      */
     public function invokeReindexing($installationId, $callbackUrl = '')
     {
@@ -44,6 +66,14 @@ class DoofinderApiIndex
         return $this->post($apiEndpoint, $jsonData);
     }
 
+    /**
+     * Execute a POST request to a given URL with a JSON payload.
+     *
+     * @param string $url The API endpoint URL
+     * @param string $payload JSON-encoded string to send in the request body
+     *
+     * @return array|null Returns the decoded JSON response, or null if the request fails
+     */
     private function post($url, $payload)
     {
         $client = new EasyREST();
