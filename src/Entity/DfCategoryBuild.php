@@ -67,9 +67,9 @@ class DfCategoryBuild
     /**
      * Sets the category IDs to be included in the payload.
      *
-     * @param array $arrayCategories list of category IDs
+     * @param bool $json whether to return the payload as JSON (true) or array (false)
      *
-     * @return void
+     * @return string|array JSON string or array containing category data
      */
     public function build($json = true)
     {

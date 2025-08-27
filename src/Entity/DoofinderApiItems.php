@@ -66,7 +66,7 @@ class DoofinderApiItems
     /**
      * Make a request to the API to update the specified items
      *
-     * @param array $payload Items data to update
+     * @param array|string $payload Items data to update. This can be an associative array or a JSON string.
      *
      * @return array Response from the API
      */
