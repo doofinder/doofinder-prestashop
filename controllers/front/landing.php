@@ -20,12 +20,26 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Front controller for handling Doofinder landing pages.
+ *
+ * Retrieves landing page requests by hashid and slug,
+ * determines the appropriate language, and redirects to the correct landing page URL.
+ */
 class DoofinderLandingModuleFrontController extends ModuleFrontController
 {
     /**
-     * Assign template vars related to page content.
+     * Processes the landing page request.
+     *
+     * - Retrieves 'hashid' and 'slug' parameters from the request.
+     * - Validates that both values exist.
+     * - Determines the language ID based on the hashid.
+     * - Redirects to the proper landing page if valid.
+     * - Redirects to the 404 page if parameters are missing or invalid.
      *
      * @see FrontController::initContent()
+     *
+     * @return void redirects the browser; execution does not continue after redirect
      */
     public function initContent()
     {

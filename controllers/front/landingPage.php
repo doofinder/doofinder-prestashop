@@ -25,20 +25,61 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Front controller for Doofinder landing pages.
+ *
+ * Handles retrieval, caching, and rendering of landing page content including product blocks.
+ * Supports both PrestaShop 1.6 and 1.7 templates.
+ */
 class DoofinderLandingPageModuleFrontController extends ModuleFrontController
 {
-    public $products = [];
-    public $landing_data = [];
-    public $display_column_right;
-    public $display_column_left;
-
+    /**
+     * Number of products to fetch per block.
+     */
     const RESULTS = 48;
+
+    /**
+     * Cache TTL in minutes for landing page data.
+     */
     const TTL_CACHE = 30;
 
     /**
-     * Initialize landing controller.
+     * Landing page products and data.
+     *
+     * @var array
+     */
+    public $products = [];
+
+    /**
+     * Landing page structured data.
+     *
+     * @var array
+     */
+    public $landing_data = [];
+
+    /**
+     * Flag to control template right column display.
+     *
+     * @var bool
+     */
+    public $display_column_right;
+
+    /**
+     * Flag to control template left column display.
+     *
+     * @var bool
+     */
+    public $display_column_left;
+
+    /**
+     * Initialize the landing controller.
+     *
+     * - Fetches landing data either from cache or API.
+     * - Searches products for each landing block using Doofinder API.
      *
      * @see FrontController::init()
+     *
+     * @return void
      */
     public function init()
     {
@@ -67,9 +108,13 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
     }
 
     /**
-     * Assign template vars related to page content.
+     * Assign template variables and render the landing page.
+     *
+     * Supports rendering for several PrestaShop versions.
      *
      * @see FrontController::initContent()
+     *
+     * @return void
      */
     public function initContent()
     {
@@ -85,6 +130,11 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         }
     }
 
+    /**
+     * Renders product list for PrestaShop 1.7 or higher versions.
+     *
+     * @return void
+     */
     private function renderProductList()
     {
         $assembler = new ProductAssembler($this->context);
@@ -122,6 +172,11 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         $this->setTemplate('module:doofinder/views/templates/front/landing.tpl');
     }
 
+    /**
+     * Renders product list for PrestaShop 1.6.
+     *
+     * @return void
+     */
     private function renderProductList16()
     {
         $this->context->smarty->assign(
@@ -158,6 +213,20 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         return $page;
     }
 
+    /**
+     * Retrieves landing page data, either from cache or Doofinder API.
+     *
+     * - Checks cache first.
+     * - If cache is absent or expired, calls the Doofinder API.
+     * - Updates cache after API call.
+     *
+     * @param string $name landing page slug
+     * @param int $id_shop shop ID
+     * @param int $id_lang language ID
+     * @param int $id_currency currency ID
+     *
+     * @return array|false landing data array or false if not found
+     */
     private function getLandingData($name, $id_shop, $id_lang, $id_currency)
     {
         $hashid = SearchEngine::getHashId($id_lang, $id_currency);
@@ -199,6 +268,14 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         }
     }
 
+    /**
+     * Calls the Doofinder landing API to fetch page data.
+     *
+     * @param string $name landing page slug
+     * @param string $hashid search engine hash ID
+     *
+     * @return array|null API response array or null on failure
+     */
     private function getApiCall($name, $hashid)
     {
         $apiKey = DfTools::getFormattedApiKey();
@@ -209,6 +286,14 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         return $api->getLanding($name);
     }
 
+    /**
+     * Retrieves cached landing data from the database.
+     *
+     * @param string $name landing page slug
+     * @param string $hashid search engine hash ID
+     *
+     * @return bool True if the cache was set, false otherwise
+     */
     private function setLandingCache($name, $hashid, $data)
     {
         return Db::getInstance()->insert(
@@ -234,6 +319,13 @@ class DoofinderLandingPageModuleFrontController extends ModuleFrontController
         );
     }
 
+    /**
+     * Checks whether the cached landing data needs refresh.
+     *
+     * @param array $row cached landing row
+     *
+     * @return bool true if cache is expired and should be refreshed, false otherwise
+     */
     private function refreshCache($row)
     {
         $last_exec_ts = strtotime($row['date_upd']);

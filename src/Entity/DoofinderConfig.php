@@ -19,8 +19,22 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Handles the migration to the Single Script from the previous Live Layer deprecated scripts.
+ */
 class DoofinderConfig
 {
+    /**
+     * Write debug messages to a log file if debug mode is enabled.
+     *
+     * The log file is stored in the module's directory under the PrestaShop installation.
+     * Only logs messages if the `DF_DEBUG` configuration is enabled for the current shop.
+     *
+     * @param mixed $message The message to log. Can be a string or any variable (arrays/objects will be converted to string).
+     * @param string $logFile Optional. The log file name (default: 'doofinder.log').
+     *
+     * @return void
+     */
     public static function debug($message, $logFile = 'doofinder.log')
     {
         if (!defined('_PS_MODULE_DIR_')) {

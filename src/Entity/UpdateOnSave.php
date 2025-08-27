@@ -272,7 +272,7 @@ class UpdateOnSave
      *
      * @param string $hashid the Doofinder search engine hashid
      * @param string $type The type of items to update (e.g., 'product', 'category', 'cms').
-     * @param array $payload The data payload containing the items to update. This is an associative array.
+     * @param array|string $payload The data payload containing the items to update. This can be an associative array or a JSON string.
      *
      * @return void
      */
@@ -301,7 +301,7 @@ class UpdateOnSave
      *
      * @param string $hashid the Doofinder search engine hashid
      * @param string $type The type of items to delete (e.g., 'product', 'category', 'cms').
-     * @param array $payload The data payload containing the items to delete. This is an associative array.
+     * @param array|string $payload The data payload containing the items to update. This can be an associative array or a JSON string.
      *
      * @return void
      */
