@@ -20,12 +20,29 @@ use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
 
+/**
+ * Front controller to provide Doofinder module configuration via JSON.
+ *
+ * This controller:
+ * - Handles autoinstaller token validation and configuration updates.
+ * - Provides a JSON representation of module configuration, including:
+ *   - Available languages and currencies
+ *   - Price display and tax settings
+ *   - Feed URLs and module version
+ * - Ensures proper response headers for AJAX requests.
+ */
 class DoofinderConfigModuleFrontController extends ModuleFrontController
 {
     /**
-     * Assign template vars related to page content.
+     * Assign template variables and output configuration as JSON.
+     *
+     * - If a valid autoinstaller token is provided, updates the API configuration.
+     * - Otherwise, returns module configuration including languages, currencies, prices, and feed URLs.
+     * - Handles compatibility across PrestaShop 1.5, 1.6, and 1.7 for AJAX responses.
      *
      * @see FrontController::initContent()
+     *
+     * @return void outputs JSON directly and exits
      */
     public function initContent()
     {
