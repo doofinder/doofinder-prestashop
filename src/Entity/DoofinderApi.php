@@ -71,21 +71,6 @@ class DoofinderApi
     private $searchOptions = [];
 
     /**
-     * @var int Current page number for search results
-     */
-    private $page = 1;
-
-    /**
-     * @var string|null Last query executed
-     */
-    private $lastQuery;
-
-    /**
-     * @var int Total number of results from the last query
-     */
-    private $total;
-
-    /**
      * @var string Prefix to prepend to serialized parameters
      */
     private $paramsPrefix = self::DEFAULT_PARAMS_PREFIX;
@@ -229,10 +214,7 @@ class DoofinderApi
             $params['filter'] = $filter;
         }
         $dfResults = new DoofinderResults($this->apiCall('search', $params));
-        $this->page = $dfResults->getProperty('page');
-        $this->total = $dfResults->getProperty('total');
         $this->searchOptions['query'] = $dfResults->getProperty('query');
-        $this->lastQuery = $dfResults->getProperty('query');
 
         return $dfResults;
     }

@@ -54,7 +54,7 @@ class DoofinderApiLanding
     /**
      * Make a GET request to the API to get landing data
      *
-     * @param string $slug Slug name of the landing page
+     * @param string $url Endpoint URL
      *
      * @return array|null Landing data
      */
