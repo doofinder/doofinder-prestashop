@@ -19,6 +19,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class UpdateOnSave
+ *
+ * Handles the update on save functionality for the Doofinder module.
+ * Manages the queue of updates to be processed and sends them to the Doofinder API.
+ */
 class UpdateOnSave
 {
     /**
