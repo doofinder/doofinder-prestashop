@@ -493,11 +493,11 @@ class DfProductBuild
                 if (is_array($value)) {
                     $keyValueToReturn = [];
                     foreach ($value as $singleValue) {
-                        $keyValueToReturn[] = $key . '=' . $singleValue;
+                        $keyValueToReturn[] = $key . '=' . str_replace('/', '\/', $singleValue);
                     }
                     $formattedAttributes[] = implode('/', $keyValueToReturn);
                 } else {
-                    $formattedAttributes[] = $key . '=' . $value;
+                    $formattedAttributes[] = $key . '=' . str_replace('/', '\/', $value);
                 }
             }
             $product['attributes'] = str_replace('\"', '"', implode('/', $formattedAttributes));
