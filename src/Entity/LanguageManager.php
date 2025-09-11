@@ -19,12 +19,24 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class LanguageManager
+ *
+ * Provides utility methods for retrieving language and currency information
+ * related to Doofinder search engine configuration in PrestaShop.
+ *
+ * Functions include:
+ * - Mapping Doofinder search engine hash IDs to PrestaShop language IDs
+ * - Retrieving currency ISO codes by ID
+ * - Extracting the base language code from a locale code
+ * - Mapping locale codes to language IDs
+ */
 class LanguageManager
 {
     /**
      * Get the language associated with a search engine
      *
-     * @param bool $hashid hashid of the Search Engine
+     * @param string $hashid hashid of the Search Engine
      *
      * @return bool|int
      */
@@ -83,7 +95,7 @@ class LanguageManager
      *
      * @param string $locale locale IETF language tag
      *
-     * @return int|false|null
+     * @return string|false
      */
     private static function getLanguageIdByLocale($locale)
     {

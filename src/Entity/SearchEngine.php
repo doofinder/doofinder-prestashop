@@ -19,6 +19,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class SearchEngine
+ *
+ * Provides methods for managing and retrieving search engine configuration
+ * including hashid retrieval and updates.
+ */
 class SearchEngine
 {
     /**

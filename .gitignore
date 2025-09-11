@@ -4,3 +4,5 @@ composer.lock
 .php-cs-fixer.cache
 /html
 .env.local
+.phpdoc
+build/docs

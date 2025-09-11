@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:5.7
+    image: mysql:${MYSQL_VERSION}
     volumes:
       - prestashop-db:/var/lib/mysql
     environment:
@@ -11,34 +11,51 @@ services:
     ports:
       - 3311:3306
 
-  prestashop:
+  setup:
+    image: doofinder-prestashop:${PRESTASHOP_DOCKER_TAG}
+    pull_policy: never
+    profiles:
+      - setup
     depends_on:
       - db
-    build:
-      context: docker
-      args:
-        PHP_VERSION: ${PHP_VERSION}
-        PS_VERSION: ${PS_VERSION}
-    ports:
-      - 9011:80
-      - 4011:443
     environment:
-      PS_DEV_MODE: 1
       DB_SERVER: db
       DB_USER: ${MYSQL_USER}
       DB_PASSWD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
+      DB_PREFIX: ${PS_DB_PREFIX}
+      PS_LANGUAGE: ${PS_LANGUAGE}
+      PS_COUNTRY: ${PS_COUNTRY}
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: ${PS_BASE_URL}
       PS_FOLDER_ADMIN: ${PS_FOLDER_ADMIN}
-      PS_ENABLE_SSL: 1
+      PS_ENABLE_SSL: ${PS_ENABLE_SSL}
       ADMIN_MAIL: ${PS_ADMIN_EMAIL}
       ADMIN_PASSWD: ${PS_ADMIN_PASSWORD}
-      # XDEBUG_CONFIG: "client_host=${XDEBUG_HOST} idekey=${XDEBUG_KEY} start_with_request=yes"
-      # XDEBUG_MODE: "debug,develop"
+    command: "/tmp/docker_setup.sh"
+    volumes:
+      - ./html:/var/www/html
+
+  prestashop:
+    image: doofinder-prestashop:${PRESTASHOP_DOCKER_TAG}
+    build:
+      context: docker
+      args:
+        PRESTASHOP_DOCKER_TAG: ${PRESTASHOP_DOCKER_TAG}
+    depends_on:
+      - db
+    ports:
+      - 9011:80
+      - 4011:443
+    environment:
+      PS_SSL_ENABLED_EVERYWHERE: 1
+      PS_DEV_MODE: 1
+      XDEBUG_CONFIG: "client_host=${XDEBUG_HOST} idekey=${XDEBUG_KEY} start_with_request=yes"
+      XDEBUG_MODE: "debug,develop"
+    command: "apache2-foreground"
     volumes:
       - ./html:/var/www/html
       - ./:/var/www/html/modules/doofinder
-      - ./html/ignore-folder-html-loop:/var/www/html/modules/doofinder/html
+      - /var/www/html/modules/doofinder/html
 volumes:
   prestashop-db:

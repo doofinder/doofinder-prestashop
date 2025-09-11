@@ -19,6 +19,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class UpdateOnSave
+ *
+ * Handles the update on save functionality for the Doofinder module.
+ * Manages the queue of updates to be processed and sends them to the Doofinder API.
+ */
 class UpdateOnSave
 {
     /**
@@ -96,7 +102,8 @@ class UpdateOnSave
 
         $languages = \Language::getLanguages(true, $shopId);
         $currencies = \Currency::getCurrenciesByIdShop($shopId);
-        $defaultCurrency = new \Currency(\Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId));
+        $defaultCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId);
+        $defaultCurrency = new \Currency($defaultCurrencyId);
         $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
 
         foreach (['product', 'cms', 'category'] as $type) {
@@ -265,7 +272,7 @@ class UpdateOnSave
      *
      * @param string $hashid the Doofinder search engine hashid
      * @param string $type The type of items to update (e.g., 'product', 'category', 'cms').
-     * @param array $payload The data payload containing the items to update. This is an associative array.
+     * @param array|string $payload The data payload containing the items to update. This can be an associative array or a JSON string.
      *
      * @return void
      */
@@ -294,7 +301,7 @@ class UpdateOnSave
      *
      * @param string $hashid the Doofinder search engine hashid
      * @param string $type The type of items to delete (e.g., 'product', 'category', 'cms').
-     * @param array $payload The data payload containing the items to delete. This is an associative array.
+     * @param array|string $payload The data payload containing the items to update. This can be an associative array or a JSON string.
      *
      * @return void
      */

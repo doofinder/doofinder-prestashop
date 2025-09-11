@@ -30,6 +30,17 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Upgrades the Doofinder module to version 4.12.0.
+ *
+ * This upgrade step removes obsolete PHP files from previous versions
+ * to prevent conflicts, dead code, or deprecated behavior.
+ * Logs progress using DoofinderConfig::debug.
+ *
+ * @param Doofinder $module the Doofinder module instance being upgraded
+ *
+ * @return bool always returns true, regardless of whether files were successfully deleted
+ */
 function upgrade_module_4_12_0($module)
 {
     DoofinderConfig::debug('Initiating 4.12.0 upgrade');
@@ -41,6 +52,15 @@ function upgrade_module_4_12_0($module)
     return true;
 }
 
+/**
+ * Deletes legacy files no longer needed by the Doofinder module.
+ *
+ * Iterates through a predefined list of obsolete files, checks their existence,
+ * and attempts to remove them from the module directory. Each deletion attempt
+ * is logged, including failures.
+ *
+ * @return void
+ */
 function unlinkFiles()
 {
     $files = [

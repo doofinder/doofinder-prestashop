@@ -19,6 +19,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * FormManager class
+ *
+ * Handles the processing of backoffice configuration forms for the Doofinder module.
+ * Manages form submissions, validation, and configuration updates across different tabs
+ * including store info, data feed, and advanced settings.
+ */
 class FormManager
 {
     /**
@@ -28,6 +35,11 @@ class FormManager
      */
     private $module;
 
+    /**
+     * Constructor
+     *
+     * @param \Doofinder $module The main Doofinder module instance
+     */
     public function __construct($module)
     {
         $this->module = $module;
@@ -36,7 +48,15 @@ class FormManager
     /**
      * Process the backoffice configuration form
      *
-     * @return string
+     * Handles form submissions from different configuration tabs:
+     * - Store information (installation ID, API key)
+     * - Data feed settings
+     * - Advanced parameters
+     * - Reindexing requests
+     *
+     * Validates input data, updates configuration values, and provides user feedback.
+     *
+     * @return string HTML messages for user feedback (errors, warnings, confirmations)
      */
     public function postProcess()
     {
@@ -76,12 +96,31 @@ class FormManager
             $context->smarty->assign('adv', 1);
         }
 
-        if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
-            $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
-            $formUpdated = 'store_info_tab';
-        }
-
         $adminPanelView = new DoofinderAdminPanelView($this->module);
+        if (((bool) \Tools::isSubmit('submitDoofinderModuleStoreInfo')) == true) {
+            $storeSubmissionErrors = false;
+
+            $installationId = trim(\Tools::getValue('DF_INSTALLATION_ID'));
+            if (DfTools::validateInstallationId($installationId)) {
+                $formValues['DF_INSTALLATION_ID'] = $installationId;
+            } else {
+                $messages .= $adminPanelView->displayErrorCtm($this->module->l('The Store ID must be in UUID format, for example: 3c49f881-5988-4e32-a581-1d577d7d55c0', 'formmanager'));
+                $storeSubmissionErrors = true;
+            }
+
+            $apiKey = trim(\Tools::getValue('DF_API_KEY'));
+            if (DfTools::validateApiKey($apiKey)) {
+                $formValues['DF_API_KEY'] = $apiKey;
+            } else {
+                $messages .= $adminPanelView->displayErrorCtm($this->module->l('The API Key must be in the correct format, for example: eu1-29c05dbdab18cbbb65c95305bb767bab1240a528', 'formmanager'));
+                $storeSubmissionErrors = true;
+            }
+
+            if (!$storeSubmissionErrors) {
+                $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
+                $formUpdated = 'store_info_tab';
+            }
+        }
 
         foreach (array_keys($formValues) as $key) {
             $postKey = str_replace(['[', ']'], '', $key);
@@ -135,6 +174,17 @@ class FormManager
         return $messages;
     }
 
+    /**
+     * Update Hashids configuration for multiprice scenarios
+     *
+     * When advanced parameters are present and multiprice is enabled,
+     * this method updates all related Hashids configuration keys.
+     *
+     * @param string $postKey The configuration key being updated
+     * @param string $value The new value to set
+     *
+     * @return void
+     */
     private static function updateHashIds($postKey, $value)
     {
         $hashidKeys = DfTools::getHashidKeys();

@@ -18,24 +18,49 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * DoofinderResults - Wrapper class for Doofinder search API results
+ *
+ * This class provides a clean interface to access search results, facets, filters,
+ * and other properties returned by the Doofinder search server. It handles both
+ * terms and range facets, manages filter states, and provides status information.
+ */
 class DoofinderResults
 {
     // doofinder status
+    /** @var string Success status - everything ok */
     const SUCCESS = 'success';      // everything ok
+
+    /** @var string Not found status - no account with the provided hashid found */
     const NOTFOUND = 'notfound';    // no account with the provided hashid found
+
+    /** @var string Exhausted status - the account has reached its query limit */
     const EXHAUSTED = 'exhausted';  // the account has reached its query limit
 
+    /** @var array<string, mixed> Search result properties (rpp, page, query, etc.) */
     private $properties;
+
+    /** @var array<int, array<string, mixed>> Search results array */
     private $results;
+
+    /** @var array<string, array<string, mixed>> Facets data with type and terms/ranges */
     private $facets;
+
+    /** @var array<string, mixed> Applied filters for the current search */
     private $filter;
+
+    /** @var array<string, mixed>|null Banner data if present */
     private $banner;
+
+    /** @var string Current status of the Doofinder request */
     public $status;
 
     /**
-     * Constructor
+     * Constructor - Parse JSON response from Doofinder search server
      *
-     * @param string $jsonString stringified json returned by doofinder search serverphp cs
+     * @param string $jsonString Stringified JSON returned by Doofinder search server
+     *
+     * @throws \JsonException When JSON parsing fails
      */
     public function __construct($jsonString)
     {
@@ -113,13 +138,13 @@ class DoofinderResults
     }
 
     /**
-     * getProperty
+     * Get a single property from the search results
      *
-     * get single property from the results
+     * Retrieves properties like 'results_per_page', 'query', 'max_score', 'page', 'total', 'hashid'
      *
-     * @param string @propertyName: 'results_per_page', 'query', 'max_score', 'page', 'total', 'hashid'
+     * @param string $propertyName Property name to retrieve
      *
-     * @return mixed the value of the property
+     * @return mixed The value of the property, or null if not found
      */
     public function getProperty($propertyName)
     {
@@ -128,17 +153,18 @@ class DoofinderResults
     }
 
     /**
-     * getResults
+     * Get the search results array
      *
-     * @return array search results. at the moment, only the 'cooked' version.
-     *               Each result is of the form:
-     *               array('header'=>...,
-     *               'body' => ..,
-     *               'price' => ..,
-     *               'href' => ...,
-     *               'image' => ...,
-     *               'type' => ...,
-     *               'id' => ..)
+     * Returns the 'cooked' version of search results. Each result contains:
+     * - header: Result header/title
+     * - body: Result description/content
+     * - price: Product price
+     * - href: Result URL
+     * - image: Result image URL
+     * - type: Result type
+     * - id: Result identifier
+     *
+     * @return array<int, array<string, mixed>> Search results array
      */
     public function getResults()
     {
@@ -146,9 +172,9 @@ class DoofinderResults
     }
 
     /**
-     * getFacetsNames
+     * Get the names of all available facets
      *
-     * @return array facets names
+     * @return array<int, string> Array of facet names
      */
     public function getFacetsNames()
     {
@@ -156,59 +182,62 @@ class DoofinderResults
     }
 
     /**
-     * getFacet
+     * Get a specific facet by name
      *
-     * @param string name the facet name whose results are wanted
+     * Returns facet data with the following structure:
      *
-     * @return array facet search data
-     *               - for terms facets
-     *               array(
-     *               '_type'=> 'terms',  // type of facet 'terms' or 'range'
-     *               'missing'=> 3, // # of elements with no value for this facet
-     *               'others'=> 2, // # of terms not present in the search response
-     *               'total'=> 6, // # number of possible terms for this facet
-     *               'terms'=> array(
-     *               array('count'=>6, 'term'=>'Blue', 'selected'=>false),
-     *               // in the response, there are 6 'blue' terms
-     *               array('count'=>3, 'term': 'Red', 'selected'=>true),
-     *               // if 'selected'=>true, that term has been selected as filter
-     *               ...
-     *               )
-     *               )
-     *               - for range facets
-     *               array(
-     *               '_type'=> 'range',
-     *               'ranges'=> array(
-     *               array(
-     *               'count'=>6, // in the response, 6 elements within that range.
-     *               'from':0,
-     *               'min': 30
-     *               'max': 90,
-     *               'mean'=>33.2,
-     *               'total'=>432,
-     *               'total_count'=>6,
-     *               'selected_from'=> 34.3
-     *               // if present. this value has been used as filter. false otherwise
-     *               'selected_to'=> 99.3
-     *               // if present. this value has been used as filter. false otherwise
-     *               ),
-     *               ...
-     *               )
-     *               )
+     * For terms facets:
+     * array(
+     *   '_type'=> 'terms',  // type of facet 'terms' or 'range'
+     *   'missing'=> 3, // # of elements with no value for this facet
+     *   'others'=> 2, // # of terms not present in the search response
+     *   'total'=> 6, // # of possible terms for this facet
+     *   'terms'=> array(
+     *     array('count'=>6, 'term'=>'Blue', 'selected'=>false),
+     *     // in the response, there are 6 'blue' terms
+     *     array('count'=>3, 'term': 'Red', 'selected'=>true),
+     *     // if 'selected'=>true, that term has been selected as filter
+     *     ...
+     *   )
+     * )
+     *
+     * For range facets:
+     * array(
+     *   '_type'=> 'range',
+     *   'ranges'=> array(
+     *     array(
+     *       'count'=>6, // in the response, 6 elements within that range.
+     *       'from':0,
+     *       'min': 30
+     *       'max': 90,
+     *       'mean'=>33.2,
+     *       'total'=>432,
+     *       'total_count'=>6,
+     *       'selected_from'=> 34.3
+     *       // if present. this value has been used as filter. false otherwise
+     *       'selected_to'=> 99.3
+     *       // if present. this value has been used as filter. false otherwise
+     *     ),
+     *     ...
+     *   )
+     * )
+     *
+     * @param string $facetName The facet name whose results are wanted
+     *
+     * @return array<string, mixed>|null Facet search data or null if facet doesn't exist
      */
     public function getFacet($facetName)
     {
-        return $this->facets[$facetName];
+        return isset($this->facets[$facetName]) ? $this->facets[$facetName] : null;
     }
 
     /**
-     * getFacets
+     * Get all facets data
      *
-     * get the whole facets associative array:
-     *                array('color'=>array(...), 'brand'=>array(...))
-     * each array is defined as in getFacet() docstring
+     * Returns the complete facets associative array where each key is a facet name
+     * and each value is the facet data as described in getFacet() documentation
      *
-     * @return array facets assoc. array
+     * @return array<string, array<string, mixed>> Complete facets associative array
      */
     public function getFacets()
     {
@@ -216,27 +245,20 @@ class DoofinderResults
     }
 
     /**
-     * getAppliedFilters
+     * Get the currently applied filters for the search query
      *
-     * get the filters the query has defined
-     *                    array('categories' => array(  // filter name . same as facet name
-     *                             'Sillas de paseo',   // if simple array, it's a terms facet
-     *                             'Sacos sillas de paseo'
-     *                             ),
-     *                           'color' => array(
-     *                              'red',
-     *                              'blue'
-     *                              ),
-     *                           'price' => array(
-     *                              'include_upper'=>true, // if 'from' , 'to' keys, it's a range facet
-     *                              'from'=>35.19,
-     *                              'to'=>9999
-     *                              )
-     *                         )
-     *   MEANING OF THE EXAMPLE FILTER:
-     *   "FROM the query results, filter only results that have
-     *   ('Sillas de paseo' OR 'Sacos sillas de paseo') categories
-     *   AND ('red' OR 'blue') color AND price is BETWEEN 34.3 and 99.3"
+     * Returns an array representing the active filters:
+     * - Simple arrays for terms facets (e.g., categories, colors)
+     * - Associative arrays for range facets (e.g., price with 'from', 'to' keys)
+     *
+     * Example structure:
+     * [
+     *   'categories' => ['Sillas de paseo', 'Sacos sillas de paseo'],
+     *   'color' => ['red', 'blue'],
+     *   'price' => ['from' => 35.19, 'to' => 9999, 'include_upper' => true]
+     * ]
+     *
+     * @return array<string, mixed> Currently applied filters
      */
     public function getAppliedFilters()
     {
@@ -244,18 +266,20 @@ class DoofinderResults
     }
 
     /**
-     * isOk
+     * Check if the search request was successful
      *
-     * checks if all went well
-     *
-     * @return bool true if the status is 'success'.
-     *              false if the status is not.
+     * @return bool True if status is 'success', false otherwise
      */
     public function isOk()
     {
         return $this->status == self::SUCCESS;
     }
 
+    /**
+     * Get banner data if present in the search results
+     *
+     * @return array<string, mixed>|null Banner data array or null if no banner
+     */
     public function getBanner()
     {
         return $this->banner;

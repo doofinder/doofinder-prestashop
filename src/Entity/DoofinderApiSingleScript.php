@@ -19,6 +19,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Handles the migration to the Single Script from the previous Live Layer deprecated scripts.
+ */
 class DoofinderApiSingleScript
 {
     private $installationId;
@@ -48,6 +51,15 @@ class DoofinderApiSingleScript
         return $this->post($url);
     }
 
+    /**
+     * Execute a POST request to the Doofinder API with a JSON payload.
+     *
+     * The payload will be the installation ID.
+     *
+     * @param string $url Full API endpoint URL
+     *
+     * @return array|null Decoded JSON response from the API, or null if the request fails
+     */
     private function post($url)
     {
         $client = new EasyREST();
@@ -61,8 +73,8 @@ class DoofinderApiSingleScript
         $response = $client->post(
             $url,
             $jsonStoreData,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );

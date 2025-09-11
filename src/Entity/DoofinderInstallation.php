@@ -19,11 +19,31 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Handles installations in Doofinder:
+ * - Manages module database tables
+ * - Creates stores in Doofinder Admin
+ * - Updates feed URLs
+ * - Manages module configuration and admin tabs
+ */
 class DoofinderInstallation
 {
+    /**
+     * @var string User's API key for Doofinder authentication
+     */
     private $apiKey;
+
+    /**
+     * @var string Base URL of the Doofinder API for the specified region
+     */
     private $apiUrl;
 
+    /**
+     * DoofinderInstallation constructor.
+     *
+     * @param string $apiKey User's API key for authentication
+     * @param string $region Region code used to determine the API endpoint
+     */
     public function __construct($apiKey, $region)
     {
         $this->apiKey = $apiKey;
@@ -33,8 +53,9 @@ class DoofinderInstallation
     /**
      * Make a request to the plugins API to to check that the update on save is valid
      *
-     * @param string $installation_id
-     * @param string $callback_url
+     * @param string $installationId
+     *
+     * @return array|null
      */
     public function isValidUpdateOnSave($installationId)
     {
@@ -43,6 +64,13 @@ class DoofinderInstallation
         return $this->_get($apiEndpoint);
     }
 
+    /**
+     * Make a GET request
+     *
+     * @param string $url Endpoint URL
+     *
+     * @return array|null data
+     */
     private function _get($url)
     {
         $client = new EasyREST();
@@ -50,8 +78,8 @@ class DoofinderInstallation
         $response = $client->get(
             $url,
             null,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $this->apiKey]
         );
@@ -122,7 +150,7 @@ class DoofinderInstallation
     /**
      * Create a store in Doofinder based on the Prestashop shop
      *
-     * @param array $shop
+     * @param array $shop PrestaShop shop data array
      *
      * @return void
      */
@@ -134,8 +162,10 @@ class DoofinderInstallation
         $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
         $shopId = $shop['id_shop'];
         $shopGroupId = $shop['id_shop_group'];
-        $primaryLang = new \Language(\Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId));
-        $primaryCurrency = new \Currency(\Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId));
+        $primaryLangId = (int) \Configuration::get('PS_LANG_DEFAULT', null, $shopGroupId, $shopId);
+        $primaryLang = new \Language($primaryLangId);
+        $primaryCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, $shopGroupId, $shopId);
+        $primaryCurrency = new \Currency($primaryCurrencyId);
         $installationID = null;
 
         DoofinderConfig::setDefaultShopConfig($shopGroupId, $shopId);
@@ -148,6 +178,11 @@ class DoofinderInstallation
             'site_url' => $shopUrl,
             'search_engines' => [],
             'plugin_version' => DoofinderConstants::VERSION,
+            'options' => [
+                'url' => preg_replace('#^https?://#', '', $shopUrl),
+                'shop_id' => (int) $shopId,
+                'shop_group_id' => (int) $shopGroupId,
+            ],
         ];
 
         foreach ($languages as $lang) {
@@ -182,8 +217,8 @@ class DoofinderInstallation
         $response = $client->post(
             UrlManager::getInstallUrl(\Configuration::get('DF_REGION')),
             $jsonCreateStoreRequest,
-            false,
-            false,
+            null,
+            null,
             'application/json',
             ['Authorization: Token ' . $apiKey]
         );
@@ -289,8 +324,8 @@ class DoofinderInstallation
             $response = $client->post(
                 UrlManager::getUpdateFeedUrl(\Configuration::get('DF_REGION')),
                 $jsonFeedUrls,
-                false,
-                false,
+                null,
+                null,
                 'application/json',
                 ['Authorization: Token ' . $apiKey]
             );
@@ -311,10 +346,15 @@ class DoofinderInstallation
         }
     }
 
+    /**
+     * Create the module admin tab in PrestaShop.
+     *
+     * @return bool True if tab was successfully created
+     */
     public static function installTabs()
     {
         $tab = new \Tab();
-        $tab->active = 0;
+        $tab->active = false;
         $tab->class_name = 'DoofinderAdmin';
         $tab->name = [];
         foreach (\Language::getLanguages() as $lang) {
@@ -326,6 +366,11 @@ class DoofinderInstallation
         return $tab->save();
     }
 
+    /**
+     * Remove the module admin tab from PrestaShop.
+     *
+     * @return bool True if tab was successfully deleted
+     */
     public static function uninstallTabs()
     {
         $tabId = (int) \Tab::getIdFromClassName('DoofinderAdmin');
@@ -333,6 +378,7 @@ class DoofinderInstallation
             return true;
         }
 
+        // Using Tab constructor and delete method instead of deprecated method
         $tab = new \Tab($tabId);
 
         return $tab->delete();

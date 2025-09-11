@@ -46,6 +46,7 @@ class DoofinderScript
         } elseif (method_exists($context, 'getMobileDetect')) {
             $isMobile = $context->getMobileDetect()->isMobile();
         }
+
         return $displayGeneral && (!$isMobile || $displayMobile);
     }
 

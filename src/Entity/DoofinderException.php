@@ -11,6 +11,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * To use custom exceptions.
+ */
 class DoofinderException extends \Exception
 {
 }

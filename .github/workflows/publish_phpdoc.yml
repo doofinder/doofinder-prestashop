@@ -1,0 +1,63 @@
+name: Build & Publish phpDocumentor -> GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP & Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xsl, zip
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies (including dev)
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Generate phpDocumentor docs
+        run: vendor/bin/phpdoc run
+
+      - name: Ensure .nojekyll (prevent Jekyll processing)
+        run: echo ".nojekyll" > build/docs/.nojekyll
+
+      - name: Upload static files as Pages artifact
+        id: upload-pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/docs
+          name: github-pages
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -19,6 +19,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Class UrlManager
+ *
+ * Provides methods for managing URLs related to the Doofinder module,
+ * including shop URLs, feed URLs, and callback URLs.
+ */
 class UrlManager
 {
     /**
@@ -89,11 +95,25 @@ class UrlManager
         return \Context::getContext()->link->getModuleLink(DoofinderConstants::NAME, 'callback', []);
     }
 
+    /**
+     * Get install endpoint URL
+     *
+     * @param string $region
+     *
+     * @return string
+     */
     public static function getInstallUrl($region)
     {
         return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/install');
     }
 
+    /**
+     * Get update feed endpoint URL
+     *
+     * @param string $region
+     *
+     * @return string
+     */
     public static function getUpdateFeedUrl($region)
     {
         return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/feed-url-update');
@@ -114,6 +134,13 @@ class UrlManager
         return sprintf($url, $region . '-') . $pathToAppend;
     }
 
+    /**
+     * Get shop base URI
+     *
+     * @param \Shop $shop
+     *
+     * @return string
+     */
     private static function _getShopBaseURI($shop)
     {
         return $shop->physical_uri . $shop->virtual_uri;

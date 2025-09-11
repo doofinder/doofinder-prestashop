@@ -38,7 +38,6 @@ if (function_exists('set_time_limit')) {
 
 DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
-
 /**
  *  @author camlafit <https://github.com/camlafit>
  *  Merge multidemensionnal array by value on each row
@@ -98,7 +97,7 @@ $isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
 $shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
 $shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
 $featuresShownArray = $dfProductBuild->getFeaturesShown();
-$attributesShownArray = explode(',', $dfProductBuild->getAttributesShown());
+$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) { return strlen(trim($a)) > 0; });
 /* ---------- END SHARED CONFIG ---------- */
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
@@ -118,13 +117,9 @@ if ($debug) {
     ini_set('display_errors', 0);
 }
 
-if (
-    is_array($attributesShownArray)
-    && count($attributesShownArray) > 0
-    && $attributesShownArray[0] !== ''
-) {
+$groupAttributesSlug = [];
+if (count($attributesShownArray) > 0) {
     $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
-    $groupAttributesSlug = [];
     foreach ($groupAttributes as $g) {
         if (in_array($g['id_attribute_group'], $attributesShownArray)) {
             $groupAttributesSlug[] = DfTools::slugify($g['name']);
@@ -152,7 +147,7 @@ if ($shouldShowProductVariations) {
 $header = array_merge($header, [
     'title', 'link', 'description', 'alternate_description', 'meta_title', 'meta_description', 'image_link', 'main_category',
     'categories', 'category_merchandising', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
-    'supplier_reference', 'extra_title_1', 'extra_title_2', 'tags',
+    'supplier_reference', 'supplier_name', 'extra_title_1', 'extra_title_2', 'tags',
 ]);
 
 if (DfTools::versionGte('1.7.0.0')) {
@@ -270,24 +265,18 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 
 $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
 foreach ($products as $product) {
-    $minProductPrices = [];
+    $minPriceVariant = null;
     if ($shouldShowProductVariations && $product['variant_count'] > 0) {
         $variations = DfTools::getProductVariations($product['id_product']);
         foreach ($variations as $variation) {
-            if ($shouldDisplayPrices) {
-                $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $shouldPricesUseTaxes, $currencies);
-                if (!isset($minProductPrices['onsale_price']) || $variantPrices['onsale_price'] < $minProductPrices['onsale_price']) {
-                    $minProductPrices = $variantPrices;
-                }
-            }
-            $expanded_variation = array_merge($product, $variation);
-            $built_variation = $dfProductBuild->buildProduct($expanded_variation, [], $additionalAttributesHeaders, $additionalHeaders);
-            $csv_product = $dfProductBuild->applySpecificTransformationsForCsv($built_variation, $extraHeader, $header);
-            fputcsv($csv, $csv_product, DfTools::TXT_SEPARATOR);
+            $minPriceVariant = $dfProductBuild->getMinPrice($minPriceVariant, $variation);
+            $builtVariation = $dfProductBuild->buildVariation($product, $variation);
+            $csvVariation = $dfProductBuild->applySpecificTransformationsForCsv($builtVariation, $extraHeader, $header);
+            fputcsv($csv, $csvVariation, DfTools::TXT_SEPARATOR);
         }
-        $product = $dfProductBuild->buildProduct($product, [$product['id_product'] => $minProductPrices], $additionalAttributesHeaders, $additionalHeaders);
+        $product = $dfProductBuild->buildProduct($product, $minPriceVariant, $additionalAttributesHeaders, $additionalHeaders);
     } else {
-        $product = $dfProductBuild->buildProduct($product, [], $additionalAttributesHeaders, $additionalHeaders);
+        $product = $dfProductBuild->buildProduct($product, null, $additionalAttributesHeaders, $additionalHeaders);
     }
 
     $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);

@@ -11,3 +11,4 @@
 /prestashop_architecture\.md	export-ignore
 /templates	                    export-ignore
 /docker                         export-ignore
+/Makefile                       export-ignore

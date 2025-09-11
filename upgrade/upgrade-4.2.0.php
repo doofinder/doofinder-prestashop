@@ -27,6 +27,17 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Upgrade the module to version 4.2.0.
+ *
+ * This upgrade step:
+ * - Installs or updates the required database table.
+ * - Registers new hooks to handle product save and delete actions for the Update On Save.
+ *
+ * @param Doofinder $module the module instance being upgraded
+ *
+ * @return bool true on success, false on failure
+ */
 function upgrade_module_4_2_0($module)
 {
     return installDb_4_2_0()
@@ -34,6 +45,17 @@ function upgrade_module_4_2_0($module)
         && $module->registerHook('actionProductDelete');
 }
 
+/**
+ * Create or update the `doofinder_product` table if it does not already exist.
+ *
+ * The table stores product changes to synchronize with Doofinder:
+ * - `id_shop` and `id_product` identify the product in a specific shop.
+ * - `action` stores the type of change (e.g., save or delete).
+ * - `date_upd` stores the timestamp of the last change.
+ * A unique key ensures there are no duplicate entries per shop/product combination.
+ *
+ * @return bool true if the query executed successfully, false otherwise
+ */
 function installDb_4_2_0()
 {
     return Db::getInstance()->execute(
