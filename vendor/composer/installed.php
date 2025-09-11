@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => '5.1.14',
-        'version' => '5.1.14.0',
-        'type' => 'library',
+        'pretty_version' => '5.2.2',
+        'version' => '5.2.2.0',
+        'type' => 'prestashop-module',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'reference' => null,
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'prestashop/doofinder' => array(
-            'pretty_version' => '5.1.14',
-            'version' => '5.1.14.0',
-            'type' => 'library',
+            'pretty_version' => '5.2.2',
+            'version' => '5.2.2.0',
+            'type' => 'prestashop-module',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'reference' => null,

@@ -22,6 +22,7 @@ class ComposerStaticInitddb45daa7f46128bfeb9153853763869
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Doofinder' => __DIR__ . '/../..' . '/doofinder.php',
         'PrestaShop\\Module\\Doofinder\\Autoloader' => __DIR__ . '/../..' . '/src/Autoloader.php',
         'PrestaShop\\Module\\Doofinder\\Db' => __DIR__ . '/../..' . '/src/Db.php',
         'PrestaShop\\Module\\Doofinder\\Entity\\DfCategoryBuild' => __DIR__ . '/../..' . '/src/Entity/DfCategoryBuild.php',

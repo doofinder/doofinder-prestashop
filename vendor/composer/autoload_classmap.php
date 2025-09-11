@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Doofinder' => $baseDir . '/doofinder.php',
     'PrestaShop\\Module\\Doofinder\\Autoloader' => $baseDir . '/src/Autoloader.php',
     'PrestaShop\\Module\\Doofinder\\Db' => $baseDir . '/src/Db.php',
     'PrestaShop\\Module\\Doofinder\\Entity\\DfCategoryBuild' => $baseDir . '/src/Entity/DfCategoryBuild.php',
