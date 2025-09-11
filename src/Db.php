@@ -1,4 +1,17 @@
 <?php
+/**
+ * NOTICE OF LICENSE
+ *
+ * This file is licenced under the Software License Agreement.
+ * With the purchase or the installation of the software in your application
+ * you accept the licence agreement.
+ *
+ * You must not modify, adapt or create derivative works of this source code
+ *
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   GPLv3
+ */
 
 namespace PrestaShop\Module\Doofinder;
 
@@ -6,25 +19,38 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * Database connection handler with master-slave support for PrestaShop.
+ *
+ * This class provides static methods to create new database connection instances
+ * and manage master/slave server configurations. It supports:
+ * - Connecting to the master or a slave server.
+ * - Connection pooling with round-robin selection for slaves.
+ * - Automatic loading of slave server configurations.
+ * - Disabling buffered queries for PDO connections to handle large datasets efficiently.
+ *
+ * Usage:
+ * - Call getNewDbInstance(true) to connect to the master.
+ * - Call getNewDbInstance(false) to connect to a slave (if configured).
+ */
 class Db
 {
-
     /** @var array List of server settings */
     public static $_servers = [];
 
-    /** @var null Flag used to load slave servers only once.
+    /** @var bool Flag used to load slave servers only once.
      * See loadSlaveServers() method
      */
-    public static $_slave_servers_loaded = null;
+    public static $_slave_servers_loaded = false;
 
     /**
      * Creates a new database instance.
-     *
      * This method initializes and returns a new database connection instance, either to the master server
      * or to a slave server based on the parameter. It manages connection pooling and sets up
      * unbuffered queries for PDO connections to handle large datasets efficiently.
      *
      * @param bool $master Whether to connect to the master server (true) or a slave server (false)
+     *
      * @return \Db Database instance with active connection
      */
     public static function getNewDbInstance($master = true)
@@ -42,20 +68,20 @@ class Db
             self::loadSlaveServers();
         }
 
-        $total_servers = count(self::$_servers);
-        if ($master || $total_servers == 1) {
-            $id_server = 0;
+        $totalServers = count(self::$_servers);
+        if ($master || $totalServers == 1) {
+            $idServer = 0;
         } else {
             ++$id;
-            $id_server = ($total_servers > 2 && ($id % $total_servers) != 0) ? $id % $total_servers : 1;
+            $idServer = ($totalServers > 2 && ($id % $totalServers) != 0) ? $id % $totalServers : 1;
         }
 
         $class = \Db::getClass();
         $instance = new $class(
-            self::$_servers[$id_server]['server'],
-            self::$_servers[$id_server]['user'],
-            self::$_servers[$id_server]['password'],
-            self::$_servers[$id_server]['database'],
+            self::$_servers[$idServer]['server'],
+            self::$_servers[$idServer]['user'],
+            self::$_servers[$idServer]['password'],
+            self::$_servers[$idServer]['database'],
             false
         );
         $link = $instance->connect();
@@ -65,15 +91,18 @@ class Db
 
             $link->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         }
+
         return $instance;
     }
 
     /**
      * Loads configuration settings for slave servers if needed.
+     *
+     * @return void
      */
     protected static function loadSlaveServers()
     {
-        if (self::$_slave_servers_loaded !== null) {
+        if (self::$_slave_servers_loaded) {
             return;
         }
 
