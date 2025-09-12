@@ -34,7 +34,7 @@ In order to be able to create an account or login to an existing Doofinder accou
 
 To do so, you can use, for example, the utility ngrok: https://dashboard.ngrok.com/get-started/setup
 
-Once the external URL is created, simply set the `PS_BASE_URL` environment variable (see [Environment Variables](#environment-variables)).
+Once the external URL is created, simply set the `BASE_URL` environment variable (see [Environment Variables](#environment-variables)).
 
 So, when the installation process finished, instead of accessing to `https://localhost:4011` you will use your url, for example, `https://forcibly-ethical-apple.ngrok-free.app`).
 Notice that you'll need to specify the 4011 port when executing ngrok.
@@ -48,7 +48,7 @@ For example, below is a base `.env.local` file:
 
 ```bash
 #PrestaShop setup configuration data
-PS_BASE_URL=your-url.ngrok-free.app
+BASE_URL=your-url.ngrok-free.app
 PS_ENV=dev
 
 ```
@@ -66,11 +66,11 @@ You can set up a fresh PrestaShop installation using the provided `Makefile` tar
 - Starts the containers
 - Runs the installer script thanks to `PS_INSTALL_AUTO` and the definded environment variables.
 
-Finally, PrestaShop is installed and will be running at `https://PS_BASE_URL`.
+Finally, PrestaShop is installed and will be running at `https://BASE_URL`.
 
 You can install the Doofinder module through the admin or execute `make doofinder-upgrade`.
 
-The admin panel will be available at `https://PS_BASE_URL/admin`. Admin credentials are defined in the `.env`, if you used the `env.example` would be:
+The admin panel will be available at `https://BASE_URL/admin`. Admin credentials are defined in the `.env`, if you used the `env.example` would be:
 
 - User: `test@example.com`
 - Pass: `admin123`

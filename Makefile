@@ -65,7 +65,7 @@ init: doofinder-configure
 	sudo chgrp -R ${GID} ./html
 	sudo chmod -R g+sw ./html
 	sudo rm -rf ./html/install
-	@echo "Access backend at $(if $(PS_ENABLE_SSL,1), https, http)://$(PS_BASE_URL)/$(PS_FOLDER_ADMIN)"
+	@echo "Access backend at $(if $(PS_ENABLE_SSL,1), https, http)://$(BASE_URL)/$(PS_FOLDER_ADMIN)"
 	$(docker_compose) up -d
 
 # Check code consitency for the Doofinder Feed module using PHP Code Sniffer
