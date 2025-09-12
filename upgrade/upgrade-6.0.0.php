@@ -51,8 +51,30 @@ function upgrade_module_6_0_0($module)
     DoofinderConfig::debug('Initiating 6.0.0 upgrade');
 
     $files = [
-        'src/Entity/DfDb.php',
-    ];
+        'src/Entity/DoofinderConfig.php',
+        'src/Entity/UpdateOnSave.php',
+        'src/Entity/DoofinderApi.php',
+        'src/Entity/LanguageManager.php',
+        'src/Entity/DoofinderApiItems.php',
+        'src/Entity/DfCategoryBuild.php',
+        'src/Entity/HookManager.php',
+        'src/Entity/DfProductBuild.php',
+        'src/Entity/EasyREST.php',
+        'src/Entity/DoofinderAdminPanelView.php',
+        'src/Entity/DoofinderConstants.php',
+        'src/Entity/SearchEngine.php',
+        'src/Entity/DoofinderLayerApi.php',
+        'src/Entity/DoofinderApiIndex.php',
+        'src/Entity/DoofinderApiLanding.php',
+        'src/Entity/DfTools.php',
+        'src/Entity/DoofinderInstallation.php',
+        'src/Entity/DoofinderException.php',
+        'src/Entity/DoofinderScript.php',
+        'src/Entity/DoofinderResults.php',
+        'src/Entity/DoofinderApiSingleScript.php',
+        'src/Entity/FormManager.php',
+        'src/Entity/DfCmsBuild.php',
+        'src/Entity/UrlManager.php'];
 
     foreach ($files as $fileName) {
         $filePath = realpath(_PS_MODULE_DIR_ . 'doofinder' . DIRECTORY_SEPARATOR . $fileName);
