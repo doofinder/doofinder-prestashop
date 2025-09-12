@@ -13,7 +13,10 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Manager;
+
+use PrestaShop\Module\Doofinder\Core\UpdateOnSave;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;

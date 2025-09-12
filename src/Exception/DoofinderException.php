@@ -5,14 +5,14 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Exception;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 /**
- * To use custom exceptions.
+ * Custom exception class for the Doofinder module.
  */
 class DoofinderException extends \Exception
 {

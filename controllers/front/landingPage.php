@@ -13,17 +13,18 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Entity\DfTools;
-use PrestaShop\Module\Doofinder\Entity\DoofinderApiLanding;
-use PrestaShop\Module\Doofinder\Entity\SearchEngine;
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
+use PrestaShop\Module\Doofinder\Api\DoofinderApiLanding;
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductListingPresenter;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
-
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
+use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
 
 /**
  * Front controller for Doofinder landing pages.

@@ -24,8 +24,8 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-use PrestaShop\Module\Doofinder\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Entity\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -49,7 +49,7 @@ if (!defined('_PS_VERSION_')) {
  */
 function upgrade_module_6_0_0($module)
 {
-    DoofinderConfig::debug('Initiating 5.2.2 upgrade');
+    DoofinderConfig::debug('Initiating 6.0.0 upgrade');
 
     $files = [
         'src/Entity/DfDb.php'

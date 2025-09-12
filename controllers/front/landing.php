@@ -13,12 +13,12 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Entity\LanguageManager;
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Manager\LanguageManager;
 
 /**
  * Front controller for handling Doofinder landing pages.

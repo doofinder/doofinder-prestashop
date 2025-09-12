@@ -16,9 +16,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use PrestaShop\Module\Doofinder\Entity\DfTools;
-use PrestaShop\Module\Doofinder\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Entity\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
 
 /**
  * Front controller to provide Doofinder module configuration via JSON.

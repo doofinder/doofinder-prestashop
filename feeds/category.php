@@ -13,8 +13,8 @@
  * @license   GPLv3
  */
 
-use PrestaShop\Module\Doofinder\Entity\DfCategoryBuild;
-use PrestaShop\Module\Doofinder\Entity\DfTools;
+use PrestaShop\Module\Doofinder\Feed\DfCategoryBuild;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;

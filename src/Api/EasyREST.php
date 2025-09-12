@@ -10,7 +10,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Api;
 
 if (!defined('_PS_VERSION_')) {
     exit;

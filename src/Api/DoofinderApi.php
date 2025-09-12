@@ -16,11 +16,17 @@
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Api;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\DoofinderResults;
+use PrestaShop\Module\Doofinder\Exception\DoofinderException;
+use PrestaShop\Module\Doofinder\Manager\UrlManager;
+use PrestaShop\Module\Doofinder\View\DoofinderAdminPanelView;
 
 /**
  * This class handles communication with the Doofinder Search API for a specific account.

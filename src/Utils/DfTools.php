@@ -13,13 +13,15 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
-
-use PrestaShop\Module\Doofinder;
+namespace PrestaShop\Module\Doofinder\Utils;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder;
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Db;
 
 /**
  * Class DfTools

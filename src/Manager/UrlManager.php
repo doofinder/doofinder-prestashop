@@ -13,11 +13,13 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Manager;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 
 /**
  * Class UrlManager

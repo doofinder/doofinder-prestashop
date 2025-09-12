@@ -13,7 +13,14 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Installer;
+
+use PrestaShop\Module\Doofinder\Api\EasyREST;
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
+use PrestaShop\Module\Doofinder\Manager\UrlManager;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
 
 if (!defined('_PS_VERSION_')) {
     exit;
