@@ -15,13 +15,13 @@
 
 namespace PrestaShop\Module\Doofinder\Utils;
 
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-
 use PrestaShop\Module\Doofinder;
 use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Db;
+
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 /**
  * Class DfTools
@@ -742,7 +742,7 @@ class DfTools
         $query->groupBy('product_shop.id_product');
 
         try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            $result = Db::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
             // If the result is false or null, fallback to default DB instance
             if (!$result) {
                 $result = \Db::getInstance()->executeS($query);
@@ -825,7 +825,7 @@ class DfTools
         );
 
         try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            $result = Db::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
             // If the result is false or null, fallback to default DB instance
             if (!$result) {
                 $result = \Db::getInstance()->executeS($query);

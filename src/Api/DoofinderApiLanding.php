@@ -15,6 +15,11 @@
 
 namespace PrestaShop\Module\Doofinder\Api;
 
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
+use PrestaShop\Module\Doofinder\Manager\UrlManager;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }

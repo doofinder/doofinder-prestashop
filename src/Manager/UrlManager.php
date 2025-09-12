@@ -15,11 +15,11 @@
 
 namespace PrestaShop\Module\Doofinder\Manager;
 
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 
 /**
  * Class UrlManager

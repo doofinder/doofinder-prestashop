@@ -1,6 +1,6 @@
 {
   "name": "prestashop/doofinder",
-  "version": "5.1.14",
+  "version": "6.0.0",
   "description": "Doofinder module for PrestaShop",
   "require-dev": {
     "prestashop/php-dev-tools": "^5",
@@ -11,13 +11,16 @@
     "psr-4": {
       "PrestaShop\\Module\\Doofinder\\": "src/"
     },
-    "config": {
-      "prepend-autoloader": false,
-      "lock": false,
-      "allow-plugins": {
-        "phpdocumentor/shim": true
-      }
-    },
-    "type": "prestashop-module"
-  }
+    "classmap": [
+      "doofinder.php"
+    ]
+  },
+  "config": {
+    "prepend-autoloader": false,
+    "lock": false,
+    "allow-plugins": {
+      "phpdocumentor/shim": true
+    }
+  },
+  "type": "prestashop-module"
 }
