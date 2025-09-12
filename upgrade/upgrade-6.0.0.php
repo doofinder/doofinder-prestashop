@@ -47,7 +47,7 @@ if (!defined('_PS_VERSION_')) {
  *
  * @return bool true on success, false if an exception occurs during the update
  */
-function upgrade_module_5_2_2($module)
+function upgrade_module_6_0_0($module)
 {
     DoofinderConfig::debug('Initiating 5.2.2 upgrade');
 
