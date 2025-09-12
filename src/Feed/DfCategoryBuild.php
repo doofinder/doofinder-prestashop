@@ -15,6 +15,8 @@
 
 namespace PrestaShop\Module\Doofinder\Feed;
 
+use PrestaShop\Module\Doofinder\Utils\DfTools;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }

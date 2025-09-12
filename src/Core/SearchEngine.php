@@ -15,6 +15,9 @@
 
 namespace PrestaShop\Module\Doofinder\Core;
 
+use PrestaShop\Module\Doofinder\Api\DoofinderLayerApi;
+use PrestaShop\Module\Doofinder\Manager\LanguageManager;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }

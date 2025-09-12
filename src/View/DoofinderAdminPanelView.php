@@ -15,6 +15,12 @@
 
 namespace PrestaShop\Module\Doofinder\View;
 
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\UpdateOnSave;
+use PrestaShop\Module\Doofinder\Manager\UrlManager;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }

@@ -43,7 +43,6 @@ class ComposerStaticInitddb45daa7f46128bfeb9153853763869
         'PrestaShop\\Module\\Doofinder\\Feed\\DfCmsBuild' => __DIR__ . '/../..' . '/src/Feed/DfCmsBuild.php',
         'PrestaShop\\Module\\Doofinder\\Feed\\DfProductBuild' => __DIR__ . '/../..' . '/src/Feed/DfProductBuild.php',
         'PrestaShop\\Module\\Doofinder\\Installer\\DoofinderInstallation' => __DIR__ . '/../..' . '/src/Installer/DoofinderInstallation.php',
-        'PrestaShop\\Module\\Doofinder\\Manager\\FormManager' => __DIR__ . '/../..' . '/src/Manager/FormManager.php',
         'PrestaShop\\Module\\Doofinder\\Manager\\HookManager' => __DIR__ . '/../..' . '/src/Manager/HookManager.php',
         'PrestaShop\\Module\\Doofinder\\Manager\\LanguageManager' => __DIR__ . '/../..' . '/src/Manager/LanguageManager.php',
         'PrestaShop\\Module\\Doofinder\\Manager\\UrlManager' => __DIR__ . '/../..' . '/src/Manager/UrlManager.php',

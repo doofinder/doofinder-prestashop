@@ -19,7 +19,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use PrestaShop\Module\Doofinder\Api\DoofinderApiIndex;
+use PrestaShop\Module\Doofinder\Api\DoofinderApiItems;
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Feed\DfCategoryBuild;
+use PrestaShop\Module\Doofinder\Feed\DfCmsBuild;
+use PrestaShop\Module\Doofinder\Feed\DfProductBuild;
 use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
 use PrestaShop\Module\Doofinder\Manager\UrlManager;
 
