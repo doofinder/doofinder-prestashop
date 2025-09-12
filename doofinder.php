@@ -11,13 +11,15 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   GPLv3
+ *
+ * @see       https://www.doofinder.com/
+ * @see       PrestaShop\Module\Doofinder\Api\DoofinderApiLanding
  */
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 /*
 We cannot use the `use` statement in the main module file due to a eval function
@@ -67,7 +69,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '5.2.2';
+        $this->version = '6.0.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '9.0.0'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -78,7 +80,7 @@ class Doofinder extends Module
         $this->description = $this->l('Install Doofinder in your shop with no effort');
 
         $this->confirmUninstall = $this->l('Are you sure? This will not cancel your account in Doofinder service');
-        $this->hookManager = new PrestaShop\Module\Doofinder\Entity\HookManager($this);
+        $this->hookManager = new PrestaShop\Module\Doofinder\Manager\HookManager($this);
     }
 
     /**
@@ -91,8 +93,8 @@ class Doofinder extends Module
     public function install()
     {
         return parent::install()
-            && PrestaShop\Module\Doofinder\Entity\DoofinderInstallation::installDb()
-            && PrestaShop\Module\Doofinder\Entity\DoofinderInstallation::installTabs()
+            && PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::installDb()
+            && PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::installTabs()
             && $this->hookManager->registerHooks();
     }
 
@@ -106,9 +108,9 @@ class Doofinder extends Module
     public function uninstall()
     {
         return parent::uninstall()
-            && PrestaShop\Module\Doofinder\Entity\DoofinderInstallation::uninstallTabs()
-            && PrestaShop\Module\Doofinder\Entity\DoofinderInstallation::deleteConfigVars()
-            && PrestaShop\Module\Doofinder\Entity\DoofinderInstallation::uninstallDb();
+            && PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::uninstallTabs()
+            && PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::deleteConfigVars()
+            && PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::uninstallDb();
     }
 
     /**
@@ -155,7 +157,7 @@ class Doofinder extends Module
      */
     public function hookModuleRoutes()
     {
-        return PrestaShop\Module\Doofinder\Entity\HookManager::getHookModuleRoutes();
+        return PrestaShop\Module\Doofinder\Manager\HookManager::getHookModuleRoutes();
     }
 
     /**
@@ -166,7 +168,7 @@ class Doofinder extends Module
      */
     public function setSearchEnginesByConfig()
     {
-        return PrestaShop\Module\Doofinder\Entity\SearchEngine::setSearchEnginesByConfig();
+        return PrestaShop\Module\Doofinder\Core\SearchEngine::setSearchEnginesByConfig();
     }
 
     /**
@@ -178,7 +180,7 @@ class Doofinder extends Module
      */
     public function getContent()
     {
-        $adminPanelView = new PrestaShop\Module\Doofinder\Entity\DoofinderAdminPanelView($this);
+        $adminPanelView = new PrestaShop\Module\Doofinder\View\DoofinderAdminPanelView($this);
 
         return $adminPanelView->getContent();
     }
@@ -225,7 +227,7 @@ class Doofinder extends Module
      */
     public function hookDisplayHeader($params)
     {
-        if (!PrestaShop\Module\Doofinder\Entity\DoofinderScript::searchLayerMustBeInitialized()) {
+        if (!PrestaShop\Module\Doofinder\Core\DoofinderScript::searchLayerMustBeInitialized()) {
             return '';
         }
 
@@ -242,7 +244,7 @@ class Doofinder extends Module
      */
     public function displaySingleScript()
     {
-        $this->context->controller->addJS(PrestaShop\Module\Doofinder\Entity\DoofinderScript::getSingleScriptPath($this->_path));
+        $this->context->controller->addJS(PrestaShop\Module\Doofinder\Core\DoofinderScript::getSingleScriptPath($this->_path));
 
         return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
     }
@@ -258,8 +260,8 @@ class Doofinder extends Module
      */
     public function hookActionProductSave($params)
     {
-        $action = $params['product']->active ? 'update' : 'delete';
-        PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
+        $action = ($params['product']->active) ? 'update' : 'delete';
+        PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, $action);
     }
 
     /**
@@ -273,7 +275,7 @@ class Doofinder extends Module
      */
     public function hookActionProductDelete($params)
     {
-        PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, 'delete');
+        PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('product', $params['id_product'], $this->context->shop->id, 'delete');
     }
 
     /**
@@ -288,7 +290,7 @@ class Doofinder extends Module
     public function hookActionObjectCmsAddAfter($params)
     {
         if ($params['object']->active) {
-            PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'update');
+            PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'update');
         }
     }
 
@@ -304,7 +306,7 @@ class Doofinder extends Module
     public function hookActionObjectCmsUpdateAfter($params)
     {
         $action = $params['object']->active ? 'update' : 'delete';
-        PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, $action);
+        PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, $action);
     }
 
     /**
@@ -318,7 +320,7 @@ class Doofinder extends Module
      */
     public function hookActionObjectCmsDeleteAfter($params)
     {
-        PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'delete');
+        PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('cms', $params['object']->id, $this->context->shop->id, 'delete');
     }
 
     /**
@@ -333,7 +335,7 @@ class Doofinder extends Module
     public function hookActionObjectCategoryAddAfter($params)
     {
         if ($params['object']->active) {
-            PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'update');
+            PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'update');
         }
     }
 
@@ -349,7 +351,7 @@ class Doofinder extends Module
     public function hookActionObjectCategoryUpdateAfter($params)
     {
         $action = $params['object']->active ? 'update' : 'delete';
-        PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, $action);
+        PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, $action);
     }
 
     /**
@@ -363,7 +365,7 @@ class Doofinder extends Module
      */
     public function hookActionObjectCategoryDeleteAfter($params)
     {
-        PrestaShop\Module\Doofinder\Entity\HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'delete');
+        PrestaShop\Module\Doofinder\Manager\HookManager::proccessHookUpdateOnSave('category', $params['object']->id, $this->context->shop->id, 'delete');
     }
 
     /**
@@ -379,7 +381,7 @@ class Doofinder extends Module
     private function configureHookCommon($params)
     {
         $this->smarty->assign(
-            PrestaShop\Module\Doofinder\Entity\HookManager::getHookCommonSmartyAssigns(
+            PrestaShop\Module\Doofinder\Manager\HookManager::getHookCommonSmartyAssigns(
                 $this->context->language->language_code,
                 $this->context->currency->iso_code,
                 $this->productLinks,
