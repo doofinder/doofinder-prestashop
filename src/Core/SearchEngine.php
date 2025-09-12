@@ -19,11 +19,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Manager\UrlManager;
-
-
-
 /**
  * Class SearchEngine
  *

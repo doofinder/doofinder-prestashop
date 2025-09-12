@@ -25,7 +25,6 @@
  */
 
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -52,7 +51,7 @@ function upgrade_module_6_0_0($module)
     DoofinderConfig::debug('Initiating 6.0.0 upgrade');
 
     $files = [
-        'src/Entity/DfDb.php'
+        'src/Entity/DfDb.php',
     ];
 
     foreach ($files as $fileName) {

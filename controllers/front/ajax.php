@@ -19,8 +19,6 @@ use PrestaShop\Module\Doofinder\Api\DoofinderApi;
 use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
 use PrestaShop\Module\Doofinder\Utils\DfTools;
 
-
-
 class DoofinderAjaxModuleFrontController extends ModuleFrontController
 {
     /**
