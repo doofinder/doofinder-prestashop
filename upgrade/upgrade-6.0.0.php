@@ -31,16 +31,9 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * Upgrades the Doofinder module to version 5.1.4.
+ * Upgrades the Doofinder module to version 6.0.0.
  *
- * This upgrade step updates feed URLs used by the module, because in older versions the paths
- * were /modules/doofinder/{name}.php (where {name} could be config, feed, etc.) which were physical
- * PHP files and PrestaShop 9 flags direct calls as errors, so instead it encourages to call a Module FrontController.
- * So from this versions the paths are /module/doofinder/{name} (Note that this time is `module` and not `modules` and the .php
- * extension has been removed since it is now a rewritten URL and not a real path to a physical file)
- *
- * Logs progress messages and captures any exceptions during the update process.
- * If an error occurs, it records the issue in PrestaShop logs and stops the upgrade.
+ * This upgrade step updates the file paths to the new namespace structure deleting the old ones.
  *
  * @param Doofinder $module the Doofinder module instance being upgraded
  *
