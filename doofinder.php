@@ -48,7 +48,7 @@ class Doofinder extends Module
      * Whether to display the Doofinder search banner. Used in the Landing API.
      * More info at: https://support.doofinder.com/search/promotional-tools/banners
      *
-     * @see PrestaShop\Module\Doofinder\Entity\DoofinderApiLanding
+     * @see PrestaShop\Module\Doofinder\Api\DoofinderApiLanding
      *
      * @var bool
      */
@@ -56,7 +56,7 @@ class Doofinder extends Module
     /**
      * Hook manager coordinating hook registration and shared hook logic.
      *
-     * @var PrestaShop\Module\Doofinder\Entity\HookManager
+     * @var PrestaShop\Module\Doofinder\Manager\HookManager
      */
     public $hookManager;
 
