@@ -11,9 +11,6 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   GPLv3
- *
- * @see       https://www.doofinder.com/
- * @see       PrestaShop\Module\Doofinder\Api\DoofinderApiLanding
  */
 
 if (!defined('_PS_VERSION_')) {
