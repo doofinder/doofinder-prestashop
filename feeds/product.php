@@ -232,7 +232,7 @@ $header = array_merge($header, $additionalAttributesHeaders);
  * }
  *
  * To add an new header, module can do an array_merge on $extraHeader
- * To add an new data to a product, module must create a multidimensionnal array as this :
+ * To add an new data to a product, the module must create a multidimensional array as this :
  * array(
  *   index => array(
  *    'id_product' => value,
@@ -264,6 +264,8 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 }
 
 $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
+$products = arrayMergeByIdProduct($products, $extraRows);
+
 foreach ($products as $product) {
     $minPriceVariant = null;
     if ($shouldShowProductVariations && $product['variant_count'] > 0) {
