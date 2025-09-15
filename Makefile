@@ -75,6 +75,7 @@ consistency:
 		composer:lts sh -c \
 		"composer install && \
 		vendor/bin/php-cs-fixer fix --diff --using-cache=no"
+
 dump-autoload:
 	docker run -it --rm -u $(shell id -u):$(shell id -g) -v$(shell pwd):/app composer:lts sh -c "composer install --no-dev && composer dump-autoload -o --no-dev"
 
