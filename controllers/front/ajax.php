@@ -12,9 +12,11 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
 use PrestaShop\Module\Doofinder\Api\DoofinderApi;
 use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
 use PrestaShop\Module\Doofinder\Utils\DfTools;

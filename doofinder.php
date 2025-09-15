@@ -15,6 +15,7 @@
  * @see       https://www.doofinder.com/
  * @see       PrestaShop\Module\Doofinder\Api\DoofinderApiLanding
  */
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
