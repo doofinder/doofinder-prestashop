@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder\Entity;
+namespace PrestaShop\Module\Doofinder\Manager;
 
 use PrestaShop\Module\Doofinder\Api\DoofinderApi;
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;

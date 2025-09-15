@@ -13,7 +13,7 @@
  * @license   GPLv3
  */
 
-namespace PrestaShop\Module\Doofinder;
+namespace PrestaShop\Module\Doofinder\Utils;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -33,7 +33,7 @@ if (!defined('_PS_VERSION_')) {
  * - Call getNewDbInstance(true) to connect to the master.
  * - Call getNewDbInstance(false) to connect to a slave (if configured).
  */
-class Db
+class DfDb
 {
     /** @var array List of server settings */
     public static $_servers = [];

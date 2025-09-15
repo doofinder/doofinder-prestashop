@@ -15,6 +15,10 @@
 
 namespace PrestaShop\Module\Doofinder\Configuration;
 
+use PrestaShop\Module\Doofinder\Api\EasyREST;
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
