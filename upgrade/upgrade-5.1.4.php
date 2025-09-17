@@ -24,8 +24,8 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConfig;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
+use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
 
 if (!defined('_PS_VERSION_')) {
     exit;

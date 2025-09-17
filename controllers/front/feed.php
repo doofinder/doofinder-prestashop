@@ -12,12 +12,11 @@
  * @copyright Doofinder
  * @license   GPLv3
  */
-
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderConstants;
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 
 /**
  * Front controller for serving Doofinder feeds in CSV format.

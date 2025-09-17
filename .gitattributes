@@ -4,6 +4,7 @@
 /\.gitignore                    export-ignore
 /\.editorconfig                 export-ignore
 /\.travis\.yml                  export-ignore
+/\.env
 /build\.sh                      export-ignore
 /\.github		                export-ignore
 /\.vscode		                export-ignore

@@ -16,9 +16,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use PrestaShop\Module\Doofinder\Src\Entity\DfTools;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderApi;
-use PrestaShop\Module\Doofinder\Src\Entity\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Api\DoofinderApi;
+use PrestaShop\Module\Doofinder\Installer\DoofinderInstallation;
+use PrestaShop\Module\Doofinder\Utils\DfTools;
 
 class DoofinderAjaxModuleFrontController extends ModuleFrontController
 {

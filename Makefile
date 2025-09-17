@@ -36,7 +36,7 @@ db-restore:
 
 # Configures extension static files
 doofinder-configure:
-	@envsubst < templates/src/Entity/DoofinderConstants.php > src/Entity/DoofinderConstants.php
+	@envsubst < templates/src/Core/DoofinderConstants.php > src/Core/DoofinderConstants.php
 
 # Enable the Doofinder module, upgrade PrestaShop, and clean the cache
 doofinder-upgrade: doofinder-configure
@@ -71,10 +71,13 @@ init: doofinder-configure
 # Check code consitency for the Doofinder Feed module using PHP Code Sniffer
 consistency:
 	docker run -it --rm -ePHP_CS_FIXER_IGNORE_ENV=1 \
-	-v$(shell pwd):/app -v/app/html -v/app/vendor \
-	composer:lts sh -c \
-	"composer install && \
-	vendor/bin/php-cs-fixer fix --diff --using-cache=no"
+		-v$(shell pwd):/app -v/app/html -v/app/vendor \
+		composer:lts sh -c \
+		"composer install && \
+		vendor/bin/php-cs-fixer fix --diff --using-cache=no"
+
+dump-autoload:
+	docker run -it --rm -u $(shell id -u):$(shell id -g) -v$(shell pwd):/app composer:lts sh -c "composer install --no-dev && composer dump-autoload -o --no-dev"
 
 # Open an interactive shell in the web container as the 'application' user
 dev-console:
