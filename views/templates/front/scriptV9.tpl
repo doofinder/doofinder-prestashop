@@ -14,7 +14,10 @@
 {if isset($installation_ID) && $installation_ID}
   <!-- START OF DOOFINDER ADD TO CART SCRIPT -->
   <script>
+    let item_link; 
     document.addEventListener('doofinder.cart.add', function(event) {
+      
+      item_link = event.detail.link;
 
       const checkIfCartItemHasVariation = (cartObject) => {
         return (cartObject.item_id === cartObject.grouping_id) ? false : true;
