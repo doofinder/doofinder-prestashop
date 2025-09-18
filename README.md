@@ -64,20 +64,20 @@ You can set up a fresh PrestaShop installation using the provided `Makefile` tar
 
 - Pulls and build a PrestaShop docker image with xdebug extension and maybe other tweaks. This build is configurable using the environment variables `PHP_VERSION` and `PS_VERSION` environment variables.
 - Starts the containers
-- Runs the installer script thanks to `PS_INSTALL_AUTO` and the definded environment variables.
+- Runs the installer script with the defined environment variables.
 
 Finally, PrestaShop is installed and will be running at `https://BASE_URL`.
 
 You can install the Doofinder module through the admin or execute `make doofinder-upgrade`.
 
-The admin panel will be available at `https://BASE_URL/admin`. Admin credentials are defined in the `.env`, if you used the `env.example` would be:
+The admin panel will be available at `https://BASE_URL/PS_FOLDER_ADMIN`. Admin credentials are defined in the `.env`, if you used the `env.example` would be:
 
 - User: `test@example.com`
 - Pass: `admin123`
 
 > [!NOTE]
 > Keep in mind that for versions prior to 1.7 PrestaShop will ask you to delete the `install` folder and rename the `admin` folder located in the `html` directory.
-> For newer versions this is done automatically, and accessing `/admin` will redirect you to the correct url. If this no happens, simply check the admin folder name inside the `html` directory and use it to access to the Admin Dashboard.
+> For newer versions this is done automatically, using the value on the environment variable `PS_FOLDER_ADMIN` (by default, `/4dm1n`).
 
 ## Xdebug ready to use
 
