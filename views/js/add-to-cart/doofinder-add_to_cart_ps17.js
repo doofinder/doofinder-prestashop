@@ -125,19 +125,29 @@ let dfAddToCart = (cartOptions) => {
                 return;
             }
 
-            /* Possible errors variantions coming from the add to cart */
+            // Possible errors variations coming from Add to Cart
             if (event && event.eventType && ('updateProductInCart' === event.eventType || 
             'updateShoppingCart' === event.eventType || 
             'updateCart' === event.eventType || 
             'updateProductInCart' === event.eventType || 
             'updateProductQuantityInCart' === event.eventType || 
             'addProductToCart' === event.eventType)) {
-                let message = "Unknown error";
+
+                console.group(`Error of type '${event.eventType}' adding item to the cart.`);
+
+                // If the event is addProductToCart, redirect to the item link. 
+                // This will prevent silent errors from both customizable products and products with minimal quantity.
+                if (event.eventType === 'addProductToCart') {
+                    console.error("Redirecting user to the item page.");
+                    window.location.href = item_link;
+                }
+
                 /* Empirically I've have reproduced this error after loading another page in a specific moment  */
                 if (0 === event.resp.readyState) {
-                    message = "The connection was interrupted while adding to the cart";
+                    console.error("The connection was interrupted while adding to the cart");
                 }
-                console.error(message);
+
+                console.groupEnd();
                 cartOptions.statusPromise.reject(new DoofinderAddToCartError(message));
             }
         });
