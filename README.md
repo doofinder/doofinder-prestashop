@@ -85,7 +85,7 @@ Starting from version 6.0.0, this plugin uses the Composer autoloader, which is 
 
 ## Version Upgrade
 
-To upgrade the package version, simply edit the `PLUGIN_VERSION` environment variable in the `.env` file and run `make doofinder-configure`. This will update all the necessary files.
+To upgrade the package version, simply edit the `PLUGIN_VERSION` environment variable in the `.env` file and run `make doofinder-configure`. This will update all the necessary files. However, you must manually edit the `doofinder.php` file, as PrestaShop requires that `$this->version` be a hardcoded value.
 
 ## Xdebug ready to use
 

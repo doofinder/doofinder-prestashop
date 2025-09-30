@@ -64,9 +64,9 @@ class Doofinder extends Module
      */
     public function __construct()
     {
-        $this->name = \PrestaShop\Module\Doofinder\Core\DoofinderConstants::NAME;
+        $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = \PrestaShop\Module\Doofinder\Core\DoofinderConstants::VERSION;
+        $this->version = '6.0.2';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '9.0.0'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
