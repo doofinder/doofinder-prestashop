@@ -1,6 +1,6 @@
 {
   "name": "prestashop/doofinder",
-  "version": "6.0.2",
+  "version": "${PLUGIN_VERSION}",
   "description": "Doofinder module for PrestaShop",
   "require-dev": {
     "prestashop/php-dev-tools": "^5",

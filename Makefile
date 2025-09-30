@@ -36,7 +36,9 @@ db-restore:
 
 # Configures extension static files
 doofinder-configure:
+	@envsubst < templates/composer.json > composer.json
 	@envsubst < templates/src/Core/DoofinderConstants.php > src/Core/DoofinderConstants.php
+	make dump-autoload
 
 # Enable the Doofinder module, upgrade PrestaShop, and clean the cache
 doofinder-upgrade: doofinder-configure
