@@ -485,7 +485,7 @@ class DfProductBuild
         $product['category_merchandising'] = implode(DfTools::CATEGORY_SEPARATOR, $product['category_merchandising']);
 
         if (array_key_exists('df_variants_information', $product)) {
-            $product['df_variants_information'] = implode('%%', array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $product['df_variants_information']));
+            $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
         }
 
         $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
@@ -876,7 +876,7 @@ class DfProductBuild
 
             $names = array_column($attributes, 'name');
 
-            return array_map([__NAMESPACE__ . '\DfTools', 'slugify'], $names);
+            return array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $names);
         }
 
         return [];
