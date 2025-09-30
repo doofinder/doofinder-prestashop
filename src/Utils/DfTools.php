@@ -1661,6 +1661,10 @@ class DfTools
 
     public static function slugify($text)
     {
+        if (null === $text) {
+            return 'n-a';
+        }
+
         // replace non letter or digits by -
         $text = preg_replace('~[^\\pL\d]+~u', '-', $text);
 
