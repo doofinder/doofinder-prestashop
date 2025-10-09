@@ -17,6 +17,8 @@ endif
 
 docker_exec_web = $(docker_compose) exec -u www-data prestashop
 
+envsubst_vars = $$PLUGIN_VERSION,$$DOOMANAGER_REGION_URL,$$DOOPLUGINS_REGION_URL,$$DOOPHOENIX_REGION_URL
+
 # Default target: list available tasks
 all:
 	@echo "Before \`make init\` be sure to set up your environment with a proper \`.env\` file."
@@ -36,9 +38,10 @@ db-restore:
 
 # Configures extension static files
 doofinder-configure:
-	@envsubst < templates/composer.json > composer.json
-	@envsubst < templates/src/Core/DoofinderConstants.php > src/Core/DoofinderConstants.php
-	make dump-autoload
+	@envsubst '$(envsubst_vars)' < templates/composer.json > composer.json
+	@envsubst '$(envsubst_vars)' < templates/src/Core/DoofinderConstants.php > src/Core/DoofinderConstants.php
+	envsubst '$(envsubst_vars)' < templates/doofinder.php > doofinder.php
+	@make dump-autoload
 
 # Enable the Doofinder module, upgrade PrestaShop, and clean the cache
 doofinder-upgrade: doofinder-configure
