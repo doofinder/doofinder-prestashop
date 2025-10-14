@@ -365,7 +365,7 @@ class DfTools
      * @param int $idProduct ID of the product
      * @param int $idProductAttribute id of the Product attribute
      *
-     * @return array of rows (assoc arrays)
+     * @return int|null
      */
     public static function getVariationImg($idProduct, $idProductAttribute)
     {
@@ -393,7 +393,7 @@ class DfTools
         if (isset($result[0])) {
             return $result[0]['id_image'];
         } else {
-            return [];
+            return null;
         }
     }
 
