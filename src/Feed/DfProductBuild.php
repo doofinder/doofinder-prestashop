@@ -726,7 +726,7 @@ class DfProductBuild
             $product['id_product'],
             $this->useTax,
             $idProductAttribute,
-            6,
+            DfTools::getCurrencyPrecision($this->idCurrency),
             null,
             false,
             false
@@ -739,7 +739,7 @@ class DfProductBuild
                 $product['id_product'],
                 $this->useTax,
                 $idProductAttribute,
-                6
+                DfTools::getCurrencyPrecision($this->idCurrency)
             );
 
             return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)

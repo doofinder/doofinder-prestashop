@@ -365,7 +365,7 @@ class DfTools
      * @param int $idProduct ID of the product
      * @param int $idProductAttribute id of the Product attribute
      *
-     * @return array of rows (assoc arrays)
+     * @return int|null
      */
     public static function getVariationImg($idProduct, $idProductAttribute)
     {
@@ -393,7 +393,7 @@ class DfTools
         if (isset($result[0])) {
             return $result[0]['id_image'];
         } else {
-            return [];
+            return null;
         }
     }
 
@@ -1108,6 +1108,17 @@ class DfTools
         return array_column($result, 'id_attribute_group');
     }
 
+    /**
+     * Get category IDs for a specific language and active status.
+     *
+     * This method retrieves all category IDs that are not root categories (id_parent != 0)
+     * for a given language. Optionally filters by active status.
+     *
+     * @param int $idLang Language ID (0 for all languages)
+     * @param bool $active Whether to filter by active categories only (default: true)
+     *
+     * @return array Array of category IDs
+     */
     public static function getCategories($idLang, $active = true)
     {
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
@@ -1125,6 +1136,18 @@ class DfTools
         return array_column($result, 'id_category');
     }
 
+    /**
+     * Get CMS page IDs for a specific language, shop, and active status.
+     *
+     * This method retrieves all CMS page IDs using PrestaShop's built-in
+     * getCMSPages method and returns only the IDs.
+     *
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     * @param bool $active Whether to filter by active pages only (default: true)
+     *
+     * @return array Array of CMS page IDs
+     */
     public static function getCmsPages($idLang, $idShop, $active = true)
     {
         $result = \CMS::getCMSPages($idLang, null, $active, $idShop);
@@ -1136,6 +1159,17 @@ class DfTools
     // Text Tools
     //
 
+    /**
+     * Truncate text to a specified length while preserving word boundaries.
+     *
+     * This method truncates text to the specified length by words, ensuring
+     * that words are not cut in the middle. It also normalizes whitespace.
+     *
+     * @param string $text The text to truncate
+     * @param int $length Maximum length of the truncated text
+     *
+     * @return string The truncated text
+     */
     public static function truncateText($text, $length)
     {
         $l = (int) $length;
@@ -1159,6 +1193,20 @@ class DfTools
         return $r;
     }
 
+    /**
+     * Clean and normalize a URL string.
+     *
+     * This method performs comprehensive URL cleaning including:
+     * - Removing line breaks and normalizing whitespace
+     * - Properly encoding URL components
+     * - Adding protocol if missing
+     * - Encoding query parameters
+     * - Filtering invalid UTF-8 characters
+     *
+     * @param string $text The URL to clean
+     *
+     * @return string The cleaned and normalized URL
+     */
     public static function cleanURL($text)
     {
         $text = trim($text);
@@ -1199,6 +1247,21 @@ class DfTools
         return urldecode($text);
     }
 
+    /**
+     * Clean and normalize a text string for safe use in feeds.
+     *
+     * This method performs comprehensive text cleaning including:
+     * - Removing control characters
+     * - Stripping HTML and PHP tags
+     * - Normalizing whitespace
+     * - Replacing text separators with HTML entities
+     * - Removing backslashes
+     * - Filtering invalid UTF-8 sequences
+     *
+     * @param string|null $text The text to clean
+     *
+     * @return string|null The cleaned text, or null if input was null
+     */
     public static function cleanString($text)
     {
         if (is_null($text)) {
@@ -1235,7 +1298,15 @@ class DfTools
      * titles that contains references that can be searched with or without
      * certain characters.
      *
+     * This method removes specific forbidden characters from text to make it
+     * more searchable. Currently removes hyphens, but is designed to be
+     * configurable from the admin panel.
+     *
      * TODO: Make it configurable from the admin.
+     *
+     * @param mixed $text The text to clean
+     *
+     * @return string The cleaned text with forbidden characters removed
      */
     public static function cleanReferences($text)
     {
@@ -1245,6 +1316,16 @@ class DfTools
         return str_replace($forbidden, '', $text);
     }
 
+    /**
+     * Split references by adding spaces between non-digit and digit characters.
+     *
+     * This method adds spaces between non-digit and digit characters in a string,
+     * which helps with reference parsing and searching.
+     *
+     * @param mixed $text The text to process
+     *
+     * @return mixed The processed text with spaces added, or original value if not a string
+     */
     public static function splitReferences($text)
     {
         if (!is_string($text)) {
@@ -1373,6 +1454,16 @@ class DfTools
         return $base . _MODULE_DIR_ . basename(dirname(__FILE__)) . '/' . $path;
     }
 
+    /**
+     * Fix URL by adding http:// protocol if missing.
+     *
+     * This method checks if a URL has a protocol (http:// or https://) and
+     * adds http:// if none is present.
+     *
+     * @param string $url The URL to fix
+     *
+     * @return string The URL with protocol added if needed
+     */
     public static function fixURL($url)
     {
         if (preg_match('~^https?://~', $url) === 0) {
@@ -1382,6 +1473,19 @@ class DfTools
         return $url;
     }
 
+    /**
+     * Generate a complete image URL for a product image.
+     *
+     * This method creates a full URL for a product image using PrestaShop's
+     * link generator and ensures the URL has a proper protocol.
+     *
+     * @param int $idProduct Product ID
+     * @param int $idImage Image ID
+     * @param string $linkRewrite URL-friendly product name
+     * @param string $imageSize Image size identifier
+     *
+     * @return string The complete image URL, or empty string if parameters are invalid
+     */
     public static function getImageLink($idProduct, $idImage, $linkRewrite, $imageSize)
     {
         $context = \Context::getContext();
@@ -1505,6 +1609,17 @@ class DfTools
         return $default;
     }
 
+    /**
+     * Callback function to apply HTML entities to string values in an array.
+     *
+     * This function is used as a callback with array_walk_recursive to convert
+     * all string values in a nested array to HTML entities for safe JSON encoding.
+     *
+     * @param mixed &$item The array item (passed by reference)
+     * @param mixed $key The array key (not used)
+     *
+     * @return void
+     */
     public static function walkApplyHtmlEntities(&$item, $key)
     {
         if (is_string($item)) {
@@ -1512,6 +1627,17 @@ class DfTools
         }
     }
 
+    /**
+     * Safely encode data to JSON with HTML entity handling.
+     *
+     * This method applies HTML entities to all string values in the data array,
+     * then encodes to JSON and decodes HTML entities to produce clean output.
+     * Also fixes escaped forward slashes in the JSON output.
+     *
+     * @param mixed $data The data to encode to JSON
+     *
+     * @return string JSON encoded string with HTML entities properly handled
+     */
     public static function jsonEncode($data)
     {
         array_walk_recursive($data, [get_class(), 'walkApplyHtmlEntities']);
@@ -1519,11 +1645,32 @@ class DfTools
         return str_replace('\\/', '/', html_entity_decode(json_encode($data)));
     }
 
+    /**
+     * Escape forward slashes in a text string.
+     *
+     * This method doubles all forward slashes in the input text to escape them.
+     * Returns null if the input is not a string.
+     *
+     * @param mixed $text The text to escape slashes in
+     *
+     * @return string|null The text with escaped slashes, or null if input is not a string
+     */
     public static function escapeSlashes($text)
     {
         return (is_string($text)) ? str_replace('/', '//', $text) : null;
     }
 
+    /**
+     * Validate the security token for Doofinder API access.
+     *
+     * This method compares the provided security hash with the configured
+     * Doofinder API key. If they don't match and an API key is configured,
+     * it sends a 403 Forbidden response and exits the script.
+     *
+     * @param string $dfsecHash The security hash to validate
+     *
+     * @return void Exits with 403 error if validation fails
+     */
     public static function validateSecurityToken($dfsecHash)
     {
         $doofinderApiKey = \Configuration::get('DF_API_KEY');
@@ -1538,6 +1685,19 @@ class DfTools
         }
     }
 
+    /**
+     * Get all price information for a product variant.
+     *
+     * This method retrieves the regular price, onsale price, and multiprice
+     * information for a specific product variant (combination).
+     *
+     * @param int $idProduct Product ID
+     * @param int $idProductAttribute Product attribute/variant ID
+     * @param bool $includeTaxes Whether to include taxes in prices
+     * @param array $currencies Array of currency information for multiprice calculation
+     *
+     * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
+     */
     public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
@@ -1552,31 +1712,67 @@ class DfTools
         ];
     }
 
+    /**
+     * Check if a product is a parent product (not a variant).
+     *
+     * A product is considered a parent if it has an id_product_attribute field
+     * that is numeric and equals 0, indicating it's the base product rather than a variant.
+     *
+     * @param array $product Product data array
+     *
+     * @return bool True if the product is a parent, false otherwise
+     */
     public static function isParent($product)
     {
         return isset($product['id_product_attribute']) && is_numeric($product['id_product_attribute']) && (int) $product['id_product_attribute'] === 0;
     }
 
-    public static function getPrice($productId, $includeTaxes, $variantId = null)
+    /**
+     * Get the regular price for a product or variant.
+     *
+     * This method retrieves the standard price for a product, optionally for a specific variant.
+     * It can include or exclude taxes and apply proper decimal rounding based on currency precision.
+     *
+     * @param int $productId Product ID
+     * @param bool $includeTaxes Whether to include taxes in the price
+     * @param int|null $variantId Product variant ID (null for base product)
+     * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     *
+     * @return float The product price
+     */
+    public static function getPrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true)
     {
         return \Product::getPriceStatic(
             $productId,
             $includeTaxes,
             $variantId,
-            6,
+            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
             null,
             false,
             false
         );
     }
 
-    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null)
+    /**
+     * Get the onsale price for a product or variant.
+     *
+     * This method retrieves the sale/discounted price for a product, optionally for a specific variant.
+     * It can include or exclude taxes and apply proper decimal rounding based on currency precision.
+     *
+     * @param int $productId Product ID
+     * @param bool $includeTaxes Whether to include taxes in the price
+     * @param int|null $variantId Product variant ID (null for base product)
+     * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     *
+     * @return float The product onsale price
+     */
+    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true)
     {
         return \Product::getPriceStatic(
             $productId,
             $includeTaxes,
             $variantId,
-            6
+            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6
         );
     }
 
@@ -1597,13 +1793,14 @@ class DfTools
     public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
     {
         $multiprice = [];
-        $price = self::getPrice($productId, $includeTaxes, $variantId);
-        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId);
+        $price = self::getPrice($productId, $includeTaxes, $variantId, false);
+        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
 
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
-                $convertedPrice = \Tools::convertPrice($price, $currency);
-                $convertedOnsalePrice = \Tools::convertPrice($onsale_price, $currency);
+                $decimals = self::getCurrencyPrecision($currency['id']);
+                $convertedPrice = \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
+                $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($onsale_price, $currency), $decimals);
                 $currencyCode = $currency['iso_code'];
                 $pricesMap = ['price' => $convertedPrice];
 
@@ -1659,6 +1856,21 @@ class DfTools
         return implode('/', $multiprices);
     }
 
+    /**
+     * Convert text to a URL-friendly slug.
+     *
+     * This method converts text to a slug by:
+     * - Replacing non-letter/digit characters with hyphens
+     * - Trimming hyphens from edges
+     * - Transliterating to ASCII
+     * - Converting to lowercase
+     * - Removing unwanted characters
+     * - Returning 'n-a' for empty or null input
+     *
+     * @param string|null $text The text to slugify
+     *
+     * @return string The URL-friendly slug
+     */
     public static function slugify($text)
     {
         if (null === $text) {
@@ -1717,6 +1929,18 @@ class DfTools
         return \Cache::retrieve($cacheKey);
     }
 
+    /**
+     * Check if a string contains a substring (PHP 8+ compatibility).
+     *
+     * This method provides a compatibility layer for the str_contains function
+     * introduced in PHP 8.0. It uses the native function if available, otherwise
+     * falls back to strpos for older PHP versions.
+     *
+     * @param string $haystack The string to search in
+     * @param string $needle The substring to search for
+     *
+     * @return bool True if the substring is found, false otherwise
+     */
     public static function str_contains($haystack, $needle)
     {
         if (function_exists('str_contains')) {
@@ -1807,5 +2031,37 @@ class DfTools
         }
 
         return $productsIds;
+    }
+
+    /**
+     * Get currency precision compatible from PrestaShop 1.5 to 9
+     *
+     * @param int|\Currency $currency Currency ID or object
+     *
+     * @return int Number of decimals to round to
+     */
+    public static function getCurrencyPrecision($currency)
+    {
+        // Ensure we have a Currency object
+        if (!($currency instanceof \Currency)) {
+            $currency = new \Currency((int) $currency);
+        }
+
+        // PrestaShop 1.7.6+ has a precision property/method
+        if (property_exists($currency, 'precision')) {
+            return (int) $currency->precision;
+        }
+
+        if (method_exists($currency, 'getPrecision') && is_callable([$currency, 'getPrecision'])) {
+            return (int) $currency->getPrecision();
+        }
+
+        // For PrestaShop < 1.7.6, use "decimals" boolean flag
+        if (property_exists($currency, 'decimals')) {
+            return $currency->decimals ? 2 : 0;
+        }
+
+        // Fallback (it shouldn't happen)
+        return 2;
     }
 }
