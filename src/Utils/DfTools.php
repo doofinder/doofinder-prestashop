@@ -1804,7 +1804,7 @@ class DfTools
      *
      * @return array
      */
-    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData)
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData = [])
     {
         $multiprice = [];
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
