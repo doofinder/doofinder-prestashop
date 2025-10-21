@@ -1737,10 +1737,11 @@ class DfTools
      * @param bool $includeTaxes Whether to include taxes in the price
      * @param int|null $variantId Product variant ID (null for base product)
      * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     * @param int|null $customerId Customer ID representing the Customer Group (defaults to null)
      *
      * @return float The product price
      */
-    public static function getPrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true)
+    public static function getPrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
         return \Product::getPriceStatic(
             $productId,
@@ -1749,7 +1750,10 @@ class DfTools
             $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
             null,
             false,
-            false
+            false,
+            1,
+            false,
+            $customerId
         );
     }
 
@@ -1763,16 +1767,23 @@ class DfTools
      * @param bool $includeTaxes Whether to include taxes in the price
      * @param int|null $variantId Product variant ID (null for base product)
      * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     * @param int|null $customerId Customer ID representing the Customer Group (defaults to null)
      *
      * @return float The product onsale price
      */
-    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true)
+    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
         return \Product::getPriceStatic(
             $productId,
             $includeTaxes,
             $variantId,
-            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6
+            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
+            null,
+            false,
+            true,
+            1,
+            false,
+            $customerId
         );
     }
 
@@ -1782,15 +1793,18 @@ class DfTools
      * An example of a value for this field is
      * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
      * for a list containing two currencies ["EUR", "GBP"].
+     * In case of B2B prices it would be:
+     * ["EUR" => ["price" => 5, "sale_price" => 3], "EUR_5" => ["price" => 4, "sale_price" => 2], ...]
      *
      * @param int $productId Id of the product to calculate the multiprice for
      * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
      * @param array $currencies List of currencies to consider for the multiprice calculation
      * @param int $variantId When specified, the multiprice will be calculated for that variant
+     * @param array $customerGroupsIds List of customer groups to consider for price calculation
      *
      * @return array
      */
-    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData)
     {
         $multiprice = [];
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
@@ -1809,6 +1823,18 @@ class DfTools
                 }
 
                 $multiprice[$currencyCode] = $pricesMap;
+
+                foreach ($customerGroupsData as $customerGroupData) {
+                    $customerGroupPrice = self::getPrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
+                    $customerGroupOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
+                    $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
+                    $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
+                    $pricesMap = ['price' => $convertedPrice];
+                    if ($convertedPrice !== $convertedOnsalePrice) {
+                        $pricesMap['sale_price'] = $convertedOnsalePrice;
+                    }
+                    $multiprice[$currencyCode . '_' . $customerGroupData['id_group']] = $pricesMap;
+                }
             }
         }
 
@@ -2063,5 +2089,37 @@ class DfTools
 
         // Fallback (it shouldn't happen)
         return 2;
+    }
+
+    /**
+     * Get the additional customer groups and default customers.
+     * 
+     * This method returns a list of customer groups and their default customers.
+     * The customer groups are the ones that are not native to PrestaShop.
+     * The default customers are the ones that are associated with the customer groups.
+     * 
+     * Result: [['id_group' => 4, 'id_customer' => 120], ['id_group' => 5, 'id_customer' => 251], ...]
+     * 
+     * @param int $idLang The language ID
+     *
+     * @return array
+     */
+    public static function getAdditionalCustomerGroupsAndDefaultCustomers() {
+        if (!self::versionGte('1.6.0.0')) {
+            return [];
+        }
+
+        $unidentifiedGroup = (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
+        $guestGroup = (int) \Configuration::get('PS_GUEST_GROUP');
+        $customerGroup = (int) \Configuration::get('PS_CUSTOMER_GROUP');
+        $nativeCustomerGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
+        
+        $query = new \DbQuery();
+        $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer');
+        $query->from('customer_group', 'cg');
+        $query->where("cg.id_group NOT IN (" . implode(',', $nativeCustomerGroups) . ")");
+        $query->groupBy('cg.id_group');
+    
+        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
     }
 }

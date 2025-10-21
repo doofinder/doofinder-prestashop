@@ -112,6 +112,9 @@ class HookManager
             'df_another_params' => $extraParams,
             'installation_ID' => $installationID,
             'currency' => $currency,
+            'customer' => (array)$context->customer,
+            'is_customer_logged' => $context->customer->isLogged(),
+            'is_customer_group_feature_active' => (bool)\Configuration::get('PS_GROUP_FEATURE_ACTIVE'),
         ];
     }
 
