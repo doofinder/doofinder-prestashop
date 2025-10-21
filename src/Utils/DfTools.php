@@ -2093,18 +2093,19 @@ class DfTools
 
     /**
      * Get the additional customer groups and default customers.
-     * 
+     *
      * This method returns a list of customer groups and their default customers.
      * The customer groups are the ones that are not native to PrestaShop.
      * The default customers are the ones that are associated with the customer groups.
-     * 
+     *
      * Result: [['id_group' => 4, 'id_customer' => 120], ['id_group' => 5, 'id_customer' => 251], ...]
-     * 
+     *
      * @param int $idLang The language ID
      *
      * @return array
      */
-    public static function getAdditionalCustomerGroupsAndDefaultCustomers() {
+    public static function getAdditionalCustomerGroupsAndDefaultCustomers()
+    {
         if (!self::versionGte('1.6.0.0')) {
             return [];
         }
@@ -2113,13 +2114,13 @@ class DfTools
         $guestGroup = (int) \Configuration::get('PS_GUEST_GROUP');
         $customerGroup = (int) \Configuration::get('PS_CUSTOMER_GROUP');
         $nativeCustomerGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
-        
+
         $query = new \DbQuery();
         $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer');
         $query->from('customer_group', 'cg');
-        $query->where("cg.id_group NOT IN (" . implode(',', $nativeCustomerGroups) . ")");
+        $query->where('cg.id_group NOT IN (' . implode(',', $nativeCustomerGroups) . ')');
         $query->groupBy('cg.id_group');
-    
+
         return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
     }
 }
