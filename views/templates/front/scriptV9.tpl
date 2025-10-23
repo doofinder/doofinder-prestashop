@@ -14,9 +14,9 @@
 {if isset($installation_ID) && $installation_ID}
   <!-- START OF DOOFINDER ADD TO CART SCRIPT -->
   <script>
-    let item_link; 
+    let item_link;
     document.addEventListener('doofinder.cart.add', function(event) {
-      
+
       item_link = event.detail.link;
 
       const checkIfCartItemHasVariation = (cartObject) => {
@@ -63,6 +63,6 @@
     doofinderApp("config", "language", "{$lang|escape:'htmlall':'UTF-8'}");
     doofinderApp("config", "currency", "{$currency|escape:'htmlall':'UTF-8'}");
   </script>
-  <script src="https://{$df_region|escape:'htmlall':'UTF-8'}-config.doofinder.com/2.x/{$installation_ID|escape:'htmlall':'UTF-8'}.js" async></script>
+  <script src="{$config_script_base_url}/{$installation_ID|escape:'htmlall':'UTF-8'}.js" async></script>
   <!-- END OF DOOFINDER UNIQUE SCRIPT -->
 {/if}

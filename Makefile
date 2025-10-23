@@ -17,7 +17,7 @@ endif
 
 docker_exec_web = $(docker_compose) exec -u www-data prestashop
 
-envsubst_vars = $$PLUGIN_VERSION,$$DOOMANAGER_REGION_URL,$$DOOPLUGINS_REGION_URL,$$DOOPHOENIX_REGION_URL
+envsubst_vars = $$PLUGIN_VERSION,$$DOOMANAGER_REGION_URL,$$DOOPLUGINS_REGION_URL,$$DOOPHOENIX_REGION_URL,$$CONFIG_REGION_URL
 
 # Default target: list available tasks
 all:
