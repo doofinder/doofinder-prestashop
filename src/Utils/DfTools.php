@@ -69,6 +69,11 @@ class DfTools
     protected static $cachedCategoryPaths = [];
 
     /**
+     * @var array|null cached customer groups data for optimization
+     */
+    protected static $cachedCustomerGroupsData = null;
+
+    /**
      * Hash a password using PrestaShop's cookie key.
      *
      * @param string $passwd Plain password to hash
@@ -1825,6 +1830,7 @@ class DfTools
                 $multiprice[$currencyCode] = $pricesMap;
 
                 foreach ($customerGroupsData as $customerGroupData) {
+                    $pricesMap = [];
                     $customerGroupPrice = self::getPrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
                     $customerGroupOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
                     $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
@@ -2097,8 +2103,9 @@ class DfTools
      * This method returns a list of customer groups and their default customers.
      * The customer groups are the ones that are not native to PrestaShop.
      * The default customers are the ones that are associated with the customer groups.
+     * The show_prices field is the price display method for the customer group.
      *
-     * Result: [['id_group' => 4, 'id_customer' => 120], ['id_group' => 5, 'id_customer' => 251], ...]
+     * Result: [['id_group' => 4, 'id_customer' => 120, 'show_prices' => 1], ['id_group' => 5, 'id_customer' => 251, 'show_prices' => 0], ...]
      *
      * @param int $idLang The language ID
      *
@@ -2106,21 +2113,43 @@ class DfTools
      */
     public static function getAdditionalCustomerGroupsAndDefaultCustomers()
     {
-        if (!self::versionGte('1.6.0.0')) {
+        if (self::$cachedCustomerGroupsData !== null) {
+            return self::$cachedCustomerGroupsData;
+        }
+
+        if (!self::versionGte('1.6.0.0') || !\Group::isCurrentlyUsed()) {
             return [];
         }
 
         $unidentifiedGroup = (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
         $guestGroup = (int) \Configuration::get('PS_GUEST_GROUP');
         $customerGroup = (int) \Configuration::get('PS_CUSTOMER_GROUP');
-        $nativeCustomerGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
+        $nativeGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
 
         $query = new \DbQuery();
         $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer');
         $query->from('customer_group', 'cg');
-        $query->where('cg.id_group NOT IN (' . implode(',', $nativeCustomerGroups) . ')');
-        $query->groupBy('cg.id_group');
+        $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
+        self::$cachedCustomerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        
+        return self::$cachedCustomerGroupsData;
+    }
 
-        return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+    /**
+     * Retrieves whether prices are shown for a given customer group.
+     *
+     * This function checks the "show_prices" setting of the group.
+     *
+     * @param int $idGroup The ID of the customer group.
+     * @return bool True if prices are shown for this group, false otherwise.
+     */
+    public static function getCustomerGroupPriceVisibility($idGroup)
+    {
+        $query = new \DbQuery();
+        $query->select('g.show_prices');
+        $query->from('group', 'g');
+        $query->where('g.id_group', (int) $idGroup);
+
+        return (bool) \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
     }
 }
