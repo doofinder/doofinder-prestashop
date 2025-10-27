@@ -305,7 +305,7 @@ class DfProductBuild
     public function getMinPrice($currentMinPrice, $variation)
     {
         if ($this->displayPrices) {
-            $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies);
+            $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies, $this->customerGroupsData);
             if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
                 return $variantPrices;
             } else {

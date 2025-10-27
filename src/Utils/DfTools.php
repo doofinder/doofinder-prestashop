@@ -1695,19 +1695,27 @@ class DfTools
      *
      * This method retrieves the regular price, onsale price, and multiprice
      * information for a specific product variant (combination).
+     * 
+     * For B2B cases, the input data structure for $customerGroupsIds is: 
+     * [
+     *    ['id_group' => 4, 'id_customer' => 120],
+     *    ['id_group' => 5, 'id_customer' => 251],
+     *    ...
+     * ]
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
      * @param array $currencies Array of currency information for multiprice calculation
+     * @param array $customerGroupsIds List of customer groups to consider for price calculation (optional) 
      *
      * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
      */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies, $customerGroupsData = [])
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
         $variantOnsalePrice = self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute);
-        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute);
+        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute, $customerGroupsData);
 
         return [
             'price' => $variantPrice,
@@ -1794,6 +1802,13 @@ class DfTools
 
     /**
      * Given a product and a list of currencies, returns the multiprice map.
+     * 
+     * For B2B cases, the input data structure for $customerGroupsIds is: 
+     * [
+     *    ['id_group' => 4, 'id_customer' => 120],
+     *    ['id_group' => 5, 'id_customer' => 251],
+     *    ...
+     * ]
      *
      * An example of a value for this field is
      * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
@@ -1812,8 +1827,8 @@ class DfTools
     public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData = [])
     {
         $multiprice = [];
-        $price = self::getPrice($productId, $includeTaxes, $variantId, false);
-        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
+        $price = self::getPrice($productId, $includeTaxes, $variantId, null);
+        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, null);
 
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
