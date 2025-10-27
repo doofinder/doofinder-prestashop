@@ -1827,8 +1827,8 @@ class DfTools
     public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData = [])
     {
         $multiprice = [];
-        $price = self::getPrice($productId, $includeTaxes, $variantId, null);
-        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, null);
+        $price = self::getPrice($productId, $includeTaxes, $variantId, false);
+        $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
 
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
@@ -2122,8 +2122,6 @@ class DfTools
      *
      * Result: [['id_group' => 4, 'id_customer' => 120, 'show_prices' => 1], ['id_group' => 5, 'id_customer' => 251, 'show_prices' => 0], ...]
      *
-     * @param int $idLang The language ID
-     *
      * @return array
      */
     public static function getAdditionalCustomerGroupsAndDefaultCustomers()
@@ -2164,7 +2162,7 @@ class DfTools
         $query = new \DbQuery();
         $query->select('g.show_prices');
         $query->from('group', 'g');
-        $query->where('g.id_group', (int) $idGroup);
+        $query->where('g.id_group = ' . (int) $idGroup);
 
         return (bool) \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
     }
