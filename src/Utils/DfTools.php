@@ -1696,7 +1696,7 @@ class DfTools
      * This method retrieves the regular price, onsale price, and multiprice
      * information for a specific product variant (combination).
      *
-     * For B2B cases, the input data structure for $customerGroupsIds is:
+     * For B2B cases, the input data structure for $customerGroupsData is:
      * [
      *    ['id_group' => 4, 'id_customer' => 120],
      *    ['id_group' => 5, 'id_customer' => 251],
@@ -1707,7 +1707,7 @@ class DfTools
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
      * @param array $currencies Array of currency information for multiprice calculation
-     * @param array $customerGroupsIds List of customer groups to consider for price calculation (optional)
+     * @param array $customerGroupsData List of customer groups to consider for price calculation (optional)
      *
      * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
      */
@@ -1803,7 +1803,7 @@ class DfTools
     /**
      * Given a product and a list of currencies, returns the multiprice map.
      *
-     * For B2B cases, the input data structure for $customerGroupsIds is:
+     * For B2B cases, the input data structure for $customerGroupsData is:
      * [
      *    ['id_group' => 4, 'id_customer' => 120],
      *    ['id_group' => 5, 'id_customer' => 251],
@@ -1820,7 +1820,7 @@ class DfTools
      * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
      * @param array $currencies List of currencies to consider for the multiprice calculation
      * @param int $variantId When specified, the multiprice will be calculated for that variant
-     * @param array $customerGroupsIds List of customer groups to consider for price calculation
+     * @param array $customerGroupsData List of customer groups to consider for price calculation
      *
      * @return array
      */
