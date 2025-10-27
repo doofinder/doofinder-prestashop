@@ -115,7 +115,7 @@ class HookManager
             'customer' => (array) $context->customer,
             'is_customer_logged' => $context->customer->isLogged(),
             'is_customer_group_feature_active' => \Group::isFeatureActive(),
-            'customer_group_price_visibility' => 'true'
+            'customer_group_price_visibility' => 'true',
         ];
 
         if ($context->customer->isLogged()) {

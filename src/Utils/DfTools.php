@@ -71,7 +71,7 @@ class DfTools
     /**
      * @var array|null cached customer groups data for optimization
      */
-    protected static $cachedCustomerGroupsData = null;
+    protected static $cachedCustomerGroupsData;
 
     /**
      * Hash a password using PrestaShop's cookie key.
@@ -1695,8 +1695,8 @@ class DfTools
      *
      * This method retrieves the regular price, onsale price, and multiprice
      * information for a specific product variant (combination).
-     * 
-     * For B2B cases, the input data structure for $customerGroupsIds is: 
+     *
+     * For B2B cases, the input data structure for $customerGroupsIds is:
      * [
      *    ['id_group' => 4, 'id_customer' => 120],
      *    ['id_group' => 5, 'id_customer' => 251],
@@ -1707,7 +1707,7 @@ class DfTools
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
      * @param array $currencies Array of currency information for multiprice calculation
-     * @param array $customerGroupsIds List of customer groups to consider for price calculation (optional) 
+     * @param array $customerGroupsIds List of customer groups to consider for price calculation (optional)
      *
      * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
      */
@@ -1802,8 +1802,8 @@ class DfTools
 
     /**
      * Given a product and a list of currencies, returns the multiprice map.
-     * 
-     * For B2B cases, the input data structure for $customerGroupsIds is: 
+     *
+     * For B2B cases, the input data structure for $customerGroupsIds is:
      * [
      *    ['id_group' => 4, 'id_customer' => 120],
      *    ['id_group' => 5, 'id_customer' => 251],
@@ -2146,7 +2146,7 @@ class DfTools
         $query->from('customer_group', 'cg');
         $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
         self::$cachedCustomerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
-        
+
         return self::$cachedCustomerGroupsData;
     }
 
@@ -2155,8 +2155,9 @@ class DfTools
      *
      * This function checks the "show_prices" setting of the group.
      *
-     * @param int $idGroup The ID of the customer group.
-     * @return bool True if prices are shown for this group, false otherwise.
+     * @param int $idGroup the ID of the customer group
+     *
+     * @return bool true if prices are shown for this group, false otherwise
      */
     public static function getCustomerGroupPriceVisibility($idGroup)
     {
