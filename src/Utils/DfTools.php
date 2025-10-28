@@ -2130,7 +2130,7 @@ class DfTools
             return self::$cachedCustomerGroupsData;
         }
 
-        if (!self::versionGte('1.6.0.0') || !\Group::isCurrentlyUsed()) {
+        if (!\Group::isCurrentlyUsed()) {
             return [];
         }
 
@@ -2143,7 +2143,12 @@ class DfTools
         $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer');
         $query->from('customer_group', 'cg');
         $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
-        self::$cachedCustomerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+
+        $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        // To guarantee compatibility with PrestaShop 1.5
+        self::$cachedCustomerGroupsData = array_filter($customerGroupsData, function($groupData) {
+            return is_numeric($groupData['id_group']) && is_numeric($groupData['id_customer']);
+        });
 
         return self::$cachedCustomerGroupsData;
     }
