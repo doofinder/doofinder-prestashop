@@ -2124,7 +2124,7 @@ class DfTools
 
         $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         // To guarantee compatibility with PrestaShop 1.5
-        self::$cachedCustomerGroupsData = array_filter($customerGroupsData, function($groupData) {
+        self::$cachedCustomerGroupsData = array_filter($customerGroupsData, function ($groupData) {
             return is_numeric($groupData['id_group']) && is_numeric($groupData['id_customer']);
         });
 
@@ -2166,7 +2166,8 @@ class DfTools
      *
      * @return float The product regular price or onsale price
      */
-    private static function calculatePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null, $useReduction = true) {
+    private static function calculatePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null, $useReduction = true) 
+    {
         if (is_null($customerId)) {
             // We have to specify almost all parameters to avoid different prices calculations if an user is logged in.
             // See https://github.com/PrestaShop/PrestaShop/blob/8.1.0/classes/Product.php#L3602.
