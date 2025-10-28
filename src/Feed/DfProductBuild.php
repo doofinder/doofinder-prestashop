@@ -728,25 +728,12 @@ class DfProductBuild
             $idProductAttribute = null;
         }
 
-        $productPrice = \Product::getPriceStatic(
-            $product['id_product'],
-            $this->useTax,
-            $idProductAttribute,
-            DfTools::getCurrencyPrecision($this->idCurrency),
-            null,
-            false,
-            false
-        );
+        $productPrice = DfTools::getPrice($product['id_product'], $this->useTax, $idProductAttribute, true, null, false);
 
         if (!$salePrice) {
             return $productPrice ? \Tools::convertPrice($productPrice, $this->idCurrency) : null;
         } else {
-            $onsalePrice = \Product::getPriceStatic(
-                $product['id_product'],
-                $this->useTax,
-                $idProductAttribute,
-                DfTools::getCurrencyPrecision($this->idCurrency)
-            );
+            $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null, true);
 
             return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
                 ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;

@@ -1756,18 +1756,7 @@ class DfTools
      */
     public static function getPrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
-        return \Product::getPriceStatic(
-            $productId,
-            $includeTaxes,
-            $variantId,
-            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
-            null,
-            false,
-            false,
-            1,
-            false,
-            $customerId
-        );
+        return self::calculatePrice($productId, $includeTaxes, $variantId, $applyDecimalRounding, $customerId, false);
     }
 
     /**
@@ -1786,18 +1775,7 @@ class DfTools
      */
     public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
-        return \Product::getPriceStatic(
-            $productId,
-            $includeTaxes,
-            $variantId,
-            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
-            null,
-            false,
-            true,
-            1,
-            false,
-            $customerId
-        );
+        return self::calculatePrice($productId, $includeTaxes, $variantId, $applyDecimalRounding, $customerId);
     }
 
     /**
@@ -2170,5 +2148,62 @@ class DfTools
         $query->where('g.id_group = ' . (int) $idGroup);
 
         return (bool) \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+    }
+
+    /**
+     * Get the regular price/onsale price for a product or variant.
+     *
+     * This method retrieves the regular price or sale/discounted price for a product, optionally for a specific variant depending on
+     * the $useReduction parameter.
+     * It can include or exclude taxes and apply proper decimal rounding based on currency precision.
+     *
+     * @param int $productId Product ID
+     * @param bool $includeTaxes Whether to include taxes in the price
+     * @param int|null $variantId Product variant ID (null for base product)
+     * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     * @param int|null $customerId Customer ID representing the Customer Group (defaults to null)
+     * @param bool $useReduction Whether to use the reduction price or the regular price
+     *
+     * @return float The product regular price or onsale price
+     */
+    private static function calculatePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null, $useReduction = true) {
+        if (is_null($customerId)) {
+            // We have to specify almost all parameters to avoid different prices calculations if an user is logged in.
+            // See https://github.com/PrestaShop/PrestaShop/blob/8.1.0/classes/Product.php#L3602.
+            // $use_group_reduction and $use_customer_price must remain as false for these cases.
+            $specificPriceOutput = null;
+            return \Product::getPriceStatic(
+                $productId,
+                $includeTaxes,
+                $variantId,
+                $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
+                null,
+                false,
+                $useReduction,
+                1,
+                false,
+                $customerId,
+                null,
+                null,
+                $specificPriceOutput,
+                true,
+                false,
+                null,
+                false
+            );
+        }
+
+        return \Product::getPriceStatic(
+            $productId,
+            $includeTaxes,
+            $variantId,
+            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
+            null,
+            false,
+            $useReduction,
+            1,
+            false,
+            $customerId
+        );
     }
 }
