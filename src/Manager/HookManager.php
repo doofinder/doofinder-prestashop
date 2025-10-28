@@ -100,7 +100,7 @@ class HookManager
             $selfPath = dirname(__FILE__);
         }
 
-        return [
+        $templateVars = [
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => $languageCode,
             'script_html' => DfTools::fixScriptTag($script),
@@ -112,7 +112,17 @@ class HookManager
             'df_another_params' => $extraParams,
             'installation_ID' => $installationID,
             'currency' => $currency,
+            'customer' => (array) $context->customer,
+            'is_customer_logged' => $context->customer->isLogged(),
+            'is_customer_group_feature_active' => \Group::isFeatureActive(),
+            'customer_group_price_visibility' => 'true',
         ];
+
+        if ($context->customer->isLogged()) {
+            $templateVars['customer_group_price_visibility'] = (DfTools::getCustomerGroupPriceVisibility($context->customer->id_default_group)) ? 'true' : 'false';
+        }
+
+        return $templateVars;
     }
 
     /**
