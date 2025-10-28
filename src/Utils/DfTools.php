@@ -2166,7 +2166,7 @@ class DfTools
      *
      * @return float The product regular price or onsale price
      */
-    private static function calculatePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null, $useReduction = true) 
+    private static function calculatePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null, $useReduction = true)
     {
         if (is_null($customerId)) {
             // We have to specify almost all parameters to avoid different prices calculations if an user is logged in.
