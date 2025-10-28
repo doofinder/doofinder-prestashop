@@ -1810,7 +1810,9 @@ class DfTools
 
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
-                $decimals = self::getCurrencyPrecision($currency['id']);
+                // Backward compatibility with PrestaShop 1.5
+                $currencyId = !empty($currency['id']) ? $currency['id'] : $currency['id_currency'];
+                $decimals = self::getCurrencyPrecision($currencyId);
                 $convertedPrice = \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
                 $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($onsale_price, $currency), $decimals);
                 $currencyCode = $currency['iso_code'];
@@ -1824,6 +1826,10 @@ class DfTools
 
                 foreach ($customerGroupsData as $customerGroupData) {
                     $pricesMap = [];
+                    // Compatibility for PrestaShop 1.5
+                    if (!self::versionGte('1.6.0.0')) {
+                        \Context::getContext()->customer = new \Customer($customerGroupData['id_customer']);
+                    }
                     $customerGroupPrice = self::getPrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
                     $customerGroupOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
                     $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
@@ -1833,6 +1839,10 @@ class DfTools
                         $pricesMap['sale_price'] = $convertedOnsalePrice;
                     }
                     $multiprice[$currencyCode . '_' . $customerGroupData['id_group']] = $pricesMap;
+                }
+                // Compatibility for PrestaShop 1.5
+                if (!self::versionGte('1.6.0.0')) {
+                    \Context::getContext()->customer = null;
                 }
             }
         }
@@ -2083,7 +2093,7 @@ class DfTools
 
         // For PrestaShop < 1.7.6, use "decimals" boolean flag
         if (property_exists($currency, 'decimals')) {
-            return $currency->decimals ? 2 : 0;
+            return ((bool) $currency->decimals) ? 2 : 0;
         }
 
         // Fallback (it shouldn't happen)
