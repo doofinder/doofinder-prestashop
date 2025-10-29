@@ -2157,7 +2157,7 @@ class DfTools
         $query->from('group', 'g');
         $query->where('g.id_group = ' . (int) $idGroup);
 
-        return (bool) \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        return (bool) \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
     }
 
     /**
