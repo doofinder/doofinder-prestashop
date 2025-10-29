@@ -115,11 +115,11 @@ class HookManager
             'customer' => (array) $context->customer,
             'is_customer_logged' => $context->customer->isLogged(),
             'is_customer_group_feature_active' => \Group::isFeatureActive(),
-            'customer_group_price_visibility' => 'true',
+            'customer_group_hide_prices' => 'false',
         ];
 
         if ($context->customer->isLogged()) {
-            $templateVars['customer_group_price_visibility'] = (DfTools::getCustomerGroupPriceVisibility($context->customer->id_default_group)) ? 'true' : 'false';
+            $templateVars['customer_group_hide_prices'] = (DfTools::getCustomerGroupPriceVisibility($context->customer->id_default_group)) ? 'false' : 'true';
         }
 
         return $templateVars;
