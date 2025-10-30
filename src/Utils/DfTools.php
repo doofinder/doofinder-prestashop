@@ -69,6 +69,11 @@ class DfTools
     protected static $cachedCategoryPaths = [];
 
     /**
+     * @var array|null cached customer groups data for optimization
+     */
+    protected static $cachedCustomerGroupsData;
+
+    /**
      * Hash a password using PrestaShop's cookie key.
      *
      * @param string $passwd Plain password to hash
@@ -1691,18 +1696,26 @@ class DfTools
      * This method retrieves the regular price, onsale price, and multiprice
      * information for a specific product variant (combination).
      *
+     * For B2B cases, the input data structure for $customerGroupsData is:
+     * [
+     *    ['id_group' => 4, 'id_customer' => 120],
+     *    ['id_group' => 5, 'id_customer' => 251],
+     *    ...
+     * ]
+     *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
      * @param array $currencies Array of currency information for multiprice calculation
+     * @param array $customerGroupsData List of customer groups to consider for price calculation (optional)
      *
      * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
      */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies, $customerGroupsData = [])
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
         $variantOnsalePrice = self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute);
-        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute);
+        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute, $customerGroupsData);
 
         return [
             'price' => $variantPrice,
@@ -1737,20 +1750,13 @@ class DfTools
      * @param bool $includeTaxes Whether to include taxes in the price
      * @param int|null $variantId Product variant ID (null for base product)
      * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     * @param int|null $customerId Customer ID representing the Customer Group (defaults to null)
      *
      * @return float The product price
      */
-    public static function getPrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true)
+    public static function getPrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
-        return \Product::getPriceStatic(
-            $productId,
-            $includeTaxes,
-            $variantId,
-            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
-            null,
-            false,
-            false
-        );
+        return self::calculatePrice($productId, $includeTaxes, $variantId, $applyDecimalRounding, $customerId, false);
     }
 
     /**
@@ -1763,34 +1769,40 @@ class DfTools
      * @param bool $includeTaxes Whether to include taxes in the price
      * @param int|null $variantId Product variant ID (null for base product)
      * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     * @param int|null $customerId Customer ID representing the Customer Group (defaults to null)
      *
      * @return float The product onsale price
      */
-    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true)
+    public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
-        return \Product::getPriceStatic(
-            $productId,
-            $includeTaxes,
-            $variantId,
-            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6
-        );
+        return self::calculatePrice($productId, $includeTaxes, $variantId, $applyDecimalRounding, $customerId);
     }
 
     /**
      * Given a product and a list of currencies, returns the multiprice map.
      *
+     * For B2B cases, the input data structure for $customerGroupsData is:
+     * [
+     *    ['id_group' => 4, 'id_customer' => 120],
+     *    ['id_group' => 5, 'id_customer' => 251],
+     *    ...
+     * ]
+     *
      * An example of a value for this field is
      * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
      * for a list containing two currencies ["EUR", "GBP"].
+     * In case of B2B prices it would be:
+     * ["EUR" => ["price" => 5, "sale_price" => 3], "EUR_5" => ["price" => 4, "sale_price" => 2], ...]
      *
      * @param int $productId Id of the product to calculate the multiprice for
      * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
      * @param array $currencies List of currencies to consider for the multiprice calculation
      * @param int $variantId When specified, the multiprice will be calculated for that variant
+     * @param array $customerGroupsData List of customer groups to consider for price calculation
      *
      * @return array
      */
-    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData = [])
     {
         $multiprice = [];
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
@@ -1798,7 +1810,9 @@ class DfTools
 
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
-                $decimals = self::getCurrencyPrecision($currency['id']);
+                // Backward compatibility with PrestaShop 1.5
+                $currencyId = !empty($currency['id']) ? $currency['id'] : $currency['id_currency'];
+                $decimals = self::getCurrencyPrecision($currencyId);
                 $convertedPrice = \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
                 $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($onsale_price, $currency), $decimals);
                 $currencyCode = $currency['iso_code'];
@@ -1809,6 +1823,27 @@ class DfTools
                 }
 
                 $multiprice[$currencyCode] = $pricesMap;
+
+                foreach ($customerGroupsData as $customerGroupData) {
+                    $pricesMap = [];
+                    // Compatibility for PrestaShop 1.5
+                    if (!self::versionGte('1.6.0.0')) {
+                        \Context::getContext()->customer = new \Customer($customerGroupData['id_customer']);
+                    }
+                    $customerGroupPrice = self::getPrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
+                    $customerGroupOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
+                    $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
+                    $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
+                    $pricesMap = ['price' => $convertedPrice];
+                    if ($convertedPrice !== $convertedOnsalePrice) {
+                        $pricesMap['sale_price'] = $convertedOnsalePrice;
+                    }
+                    $multiprice[$currencyCode . '_' . $customerGroupData['id_group']] = $pricesMap;
+                }
+                // Compatibility for PrestaShop 1.5
+                if (!self::versionGte('1.6.0.0')) {
+                    \Context::getContext()->customer = null;
+                }
             }
         }
 
@@ -2058,10 +2093,128 @@ class DfTools
 
         // For PrestaShop < 1.7.6, use "decimals" boolean flag
         if (property_exists($currency, 'decimals')) {
-            return $currency->decimals ? 2 : 0;
+            return ((bool) $currency->decimals) ? 2 : 0;
         }
 
         // Fallback (it shouldn't happen)
         return 2;
+    }
+
+    /**
+     * Get the additional customer groups and default customers.
+     *
+     * This method returns a list of customer groups and their default customers.
+     * The customer groups are the ones that are not native to PrestaShop.
+     * The default customers are the ones that are associated with the customer groups.
+     * The show_prices field is the price display method for the customer group.
+     *
+     * Result: [['id_group' => 4, 'id_customer' => 120, 'show_prices' => 1], ['id_group' => 5, 'id_customer' => 251, 'show_prices' => 0], ...]
+     *
+     * @return array
+     */
+    public static function getAdditionalCustomerGroupsAndDefaultCustomers()
+    {
+        if (self::$cachedCustomerGroupsData !== null) {
+            return self::$cachedCustomerGroupsData;
+        }
+
+        if (!\Group::isCurrentlyUsed()) {
+            return [];
+        }
+
+        $unidentifiedGroup = (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
+        $guestGroup = (int) \Configuration::get('PS_GUEST_GROUP');
+        $customerGroup = (int) \Configuration::get('PS_CUSTOMER_GROUP');
+        $nativeGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
+
+        $query = new \DbQuery();
+        $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer');
+        $query->from('customer_group', 'cg');
+        $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
+
+        $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        // To guarantee compatibility with PrestaShop 1.5
+        self::$cachedCustomerGroupsData = array_filter($customerGroupsData, function ($groupData) {
+            return is_numeric($groupData['id_group']) && is_numeric($groupData['id_customer']);
+        });
+
+        return self::$cachedCustomerGroupsData;
+    }
+
+    /**
+     * Retrieves whether prices are shown for a given customer group.
+     *
+     * This function checks the "show_prices" setting of the group.
+     *
+     * @param int $idGroup the ID of the customer group
+     *
+     * @return bool true if prices are shown for this group, false otherwise
+     */
+    public static function getCustomerGroupPriceVisibility($idGroup)
+    {
+        $query = new \DbQuery();
+        $query->select('g.show_prices');
+        $query->from('group', 'g');
+        $query->where('g.id_group = ' . (int) $idGroup);
+
+        return (bool) \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
+    }
+
+    /**
+     * Get the regular price/onsale price for a product or variant.
+     *
+     * This method retrieves the regular price or sale/discounted price for a product, optionally for a specific variant depending on
+     * the $useReduction parameter.
+     * It can include or exclude taxes and apply proper decimal rounding based on currency precision.
+     *
+     * @param int $productId Product ID
+     * @param bool $includeTaxes Whether to include taxes in the price
+     * @param int|null $variantId Product variant ID (null for base product)
+     * @param bool $applyDecimalRounding Whether to apply currency-specific decimal rounding
+     * @param int|null $customerId Customer ID representing the Customer Group (defaults to null)
+     * @param bool $useReduction Whether to use the reduction price or the regular price
+     *
+     * @return float The product regular price or onsale price
+     */
+    private static function calculatePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null, $useReduction = true)
+    {
+        if (is_null($customerId)) {
+            // We have to specify almost all parameters to avoid different prices calculations if an user is logged in.
+            // See https://github.com/PrestaShop/PrestaShop/blob/8.1.0/classes/Product.php#L3602.
+            // $use_group_reduction and $use_customer_price must remain as false for these cases.
+            $specificPriceOutput = null;
+            return \Product::getPriceStatic(
+                $productId,
+                $includeTaxes,
+                $variantId,
+                $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
+                null,
+                false,
+                $useReduction,
+                1,
+                false,
+                $customerId,
+                null,
+                null,
+                $specificPriceOutput,
+                true,
+                false,
+                null,
+                false
+            );
+        }
+
+        return \Product::getPriceStatic(
+            $productId,
+            $includeTaxes,
+            $variantId,
+            $applyDecimalRounding ? self::getCurrencyPrecision(\Context::getContext()->currency->id) : 6,
+            null,
+            false,
+            $useReduction,
+            1,
+            false,
+            $customerId
+        );
     }
 }

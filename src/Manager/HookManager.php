@@ -103,7 +103,7 @@ class HookManager
 
 
         $configScriptBaseUrl = sprintf(DoofinderConstants::CONFIG_REGION_URL, $dfRegion) . '/2.x';
-        return [
+        $templateVars = [
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => $languageCode,
             'script_html' => DfTools::fixScriptTag($script),
@@ -115,7 +115,17 @@ class HookManager
             'installation_ID' => $installationID,
             'currency' => $currency,
             'config_script_base_url' => $configScriptBaseUrl,
+            'customer' => (array) $context->customer,
+            'is_customer_logged' => $context->customer->isLogged(),
+            'is_customer_group_feature_active' => \Group::isFeatureActive(),
+            'customer_group_hide_prices' => 'false',
         ];
+
+        if ($context->customer->isLogged()) {
+            $templateVars['customer_group_hide_prices'] = (DfTools::getCustomerGroupPriceVisibility($context->customer->id_default_group)) ? 'false' : 'true';
+        }
+
+        return $templateVars;
     }
 
     /**

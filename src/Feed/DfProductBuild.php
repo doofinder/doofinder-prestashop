@@ -120,6 +120,11 @@ class DfProductBuild
     private $featuresKeys;
 
     /**
+     * @var array A list of customer Groups data
+     */
+    private $customerGroupsData;
+
+    /**
      * Constructor.
      *
      * Initializes configuration settings for building product data.
@@ -133,6 +138,7 @@ class DfProductBuild
         $this->idShop = $idShop;
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
+        $this->customerGroupsData = DfTools::getAdditionalCustomerGroupsAndDefaultCustomers();
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
         $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
         $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
@@ -299,7 +305,7 @@ class DfProductBuild
     public function getMinPrice($currentMinPrice, $variation)
     {
         if ($this->displayPrices) {
-            $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies);
+            $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies, $this->customerGroupsData);
             if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
                 return $variantPrices;
             } else {
@@ -722,25 +728,12 @@ class DfProductBuild
             $idProductAttribute = null;
         }
 
-        $productPrice = \Product::getPriceStatic(
-            $product['id_product'],
-            $this->useTax,
-            $idProductAttribute,
-            DfTools::getCurrencyPrecision($this->idCurrency),
-            null,
-            false,
-            false
-        );
+        $productPrice = DfTools::getPrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
         if (!$salePrice) {
             return $productPrice ? \Tools::convertPrice($productPrice, $this->idCurrency) : null;
         } else {
-            $onsalePrice = \Product::getPriceStatic(
-                $product['id_product'],
-                $this->useTax,
-                $idProductAttribute,
-                DfTools::getCurrencyPrecision($this->idCurrency)
-            );
+            $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
             return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
                 ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
@@ -759,7 +752,7 @@ class DfProductBuild
         $productId = $product['id_product'];
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
-        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute);
+        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute, $this->customerGroupsData);
     }
 
     /**
