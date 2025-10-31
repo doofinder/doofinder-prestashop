@@ -15,6 +15,7 @@
 
 namespace PrestaShop\Module\Doofinder\Manager;
 
+use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Core\UpdateOnSave;
 use PrestaShop\Module\Doofinder\Utils\DfTools;
 
@@ -100,6 +101,8 @@ class HookManager
             $selfPath = dirname(__FILE__);
         }
 
+
+        $configScriptBaseUrl = sprintf(DoofinderConstants::CONFIG_REGION_URL, $dfRegion) . '/2.x';
         $templateVars = [
             'ENT_QUOTES' => ENT_QUOTES,
             'lang' => $languageCode,
@@ -107,11 +110,11 @@ class HookManager
             'extra_css_html' => DfTools::fixStyleTag($extraCss),
             'productLinks' => $productLinks,
             'search_engine_id' => $searchEngineId,
-            'df_region' => $dfRegion,
             'self' => $selfPath,
             'df_another_params' => $extraParams,
             'installation_ID' => $installationID,
             'currency' => $currency,
+            'config_script_base_url' => $configScriptBaseUrl,
             'customer' => (array) $context->customer,
             'is_customer_logged' => $context->customer->isLogged(),
             'is_customer_group_feature_active' => \Group::isFeatureActive(),
