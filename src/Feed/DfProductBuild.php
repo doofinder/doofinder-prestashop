@@ -688,8 +688,9 @@ class DfProductBuild
     /**
      * Get all product images links.
      *
-     * Returns an array of all image URLs for the product, including the main image.
-     * Uses the all_image_ids field from the product data (comma-separated string).
+     * Returns an array of all image URLs for the product.
+     * For variations, returns only variation-specific images.
+     * For regular products, returns all product images.
      *
      * @param array $product Product data
      *
@@ -697,18 +698,35 @@ class DfProductBuild
      */
     private function getImagesLinks($product)
     {
-        // Parse comma-separated image IDs (consistent with how category_ids is handled)
-        $imageIds = array_filter(array_map('intval', explode(',', $product['all_image_ids'])));
-        $idProduct = (int) $product['id_product'];
+        $imageIds = [];
+        $idForImageLink = null;
+        
+        if ($this->haveVariations($product)) {
+            $imageIds = DfTools::getVariationImages($product['id_product'], $product['id_product_attribute']);
+            $idForImageLink = $product['id_product_attribute'];
+        } else {
+            $imageIds = array_filter(array_map('intval', explode(',', $product['all_image_ids'])));
+            $idForImageLink = (int) $product['id_product'];
+        }
+
+        if (empty($imageIds)) {
+            return [];
+        }
+
         $imageLinks = [];
 
         foreach ($imageIds as $idImage) {
             $imageLink = DfTools::getImageLink(
-                $idProduct,
+                $idForImageLink,
                 $idImage,
                 $product['link_rewrite'],
                 $this->imageSize
             );
+
+            // For variations with no specific pictures, skip invalid image links
+            if ($this->haveVariations($product) && strpos($imageLink, '/-') > -1) {
+                continue;
+            }
 
             if (!empty($imageLink)) {
                 $cleanLink = DfTools::cleanURL($imageLink);

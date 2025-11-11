@@ -365,7 +365,30 @@ class DfTools
     }
 
     /**
-     * Returns the features of a product
+     * Returns all images for a product variation.
+     *
+     * @param int $idProduct ID of the product
+     * @param int $idProductAttribute id of the Product attribute
+     *
+     * @return array Array of image IDs
+     */
+    public static function getVariationImages($idProduct, $idProductAttribute)
+    {
+        $sql = '
+            SELECT DISTINCT pai.id_image
+            FROM ' . _DB_PREFIX_ . 'product_attribute_image pai
+            INNER JOIN ' . _DB_PREFIX_ . 'image i ON (i.id_image = pai.id_image AND i.id_product = ' . (int) $idProduct . ')
+            WHERE pai.id_product_attribute = ' . (int) $idProductAttribute . '
+            ORDER BY i.position ASC
+        ';
+        $sql = self::prepareSQL($sql, []);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        
+        return $result ? array_map('intval', array_column($result, 'id_image')) : [];
+    }
+
+    /**
+     * Returns the first image for a product variation.
      *
      * @param int $idProduct ID of the product
      * @param int $idProductAttribute id of the Product attribute
@@ -374,32 +397,8 @@ class DfTools
      */
     public static function getVariationImg($idProduct, $idProductAttribute)
     {
-        $sql = '
-      SELECT i.id_image
-            from
-            (
-            select pa.id_product, pa.id_product_attribute,paic.id_attribute,min(i.position) as min_position
-            from _DB_PREFIX_product_attribute pa
-             inner join _DB_PREFIX_product_attribute_image pai
-               on pai.id_product_attribute = pa.id_product_attribute
-             inner join  _DB_PREFIX_product_attribute_combination paic
-               on pai.id_product_attribute = paic.id_product_attribute
-             inner join _DB_PREFIX_image i
-               on pai.id_image = i.id_image
-            where pa.id_product = ' . (int) $idProduct . '
-                and pa.id_product_attribute = ' . (int) $idProductAttribute . '
-            group by pa.id_product, pa.id_product_attribute,paic.id_attribute
-            ) as P
-            inner join _DB_PREFIX_image i
-             on i.id_product = P.id_product and i.position =  P.min_position
-            ';
-        $sql = self::prepareSQL($sql, []);
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        if (isset($result[0])) {
-            return $result[0]['id_image'];
-        } else {
-            return null;
-        }
+        $images = self::getVariationImages($idProduct, $idProductAttribute);
+        return !empty($images) ? $images[0] : null;
     }
 
     /**
