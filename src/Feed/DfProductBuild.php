@@ -490,7 +490,7 @@ class DfProductBuild
         }
         $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
         $product['category_merchandising'] = implode(DfTools::CATEGORY_SEPARATOR, $product['category_merchandising']);
-        $product['images_links'] = implode(DfTools::CATEGORY_SEPARATOR, $product['images_links']);
+        $product['images_links'] = implode(DfTools::LIST_SEPARATOR, $product['images_links']);
 
         if (array_key_exists('df_variants_information', $product)) {
             $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
@@ -569,7 +569,7 @@ class DfProductBuild
      */
     private function getId($product)
     {
-        if ($this->haveVariations($product)) {
+        if ($this->hasVariations($product)) {
             return 'VAR-' . $product['id_product_attribute'];
         }
 
@@ -585,7 +585,7 @@ class DfProductBuild
      */
     private function getItemGroupId($product)
     {
-        if ($this->haveVariations($product)) {
+        if ($this->hasVariations($product)) {
             return $product['id_product'];
         }
 
@@ -601,7 +601,7 @@ class DfProductBuild
      */
     private function getLink($product)
     {
-        if ($this->haveVariations($product)) {
+        if ($this->hasVariations($product)) {
             return DfTools::cleanURL(
                 $this->link->getProductLink(
                     (int) $product['id_product'],
@@ -641,7 +641,7 @@ class DfProductBuild
      */
     private function getImageLink($product)
     {
-        if ($this->haveVariations($product)) {
+        if ($this->hasVariations($product)) {
             $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
 
             if (!empty($idImage)) {
@@ -701,7 +701,7 @@ class DfProductBuild
         $imageIds = [];
         $idForImageLink = null;
         
-        if ($this->haveVariations($product)) {
+        if ($this->hasVariations($product)) {
             $imageIds = DfTools::getVariationImages($product['id_product'], $product['id_product_attribute']);
             $idForImageLink = $product['id_product_attribute'];
         } else {
@@ -724,7 +724,7 @@ class DfProductBuild
             );
 
             // For variations with no specific pictures, skip invalid image links
-            if ($this->haveVariations($product) && strpos($imageLink, '/-') > -1) {
+            if ($this->hasVariations($product) && strpos($imageLink, '/-') > -1) {
                 continue;
             }
 
@@ -892,7 +892,7 @@ class DfProductBuild
      *
      * @return bool
      */
-    private function haveVariations($product)
+    private function hasVariations($product)
     {
         if ($this->productVariations) {
             if (isset($product['id_product_attribute']) && (int) $product['id_product_attribute'] > 0) {

@@ -40,6 +40,11 @@ class DfTools
     const CATEGORY_SEPARATOR = ' %% ';
 
     /**
+     * Separator used for list fields in CSV feeds.
+     */
+    const LIST_SEPARATOR = ' %% ';
+
+    /**
      * Separator used for category tree paths.
      */
     const CATEGORY_TREE_SEPARATOR = '>';
