@@ -622,6 +622,7 @@ class DfTools
         $imsCoverField = self::versionGte('1.5.1.0') ? 'ims.cover = 1' : 'im.cover = 1';
 
         $query->select('MIN(ims.id_image) AS id_image');
+        $query->select('GROUP_CONCAT(DISTINCT ims_all.id_image ORDER BY im.position ASC) AS all_image_ids');
         $query->leftJoin('image', 'im', 'im.id_product = p.id_product');
         $query->leftJoin(
             'image_shop',
@@ -629,6 +630,13 @@ class DfTools
             'im.id_image = ims.id_image
             AND ims.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             AND ' . $imsCoverField
+        );
+        // Join image_shop for all images (filtered by shop) to ensure we only get shop-available images
+        $query->leftJoin(
+            'image_shop',
+            'ims_all',
+            'im.id_image = ims_all.id_image
+            AND ims_all.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')'
         );
 
         // Product supplier reference

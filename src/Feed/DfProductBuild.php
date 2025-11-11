@@ -356,6 +356,7 @@ class DfProductBuild
         $p['meta_title'] = DfTools::cleanString($product['meta_title']);
         $p['meta_description'] = DfTools::cleanString($product['meta_description']);
         $p['image_link'] = $this->getImageLink($product);
+        $p['images_links'] = $this->getImagesLinks($product);
         $p['main_category'] = DfTools::cleanString($product['main_category']);
         $p['categories'] = DfTools::getCategoriesForProductIdAndLanguage(
             $product['id_product'],
@@ -489,6 +490,7 @@ class DfProductBuild
         }
         $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
         $product['category_merchandising'] = implode(DfTools::CATEGORY_SEPARATOR, $product['category_merchandising']);
+        $product['images_links'] = implode(DfTools::CATEGORY_SEPARATOR, $product['images_links']);
 
         if (array_key_exists('df_variants_information', $product)) {
             $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
@@ -681,6 +683,40 @@ class DfProductBuild
         }
 
         return DfTools::cleanURL($imageLink);
+    }
+
+    /**
+     * Get all product images links.
+     *
+     * Returns an array of all image URLs for the product, including the main image.
+     * Uses the all_image_ids field from the product data (comma-separated string).
+     *
+     * @param array $product Product data
+     *
+     * @return array Array of image URLs
+     */
+    private function getImagesLinks($product)
+    {
+        // Parse comma-separated image IDs (consistent with how category_ids is handled)
+        $imageIds = array_filter(array_map('intval', explode(',', $product['all_image_ids'])));
+        $idProduct = (int) $product['id_product'];
+        $imageLinks = [];
+
+        foreach ($imageIds as $idImage) {
+            $imageLink = DfTools::getImageLink(
+                $idProduct,
+                $idImage,
+                $product['link_rewrite'],
+                $this->imageSize
+            );
+
+            if (!empty($imageLink)) {
+                $cleanLink = DfTools::cleanURL($imageLink);
+                $imageLinks[] = $cleanLink;
+            }
+        }
+
+        return $imageLinks;
     }
 
     /**
