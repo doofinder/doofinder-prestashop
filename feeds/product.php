@@ -145,7 +145,7 @@ if ($shouldShowProductVariations) {
     $header[] = 'item_group_id';
 }
 $header = array_merge($header, [
-    'title', 'link', 'description', 'alternate_description', 'meta_title', 'meta_description', 'image_link', 'main_category',
+    'title', 'link', 'description', 'alternate_description', 'meta_title', 'meta_description', 'image_link', 'images_links', 'main_category',
     'categories', 'category_merchandising', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
     'supplier_reference', 'supplier_name', 'extra_title_1', 'extra_title_2', 'tags',
 ]);

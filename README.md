@@ -89,7 +89,7 @@ To upgrade the package version, simply edit the `PLUGIN_VERSION` environment var
 
 ## Xdebug ready to use
 
-If you wish to debug your new PrestaShop installation, simply uncomment the `XDEBUG_CONFIG` and `XDEBUG_MODE` environment variables in `docker-compose.yml` configure your IDE accordingly and have fun!
+If you wish to debug your new PrestaShop installation, the `XDEBUG_CONFIG` and `XDEBUG_MODE` environment variables are already configured in `docker-compose.yml`. Simply configure your IDE accordingly and have fun!
 
 ## Uninstall the module
 
