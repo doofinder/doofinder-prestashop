@@ -101,7 +101,6 @@ class HookManager
             $selfPath = dirname(__FILE__);
         }
 
-
         $configScriptBaseUrl = sprintf(DoofinderConstants::CONFIG_REGION_URL, $dfRegion) . '/2.x';
         $templateVars = [
             'ENT_QUOTES' => ENT_QUOTES,

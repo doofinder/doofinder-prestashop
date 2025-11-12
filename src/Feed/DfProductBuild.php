@@ -700,7 +700,7 @@ class DfProductBuild
     {
         $imageIds = [];
         $idForImageLink = null;
-        
+
         if ($this->hasVariations($product)) {
             $imageIds = DfTools::getVariationImages($product['id_product'], $product['id_product_attribute']);
             $idForImageLink = $product['id_product_attribute'];
