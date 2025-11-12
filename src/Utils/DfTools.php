@@ -383,7 +383,7 @@ class DfTools
         ';
         $sql = self::prepareSQL($sql, []);
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        
+
         return $result ? array_map('intval', array_column($result, 'id_image')) : [];
     }
 
