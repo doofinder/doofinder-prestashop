@@ -35,12 +35,7 @@ if (!defined('_PS_VERSION_')) {
 class DfTools
 {
     /**
-     * Separator used for category lists.
-     */
-    const CATEGORY_SEPARATOR = ' %% ';
-
-    /**
-     * Separator used for list fields in CSV feeds.
+     * Separator used for list fields.
      */
     const LIST_SEPARATOR = ' %% ';
 
@@ -927,7 +922,7 @@ class DfTools
 
         $path = [];
         foreach (\Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $row) {
-            $path[] = str_replace([self::CATEGORY_TREE_SEPARATOR, self::CATEGORY_SEPARATOR], '-', $row['name']);
+            $path[] = str_replace([self::CATEGORY_TREE_SEPARATOR, self::LIST_SEPARATOR], '-', $row['name']);
         }
 
         if ($full) {
@@ -1073,7 +1068,7 @@ class DfTools
             $categories[] = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
         }
 
-        return $flat ? implode(self::CATEGORY_SEPARATOR, $categories) : $categories;
+        return $flat ? implode(self::LIST_SEPARATOR, $categories) : $categories;
     }
 
     /**

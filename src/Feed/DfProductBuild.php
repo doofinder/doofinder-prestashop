@@ -488,8 +488,8 @@ class DfProductBuild
         if ($this->multipriceEnabled) {
             $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
         }
-        $product['categories'] = implode(DfTools::CATEGORY_SEPARATOR, $product['categories']);
-        $product['category_merchandising'] = implode(DfTools::CATEGORY_SEPARATOR, $product['category_merchandising']);
+        $product['categories'] = implode(DfTools::LIST_SEPARATOR, $product['categories']);
+        $product['category_merchandising'] = implode(DfTools::LIST_SEPARATOR, $product['category_merchandising']);
         $product['images_links'] = implode(DfTools::LIST_SEPARATOR, $product['images_links']);
 
         if (array_key_exists('df_variants_information', $product)) {
