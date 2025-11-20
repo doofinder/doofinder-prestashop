@@ -63,23 +63,4 @@ class LanguageManager
 
         return $langCountry[0];
     }
-
-    /**
-     * Returns language id from locale
-     *
-     * @param string $locale locale IETF language tag
-     *
-     * @return string|false
-     */
-    private static function getLanguageIdByLocale($locale)
-    {
-        $sanitized_locale = pSQL(strtolower($locale));
-
-        return \Db::getInstance()
-            ->getValue(
-                'SELECT `id_lang` FROM `' . _DB_PREFIX_ . 'lang`
-                WHERE `language_code` = \'' . $sanitized_locale . '\'
-                OR `iso_code` = \'' . $sanitized_locale . '\''
-            );
-    }
 }
