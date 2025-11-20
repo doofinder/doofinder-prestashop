@@ -34,32 +34,6 @@ if (!defined('_PS_VERSION_')) {
 class LanguageManager
 {
     /**
-     * Get the language associated with a search engine
-     *
-     * @param string $hashid hashid of the Search Engine
-     *
-     * @return bool|int
-     */
-    public static function getLanguageByHashid($hashid)
-    {
-        $result = \Db::getInstance()->getValue('
-            SELECT name
-            FROM ' . _DB_PREFIX_ . 'configuration
-            WHERE name like "DF_HASHID_%" and value = "' . pSQL($hashid) . '";
-        ');
-
-        if ($result) {
-            $key = str_replace('DF_HASHID_', '', $result);
-            $iso_code_parts = explode('_', $key);
-            $iso_code = end($iso_code_parts);
-
-            return (int) self::getLanguageIdByLocale($iso_code);
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Get the ISO of a currency
      *
      * @param int $id currency ID

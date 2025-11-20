@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -57,15 +58,6 @@ class Doofinder extends Module
      * @var array<string, string>
      */
     protected $productLinks = [];
-    /**
-     * Whether to display the Doofinder search banner. Used in the Landing API.
-     * More info at: https://support.doofinder.com/search/promotional-tools/banners
-     *
-     * @see PrestaShop\Module\Doofinder\Api\DoofinderApiLanding
-     *
-     * @var bool
-     */
-    public $searchBanner = false;
     /**
      * Hook manager coordinating hook registration and shared hook logic.
      *

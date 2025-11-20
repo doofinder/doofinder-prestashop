@@ -1,7 +1,7 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => '6.2.4',
-        'version' => '6.2.4.0',
+        'pretty_version' => '6.3.0',
+        'version' => '6.3.0.0',
         'type' => 'prestashop-module',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,8 +11,8 @@
     ),
     'versions' => array(
         'prestashop/doofinder' => array(
-            'pretty_version' => '6.2.4',
-            'version' => '6.2.4.0',
+            'pretty_version' => '6.3.0',
+            'version' => '6.3.0.0',
             'type' => 'prestashop-module',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
