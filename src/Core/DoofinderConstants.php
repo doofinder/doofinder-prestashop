@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -42,7 +43,7 @@ class DoofinderConstants
     const CONFIG_REGION_URL = 'https://%s-config.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '6.2.3';
+    const VERSION = '6.2.4';
     const NAME = 'doofinder';
     const YES = 1;
     const NO = 0;

@@ -59,19 +59,17 @@ $builder->setCategories($categories);
 $rows = $builder->build(false);
 
 // HEADERS
-$header = ['id', 'title', 'description', 'meta_title', 'meta_description', 'tags', 'link', 'image_link'];
-echo implode(DfTools::TXT_SEPARATOR, $header) . PHP_EOL;
+$header = ['id', 'title', 'description', 'meta_title', 'meta_description', 'link', 'image_link'];
+
+$csv = fopen('php://output', 'w');
+fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
 
 // CATEGORIES
 foreach ($rows as $row) {
-    echo $row['id'] . DfTools::TXT_SEPARATOR;
-    echo $row['title'] . DfTools::TXT_SEPARATOR;
-    echo $row['description'] . DfTools::TXT_SEPARATOR;
-    echo $row['meta_title'] . DfTools::TXT_SEPARATOR;
-    echo $row['meta_description'] . DfTools::TXT_SEPARATOR;
-    // Tags does not seem to exist on PrestaShop 9
-    echo !empty($row['tags']) ? $row['tags'] : '' . DfTools::TXT_SEPARATOR;
-    echo $row['link'] . DfTools::TXT_SEPARATOR;
-    echo $row['image_link'];
-    echo PHP_EOL;
+    $csvRow = [];
+    foreach ($header as $field) {
+        $csvRow[$field] = array_key_exists($field, $row) ? $row[$field] : '';
+    }
+    fputcsv($csv, $csvRow, DfTools::TXT_SEPARATOR);
 }
+fclose($csv);
