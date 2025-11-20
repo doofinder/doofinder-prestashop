@@ -169,7 +169,7 @@ class FormManager
         if ($formUpdated == 'store_info_tab') {
             $hashid = SearchEngine::getHashId($context->language->id, $context->currency->id);
             $apiKey = \Configuration::get('DF_API_KEY');
-            $dfApi = new DoofinderApi($hashid, $apiKey, false, ['apiVersion' => '5']);
+            $dfApi = new DoofinderApi($hashid, $apiKey);
             $messages .= $dfApi->checkConnection($this->module);
         }
 
