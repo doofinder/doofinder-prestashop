@@ -31,7 +31,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * Upgrades the Doofinder module to version 6.3.0.
+ * Upgrades the Doofinder module to version 7.0.0.
  *
  * This upgrade removes the landing pages feature which has been deprecated.
  * It drops the doofinder_landing table that was used to cache landing page data.
@@ -40,9 +40,9 @@ if (!defined('_PS_VERSION_')) {
  *
  * @return bool true on success, false if an error occurs
  */
-function upgrade_module_6_3_0($module)
+function upgrade_module_7_0_0($module)
 {
-    DoofinderConfig::debug('Initiating 6.3.0 upgrade - Removing landing pages feature');
+    DoofinderConfig::debug('Initiating 7.0.0 upgrade - Removing landing pages feature');
 
     $result = Db::getInstance()->execute(
         'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_landing`'
