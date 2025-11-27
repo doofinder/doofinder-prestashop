@@ -805,13 +805,6 @@ class DfTools
             'p.id_product = pa.id_product'
         );
 
-        $query->select('MIN(pa_im.id_image) AS variation_image_id');
-        $query->leftJoin(
-            'product_attribute_image',
-            'pa_im',
-            'pa_im.id_product_attribute = pa.id_product_attribute'
-        );
-
         // Product supplier reference
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
         $query->select('s.name AS supplier_name');
