@@ -805,7 +805,7 @@ class DfTools
             'p.id_product = pa.id_product'
         );
 
-        $query->select('pa_im.id_image AS variation_image_id');
+        $query->select('MIN(pa_im.id_image) AS variation_image_id');
         $query->leftJoin(
             'product_attribute_image',
             'pa_im',
@@ -818,8 +818,9 @@ class DfTools
         $query->leftJoin(
             'product_supplier',
             'psp',
-            'p.`id_product` = psp.`id_product`
-            AND psp.`id_product_attribute` = pa.id_product_attribute'
+            'p.`id_supplier` = psp.`id_supplier`
+            AND p.`id_product` = psp.`id_product`
+            AND pa.`id_product_attribute` = psp.`id_product_attribute`'
         );
 
         $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
@@ -833,6 +834,7 @@ class DfTools
             AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
         );
+        $query->groupBy('pa.id_product_attribute');
 
         try {
             $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
