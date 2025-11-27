@@ -18,7 +18,7 @@ The maximum php version tested is 8.4
 
 ### PrestaShop
 
-From 1.5.0.17 to 9.0.0
+From 1.5.0.17 to latest version
 
 For more compatibility details check the following documentation
 
