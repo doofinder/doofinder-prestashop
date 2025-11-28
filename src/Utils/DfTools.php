@@ -1845,7 +1845,6 @@ class DfTools
                     if (!self::versionGte('1.6.0.0')) {
                         \Context::getContext()->customer = new \Customer($customerGroupData['id_customer']);
                     }
-                    // Use the customer group's price_display_method instead of the global includeTaxes setting
                     // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
                     $customerGroupIncludeTaxes = isset($customerGroupData['price_display_method'])
                         ? !(bool) $customerGroupData['price_display_method']
