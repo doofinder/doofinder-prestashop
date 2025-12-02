@@ -58,15 +58,6 @@ class Doofinder extends Module
      */
     protected $productLinks = [];
     /**
-     * Whether to display the Doofinder search banner. Used in the Landing API.
-     * More info at: https://support.doofinder.com/search/promotional-tools/banners
-     *
-     * @see PrestaShop\Module\Doofinder\Api\DoofinderApiLanding
-     *
-     * @var bool
-     */
-    public $searchBanner = false;
-    /**
      * Hook manager coordinating hook registration and shared hook logic.
      *
      * @var PrestaShop\Module\Doofinder\Manager\HookManager
@@ -82,7 +73,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '6.2.7';
+        $this->version = '7.0.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '9.1.0'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';

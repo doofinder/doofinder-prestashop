@@ -137,38 +137,6 @@ class HookManager
     public static function getHookModuleRoutes()
     {
         return [
-            'module-doofinder-landing' => [
-                'controller' => 'landing',
-                'rule' => 'module/doofinder/landing',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'landing',
-                ],
-            ],
-            'module-doofinder-landingpage' => [
-                'controller' => 'landingPage',
-                'rule' => 'df/{landing_name}',
-                'keywords' => [
-                    'landing_name' => ['regexp' => '[_a-zA-Z0-9_-]+', 'param' => 'landing_name'],
-                ],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'landingPage',
-                ],
-            ],
-            'module-doofinder-cache' => [
-                'controller' => 'cache',
-                'rule' => 'module/doofinder/cache',
-                'keywords' => [],
-                'params' => [
-                    'fc' => 'module',
-                    'module' => 'doofinder',
-                    'controller' => 'cache',
-                ],
-            ],
             'module-doofinder-config' => [
                 'controller' => 'config',
                 'rule' => 'module/doofinder/config',

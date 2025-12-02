@@ -113,17 +113,7 @@ class DoofinderInstallation
                 PRIMARY KEY (`id_doofinder_update`),
                 CONSTRAINT uc_shop_update UNIQUE KEY (id_shop,object,id_object)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
-        )
-            && \Db::getInstance()->execute(
-                '
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_landing` (
-                `name` VARCHAR(45) NOT NULL,
-                `hashid` VARCHAR(45) NOT NULL,
-                `data` TEXT NOT NULL,
-                `date_upd` DATETIME NOT NULL,
-                PRIMARY KEY (`name`, `hashid`)
-            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;'
-            );
+        );
     }
 
     /**
@@ -463,7 +453,6 @@ class DoofinderInstallation
      */
     public static function uninstallDb()
     {
-        return \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_updates`')
-            && \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_landing`');
+        return \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_updates`');
     }
 }

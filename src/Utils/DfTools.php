@@ -86,22 +86,6 @@ class DfTools
     }
 
     // ------------------------------------------------------------
-    // Validation helpers
-    // ------------------------------------------------------------
-
-    /**
-     * Validate if a value is a non-empty generic string.
-     *
-     * @param mixed $v Value to validate
-     *
-     * @return bool True if value is a valid generic name
-     */
-    public static function isBasicValue($v)
-    {
-        return $v && \Validate::isGenericName($v);
-    }
-
-    // ------------------------------------------------------------
     // SQL tools
     // ------------------------------------------------------------
 
@@ -124,28 +108,6 @@ class DfTools
         }
 
         return str_replace($keys, $values, $sql);
-    }
-
-    /**
-     * Append LIMIT and OFFSET clauses to an SQL query.
-     *
-     * @param string $sql SQL query string
-     * @param int|false $limit Maximum number of rows to return
-     * @param int|false $offset Number of rows to skip
-     *
-     * @return string SQL query with LIMIT/OFFSET
-     */
-    public static function limitSQL($sql, $limit = false, $offset = false)
-    {
-        if (false !== $limit && is_numeric($limit)) {
-            $sql .= ' LIMIT ' . (int) $limit;
-
-            if (false !== $offset && is_numeric($offset)) {
-                $sql .= ' OFFSET ' . (int) $offset;
-            }
-        }
-
-        return $sql;
     }
 
     // ------------------------------------------------------------
@@ -443,60 +405,6 @@ class DfTools
         }
 
         return $features;
-    }
-
-    /**
-     * Returns the product variation attributes
-     *
-     * @param int $variationId product variation Attribute ID
-     * @param int $idLang language ID
-     * @param array $attributeKeys keys of the attributes associated to the product
-     *
-     * @return array of rows (assoc arrays)
-     */
-    public static function getAttributesForProductVariation($variationId, $idLang, $attributeKeys)
-    {
-        if (is_numeric($variationId) && $variationId > 0) {
-            $sql = '
-        SELECT pc.id_product_attribute,
-               pal.name,
-               pagl.name AS group_name
-
-        FROM
-          _DB_PREFIX_product_attribute_combination pc
-          LEFT JOIN _DB_PREFIX_attribute pa
-            ON pc.id_attribute = pa.id_attribute
-          LEFT JOIN _DB_PREFIX_attribute_lang pal
-            ON (pc.id_attribute = pal.id_attribute AND pal.id_lang = _ID_LANG_)
-          LEFT JOIN _DB_PREFIX_attribute_group_lang pagl
-            ON (pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = _ID_LANG_)
-        WHERE
-          pc.id_product_attribute = _VARIATION_ID
-      ';
-
-            $sql = self::prepareSQL($sql, [
-                '_ID_LANG_' => (int) $idLang,
-                '_VARIATION_ID' => (int) $variationId,
-            ]);
-
-            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        } else {
-            $result = [];
-        }
-
-        if (count($attributeKeys) > 0) {
-            $attributes = array_fill(0, count($attributeKeys), '');
-        } else {
-            $attributes = [];
-        }
-
-        foreach ($result as $elem) {
-            if (array_search($elem['group_name'], $attributeKeys) !== false) {
-                $attributes[array_search($elem['group_name'], $attributeKeys)] = $elem['name'];
-            }
-        }
-
-        return $attributes;
     }
 
     /**
@@ -1167,40 +1075,6 @@ class DfTools
     //
 
     /**
-     * Truncate text to a specified length while preserving word boundaries.
-     *
-     * This method truncates text to the specified length by words, ensuring
-     * that words are not cut in the middle. It also normalizes whitespace.
-     *
-     * @param string $text The text to truncate
-     * @param int $length Maximum length of the truncated text
-     *
-     * @return string The truncated text
-     */
-    public static function truncateText($text, $length)
-    {
-        $l = (int) $length;
-        $c = trim(preg_replace('/\s+/', ' ', $text));
-
-        if (strlen($c) <= $l) {
-            return $c;
-        }
-
-        $n = 0;
-        $r = '';
-        foreach (explode(' ', $c) as $p) {
-            if (($tmp = $n + strlen($p) + 1) <= $l) {
-                $n = $tmp;
-                $r .= " $p";
-            } else {
-                break;
-            }
-        }
-
-        return $r;
-    }
-
-    /**
      * Clean and normalize a URL string.
      *
      * This method performs comprehensive URL cleaning including:
@@ -1298,29 +1172,6 @@ class DfTools
 
         // Filter out invalid UTF-8 sequences using a predefined regex pattern
         return preg_replace(self::VALID_UTF8, '$1', $text);
-    }
-
-    /**
-     * Cleans a string in an extreme way to deal with conflictive strings like
-     * titles that contains references that can be searched with or without
-     * certain characters.
-     *
-     * This method removes specific forbidden characters from text to make it
-     * more searchable. Currently removes hyphens, but is designed to be
-     * configurable from the admin panel.
-     *
-     * TODO: Make it configurable from the admin.
-     *
-     * @param mixed $text The text to clean
-     *
-     * @return string The cleaned text with forbidden characters removed
-     */
-    public static function cleanReferences($text)
-    {
-        $forbidden = ['-'];
-        $text = (is_string($text)) ? $text : '';
-
-        return str_replace($forbidden, '', $text);
     }
 
     /**
@@ -1505,23 +1356,6 @@ class DfTools
     }
 
     /**
-     * Returns a data feed link for a given language ISO code. The link declares
-     * the usage of the currency configured in the plugin by default.
-     *
-     * @param string $langIsoCode ISO language code
-     *
-     * @return string URL
-     */
-    public static function getFeedURL($langIsoCode)
-    {
-        $currency = self::getCurrencyForLanguage($langIsoCode);
-        $feedUrl = self::getModuleLink('feed') . '?language=' . strtoupper($langIsoCode);
-        $feedUrl .= '&currency=' . strtoupper($currency->iso_code);
-
-        return $feedUrl;
-    }
-
-    /**
      * Wraps a Javascript piece of code if no script tag is found.
      *
      * @param string $jsCode javascript code
@@ -1650,21 +1484,6 @@ class DfTools
         array_walk_recursive($data, [get_class(), 'walkApplyHtmlEntities']);
 
         return str_replace('\\/', '/', html_entity_decode(json_encode($data)));
-    }
-
-    /**
-     * Escape forward slashes in a text string.
-     *
-     * This method doubles all forward slashes in the input text to escape them.
-     * Returns null if the input is not a string.
-     *
-     * @param mixed $text The text to escape slashes in
-     *
-     * @return string|null The text with escaped slashes, or null if input is not a string
-     */
-    public static function escapeSlashes($text)
-    {
-        return (is_string($text)) ? str_replace('/', '//', $text) : null;
     }
 
     /**
