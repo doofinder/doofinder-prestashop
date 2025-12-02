@@ -713,21 +713,15 @@ class DfTools
             'p.id_product = pa.id_product'
         );
 
-        $query->select('pa_im.id_image AS variation_image_id');
-        $query->leftJoin(
-            'product_attribute_image',
-            'pa_im',
-            'pa_im.id_product_attribute = pa.id_product_attribute'
-        );
-
         // Product supplier reference
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
         $query->select('s.name AS supplier_name');
         $query->leftJoin(
             'product_supplier',
             'psp',
-            'p.`id_product` = psp.`id_product`
-            AND psp.`id_product_attribute` = pa.id_product_attribute'
+            'p.`id_supplier` = psp.`id_supplier`
+            AND p.`id_product` = psp.`id_product`
+            AND pa.`id_product_attribute` = psp.`id_product_attribute`'
         );
 
         $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
@@ -741,6 +735,7 @@ class DfTools
             AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
         );
+        $query->groupBy('pa.id_product_attribute');
 
         try {
             $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
@@ -1524,10 +1519,12 @@ class DfTools
      *
      * For B2B cases, the input data structure for $customerGroupsData is:
      * [
-     *    ['id_group' => 4, 'id_customer' => 120],
-     *    ['id_group' => 5, 'id_customer' => 251],
+     *    ['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1],
+     *    ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0],
      *    ...
      * ]
+     * The price_display_method field (0 = with tax, 1 = without tax) determines whether
+     * prices for each customer group should include taxes.
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
@@ -1609,10 +1606,13 @@ class DfTools
      *
      * For B2B cases, the input data structure for $customerGroupsData is:
      * [
-     *    ['id_group' => 4, 'id_customer' => 120],
-     *    ['id_group' => 5, 'id_customer' => 251],
+     *    ['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1],
+     *    ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0],
      *    ...
      * ]
+     * The price_display_method field (0 = with tax, 1 = without tax) determines whether
+     * prices for each customer group should include taxes. If not provided, it will be
+     * retrieved from the customer group settings.
      *
      * An example of a value for this field is
      * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
@@ -1620,8 +1620,11 @@ class DfTools
      * In case of B2B prices it would be:
      * ["EUR" => ["price" => 5, "sale_price" => 3], "EUR_5" => ["price" => 4, "sale_price" => 2], ...]
      *
+     * Note: The $includeTaxes parameter is used for base currency prices (non-B2B).
+     * For B2B customer group prices, each group's price_display_method setting is used instead.
+     *
      * @param int $productId Id of the product to calculate the multiprice for
-     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
+     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices (for base currency prices only)
      * @param array $currencies List of currencies to consider for the multiprice calculation
      * @param int $variantId When specified, the multiprice will be calculated for that variant
      * @param array $customerGroupsData List of customer groups to consider for price calculation
@@ -1656,8 +1659,13 @@ class DfTools
                     if (!self::versionGte('1.6.0.0')) {
                         \Context::getContext()->customer = new \Customer($customerGroupData['id_customer']);
                     }
-                    $customerGroupPrice = self::getPrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
-                    $customerGroupOnsalePrice = self::getOnsalePrice($productId, $includeTaxes, $variantId, false, $customerGroupData['id_customer']);
+                    // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
+                    $customerGroupIncludeTaxes = isset($customerGroupData['price_display_method'])
+                        ? !(bool) $customerGroupData['price_display_method']
+                        : $includeTaxes;
+
+                    $customerGroupPrice = self::getPrice($productId, $customerGroupIncludeTaxes, $variantId, false, $customerGroupData['id_customer']);
+                    $customerGroupOnsalePrice = self::getOnsalePrice($productId, $customerGroupIncludeTaxes, $variantId, false, $customerGroupData['id_customer']);
                     $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
                     $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
                     $pricesMap = ['price' => $convertedPrice];
@@ -1932,9 +1940,9 @@ class DfTools
      * This method returns a list of customer groups and their default customers.
      * The customer groups are the ones that are not native to PrestaShop.
      * The default customers are the ones that are associated with the customer groups.
-     * The show_prices field is the price display method for the customer group.
+     * The price_display_method field indicates whether prices should include tax (1) or exclude tax (0).
      *
-     * Result: [['id_group' => 4, 'id_customer' => 120, 'show_prices' => 1], ['id_group' => 5, 'id_customer' => 251, 'show_prices' => 0], ...]
+     * Result: [['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1], ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0], ...]
      *
      * @return array
      */
@@ -1954,9 +1962,11 @@ class DfTools
         $nativeGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
 
         $query = new \DbQuery();
-        $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer');
+        $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer, g.price_display_method');
         $query->from('customer_group', 'cg');
+        $query->leftJoin('group', 'g', 'cg.id_group = g.id_group');
         $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
+        $query->groupBy('cg.id_group, g.price_display_method');
 
         $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         // To guarantee compatibility with PrestaShop 1.5
