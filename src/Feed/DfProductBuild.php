@@ -388,7 +388,7 @@ class DfProductBuild
             $productTags = explode(',', $productTags);
             $productTags = array_unique($productTags);
             // Escape slashes in tags
-            $productTags = array_map(function($tag) {
+            $productTags = array_map(function ($tag) {
                 return str_replace('/', '//', $tag);
             }, $productTags);
             $p['tags'] = implode('/', $productTags);
