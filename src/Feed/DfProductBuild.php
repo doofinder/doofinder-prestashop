@@ -387,7 +387,11 @@ class DfProductBuild
             // Extra steps to avoid possible duplicates in tags
             $productTags = explode(',', $productTags);
             $productTags = array_unique($productTags);
-            $p['tags'] = implode(',', $productTags);
+            // Escape slashes in tags
+            $productTags = array_map(function ($tag) {
+                return str_replace('/', '//', $tag);
+            }, $productTags);
+            $p['tags'] = implode('/', $productTags);
         }
 
         if (DfTools::versionGte('1.7.0.0')) {
