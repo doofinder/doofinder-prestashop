@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -379,6 +380,10 @@ class DfProductBuild
         $p['supplier_name'] = DfTools::cleanString($product['supplier_name']);
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
+        $p['minimal_quantity'] = DfTools::splitReferences($product['pas_minimal_quantity'] ?? $product['minimal_quantity']);
+        $p['minimal_quantity'] = DfTools::cleanString(
+            $product['pas_minimal_quantity'] ? $product['pas_minimal_quantity'] : $product['minimal_quantity']
+        );
 
         $productTags = DfTools::cleanString($product['tags']);
         $p['tags'] = $productTags;
@@ -411,7 +416,6 @@ class DfProductBuild
 
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
-            $p['sale_price'] = $this->getPrice($product, true);
 
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);

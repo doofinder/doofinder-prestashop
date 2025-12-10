@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -513,7 +514,7 @@ class DfTools
         $query->select('p.ean13 AS ean13, p.upc, p.reference');
 
         // Product shop table fields
-        $query->select('product_shop.id_product, product_shop.show_price, product_shop.available_for_order');
+        $query->select('product_shop.id_product, product_shop.show_price, product_shop.available_for_order, product_shop.minimal_quantity');
         $query->join(\Shop::addSqlAssociation('product', 'p'));
 
         $query->from('product', 'p');
@@ -734,6 +735,14 @@ class DfTools
             AND sa.id_product_attribute = pa.id_product_attribute
             AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
             OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
+        );
+
+        // Product attribute shop reference
+        $query->select('pas.minimal_quantity AS pas_minimal_quantity');
+        $query->leftJoin(
+            'product_attribute_shop',
+            'pas',
+            'pa.id_product_attribute = pas.id_product_attribute'
         );
         $query->groupBy('pa.id_product_attribute');
 

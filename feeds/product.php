@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NOTICE OF LICENSE
  *
@@ -147,7 +148,7 @@ if ($shouldShowProductVariations) {
 $header = array_merge($header, [
     'title', 'link', 'description', 'alternate_description', 'meta_title', 'meta_description', 'image_link', 'images_links', 'main_category',
     'categories', 'category_merchandising', 'availability', 'brand', 'mpn', 'ean13', 'upc', 'reference',
-    'supplier_reference', 'supplier_name', 'extra_title_1', 'extra_title_2', 'tags',
+    'supplier_reference', 'supplier_name', 'extra_title_1', 'extra_title_2', 'tags', 'minimal_quantity'
 ]);
 
 if (DfTools::versionGte('1.7.0.0')) {
