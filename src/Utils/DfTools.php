@@ -737,7 +737,7 @@ class DfTools
         );
 
         // Product attribute shop reference
-        $query->select('pas.minimal_quantity AS pas_minimal_quantity');
+        $query->select('pas.minimal_quantity AS minimal_quantity');
         $query->leftJoin(
             'product_attribute_shop',
             'pas',
