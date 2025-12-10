@@ -1,5 +1,4 @@
 <?php
-
 /**
  * NOTICE OF LICENSE
  *
@@ -416,6 +415,7 @@ class DfProductBuild
 
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
+            $p['sale_price'] = $this->getPrice($product, true);
 
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);
