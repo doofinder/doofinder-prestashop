@@ -379,7 +379,7 @@ class DfProductBuild
         $p['supplier_name'] = DfTools::cleanString($product['supplier_name']);
         $p['extra_title_1'] = $p['title'];
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
-        $p['minimal_quantity'] = DfTools::cleanString($product['minimal_quantity']);
+        $p['minimum_quantity'] = DfTools::cleanString($product['minimum_quantity']);
 
         $productTags = DfTools::cleanString($product['tags']);
         $p['tags'] = $productTags;

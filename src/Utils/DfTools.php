@@ -513,7 +513,7 @@ class DfTools
         $query->select('p.ean13 AS ean13, p.upc, p.reference');
 
         // Product shop table fields
-        $query->select('product_shop.id_product, product_shop.show_price, product_shop.available_for_order, product_shop.minimal_quantity');
+        $query->select('product_shop.id_product, product_shop.show_price, product_shop.available_for_order, product_shop.minimal_quantity AS minimum_quantity');
         $query->join(\Shop::addSqlAssociation('product', 'p'));
 
         $query->from('product', 'p');
@@ -737,7 +737,7 @@ class DfTools
         );
 
         // Product attribute shop reference
-        $query->select('pas.minimal_quantity AS minimal_quantity');
+        $query->select('pas.minimal_quantity AS minimum_quantity');
         $query->leftJoin(
             'product_attribute_shop',
             'pas',
