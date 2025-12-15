@@ -36,13 +36,9 @@ if (!defined('_PS_VERSION_')) {
 
 class DoofinderConstants
 {
-    const DOOMANAGER_REGION_URL = 'https://%sadmin.doofinder.com';
-    const DOOPLUGINS_REGION_URL = 'https://%splugins.doofinder.com';
-    const DOOPHOENIX_REGION_URL = 'https://%ssearch.doofinder.com';
-    const CONFIG_REGION_URL = 'https://%s-config.doofinder.com';
     const GS_SHORT_DESCRIPTION = 1;
     const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '7.0.1';
+    const VERSION = '7.0.2';
     const NAME = 'doofinder';
     const YES = 1;
     const NO = 0;
