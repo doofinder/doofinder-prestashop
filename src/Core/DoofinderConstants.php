@@ -35,7 +35,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 class DoofinderConstants
-{    
+{
     const DOOMANAGER_REGION_URL = 'https://%sadmin.doofinder.com';
     const DOOPLUGINS_REGION_URL = 'https://%splugins.doofinder.com';
     const DOOPHOENIX_REGION_URL = 'https://%ssearch.doofinder.com';
