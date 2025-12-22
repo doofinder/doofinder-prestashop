@@ -2005,6 +2005,23 @@ class DfTools
     }
 
     /**
+     * Try to convert a date string to ISO 8601 format (e.g. 2025-12-22T13:03:31Z). If the conversion fails, return the original date string unconverted.
+     *
+     * @param string $dateString The date string to convert
+     *
+     * @return string The ISO 8601 formatted date
+     */
+    public static function dateStringToIso8601($dateString)
+    {
+        $timestamp = strtotime($dateString);
+        if (false === $timestamp) {
+            return self::cleanString($dateString);
+        }
+
+        return date('Y-m-d\TH:i:s\Z', $timestamp);
+    }
+
+    /**
      * Get the regular price/onsale price for a product or variant.
      *
      * This method retrieves the regular price or sale/discounted price for a product, optionally for a specific variant depending on
