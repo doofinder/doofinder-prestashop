@@ -1052,19 +1052,19 @@ class DfTools
         $query->join(\Shop::addSqlAssociation('category', 'c'));
         $query->leftJoin('category_lang', 'cl', 'c.`id_category` = cl.`id_category`' . \Shop::addSqlRestrictionOnLang('cl'));
         $query->where('c.id_parent != 0');
-        
+
         if ($idLang) {
             $query->where('cl.`id_lang` = ' . (int) $idLang);
         }
-        
+
         if ($active) {
             $query->where('c.`active` = 1');
         }
-        
+
         if (!$idLang) {
             $query->groupBy('c.id_category');
         }
-        
+
         if ($limit) {
             $query->limit((int) $limit, (int) $offset);
         }
