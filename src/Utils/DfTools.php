@@ -1081,7 +1081,7 @@ class DfTools
      * getCMSPages method and returns only the IDs.
      *
      * @param int $idLang Language ID
-     * @param int|false|null $idShop Shop ID
+     * @param int|null $idShop Shop ID
      * @param int|bool $limit Whether to limit the result (default: false)
      * @param int|bool $offset Whether to offset the result (default: false)
      * @param bool $active Whether to filter by active pages only (default: true)
@@ -1090,7 +1090,33 @@ class DfTools
      */
     public static function getCmsPages($idLang, $idShop, $limit = false, $offset = false, $active = true)
     {
-        $result = \CMS::getCMSPages($idLang, null, $limit, $offset, $active, $idShop);
+        $query = new \DbQuery();
+        $query->select('*');
+        $query->from('cms', 'c');
+
+        if ($idLang) {
+            if ($idShop) {
+                $query->innerJoin('cms_lang', 'l', 'c.id_cms = l.id_cms AND l.id_lang = ' . (int) $idLang . ' AND l.id_shop = ' . (int) $idShop);
+            } else {
+                $query->innerJoin('cms_lang', 'l', 'c.id_cms = l.id_cms AND l.id_lang = ' . (int) $idLang);
+            }
+        }
+
+        if ($idShop) {
+            $query->innerJoin('cms_shop', 'cs', 'c.id_cms = cs.id_cms AND cs.id_shop = ' . (int) $idShop);
+        }
+
+        if ($active) {
+            $query->where('c.active = 1');
+        }
+
+        $query->orderBy('position');
+
+        if ($limit) {
+            $query->limit((int) $limit, (int) $offset);
+        }
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
 
         return array_column($result, 'id_cms');
     }
