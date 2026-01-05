@@ -1038,8 +1038,8 @@ class DfTools
      * for a given language. Optionally filters by active status.
      *
      * @param int $idLang Language ID (0 for all languages)
-     * @param bool $limit Whether to limit the result (default: false)
-     * @param bool $offset Whether to offset the result (default: false)
+     * @param int|bool $limit Whether to limit the result (default: false)
+     * @param int|bool $offset Whether to offset the result (default: false)
      * @param bool $active Whether to filter by active categories only (default: true)
      *
      * @return array Array of category IDs
@@ -1081,9 +1081,9 @@ class DfTools
      * getCMSPages method and returns only the IDs.
      *
      * @param int $idLang Language ID
-     * @param int $idShop Shop ID
-     * @param bool $limit Whether to limit the result (default: false)
-     * @param bool $offset Whether to offset the result (default: false)
+     * @param int|false|null $idShop Shop ID
+     * @param int|bool $limit Whether to limit the result (default: false)
+     * @param int|bool $offset Whether to offset the result (default: false)
      * @param bool $active Whether to filter by active pages only (default: true)
      *
      * @return array Array of CMS page IDs
