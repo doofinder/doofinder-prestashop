@@ -1038,23 +1038,38 @@ class DfTools
      * for a given language. Optionally filters by active status.
      *
      * @param int $idLang Language ID (0 for all languages)
+     * @param bool $limit Whether to limit the result (default: false)
+     * @param bool $offset Whether to offset the result (default: false)
      * @param bool $active Whether to filter by active categories only (default: true)
      *
      * @return array Array of category IDs
      */
-    public static function getCategories($idLang, $active = true)
+    public static function getCategories($idLang, $limit = false, $offset = false, $active = true)
     {
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
-            '
-            SELECT c.id_category
-            FROM `' . _DB_PREFIX_ . 'category` c
-            ' . \Shop::addSqlAssociation('category', 'c') . '
-            LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` cl ON c.`id_category` = cl.`id_category`' . \Shop::addSqlRestrictionOnLang('cl') . '
-            WHERE id_parent != 0
-            ' . ($idLang ? 'AND `id_lang` = ' . (int) $idLang : '') . '
-            ' . ($active ? 'AND `active` = 1' : '') . '
-            ' . (!$idLang ? 'GROUP BY c.id_category' : '')
-        );
+        $query = new \DbQuery();
+        $query->select('c.id_category');
+        $query->from('category', 'c');
+        $query->join(\Shop::addSqlAssociation('category', 'c'));
+        $query->leftJoin('category_lang', 'cl', 'c.`id_category` = cl.`id_category`' . \Shop::addSqlRestrictionOnLang('cl'));
+        $query->where('c.id_parent != 0');
+        
+        if ($idLang) {
+            $query->where('cl.`id_lang` = ' . (int) $idLang);
+        }
+        
+        if ($active) {
+            $query->where('c.`active` = 1');
+        }
+        
+        if (!$idLang) {
+            $query->groupBy('c.id_category');
+        }
+        
+        if ($limit) {
+            $query->limit((int) $limit, (int) $offset);
+        }
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
 
         return array_column($result, 'id_category');
     }
@@ -1067,13 +1082,15 @@ class DfTools
      *
      * @param int $idLang Language ID
      * @param int $idShop Shop ID
+     * @param bool $limit Whether to limit the result (default: false)
+     * @param bool $offset Whether to offset the result (default: false)
      * @param bool $active Whether to filter by active pages only (default: true)
      *
      * @return array Array of CMS page IDs
      */
-    public static function getCmsPages($idLang, $idShop, $active = true)
+    public static function getCmsPages($idLang, $idShop, $limit = false, $offset = false, $active = true)
     {
-        $result = \CMS::getCMSPages($idLang, null, $active, $idShop);
+        $result = \CMS::getCMSPages($idLang, null, $limit, $offset, $active, $idShop);
 
         return array_column($result, 'id_cms');
     }

@@ -24,8 +24,12 @@ if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
 }
 
-// To prevent printing errors or warnings that may corrupt the feed.
-$debug = DfTools::getBooleanFromRequest('debug', false);
+/* ---------- START CSV-SPECIFIC CONFIG ---------- */
+$debug = DfTools::getBooleanFromRequest('debug');
+$limit = Tools::getValue('limit', false);
+$offset = Tools::getValue('offset', false);
+/* ---------- END CSV-SPECIFIC CONFIG ---------- */
+
 if ($debug) {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -53,25 +57,24 @@ $lang = DfTools::getLanguageFromRequest();
 $context->language = $lang;
 
 // CMS DATA
-$cms_pages = DfTools::getCmsPages($lang->id, $shop->id);
+$cms_pages = DfTools::getCmsPages($lang->id, $shop->id, $limit, $offset);
 $builder = new DfCmsBuild($shop->id, $lang->id);
 $builder->setCmsPages($cms_pages);
 $rows = $builder->build(false);
 
 // HEADERS
 $header = ['id', 'title', 'description', 'meta_title', 'meta_description', 'tags', 'content', 'link'];
-echo implode(DfTools::TXT_SEPARATOR, $header) . PHP_EOL;
-
-// CMS Pages
-foreach ($rows as $row) {
-    echo $row['id'] . DfTools::TXT_SEPARATOR;
-    echo $row['title'] . DfTools::TXT_SEPARATOR;
-    echo $row['description'] . DfTools::TXT_SEPARATOR;
-    echo $row['meta_title'] . DfTools::TXT_SEPARATOR;
-    echo $row['meta_description'] . DfTools::TXT_SEPARATOR;
-    // Tags does not seem to exist on PrestaShop 9
-    echo !empty($row['tags']) ? $row['tags'] : '' . DfTools::TXT_SEPARATOR;
-    echo $row['content'] . DfTools::TXT_SEPARATOR;
-    echo $row['link'];
-    echo PHP_EOL;
+$csv = fopen('php://output', 'w');
+if (!$limit || (false !== $offset && 0 === (int) $offset)) {
+    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
 }
+
+// CMS PAGES
+foreach ($rows as $row) {
+    $csvRow = [];
+    foreach ($header as $field) {
+        $csvRow[$field] = array_key_exists($field, $row) ? $row[$field] : '';
+    }
+    fputcsv($csv, $csvRow, DfTools::TXT_SEPARATOR);
+}
+fclose($csv);
