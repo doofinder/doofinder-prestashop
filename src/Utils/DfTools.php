@@ -483,16 +483,18 @@ class DfTools
      * - Manufacturer details
      * - Product tags
      * - Variation information
+     * - Features (integrated via GROUP_CONCAT)
      *
      * @param int $idLang Language ID to retrieve product information in
      * @param bool $checkLeadership Whether to check if product is a variant group leader (true by default)
      * @param int|bool $limit Maximum number of products to retrieve (false for no limit)
      * @param int|bool $offset Offset for pagination (false for no offset)
      * @param array|null $ids Specific product IDs to retrieve (not implemented in current code)
+     * @param array|null $featureKeys Array of feature keys to filter (optional, if null all features are included)
      *
      * @return array|false|\mysqli_result|\PDOStatement|resource|null Array of products with their associated information
      */
-    public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null)
+    public static function getAvailableProducts($idLang, $checkLeadership = true, $limit = false, $offset = false, $ids = null, $featureKeys = null)
     {
         if (null === $ids) {
             $ids = self::getAvailableProductsIds($idLang, $limit, $offset);
@@ -620,6 +622,32 @@ class DfTools
             AND cp.id_category > 2'
         );
 
+        // Features - integrated directly in the query using GROUP_CONCAT
+        $query->select('GROUP_CONCAT(DISTINCT CONCAT(fl.name, ":", fvl.value) ORDER BY fl.name, fvl.value SEPARATOR "|||") AS features_data');
+        $query->leftJoin(
+            'feature_product',
+            'fp',
+            'fp.id_product = product_shop.id_product'
+        );
+        $query->leftJoin(
+            'feature_lang',
+            'fl',
+            'fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $idLang
+        );
+        $query->leftJoin(
+            'feature_value_lang',
+            'fvl',
+            'fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $idLang
+        );
+        
+        // Filter by feature keys if provided
+        if ($featureKeys !== null && !empty($featureKeys)) {
+            $featureKeysEscaped = array_map(function($key) {
+                return "'" . pSQL($key) . "'";
+            }, $featureKeys);
+            $query->where('(fl.name IN (' . implode(',', $featureKeysEscaped) . ') OR fl.name IS NULL)');
+        }
+
         $query->select('IFNULL(vc.count, 0) as variant_count');
         if ($checkLeadership) {
             $query->select('IF(NOT ISNULL(vc.count) AND vc.count > 0,true, false) as df_group_leader');
@@ -677,10 +705,12 @@ class DfTools
      * Returns the product variations for a product
      *
      * @param int $idProduct ID of the product
+     * @param int|null $idLang Language ID (optional, for integrated attributes)
+     * @param string $attributesShown Attribute groups IDs to filter (optional)
      *
      * @return array|false|\mysqli_result|\PDOStatement|resource|null
      */
-    public static function getProductVariations($idProduct)
+    public static function getProductVariations($idProduct, $idLang = null, $attributesShown = '')
     {
         $query = new \DbQuery();
 
@@ -743,6 +773,49 @@ class DfTools
             'pas',
             'pa.id_product_attribute = pas.id_product_attribute'
         );
+
+        // Attributes - integrated directly in the query using GROUP_CONCAT
+        if ($idLang !== null) {
+            $query->select('GROUP_CONCAT(DISTINCT CONCAT(pagl.name, ":", pal.name) ORDER BY pagl.name, pal.name SEPARATOR "|||") AS attributes_data');
+            $query->leftJoin(
+                'product_attribute_combination',
+                'pac',
+                'pac.id_product_attribute = pa.id_product_attribute'
+            );
+            $query->leftJoin(
+                'attribute',
+                'a',
+                'a.id_attribute = pac.id_attribute'
+            );
+            $query->leftJoin(
+                'attribute_lang',
+                'pal',
+                'pal.id_attribute = a.id_attribute AND pal.id_lang = ' . (int) $idLang
+            );
+            $query->leftJoin(
+                'attribute_group_lang',
+                'pagl',
+                'pagl.id_attribute_group = a.id_attribute_group AND pagl.id_lang = ' . (int) $idLang
+            );
+
+            if (strlen(trim($attributesShown)) !== 0) {
+                $query->where('(a.id_attribute_group IN (' . pSQL($attributesShown) . ') OR a.id_attribute_group IS NULL)');
+            }
+        }
+
+        // Variation images - integrated directly in the query using GROUP_CONCAT
+        $query->select('GROUP_CONCAT(DISTINCT pai.id_image ORDER BY i.position ASC SEPARATOR ",") AS variation_image_ids');
+        $query->leftJoin(
+            'product_attribute_image',
+            'pai',
+            'pai.id_product_attribute = pa.id_product_attribute'
+        );
+        $query->leftJoin(
+            'image',
+            'i',
+            'i.id_image = pai.id_image AND i.id_product = pa.id_product'
+        );
+
         $query->groupBy('pa.id_product_attribute');
 
         try {
@@ -2077,5 +2150,496 @@ class DfTools
             false,
             $customerId
         );
+    }
+
+    /**
+     * Get all product variations for multiple products in batch.
+     *
+     * @param array $productIds Array of product IDs
+     * @param int $idLang Language ID
+     * @param string $attributesShown Attribute groups IDs to filter (optional)
+     *
+     * @return array Associative array keyed by product ID, containing arrays of variations
+     */
+    public static function getProductVariationsBatch($productIds, $idLang = null, $attributesShown = '')
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $query = new \DbQuery();
+        $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
+        $query->select('false as df_group_leader');
+        $query->select('0 as variant_count');
+        $query->select('pa.id_product, pa.id_product_attribute');
+
+        if (self::versionGte('1.7.0.0')) {
+            $query->select('pa.isbn AS isbn');
+        }
+
+        if (self::versionGte('1.7.7.0')) {
+            $query->select('pa.mpn AS variation_mpn');
+        } else {
+            $query->select('pa.reference AS variation_mpn');
+        }
+
+        $query->from('product_attribute', 'pa');
+        $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
+        $query->where('pa.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+
+        $query->leftJoin('product', 'p', 'p.id_product = pa.id_product');
+
+        $query->select('psp.product_supplier_reference AS variation_supplier_reference');
+        $query->select('s.name AS supplier_name');
+        $query->leftJoin(
+            'product_supplier',
+            'psp',
+            'p.`id_supplier` = psp.`id_supplier`
+            AND p.`id_product` = psp.`id_product`
+            AND pa.`id_product_attribute` = psp.`id_product_attribute`'
+        );
+
+        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
+
+        $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
+        $query->leftJoin(
+            'stock_available',
+            'sa',
+            'p.id_product = sa.id_product
+            AND sa.id_product_attribute = pa.id_product_attribute
+            AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
+        );
+
+        $query->select('pas.minimal_quantity AS minimum_quantity');
+        $query->leftJoin(
+            'product_attribute_shop',
+            'pas',
+            'pa.id_product_attribute = pas.id_product_attribute'
+        );
+
+        // Attributes - integrated directly in the query using GROUP_CONCAT
+        if ($idLang !== null) {
+            $query->select('GROUP_CONCAT(DISTINCT CONCAT(pagl.name, ":", pal.name) ORDER BY pagl.name, pal.name SEPARATOR "|||") AS attributes_data');
+            $query->leftJoin(
+                'product_attribute_combination',
+                'pac',
+                'pac.id_product_attribute = pa.id_product_attribute'
+            );
+            $query->leftJoin(
+                'attribute',
+                'a',
+                'a.id_attribute = pac.id_attribute'
+            );
+            $query->leftJoin(
+                'attribute_lang',
+                'pal',
+                'pal.id_attribute = a.id_attribute AND pal.id_lang = ' . (int) $idLang
+            );
+            $query->leftJoin(
+                'attribute_group_lang',
+                'pagl',
+                'pagl.id_attribute_group = a.id_attribute_group AND pagl.id_lang = ' . (int) $idLang
+            );
+
+            if (strlen(trim($attributesShown)) !== 0) {
+                $query->where('(a.id_attribute_group IN (' . pSQL($attributesShown) . ') OR a.id_attribute_group IS NULL)');
+            }
+        }
+
+        // Variation images - integrated directly in the query using GROUP_CONCAT
+        $query->select('GROUP_CONCAT(DISTINCT pai.id_image ORDER BY i.position ASC SEPARATOR ",") AS variation_image_ids');
+        $query->leftJoin(
+            'product_attribute_image',
+            'pai',
+            'pai.id_product_attribute = pa.id_product_attribute'
+        );
+        $query->leftJoin(
+            'image',
+            'i',
+            'i.id_image = pai.id_image AND i.id_product = pa.id_product'
+        );
+
+        $query->groupBy('pa.id_product_attribute');
+
+        try {
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            if (!$result) {
+                $result = \Db::getInstance()->executeS($query);
+            }
+        } catch (\PrestaShopException $e) {
+            $result = \Db::getInstance()->executeS($query);
+        }
+
+        // Group variations by product ID
+        $variationsByProduct = [];
+        if ($result) {
+            foreach ($result as $variation) {
+                $productId = (int) $variation['id_product'];
+                if (!isset($variationsByProduct[$productId])) {
+                    $variationsByProduct[$productId] = [];
+                }
+                $variationsByProduct[$productId][] = $variation;
+            }
+        }
+
+        return $variationsByProduct;
+    }
+
+    /**
+     * Get all categories for multiple products in batch.
+     *
+     * @param array $productIds Array of product IDs
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     * @param bool $flat Whether to return flat strings or arrays
+     *
+     * @return array Associative array keyed by product ID
+     */
+    public static function getCategoriesForProductsBatch($productIds, $idLang, $idShop, $flat = true)
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $useMainCategory = (bool) self::cfg($idShop, 'DF_FEED_MAINCATEGORY_PATH', DoofinderConstants::YES);
+        $useFullPath = (bool) self::cfg($idShop, 'DF_FEED_FULL_PATH', DoofinderConstants::YES);
+
+        $sql = '
+            SELECT DISTINCT
+                cp.id_product,
+                c.id_category,
+                c.id_parent,
+                c.level_depth,
+                c.nleft,
+                c.nright
+            FROM
+                ' . _DB_PREFIX_ . 'category c
+                INNER JOIN ' . _DB_PREFIX_ . 'category_product cp
+                    ON (c.id_category = cp.id_category AND cp.id_product IN (' . implode(',', array_map('intval', $productIds)) . '))
+                INNER JOIN ' . _DB_PREFIX_ . 'category_shop cs
+                    ON (c.id_category = cs.id_category AND cs.id_shop = ' . (int) $idShop . ')';
+
+        if ($useMainCategory) {
+            $sql .= ' INNER JOIN ' . _DB_PREFIX_ . 'product_shop ps
+                ON (ps.id_product = cp.id_product AND ps.id_shop = ' . (int) $idShop . ' AND ps.id_category_default = cp.id_category)';
+        }
+
+        $sql .= ' WHERE c.active = 1
+            ORDER BY cp.id_product, c.nleft DESC, c.nright ASC';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+
+        $categoriesByProduct = [];
+        $lastProductId = null;
+        $lastSaved = 0;
+        $idCategory0 = 0;
+        $nleft0 = 0;
+        $nright0 = 0;
+
+        if ($result) {
+            foreach ($result as $i => $row) {
+                $productId = (int) $row['id_product'];
+                $idCategory = (int) $row['id_category'];
+                $nleft = (int) $row['nleft'];
+                $nright = (int) $row['nright'];
+
+                if ($lastProductId !== $productId) {
+                    // Save previous product's last category if needed
+                    if ($lastProductId !== null && $lastSaved != $idCategory0) {
+                        $categoryPath = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
+                        $categoriesByProduct[$lastProductId][] = $categoryPath;
+                    }
+
+                    // Initialize for new product
+                    $lastProductId = $productId;
+                    $idCategory0 = $idCategory;
+                    $nleft0 = $nleft;
+                    $nright0 = $nright;
+                    $lastSaved = 0;
+                    if (!isset($categoriesByProduct[$productId])) {
+                        $categoriesByProduct[$productId] = [];
+                    }
+                } else {
+                    // Same product, check category relationship
+                    if ($nleft < $nleft0 && $nright > $nright0) {
+                        // Current category is ancestor, keep the deeper one
+                    } elseif ($nleft > $nleft0 && $nright < $nright0) {
+                        // Current category is child, replace
+                        $idCategory0 = $idCategory;
+                        $nleft0 = $nleft;
+                        $nright0 = $nright;
+                    } else {
+                        // Not related, save previous and start new
+                        $categoryPath = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
+                        $categoriesByProduct[$productId][] = $categoryPath;
+                        $lastSaved = $idCategory0;
+
+                        $idCategory0 = $idCategory;
+                        $nleft0 = $nleft;
+                        $nright0 = $nright;
+                    }
+                }
+            }
+
+            // Save last category for last product
+            if ($lastProductId !== null && $lastSaved != $idCategory0) {
+                $categoryPath = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
+                $categoriesByProduct[$lastProductId][] = $categoryPath;
+            }
+        }
+
+        // Convert to flat strings if needed
+        if ($flat) {
+            foreach ($categoriesByProduct as $productId => $categories) {
+                $categoriesByProduct[$productId] = implode(self::LIST_SEPARATOR, $categories);
+            }
+        }
+
+        return $categoriesByProduct;
+    }
+
+    /**
+     * Get all category links for multiple category IDs in batch.
+     *
+     * @param array $allCategoryIds Array of category IDs (may contain duplicates)
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     *
+     * @return array Associative array keyed by category ID
+     */
+    public static function getCategoryLinksByIdBatch($allCategoryIds, $idLang, $idShop)
+    {
+        if (empty($allCategoryIds)) {
+            return [];
+        }
+
+        $uniqueCategoryIds = array_unique(array_map('intval', $allCategoryIds));
+        $link = \Context::getContext()->link;
+        $urls = [];
+        $useRewriting = (bool) \Configuration::get('PS_REWRITING_SETTINGS');
+
+        // Load all categories at once
+        $categories = [];
+        foreach ($uniqueCategoryIds as $categoryId) {
+            $category = new \Category((int) $categoryId, $idLang, $idShop);
+            if (\Validate::isLoadedObject($category)) {
+                if ($useRewriting) {
+                    $categoryLink = $link->getCategoryLink($category);
+                    $urls[$categoryId] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
+                } else {
+                    $urls[$categoryId] = $categoryId;
+                }
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Get all features for multiple products in batch.
+     *
+     * @param array $productIds Array of product IDs
+     * @param int $idLang Language ID
+     * @param array $featureKeys Array of feature keys to filter
+     *
+     * @return array Associative array keyed by product ID
+     */
+    public static function getFeaturesForProductsBatch($productIds, $idLang, $featureKeys)
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $sql = '
+            SELECT fp.id_product,
+                   fl.name,
+                   fvl.value
+            FROM
+                ' . _DB_PREFIX_ . 'feature_product fp
+                LEFT JOIN ' . _DB_PREFIX_ . 'feature_lang fl
+                    ON (fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $idLang . ')
+                LEFT JOIN ' . _DB_PREFIX_ . 'feature_value_lang fvl
+                    ON (fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $idLang . ')
+            WHERE
+                fp.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
+        ';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+
+        $featuresByProduct = [];
+        if ($result) {
+            foreach ($result as $row) {
+                $productId = (int) $row['id_product'];
+                $featureName = $row['name'];
+                $featureValue = $row['value'];
+
+                if (in_array($featureName, $featureKeys, true)) {
+                    if (!isset($featuresByProduct[$productId])) {
+                        $featuresByProduct[$productId] = [];
+                    }
+                    if (!isset($featuresByProduct[$productId][$featureName])) {
+                        $featuresByProduct[$productId][$featureName] = [];
+                    }
+                    $featuresByProduct[$productId][$featureName][] = $featureValue;
+                }
+            }
+        }
+
+        return $featuresByProduct;
+    }
+
+    /**
+     * Get all attributes for multiple product attribute combinations in batch.
+     *
+     * @param array $variationIds Array of product attribute IDs
+     * @param int $idLang Language ID
+     * @param string $attrLimit Attribute groups IDs to filter
+     *
+     * @return array Associative array keyed by variation ID
+     */
+    public static function getAttributesByCombinationBatch($variationIds, $idLang, $attrLimit = '')
+    {
+        if (empty($variationIds)) {
+            return [];
+        }
+
+        $sql = 'SELECT pc.id_product_attribute,
+                pal.name,
+                pagl.name AS group_name
+            FROM
+            ' . _DB_PREFIX_ . 'product_attribute_combination pc
+                LEFT JOIN ' . _DB_PREFIX_ . 'attribute pa
+                    ON pc.id_attribute = pa.id_attribute
+                LEFT JOIN ' . _DB_PREFIX_ . 'attribute_lang pal
+                    ON (pc.id_attribute = pal.id_attribute AND pal.id_lang = ' . (int) $idLang . ')
+                LEFT JOIN ' . _DB_PREFIX_ . 'attribute_group_lang pagl
+                    ON (pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = ' . (int) $idLang . ')
+            WHERE
+            pc.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')';
+
+        if (strlen(trim($attrLimit)) !== 0) {
+            $sql .= ' AND pa.id_attribute_group IN (' . pSQL($attrLimit) . ')';
+        }
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+
+        $attributesByVariation = [];
+        if ($result) {
+            foreach ($result as $row) {
+                $variationId = (int) $row['id_product_attribute'];
+                if (!isset($attributesByVariation[$variationId])) {
+                    $attributesByVariation[$variationId] = [];
+                }
+                $attributesByVariation[$variationId][] = $row;
+            }
+        }
+
+        return $attributesByVariation;
+    }
+
+    /**
+     * Get all variation images for multiple variations in batch.
+     *
+     * @param array $variationData Array of arrays with 'id_product' and 'id_product_attribute'
+     *
+     * @return array Associative array keyed by 'productId_attributeId'
+     */
+    public static function getVariationImagesBatch($variationData)
+    {
+        if (empty($variationData)) {
+            return [];
+        }
+
+        $conditions = [];
+        foreach ($variationData as $variation) {
+            $productId = (int) $variation['id_product'];
+            $attributeId = (int) $variation['id_product_attribute'];
+            $conditions[] = "(pai.id_product_attribute = $attributeId AND i.id_product = $productId)";
+        }
+
+        if (empty($conditions)) {
+            return [];
+        }
+
+        $sql = '
+            SELECT DISTINCT pai.id_product_attribute,
+                   pai.id_image,
+                   i.id_product,
+                   i.position
+            FROM ' . _DB_PREFIX_ . 'product_attribute_image pai
+            INNER JOIN ' . _DB_PREFIX_ . 'image i ON (i.id_image = pai.id_image)
+            WHERE (' . implode(' OR ', $conditions) . ')
+            ORDER BY i.id_product, pai.id_product_attribute, i.position ASC
+        ';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+
+        $imagesByVariation = [];
+        if ($result) {
+            foreach ($result as $row) {
+                $key = (int) $row['id_product'] . '_' . (int) $row['id_product_attribute'];
+                if (!isset($imagesByVariation[$key])) {
+                    $imagesByVariation[$key] = [];
+                }
+                $imagesByVariation[$key][] = (int) $row['id_image'];
+            }
+        }
+
+        return $imagesByVariation;
+    }
+
+    /**
+     * Get all stock information for multiple products/variations in batch.
+     *
+     * @param array $productData Array of arrays with 'id_product' and optionally 'id_product_attribute'
+     * @param int $idShop Shop ID
+     *
+     * @return array Associative array keyed by 'productId' or 'productId_attributeId'
+     */
+    public static function getStockAvailableBatch($productData, $idShop)
+    {
+        if (empty($productData)) {
+            return [];
+        }
+
+        $conditions = [];
+        foreach ($productData as $data) {
+            $productId = (int) $data['id_product'];
+            $attributeId = isset($data['id_product_attribute']) ? (int) $data['id_product_attribute'] : 0;
+            $conditions[] = "(sa.id_product = $productId AND sa.id_product_attribute = $attributeId)";
+        }
+
+        if (empty($conditions)) {
+            return [];
+        }
+
+        $sql = '
+            SELECT sa.id_product,
+                   sa.id_product_attribute,
+                   sa.quantity,
+                   sa.out_of_stock
+            FROM ' . _DB_PREFIX_ . 'stock_available sa
+            WHERE (' . implode(' OR ', $conditions) . ')
+            AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))
+        ';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+
+        $stockByProduct = [];
+        if ($result) {
+            foreach ($result as $row) {
+                $productId = (int) $row['id_product'];
+                $attributeId = (int) $row['id_product_attribute'];
+                $key = $attributeId > 0 ? $productId . '_' . $attributeId : $productId;
+                $stockByProduct[$key] = [
+                    'quantity' => (int) $row['quantity'],
+                    'out_of_stock' => (int) $row['out_of_stock'],
+                ];
+            }
+        }
+
+        return $stockByProduct;
     }
 }

@@ -125,6 +125,41 @@ class DfProductBuild
     private $customerGroupsData;
 
     /**
+     * @var array Cached variations data keyed by product ID
+     */
+    private $cachedVariations = [];
+
+    /**
+     * @var array Cached categories data keyed by product ID
+     */
+    private $cachedCategories = [];
+
+    /**
+     * @var array Cached category links data keyed by category ID
+     */
+    private $cachedCategoryLinks = [];
+
+    /**
+     * @var array Cached features data keyed by product ID
+     */
+    private $cachedFeatures = [];
+
+    /**
+     * @var array Cached attributes data keyed by variation ID
+     */
+    private $cachedAttributes = [];
+
+    /**
+     * @var array Cached variation images data keyed by 'productId_attributeId'
+     */
+    private $cachedVariationImages = [];
+
+    /**
+     * @var array Cached stock data keyed by 'productId' or 'productId_attributeId'
+     */
+    private $cachedStock = [];
+
+    /**
      * Constructor.
      *
      * Initializes configuration settings for building product data.
@@ -276,10 +311,19 @@ class DfProductBuild
         \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
+        // Preload all data in batch to avoid N+1 queries
+        $this->preloadBatchData($products);
+
         foreach ($products as $product) {
             $minPriceVariant = null;
+            $productId = (int) $product['id_product'];
+            
             if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = DfTools::getProductVariations($product['id_product']);
+                // Get variations from cache
+                $variations = isset($this->cachedVariations[$productId]) 
+                    ? $this->cachedVariations[$productId] 
+                    : [];
+                
                 foreach ($variations as $variation) {
                     $minPriceVariant = $this->getMinPrice($minPriceVariant, $variation);
                     $payload[] = $this->buildVariation($product, $variation);
@@ -292,6 +336,113 @@ class DfProductBuild
         }
 
         return json_encode($payload);
+    }
+
+    /**
+     * Preload all data needed for building products in batch to avoid N+1 queries.
+     *
+     * @param array $products Array of product data
+     */
+    private function preloadBatchData($products)
+    {
+        if (empty($products)) {
+            return;
+        }
+
+        $productIds = array_map(function ($product) {
+            return (int) $product['id_product'];
+        }, $products);
+
+        // Load all variations in batch (with integrated attributes and images)
+        if ($this->productVariations) {
+            $this->cachedVariations = DfTools::getProductVariationsBatch(
+                $productIds,
+                $this->idLang,
+                $this->attributesShown
+            );
+        }
+
+        // Load all categories in batch
+        $this->cachedCategories = DfTools::getCategoriesForProductsBatch(
+            $productIds,
+            $this->idLang,
+            $this->idShop,
+            false
+        );
+
+        // Collect all category IDs for batch loading category links
+        $allCategoryIds = [];
+        foreach ($products as $product) {
+            if (isset($product['category_ids']) && !empty($product['category_ids'])) {
+                $categoryIds = explode(',', $product['category_ids']);
+                $allCategoryIds = array_merge($allCategoryIds, $categoryIds);
+            }
+        }
+        if (!empty($allCategoryIds)) {
+            $this->cachedCategoryLinks = DfTools::getCategoryLinksByIdBatch(
+                $allCategoryIds,
+                $this->idLang,
+                $this->idShop
+            );
+        }
+
+        // Features are now integrated in getAvailableProducts query, parse from products
+        if ($this->showProductFeatures) {
+            $this->cachedFeatures = [];
+            foreach ($products as $product) {
+                if (isset($product['features_data']) && !empty($product['features_data'])) {
+                    $productId = (int) $product['id_product'];
+                    $this->cachedFeatures[$productId] = $this->parseFeaturesData($product['features_data']);
+                }
+            }
+        }
+
+        // Attributes and variation images are now integrated in getProductVariationsBatch query
+        if ($this->productVariations) {
+            $this->cachedAttributes = [];
+            $this->cachedVariationImages = [];
+            foreach ($this->cachedVariations as $variations) {
+                foreach ($variations as $variation) {
+                    $variationId = isset($variation['id_product_attribute']) ? (int) $variation['id_product_attribute'] : 0;
+                    $productId = isset($variation['id_product']) ? (int) $variation['id_product'] : 0;
+                    
+                    // Parse attributes from integrated data
+                    if (isset($variation['attributes_data']) && !empty($variation['attributes_data'])) {
+                        $this->cachedAttributes[$variationId] = $this->parseAttributesData($variation['attributes_data']);
+                    }
+                    
+                    // Parse variation images from integrated data
+                    if (isset($variation['variation_image_ids']) && !empty($variation['variation_image_ids'])) {
+                        $cacheKey = $productId . '_' . $variationId;
+                        $this->cachedVariationImages[$cacheKey] = array_filter(
+                            array_map('intval', explode(',', $variation['variation_image_ids']))
+                        );
+                    }
+                }
+            }
+        }
+
+        // Load all stock information in batch
+        $stockData = [];
+        foreach ($products as $product) {
+            $stockData[] = [
+                'id_product' => (int) $product['id_product'],
+                'id_product_attribute' => 0,
+            ];
+        }
+        if ($this->productVariations) {
+            foreach ($this->cachedVariations as $variations) {
+                foreach ($variations as $variation) {
+                    $stockData[] = [
+                        'id_product' => (int) $variation['id_product'],
+                        'id_product_attribute' => (int) $variation['id_product_attribute'],
+                    ];
+                }
+            }
+        }
+        if (!empty($stockData)) {
+            $this->cachedStock = DfTools::getStockAvailableBatch($stockData, $this->idShop);
+        }
     }
 
     /**
@@ -358,17 +509,42 @@ class DfProductBuild
         $p['image_link'] = $this->getImageLink($product);
         $p['images_links'] = $this->getImagesLinks($product);
         $p['main_category'] = DfTools::cleanString($product['main_category']);
-        $p['categories'] = DfTools::getCategoriesForProductIdAndLanguage(
-            $product['id_product'],
-            $this->idLang,
-            $this->idShop,
-            false
-        );
-        $p['category_merchandising'] = DfTools::getCategoryLinksById(
-            $product['category_ids'],
-            $this->idLang,
-            $this->idShop
-        );
+        $productId = (int) $product['id_product'];
+        
+        // Use cached categories if available, otherwise fallback to individual query
+        if (isset($this->cachedCategories[$productId])) {
+            $p['categories'] = $this->cachedCategories[$productId];
+        } else {
+            $p['categories'] = DfTools::getCategoriesForProductIdAndLanguage(
+                $product['id_product'],
+                $this->idLang,
+                $this->idShop,
+                false
+            );
+        }
+        
+        // Use cached category links if available
+        if (isset($product['category_ids']) && !empty($product['category_ids'])) {
+            $categoryIds = explode(',', $product['category_ids']);
+            $categoryLinks = [];
+            foreach ($categoryIds as $categoryId) {
+                $categoryId = (int) trim($categoryId);
+                if (isset($this->cachedCategoryLinks[$categoryId])) {
+                    $categoryLinks[] = $this->cachedCategoryLinks[$categoryId];
+                } else {
+                    // Fallback to individual query if not in cache
+                    $categoryLinks = DfTools::getCategoryLinksById(
+                        $product['category_ids'],
+                        $this->idLang,
+                        $this->idShop
+                    );
+                    break;
+                }
+            }
+            $p['category_merchandising'] = $categoryLinks;
+        } else {
+            $p['category_merchandising'] = [];
+        }
         $p['availability'] = $this->getAvailability($product);
         $p['brand'] = DfTools::cleanString($product['manufacturer']);
         $p['mpn'] = DfTools::cleanString($product['mpn']);
@@ -455,7 +631,7 @@ class DfProductBuild
         }
 
         if ($this->showProductFeatures) {
-            $p['features'] = $this->getFeatures($product);
+            $p['features'] = $this->getFeatures($product, $productId);
         }
 
         foreach ($extraHeaders as $extraHeader) {
@@ -555,12 +731,15 @@ class DfProductBuild
      */
     private function getProductData()
     {
+        $featureKeys = $this->showProductFeatures ? $this->featuresKeys : null;
+        
         $products = DfTools::getAvailableProducts(
             $this->idLang,
             $this->productVariations,
             false,
             false,
-            $this->products
+            $this->products,
+            $featureKeys
         );
 
         return $products;
@@ -648,18 +827,28 @@ class DfProductBuild
     private function getImageLink($product)
     {
         if ($this->hasVariations($product)) {
-            $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
+            $productId = (int) $product['id_product'];
+            $attributeId = (int) $product['id_product_attribute'];
+            $cacheKey = $productId . '_' . $attributeId;
+
+            // Use cached variation images if available
+            if (isset($this->cachedVariationImages[$cacheKey]) && !empty($this->cachedVariationImages[$cacheKey])) {
+                $idImage = $this->cachedVariationImages[$cacheKey][0];
+            } else {
+                // Fallback to individual query
+                $idImage = DfTools::getVariationImg($productId, $attributeId);
+            }
 
             if (!empty($idImage)) {
                 $imageLink = DfTools::getImageLink(
-                    $product['id_product_attribute'],
+                    $attributeId,
                     $idImage,
                     $product['link_rewrite'],
                     $this->imageSize
                 );
             } else {
                 $imageLink = DfTools::getImageLink(
-                    $product['id_product_attribute'],
+                    $attributeId,
                     $product['id_image'],
                     $product['link_rewrite'],
                     $this->imageSize
@@ -669,7 +858,7 @@ class DfProductBuild
             // For variations with no specific pictures
             if (strpos($imageLink, '/-') > -1) {
                 $imageLink = DfTools::getImageLink(
-                    $product['id_product'],
+                    $productId,
                     $product['id_image'],
                     $product['link_rewrite'],
                     $this->imageSize
@@ -708,8 +897,18 @@ class DfProductBuild
         $idForImageLink = null;
 
         if ($this->hasVariations($product)) {
-            $imageIds = DfTools::getVariationImages($product['id_product'], $product['id_product_attribute']);
-            $idForImageLink = $product['id_product_attribute'];
+            $productId = (int) $product['id_product'];
+            $attributeId = (int) $product['id_product_attribute'];
+            $cacheKey = $productId . '_' . $attributeId;
+
+            // Use cached variation images if available
+            if (isset($this->cachedVariationImages[$cacheKey])) {
+                $imageIds = $this->cachedVariationImages[$cacheKey];
+            } else {
+                // Fallback to individual query
+                $imageIds = DfTools::getVariationImages($productId, $attributeId);
+            }
+            $idForImageLink = $attributeId;
         } else {
             $imageIds = array_filter(array_map('intval', explode(',', $product['all_image_ids'])));
             $idForImageLink = (int) $product['id_product'];
@@ -755,12 +954,25 @@ class DfProductBuild
         $available = (int) $product['available_for_order'] > 0;
 
         if ((int) $this->stockManagement) {
-            $stock = \StockAvailable::getQuantityAvailableByProduct(
-                $product['id_product'],
-                isset($product['id_product_attribute']) ? $product['id_product_attribute'] : null,
-                $this->idShop
-            );
-            $allowOosp = \Product::isAvailableWhenOutOfStock($product['out_of_stock']);
+            $productId = (int) $product['id_product'];
+            $attributeId = isset($product['id_product_attribute']) ? (int) $product['id_product_attribute'] : 0;
+            $cacheKey = $attributeId > 0 ? $productId . '_' . $attributeId : $productId;
+
+            // Use cached stock if available
+            if (isset($this->cachedStock[$cacheKey])) {
+                $stock = $this->cachedStock[$cacheKey]['quantity'];
+                $outOfStock = $this->cachedStock[$cacheKey]['out_of_stock'];
+            } else {
+                // Fallback to individual query
+                $stock = \StockAvailable::getQuantityAvailableByProduct(
+                    $productId,
+                    $attributeId > 0 ? $attributeId : null,
+                    $this->idShop
+                );
+                $outOfStock = isset($product['out_of_stock']) ? (int) $product['out_of_stock'] : 0;
+            }
+            
+            $allowOosp = \Product::isAvailableWhenOutOfStock($outOfStock);
 
             return $available && ($stock > 0 || $allowOosp) ? 'in stock' : 'out of stock';
         } else {
@@ -816,28 +1028,74 @@ class DfProductBuild
     }
 
     /**
+     * Parse features data from integrated query result.
+     *
+     * @param string $featuresData Features data in format "name:value|||name:value"
+     *
+     * @return array Processed features
+     */
+    private function parseFeaturesData($featuresData)
+    {
+        $features = [];
+        $pairs = explode('|||', $featuresData);
+        
+        foreach ($pairs as $pair) {
+            if (strpos($pair, ':') === false) {
+                continue;
+            }
+            list($name, $value) = explode(':', $pair, 2);
+            $name = trim($name);
+            $value = trim($value);
+            
+            if (empty($name) || empty($value)) {
+                continue;
+            }
+            
+            // Filter by feature keys if configured
+            if (!empty($this->featuresKeys) && !in_array($name, $this->featuresKeys, true)) {
+                continue;
+            }
+            
+            if (!isset($features[$name])) {
+                $features[$name] = [];
+            }
+            $features[$name][] = $value;
+        }
+        
+        return $features;
+    }
+
+    /**
      * Get features for a product.
      *
      * Features are a way to describe and filter your Products.
      * More info at: https://docs.prestashop-project.org/v.8-documentation/user-guide/selling/managing-catalog/managing-product-features
      *
      * @param array $product Product data
+     * @param int $productId Product ID (for cache lookup)
      *
      * @return array Processed features
      */
-    private function getFeatures($product)
+    private function getFeatures($product, $productId)
     {
         $features = [];
 
-        $keys = $this->featuresKeys;
+        // Use cached features if available (from integrated query), otherwise fallback to individual query
+        if (isset($this->cachedFeatures[$productId])) {
+            $productFeatures = $this->cachedFeatures[$productId];
+        } else {
+            $keys = $this->featuresKeys;
+            $productFeatures = DfTools::getFeaturesForProduct($product['id_product'], $this->idLang, $keys);
+        }
 
-        foreach (DfTools::getFeaturesForProduct($product['id_product'], $this->idLang, $keys) as $key => $values) {
-            if (count($values) > 1) {
+        foreach ($productFeatures as $key => $values) {
+            if (is_array($values) && count($values) > 1) {
                 foreach ($values as $value) {
                     $features[DfTools::slugify($key)][] = DfTools::cleanString($value);
                 }
             } else {
-                $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
+                $value = is_array($values) ? $values[0] : $values;
+                $features[DfTools::slugify($key)] = DfTools::cleanString($value);
             }
         }
 
@@ -861,6 +1119,39 @@ class DfProductBuild
     }
 
     /**
+     * Parse attributes data from integrated query result.
+     *
+     * @param string $attributesData Attributes data in format "group_name:name|||group_name:name"
+     *
+     * @return array Processed attributes in format [['group_name' => ..., 'name' => ...], ...]
+     */
+    private function parseAttributesData($attributesData)
+    {
+        $attributes = [];
+        $pairs = explode('|||', $attributesData);
+        
+        foreach ($pairs as $pair) {
+            if (strpos($pair, ':') === false) {
+                continue;
+            }
+            list($groupName, $name) = explode(':', $pair, 2);
+            $groupName = trim($groupName);
+            $name = trim($name);
+            
+            if (empty($groupName) || empty($name)) {
+                continue;
+            }
+            
+            $attributes[] = [
+                'group_name' => $groupName,
+                'name' => $name,
+            ];
+        }
+        
+        return $attributes;
+    }
+
+    /**
      * Get attributes for a product variation.
      *
      * Attributes are the basis of product variations.
@@ -872,11 +1163,22 @@ class DfProductBuild
      */
     private function getAttributes($product)
     {
-        $attributes = DfTools::getAttributesByCombination(
-            $product['id_product_attribute'],
-            $this->idLang,
-            $this->attributesShown
-        );
+        if (!isset($product['id_product_attribute']) || (int) $product['id_product_attribute'] <= 0) {
+            return [];
+        }
+
+        $variationId = (int) $product['id_product_attribute'];
+
+        // Use cached attributes if available (from integrated query), otherwise fallback to individual query
+        if (isset($this->cachedAttributes[$variationId])) {
+            $attributes = $this->cachedAttributes[$variationId];
+        } else {
+            $attributes = DfTools::getAttributesByCombination(
+                $variationId,
+                $this->idLang,
+                $this->attributesShown
+            );
+        }
 
         if (empty($attributes)) {
             return [];
