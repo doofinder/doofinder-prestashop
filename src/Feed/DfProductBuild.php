@@ -271,27 +271,517 @@ class DfProductBuild
      */
     public function build()
     {
-        $payload = [];
-
         \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
+        if (empty($products)) {
+            return json_encode([]);
+        }
+
+        // Batch fetch all related data upfront to avoid N+1 queries
+        $productIds = array_column($products, 'id_product');
+        $batchData = $this->batchFetchAllData($productIds);
+
+        $payload = [];
         foreach ($products as $product) {
             $minPriceVariant = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = DfTools::getProductVariations($product['id_product']);
+                $variations = isset($batchData['variations'][$product['id_product']]) ? $batchData['variations'][$product['id_product']] : [];
                 foreach ($variations as $variation) {
-                    $minPriceVariant = $this->getMinPrice($minPriceVariant, $variation);
-                    $payload[] = $this->buildVariation($product, $variation);
+                    $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
+                    $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
+                    if ($variationPrices) {
+                        $minPriceVariant = $this->getMinPriceFromData($minPriceVariant, $variationPrices);
+                    }
+                    $payload[] = $this->buildVariationWithData($product, $variation, $batchData);
                 }
-
-                $payload[] = $this->buildProduct($product, $minPriceVariant);
+                $payload[] = $this->buildProductWithData($product, $minPriceVariant, $batchData);
             } else {
-                $payload[] = $this->buildProduct($product, null);
+                $payload[] = $this->buildProductWithData($product, null, $batchData);
             }
         }
 
         return json_encode($payload);
+    }
+
+    /**
+     * Batch fetch all related data for products to avoid N+1 queries.
+     *
+     * @param array $productIds Array of product IDs
+     *
+     * @return array Batch data containing variations, categories, features, attributes, images, prices, and stock
+     */
+    private function batchFetchAllData($productIds)
+    {
+        $data = [
+            'variations' => [],
+            'categories' => [],
+            'category_links' => [],
+            'features' => [],
+            'attributes' => [],
+            'variation_images' => [],
+            'variant_prices' => [],
+            'stock' => [],
+            'variants_information' => [],
+        ];
+
+        if (empty($productIds)) {
+            return $data;
+        }
+
+        // Batch fetch variations for all products
+        if ($this->productVariations) {
+            $allVariations = $this->batchFetchVariations($productIds);
+            foreach ($allVariations as $variation) {
+                $data['variations'][$variation['id_product']][] = $variation;
+            }
+        }
+
+        // Batch fetch categories for all products
+        $data['categories'] = $this->batchFetchCategories($productIds);
+
+        // Batch fetch category links - collect unique category IDs from products
+        // We need to get products again to access category_ids, but this is still better than N queries per product
+        $productsForCategories = $this->getProductData();
+        $allCategoryIds = [];
+        foreach ($productsForCategories as $product) {
+            if (!empty($product['category_ids'])) {
+                $categoryIds = explode(',', $product['category_ids']);
+                $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
+            }
+        }
+        $allCategoryIds = array_unique($allCategoryIds);
+        if (!empty($allCategoryIds)) {
+            $data['category_links'] = $this->batchFetchCategoryLinks($allCategoryIds);
+        }
+
+        // Batch fetch features for all products
+        if ($this->showProductFeatures) {
+            $data['features'] = $this->batchFetchFeatures($productIds);
+        }
+
+        // Batch fetch attributes for all variations
+        if ($this->productVariations && !empty($allVariations)) {
+            $variationIds = array_column($allVariations, 'id_product_attribute');
+            $data['attributes'] = $this->batchFetchAttributes($variationIds);
+            $data['variation_images'] = $this->batchFetchVariationImages($productIds, $variationIds);
+        }
+
+        // Batch fetch variant prices
+        if ($this->displayPrices && $this->productVariations && !empty($allVariations)) {
+            foreach ($allVariations as $variation) {
+                $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
+                $data['variant_prices'][$key] = DfTools::getVariantPrices(
+                    $variation['id_product'],
+                    $variation['id_product_attribute'],
+                    $this->useTax,
+                    $this->currencies,
+                    $this->customerGroupsData
+                );
+            }
+        }
+
+        // Batch fetch stock availability
+        $variationIdsForStock = [];
+        if ($this->productVariations && !empty($allVariations)) {
+            $variationIdsForStock = array_column($allVariations, 'id_product_attribute');
+        }
+        $data['stock'] = $this->batchFetchStock($productIds, $variationIdsForStock);
+
+        // Batch fetch variants information
+        if ($this->productVariations) {
+            $data['variants_information'] = $this->batchFetchVariantsInformation($productIds);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Batch fetch variations for multiple products.
+     *
+     * @param array $productIds Array of product IDs
+     *
+     * @return array All variations indexed by product ID
+     */
+    private function batchFetchVariations($productIds)
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $query = new \DbQuery();
+        $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
+        $query->select('false as df_group_leader, 0 as variant_count');
+        if (DfTools::versionGte('1.7.0.0')) {
+            $query->select('pa.isbn AS isbn');
+        }
+        if (DfTools::versionGte('1.7.7.0')) {
+            $query->select('pa.mpn AS variation_mpn');
+        } else {
+            $query->select('pa.reference AS variation_mpn');
+        }
+        $query->select('pa.id_product, pa.id_product_attribute');
+        $query->from('product_attribute', 'pa');
+        $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
+        $query->where('pa.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+
+        $query->leftJoin('product', 'p', 'p.id_product = pa.id_product');
+        $query->select('psp.product_supplier_reference AS variation_supplier_reference');
+        $query->select('s.name AS supplier_name');
+        $query->leftJoin('product_supplier', 'psp', 'p.`id_supplier` = psp.`id_supplier` AND p.`id_product` = psp.`id_product` AND pa.`id_product_attribute` = psp.`id_product_attribute`');
+        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
+        $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
+        $query->leftJoin('stock_available', 'sa', 'p.id_product = sa.id_product AND sa.id_product_attribute = pa.id_product_attribute AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ') OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))');
+        $query->select('pas.minimal_quantity AS minimum_quantity');
+        $query->leftJoin('product_attribute_shop', 'pas', 'pa.id_product_attribute = pas.id_product_attribute');
+        $query->groupBy('pa.id_product_attribute');
+
+        try {
+            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+            if (!$result) {
+                $result = \Db::getInstance()->executeS($query);
+            }
+        } catch (\PrestaShopException $e) {
+            $result = \Db::getInstance()->executeS($query);
+        }
+
+        return $result ?: [];
+    }
+
+    /**
+     * Batch fetch categories for multiple products.
+     *
+     * @param array $productIds Array of product IDs
+     *
+     * @return array Categories indexed by product ID (as arrays)
+     */
+    private function batchFetchCategories($productIds)
+    {
+        $categories = [];
+        foreach ($productIds as $productId) {
+            $catData = DfTools::getCategoriesForProductIdAndLanguage($productId, $this->idLang, $this->idShop, false);
+            $categories[$productId] = is_array($catData) ? $catData : [];
+        }
+        return $categories;
+    }
+
+    /**
+     * Batch fetch category links for multiple category IDs.
+     *
+     * @param array $categoryIds Array of category IDs
+     *
+     * @return array Category links indexed by category ID
+     */
+    private function batchFetchCategoryLinks($categoryIds)
+    {
+        $links = [];
+        $link = \Context::getContext()->link;
+        $useRewriting = (bool) \Configuration::get('PS_REWRITING_SETTINGS');
+
+        foreach ($categoryIds as $categoryId) {
+            $category = new \Category((int) $categoryId, $this->idLang, $this->idShop);
+            if (\Validate::isLoadedObject($category)) {
+                if ($useRewriting) {
+                    $categoryLink = $link->getCategoryLink($category);
+                    $links[$categoryId] = trim(parse_url($categoryLink, PHP_URL_PATH), '/');
+                } else {
+                    $links[$categoryId] = $categoryId;
+                }
+            }
+        }
+
+        return $links;
+    }
+
+    /**
+     * Batch fetch features for multiple products.
+     *
+     * @param array $productIds Array of product IDs
+     *
+     * @return array Features indexed by product ID
+     */
+    private function batchFetchFeatures($productIds)
+    {
+        $features = [];
+        $keys = $this->featuresKeys;
+
+        $sql = '
+            SELECT fp.id_product, fl.name, fvl.value
+            FROM ' . _DB_PREFIX_ . 'feature_product fp
+            LEFT JOIN ' . _DB_PREFIX_ . 'feature_lang fl ON (fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $this->idLang . ')
+            LEFT JOIN ' . _DB_PREFIX_ . 'feature_value_lang fvl ON (fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $this->idLang . ')
+            WHERE fp.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
+        ';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($sql);
+        }
+
+        if ($result) {
+            foreach ($result as $row) {
+                if (in_array($row['name'], $keys, true)) {
+                    $productId = (int) $row['id_product'];
+                    if (!isset($features[$productId])) {
+                        $features[$productId] = [];
+                    }
+                    if (!isset($features[$productId][$row['name']])) {
+                        $features[$productId][$row['name']] = [];
+                    }
+                    $features[$productId][$row['name']][] = $row['value'];
+                }
+            }
+        }
+
+        return $features;
+    }
+
+    /**
+     * Batch fetch attributes for multiple variations.
+     *
+     * @param array $variationIds Array of variation IDs
+     *
+     * @return array Attributes indexed by variation ID
+     */
+    private function batchFetchAttributes($variationIds)
+    {
+        if (empty($variationIds)) {
+            return [];
+        }
+
+        $attributes = [];
+        $attrLimit = $this->attributesShown ? ' AND pa.id_attribute_group IN (' . pSQL($this->attributesShown) . ')' : '';
+
+        $sql = 'SELECT pc.id_product_attribute, pal.name, pagl.name AS group_name
+            FROM ' . _DB_PREFIX_ . 'product_attribute_combination pc
+            LEFT JOIN ' . _DB_PREFIX_ . 'attribute pa ON pc.id_attribute = pa.id_attribute
+            LEFT JOIN ' . _DB_PREFIX_ . 'attribute_lang pal ON (pc.id_attribute = pal.id_attribute AND pal.id_lang = ' . (int) $this->idLang . ')
+            LEFT JOIN ' . _DB_PREFIX_ . 'attribute_group_lang pagl ON (pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = ' . (int) $this->idLang . ')
+            WHERE pc.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')' . $attrLimit;
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($sql);
+        }
+
+        if ($result) {
+            foreach ($result as $row) {
+                $variationId = (int) $row['id_product_attribute'];
+                if (!isset($attributes[$variationId])) {
+                    $attributes[$variationId] = [];
+                }
+                $attributes[$variationId][DfTools::slugify($row['group_name'])] = $row['name'];
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Batch fetch variation images for multiple products and variations.
+     *
+     * @param array $productIds Array of product IDs
+     * @param array $variationIds Array of variation IDs
+     *
+     * @return array Variation images indexed by product_id_attribute_id
+     */
+    private function batchFetchVariationImages($productIds, $variationIds)
+    {
+        if (empty($variationIds)) {
+            return [];
+        }
+
+        $images = [];
+        $sql = 'SELECT DISTINCT pai.id_product_attribute, pai.id_image, i.id_product, i.position
+            FROM ' . _DB_PREFIX_ . 'product_attribute_image pai
+            INNER JOIN ' . _DB_PREFIX_ . 'image i ON (i.id_image = pai.id_image AND i.id_product IN (' . implode(',', array_map('intval', $productIds)) . '))
+            WHERE pai.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')
+            ORDER BY pai.id_product_attribute, i.position ASC';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($sql);
+        }
+
+        if ($result) {
+            foreach ($result as $row) {
+                $key = $row['id_product'] . '_' . $row['id_product_attribute'];
+                if (!isset($images[$key])) {
+                    $images[$key] = [];
+                }
+                $images[$key][] = (int) $row['id_image'];
+            }
+        }
+
+        return $images;
+    }
+
+    /**
+     * Batch fetch stock availability for products and variations.
+     *
+     * @param array $productIds Array of product IDs
+     * @param array $variationIds Array of variation IDs
+     *
+     * @return array Stock data indexed by product_id_attribute_id
+     */
+    private function batchFetchStock($productIds, $variationIds)
+    {
+        $stock = [];
+        $shopIds = \Shop::getContextListShopID();
+        $shopGroupId = \Shop::getContextShopGroupID();
+
+        // Fetch stock for base products
+        $sql = 'SELECT id_product, id_product_attribute, quantity, out_of_stock
+            FROM ' . _DB_PREFIX_ . 'stock_available
+            WHERE id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
+            AND (id_shop IN (' . implode(',', array_map('intval', $shopIds)) . ') OR (id_shop = 0 AND id_shop_group = ' . (int) $shopGroupId . '))
+            AND (id_product_attribute = 0 OR id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . '))';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($sql);
+        }
+
+        if ($result) {
+            foreach ($result as $row) {
+                $key = $row['id_product'] . '_' . $row['id_product_attribute'];
+                $stock[$key] = [
+                    'quantity' => (int) $row['quantity'],
+                    'out_of_stock' => (int) $row['out_of_stock'],
+                ];
+            }
+        }
+
+        return $stock;
+    }
+
+    /**
+     * Batch fetch variants information for multiple products.
+     *
+     * @param array $productIds Array of product IDs
+     *
+     * @return array Variants information indexed by product ID
+     */
+    private function batchFetchVariantsInformation($productIds)
+    {
+        $variantsInfo = [];
+        if (empty($this->attributesShown)) {
+            return $variantsInfo;
+        }
+
+        $attrGroups = implode(',', array_map('intval', explode(',', $this->attributesShown)));
+        $sql = 'SELECT DISTINCT p.id_product, a.id_attribute_group
+            FROM ' . _DB_PREFIX_ . 'product p
+            LEFT JOIN ' . _DB_PREFIX_ . 'product_attribute pa ON p.id_product = pa.id_product
+            LEFT JOIN ' . _DB_PREFIX_ . 'product_attribute_combination pac ON pa.id_product_attribute = pac.id_product_attribute
+            LEFT JOIN ' . _DB_PREFIX_ . 'attribute a ON pac.id_attribute = a.id_attribute
+            WHERE p.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
+            AND a.id_attribute_group IN (' . $attrGroups . ')
+            GROUP BY p.id_product, a.id_attribute_group';
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($sql);
+        }
+
+        if ($result) {
+            $productGroups = [];
+            foreach ($result as $row) {
+                $productId = (int) $row['id_product'];
+                if (!isset($productGroups[$productId])) {
+                    $productGroups[$productId] = [];
+                }
+                $productGroups[$productId][] = (int) $row['id_attribute_group'];
+            }
+
+            foreach ($productGroups as $productId => $groupIds) {
+                $attributes = DfTools::getAttributesName($groupIds, $this->idLang);
+                $names = array_column($attributes, 'name');
+                $variantsInfo[$productId] = array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $names);
+            }
+        }
+
+        return $variantsInfo;
+    }
+
+    /**
+     * Get the minimum price from pre-fetched data.
+     *
+     * @param array|null $currentMinPrice Current minimum price array (or null)
+     * @param array $variantPrices Pre-fetched variant prices
+     *
+     * @return array|null Minimum price array or null
+     */
+    private function getMinPriceFromData($currentMinPrice, $variantPrices)
+    {
+        if (!$this->displayPrices) {
+            return null;
+        }
+
+        if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
+            return $variantPrices;
+        }
+
+        return $currentMinPrice;
+    }
+
+    /**
+     * Build product payload using pre-fetched batch data.
+     *
+     * @param array $product Product data
+     * @param array|null $minPriceVariant Minimum price data from variations
+     * @param array $batchData Pre-fetched batch data
+     *
+     * @return array Processed product payload
+     */
+    private function buildProductWithData($product, $minPriceVariant, $batchData)
+    {
+        $productId = $product['id_product'];
+        $variationId = isset($product['id_product_attribute']) ? $product['id_product_attribute'] : 0;
+        $key = $productId . '_' . $variationId;
+
+        // Merge batch data into product array
+        if (isset($batchData['categories'][$productId])) {
+            $product['_categories'] = $batchData['categories'][$productId];
+        }
+        if (isset($batchData['category_links']) && !empty($product['category_ids'])) {
+            $categoryIds = explode(',', $product['category_ids']);
+            $product['_category_links'] = array_filter(array_map(function ($id) use ($batchData) {
+                return isset($batchData['category_links'][$id]) ? $batchData['category_links'][$id] : null;
+            }, $categoryIds));
+        }
+        if (isset($batchData['features'][$productId])) {
+            $product['_features'] = $batchData['features'][$productId];
+        }
+        if (isset($batchData['attributes'][$variationId])) {
+            $product['_attributes'] = $batchData['attributes'][$variationId];
+        }
+        if (isset($batchData['variation_images'][$key])) {
+            $product['_variation_images'] = $batchData['variation_images'][$key];
+        }
+        if (isset($batchData['stock'][$key])) {
+            $product['_stock'] = $batchData['stock'][$key];
+        }
+        if (isset($batchData['variants_information'][$productId])) {
+            $product['_variants_information'] = $batchData['variants_information'][$productId];
+        }
+
+        return $this->buildProduct($product, $minPriceVariant);
+    }
+
+    /**
+     * Build variation payload using pre-fetched batch data.
+     *
+     * @param array $product Base product data
+     * @param array $variation Variation data
+     * @param array $batchData Pre-fetched batch data
+     *
+     * @return array Variation payload
+     */
+    private function buildVariationWithData($product, $variation, $batchData)
+    {
+        $expanded_variation = array_merge($product, $variation);
+        return $this->buildProductWithData($expanded_variation, [], $batchData);
     }
 
     /**
@@ -358,17 +848,27 @@ class DfProductBuild
         $p['image_link'] = $this->getImageLink($product);
         $p['images_links'] = $this->getImagesLinks($product);
         $p['main_category'] = DfTools::cleanString($product['main_category']);
-        $p['categories'] = DfTools::getCategoriesForProductIdAndLanguage(
-            $product['id_product'],
-            $this->idLang,
-            $this->idShop,
-            false
-        );
-        $p['category_merchandising'] = DfTools::getCategoryLinksById(
-            $product['category_ids'],
-            $this->idLang,
-            $this->idShop
-        );
+        // Use pre-fetched categories if available, otherwise fetch on demand
+        if (isset($product['_categories'])) {
+            $p['categories'] = is_array($product['_categories']) ? $product['_categories'] : [];
+        } else {
+            $p['categories'] = DfTools::getCategoriesForProductIdAndLanguage(
+                $product['id_product'],
+                $this->idLang,
+                $this->idShop,
+                false
+            );
+        }
+        // Use pre-fetched category links if available, otherwise fetch on demand
+        if (isset($product['_category_links'])) {
+            $p['category_merchandising'] = $product['_category_links'];
+        } else {
+            $p['category_merchandising'] = DfTools::getCategoryLinksById(
+                $product['category_ids'],
+                $this->idLang,
+                $this->idShop
+            );
+        }
         $p['availability'] = $this->getAvailability($product);
         $p['brand'] = DfTools::cleanString($product['manufacturer']);
         $p['mpn'] = DfTools::cleanString($product['mpn']);
@@ -441,9 +941,19 @@ class DfProductBuild
             $p['variation_ean13'] = DfTools::cleanString($product['variation_ean13']);
             $p['variation_upc'] = DfTools::cleanString($product['variation_upc']);
             $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
-            $p['df_variants_information'] = $this->getVariantsInformation($product);
+            // Use pre-fetched variants information if available
+            if (isset($product['_variants_information'])) {
+                $p['df_variants_information'] = $product['_variants_information'];
+            } else {
+                $p['df_variants_information'] = $this->getVariantsInformation($product);
+            }
 
-            $attributes = $this->getAttributes($product);
+            // Use pre-fetched attributes if available
+            if (isset($product['_attributes'])) {
+                $attributes = $product['_attributes'];
+            } else {
+                $attributes = $this->getAttributes($product);
+            }
 
             $p = array_merge($p, $attributes);
 
@@ -455,7 +965,12 @@ class DfProductBuild
         }
 
         if ($this->showProductFeatures) {
-            $p['features'] = $this->getFeatures($product);
+            // Use pre-fetched features if available
+            if (isset($product['_features'])) {
+                $p['features'] = $this->processFeatures($product['_features']);
+            } else {
+                $p['features'] = $this->getFeatures($product);
+            }
         }
 
         foreach ($extraHeaders as $extraHeader) {
@@ -648,18 +1163,25 @@ class DfProductBuild
     private function getImageLink($product)
     {
         if ($this->hasVariations($product)) {
-            $idImage = DfTools::getVariationImg($product['id_product'], $product['id_product_attribute']);
+            // Use pre-fetched variation images if available
+            $variationId = $product['id_product_attribute'];
+            $key = $product['id_product'] . '_' . $variationId;
+            if (isset($product['_variation_images']) && !empty($product['_variation_images'])) {
+                $idImage = $product['_variation_images'][0];
+            } else {
+                $idImage = DfTools::getVariationImg($product['id_product'], $variationId);
+            }
 
             if (!empty($idImage)) {
                 $imageLink = DfTools::getImageLink(
-                    $product['id_product_attribute'],
+                    $variationId,
                     $idImage,
                     $product['link_rewrite'],
                     $this->imageSize
                 );
             } else {
                 $imageLink = DfTools::getImageLink(
-                    $product['id_product_attribute'],
+                    $variationId,
                     $product['id_image'],
                     $product['link_rewrite'],
                     $this->imageSize
@@ -708,8 +1230,15 @@ class DfProductBuild
         $idForImageLink = null;
 
         if ($this->hasVariations($product)) {
-            $imageIds = DfTools::getVariationImages($product['id_product'], $product['id_product_attribute']);
-            $idForImageLink = $product['id_product_attribute'];
+            // Use pre-fetched variation images if available
+            $variationId = $product['id_product_attribute'];
+            $key = $product['id_product'] . '_' . $variationId;
+            if (isset($product['_variation_images']) && !empty($product['_variation_images'])) {
+                $imageIds = $product['_variation_images'];
+            } else {
+                $imageIds = DfTools::getVariationImages($product['id_product'], $variationId);
+            }
+            $idForImageLink = $variationId;
         } else {
             $imageIds = array_filter(array_map('intval', explode(',', $product['all_image_ids'])));
             $idForImageLink = (int) $product['id_product'];
@@ -755,12 +1284,21 @@ class DfProductBuild
         $available = (int) $product['available_for_order'] > 0;
 
         if ((int) $this->stockManagement) {
-            $stock = \StockAvailable::getQuantityAvailableByProduct(
-                $product['id_product'],
-                isset($product['id_product_attribute']) ? $product['id_product_attribute'] : null,
-                $this->idShop
-            );
-            $allowOosp = \Product::isAvailableWhenOutOfStock($product['out_of_stock']);
+            // Use pre-fetched stock if available
+            $variationId = isset($product['id_product_attribute']) ? $product['id_product_attribute'] : 0;
+            $key = $product['id_product'] . '_' . $variationId;
+            if (isset($product['_stock'])) {
+                $stock = $product['_stock']['quantity'];
+                $outOfStock = $product['_stock']['out_of_stock'];
+            } else {
+                $stock = \StockAvailable::getQuantityAvailableByProduct(
+                    $product['id_product'],
+                    $variationId ?: null,
+                    $this->idShop
+                );
+                $outOfStock = isset($product['out_of_stock']) ? $product['out_of_stock'] : 0;
+            }
+            $allowOosp = \Product::isAvailableWhenOutOfStock($outOfStock);
 
             return $available && ($stock > 0 || $allowOosp) ? 'in stock' : 'out of stock';
         } else {
@@ -813,6 +1351,28 @@ class DfProductBuild
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
         return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute, $this->customerGroupsData);
+    }
+
+    /**
+     * Process pre-fetched features data.
+     *
+     * @param array $featuresData Raw features data from batch fetch
+     *
+     * @return array Processed features
+     */
+    private function processFeatures($featuresData)
+    {
+        $features = [];
+        foreach ($featuresData as $key => $values) {
+            if (count($values) > 1) {
+                foreach ($values as $value) {
+                    $features[DfTools::slugify($key)][] = DfTools::cleanString($value);
+                }
+            } else {
+                $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
+            }
+        }
+        return $features;
     }
 
     /**
