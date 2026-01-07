@@ -24,8 +24,13 @@ if (function_exists('set_time_limit')) {
     @set_time_limit(3600 * 2);
 }
 
+/* ---------- START CSV-SPECIFIC CONFIG ---------- */
+$debug = DfTools::getBooleanFromRequest('debug');
+$limit = Tools::getValue('limit', false);
+$offset = Tools::getValue('offset', false);
+/* ---------- END CSV-SPECIFIC CONFIG ---------- */
+
 // To prevent printing errors or warnings that may corrupt the feed.
-$debug = DfTools::getBooleanFromRequest('debug', false);
 if ($debug) {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -53,7 +58,7 @@ $lang = DfTools::getLanguageFromRequest();
 $context->language = $lang;
 
 // CATEGORY DATA
-$categories = DfTools::getCategories($lang->id);
+$categories = DfTools::getCategories($lang->id, $limit, $offset);
 $builder = new DfCategoryBuild($shop->id, $lang->id);
 $builder->setCategories($categories);
 $rows = $builder->build(false);
@@ -62,7 +67,9 @@ $rows = $builder->build(false);
 $header = ['id', 'title', 'description', 'meta_title', 'meta_description', 'link', 'image_link'];
 
 $csv = fopen('php://output', 'w');
-fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
+if (!$limit || (false !== $offset && 0 === (int) $offset)) {
+    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
+}
 
 // CATEGORIES
 foreach ($rows as $row) {
