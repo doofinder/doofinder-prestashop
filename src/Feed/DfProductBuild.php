@@ -320,8 +320,8 @@ class DfProductBuild
             
             if ($this->productVariations && $product['variant_count'] > 0) {
                 // Get variations from cache
-                $variations = isset($this->cachedVariations[$productId]) 
-                    ? $this->cachedVariations[$productId] 
+                $variations = isset($this->cachedVariations[$productId])
+                    ? $this->cachedVariations[$productId]
                     : [];
                 
                 foreach ($variations as $variation) {

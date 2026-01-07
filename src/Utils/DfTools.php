@@ -642,7 +642,7 @@ class DfTools
         
         // Filter by feature keys if provided
         if ($featureKeys !== null && !empty($featureKeys)) {
-            $featureKeysEscaped = array_map(function($key) {
+            $featureKeysEscaped = array_map(function ($key) {
                 return "'" . pSQL($key) . "'";
             }, $featureKeys);
             $query->where('(fl.name IN (' . implode(',', $featureKeysEscaped) . ') OR fl.name IS NULL)');
