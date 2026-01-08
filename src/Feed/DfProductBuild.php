@@ -306,13 +306,39 @@ class DfProductBuild
     }
 
     /**
+     * Prepare batch data for products to enable optimized building.
+     * This method can be used by feed scripts to get pre-fetched data.
+     *
+     * @param array $products Array of product data
+     *
+     * @return array Batch data containing all related information
+     */
+    public function prepareBatchData($products)
+    {
+        $productIds = [];
+
+        if (empty($products)) {
+            return $this->batchFetchAllData($productIds);
+        }
+
+        foreach ($products as $product) {
+            if (isset($product['id_product'])) {
+                $productIds[] = (int) $product['id_product'];
+            }
+        }
+        $productIds = array_unique($productIds);
+
+        return $this->batchFetchAllData($productIds);
+    }
+
+    /**
      * Batch fetch all related data for products to avoid N+1 queries.
      *
      * @param array $productIds Array of product IDs
      *
      * @return array Batch data containing variations, categories, features, attributes, images, prices, and stock
      */
-    private function batchFetchAllData($productIds)
+    protected function batchFetchAllData($productIds)
     {
         $data = [
             'variations' => [],
@@ -628,15 +654,25 @@ class DfProductBuild
     private function batchFetchStock($productIds, $variationIds)
     {
         $stock = [];
+        if (empty($productIds)) {
+            return $stock;
+        }
+
         $shopIds = \Shop::getContextListShopID();
         $shopGroupId = \Shop::getContextShopGroupID();
 
-        // Fetch stock for base products
+        // Build the product attribute condition
+        $attributeCondition = 'id_product_attribute = 0';
+        if (!empty($variationIds)) {
+            $attributeCondition .= ' OR id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')';
+        }
+
+        // Fetch stock for base products and variations
         $sql = 'SELECT id_product, id_product_attribute, quantity, out_of_stock
             FROM ' . _DB_PREFIX_ . 'stock_available
             WHERE id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
             AND (id_shop IN (' . implode(',', array_map('intval', $shopIds)) . ') OR (id_shop = 0 AND id_shop_group = ' . (int) $shopGroupId . '))
-            AND (id_product_attribute = 0 OR id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . '))';
+            AND (' . $attributeCondition . ')';
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         if (!$result) {
@@ -713,7 +749,7 @@ class DfProductBuild
      *
      * @return array|null Minimum price array or null
      */
-    private function getMinPriceFromData($currentMinPrice, $variantPrices)
+    public function getMinPriceFromData($currentMinPrice, $variantPrices)
     {
         if (!$this->displayPrices) {
             return null;
@@ -732,10 +768,12 @@ class DfProductBuild
      * @param array $product Product data
      * @param array|null $minPriceVariant Minimum price data from variations
      * @param array $batchData Pre-fetched batch data
+     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $extraHeaders Additional product headers to include
      *
      * @return array Processed product payload
      */
-    private function buildProductWithData($product, $minPriceVariant, $batchData)
+    public function buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $productId = $product['id_product'];
         $variationId = isset($product['id_product_attribute']) ? $product['id_product_attribute'] : 0;
@@ -767,7 +805,7 @@ class DfProductBuild
             $product['_variants_information'] = $batchData['variants_information'][$productId];
         }
 
-        return $this->buildProduct($product, $minPriceVariant);
+        return $this->buildProduct($product, $minPriceVariant, $extraAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -776,13 +814,15 @@ class DfProductBuild
      * @param array $product Base product data
      * @param array $variation Variation data
      * @param array $batchData Pre-fetched batch data
+     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $extraHeaders Additional product headers to include
      *
      * @return array Variation payload
      */
-    private function buildVariationWithData($product, $variation, $batchData)
+    public function buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $expanded_variation = array_merge($product, $variation);
-        return $this->buildProductWithData($expanded_variation, [], $batchData);
+        return $this->buildProductWithData($expanded_variation, [], $batchData, $extraAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -943,24 +983,35 @@ class DfProductBuild
             $p['variation_upc'] = DfTools::cleanString($product['variation_upc']);
             $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
             // Use pre-fetched variants information if available
-            if (isset($product['_variants_information'])) {
-                $p['df_variants_information'] = $product['_variants_information'];
+            // Only set for parent products (not variations), variations should have empty df_variants_information
+            if (!isset($product['id_product_attribute']) || (int) $product['id_product_attribute'] === 0) {
+                if (isset($product['_variants_information']) && is_array($product['_variants_information'])) {
+                    $p['df_variants_information'] = $product['_variants_information'];
+                } else {
+                    $p['df_variants_information'] = $this->getVariantsInformation($product);
+                }
             } else {
-                $p['df_variants_information'] = $this->getVariantsInformation($product);
+                $p['df_variants_information'] = [];
             }
 
             // Use pre-fetched attributes if available
-            if (isset($product['_attributes'])) {
+            if (isset($product['_attributes']) && is_array($product['_attributes'])) {
                 $attributes = $product['_attributes'];
             } else {
                 $attributes = $this->getAttributes($product);
             }
 
-            $p = array_merge($p, $attributes);
+            // Merge attributes into product payload - attributes take precedence over any product data
+            // This ensures attribute values (like 'White') override any conflicting keys in $product
+            if (!empty($attributes) && is_array($attributes)) {
+                $p = array_merge($p, $attributes);
+            }
 
+            // Ensure all attribute headers from extraAttributesHeader are present for CSV column consistency
+            // Add empty values for headers that don't have attributes (already merged ones are skipped)
             foreach ($extraAttributesHeader as $extraAttributeHeader) {
-                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $p) && array_key_exists($extraAttributeHeader, $attributes)) {
-                    $p[$extraAttributeHeader] = $attributes[$extraAttributeHeader];
+                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $p)) {
+                    $p[$extraAttributeHeader] = '';
                 }
             }
         }
@@ -974,10 +1025,16 @@ class DfProductBuild
             }
         }
 
+        // Process extra headers - but exclude attribute headers that were already processed above
+        // This prevents overwriting attributes with values from $product array
+        $processedAttributeHeaders = $this->productVariations ? $extraAttributesHeader : [];
         foreach ($extraHeaders as $extraHeader) {
-            if (!empty($p[$extraHeader])) {
+            // Skip if already set (e.g., from attributes merge above)
+            // Also skip if this is an attribute header (to prevent overwriting with product data)
+            if (array_key_exists($extraHeader, $p) || in_array($extraHeader, $processedAttributeHeaders, true)) {
                 continue;
             }
+            // Only use product value if it exists, otherwise use empty string
             $p[$extraHeader] = isset($product[$extraHeader]) ? DfTools::cleanString($product[$extraHeader]) : '';
         }
 
@@ -1015,7 +1072,15 @@ class DfProductBuild
         $product['images_links'] = implode(DfTools::LIST_SEPARATOR, $product['images_links']);
 
         if (array_key_exists('df_variants_information', $product)) {
-            $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
+            // Ensure df_variants_information is always an array before processing
+            if (!is_array($product['df_variants_information'])) {
+                $product['df_variants_information'] = [];
+            }
+            if (!empty($product['df_variants_information'])) {
+                $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
+            } else {
+                $product['df_variants_information'] = '';
+            }
         }
 
         $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
@@ -1486,9 +1551,9 @@ class DfProductBuild
                 return [];
             }
 
-            $attributes = DfTools::getAttributesName($productAttributes, $this->idLang);
+        $attributes = DfTools::getAttributesName($productAttributes, $this->idLang);
 
-            $names = array_column($attributes, 'name');
+        $names = array_column($attributes, 'name');
 
             return array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $names);
         }
