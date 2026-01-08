@@ -67,6 +67,6 @@
     doofinderApp("config", "hidePrices", {$customer_group_hide_prices|escape:'htmlall':'UTF-8'});
     {/if}
   </script>
-  <script src="{$config_script_base_url|escape:'url':'UTF-8'}/{$installation_ID|escape:'htmlall':'UTF-8'}.js" async></script>
+  <script src="{$config_script_base_url|escape:'htmlall':'UTF-8'}/{$installation_ID|escape:'htmlall':'UTF-8'}.js" async></script>
   <!-- END OF DOOFINDER UNIQUE SCRIPT -->
 {/if}
