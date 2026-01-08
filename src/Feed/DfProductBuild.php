@@ -271,18 +271,19 @@ class DfProductBuild
      */
     public function build()
     {
+        $payload = [];
+
         \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
         if (empty($products)) {
-            return json_encode([]);
+            return json_encode($payload);
         }
 
         // Batch fetch all related data upfront to avoid N+1 queries
         $productIds = array_column($products, 'id_product');
         $batchData = $this->batchFetchAllData($productIds);
 
-        $payload = [];
         foreach ($products as $product) {
             $minPriceVariant = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
