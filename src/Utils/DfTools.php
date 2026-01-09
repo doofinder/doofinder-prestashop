@@ -660,7 +660,7 @@ class DfTools
         $query->groupBy('product_shop.id_product');
 
         try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
             // If the result is false or null, fallback to default DB instance
             if (!$result) {
                 $result = \Db::getInstance()->executeS($query);
@@ -746,7 +746,7 @@ class DfTools
         $query->groupBy('pa.id_product_attribute');
 
         try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
+            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
             // If the result is false or null, fallback to default DB instance
             if (!$result) {
                 $result = \Db::getInstance()->executeS($query);
@@ -1688,6 +1688,60 @@ class DfTools
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
         $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
 
+        // Early exit if no customer groups to process
+        $hasCustomerGroups = !empty($customerGroupsData);
+
+        // Pre-process customer groups data for optimization
+        // Cache customer objects for PrestaShop 1.5 and pre-calculate tax settings
+        $isPrestaShop15 = !self::versionGte('1.6.0.0');
+        $cachedCustomers = [];
+        $customerGroupTaxSettings = [];
+
+        if ($hasCustomerGroups && $isPrestaShop15) {
+            // Cache Customer objects to avoid repeated instantiation
+            foreach ($customerGroupsData as $customerGroupData) {
+                $customerId = $customerGroupData['id_customer'];
+                if (!isset($cachedCustomers[$customerId])) {
+                    $cachedCustomers[$customerId] = new \Customer($customerId);
+                }
+            }
+        }
+
+        // Pre-calculate tax settings for each customer group (outside currency loop)
+        if ($hasCustomerGroups) {
+            foreach ($customerGroupsData as $customerGroupData) {
+                $groupId = $customerGroupData['id_group'];
+                // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
+                $customerGroupTaxSettings[$groupId] = isset($customerGroupData['price_display_method'])
+                    ? !(bool) $customerGroupData['price_display_method']
+                    : $includeTaxes;
+            }
+        }
+
+        // Pre-fetch all customer group prices once (outside currency loop) to minimize Product::getPriceStatic calls
+        $customerGroupPrices = [];
+        $customerGroupOnsalePrices = [];
+        if ($hasCustomerGroups) {
+            foreach ($customerGroupsData as $customerGroupData) {
+                $groupId = $customerGroupData['id_group'];
+                $customerId = $customerGroupData['id_customer'];
+                $groupIncludeTaxes = $customerGroupTaxSettings[$groupId];
+
+                // Set customer context for PrestaShop 1.5 before fetching prices
+                if ($isPrestaShop15) {
+                    \Context::getContext()->customer = $cachedCustomers[$customerId];
+                }
+
+                $customerGroupPrices[$groupId] = self::getPrice($productId, $groupIncludeTaxes, $variantId, false, $customerId);
+                $customerGroupOnsalePrices[$groupId] = self::getOnsalePrice($productId, $groupIncludeTaxes, $variantId, false, $customerId);
+            }
+
+            // Reset customer context for PrestaShop 1.5
+            if ($isPrestaShop15) {
+                \Context::getContext()->customer = null;
+            }
+        }
+
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
                 // Backward compatibility with PrestaShop 1.5
@@ -1704,30 +1758,21 @@ class DfTools
 
                 $multiprice[$currencyCode] = $pricesMap;
 
-                foreach ($customerGroupsData as $customerGroupData) {
-                    $pricesMap = [];
-                    // Compatibility for PrestaShop 1.5
-                    if (!self::versionGte('1.6.0.0')) {
-                        \Context::getContext()->customer = new \Customer($customerGroupData['id_customer']);
-                    }
-                    // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
-                    $customerGroupIncludeTaxes = isset($customerGroupData['price_display_method'])
-                        ? !(bool) $customerGroupData['price_display_method']
-                        : $includeTaxes;
+                // Process customer group prices using pre-fetched data
+                if ($hasCustomerGroups) {
+                    foreach ($customerGroupsData as $customerGroupData) {
+                        $groupId = $customerGroupData['id_group'];
+                        $customerGroupPrice = $customerGroupPrices[$groupId];
+                        $customerGroupOnsalePrice = $customerGroupOnsalePrices[$groupId];
 
-                    $customerGroupPrice = self::getPrice($productId, $customerGroupIncludeTaxes, $variantId, false, $customerGroupData['id_customer']);
-                    $customerGroupOnsalePrice = self::getOnsalePrice($productId, $customerGroupIncludeTaxes, $variantId, false, $customerGroupData['id_customer']);
-                    $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
-                    $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
-                    $pricesMap = ['price' => $convertedPrice];
-                    if ($convertedPrice !== $convertedOnsalePrice) {
-                        $pricesMap['sale_price'] = $convertedOnsalePrice;
+                        $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
+                        $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
+                        $pricesMap = ['price' => $convertedPrice];
+                        if ($convertedPrice !== $convertedOnsalePrice) {
+                            $pricesMap['sale_price'] = $convertedOnsalePrice;
+                        }
+                        $multiprice[$currencyCode . '_' . $groupId] = $pricesMap;
                     }
-                    $multiprice[$currencyCode . '_' . $customerGroupData['id_group']] = $pricesMap;
-                }
-                // Compatibility for PrestaShop 1.5
-                if (!self::versionGte('1.6.0.0')) {
-                    \Context::getContext()->customer = null;
                 }
             }
         }
