@@ -40,7 +40,7 @@ DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
 /**
  *  @author camlafit <https://github.com/camlafit>
- *  Merge multidemensionnal array by value on each row
+ *  Merge multidimensional array by value on each row
  *  https://stackoverflow.com/questions/7973915/php-merge-arrays-by-value
  */
 function arrayMergeByIdProduct($array1 = [], $array2 = [])
@@ -104,7 +104,7 @@ $attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributes
 $shouldLimitGroupAttributes = false;
 $isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
 $debug = DfTools::getBooleanFromRequest('debug');
-$limit = Tools::getValue('limit', false);
+$limit = Tools::getValue('limit', 1000);
 $offset = Tools::getValue('offset', false);
 /* ---------- END CSV-SPECIFIC CONFIG ---------- */
 

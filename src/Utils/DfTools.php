@@ -558,7 +558,7 @@ class DfTools
         );
 
         $query->select('MIN(sa.out_of_stock) as out_of_stock, MIN(sa.quantity) as stock_quantity');
-        $query->leftJoin(
+        $query->innerJoin(
             'stock_available',
             'sa',
             'product_shop.id_product = sa.id_product
@@ -568,7 +568,7 @@ class DfTools
         );
 
         $query->select('pl.name, pl.description, pl.description_short, pl.meta_title, pl.meta_description, pl.link_rewrite');
-        $query->leftJoin(
+        $query->innerJoin(
             'product_lang',
             'pl',
             'p.`id_product` = pl.`id_product` AND pl.`id_lang` = ' . (int) $idLang . \Shop::addSqlRestrictionOnLang('pl')
@@ -578,7 +578,7 @@ class DfTools
         $idCategoryField = self::versionGte('1.5.0.9') ? 'product_shop.id_category_default' : 'p.id_category_default';
         $query->select('default_category_lang.name as main_category, default_category_lang.link_rewrite AS cat_link_rew');
         $query->select($idCategoryField . ' as id_category_default');
-        $query->leftJoin(
+        $query->innerJoin(
             'category_lang',
             'default_category_lang',
             $idCategoryField . ' = default_category_lang.id_category
@@ -707,7 +707,7 @@ class DfTools
         $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
         $query->where('pa.id_product = ' . (int) $idProduct);
 
-        $query->leftJoin(
+        $query->innerJoin(
             'product',
             'p',
             'p.id_product = pa.id_product'
@@ -727,7 +727,7 @@ class DfTools
         $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
 
         $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
-        $query->leftJoin(
+        $query->innerJoin(
             'stock_available',
             'sa',
             'p.id_product = sa.id_product

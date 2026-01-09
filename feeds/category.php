@@ -26,7 +26,7 @@ if (function_exists('set_time_limit')) {
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
 $debug = DfTools::getBooleanFromRequest('debug');
-$limit = Tools::getValue('limit', false);
+$limit = Tools::getValue('limit', 1000);
 $offset = Tools::getValue('offset', false);
 /* ---------- END CSV-SPECIFIC CONFIG ---------- */
 
