@@ -558,7 +558,6 @@ class DfTools
         );
 
         $query->select('MIN(sa.out_of_stock) as out_of_stock, MIN(sa.quantity) as stock_quantity');
-        // Use INNER JOIN for stock_available as stock information is required for product feeds
         $query->innerJoin(
             'stock_available',
             'sa',
@@ -569,7 +568,6 @@ class DfTools
         );
 
         $query->select('pl.name, pl.description, pl.description_short, pl.meta_title, pl.meta_description, pl.link_rewrite');
-        // Use INNER JOIN for product_lang as product language data is required for the feed
         $query->innerJoin(
             'product_lang',
             'pl',
@@ -580,7 +578,6 @@ class DfTools
         $idCategoryField = self::versionGte('1.5.0.9') ? 'product_shop.id_category_default' : 'p.id_category_default';
         $query->select('default_category_lang.name as main_category, default_category_lang.link_rewrite AS cat_link_rew');
         $query->select($idCategoryField . ' as id_category_default');
-        // Use INNER JOIN for default category_lang as category information is typically required
         $query->innerJoin(
             'category_lang',
             'default_category_lang',
