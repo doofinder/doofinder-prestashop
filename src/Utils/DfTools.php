@@ -1688,7 +1688,6 @@ class DfTools
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
         $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
 
-        // Early exit if no customer groups to process
         $hasCustomerGroups = !empty($customerGroupsData);
 
         // Pre-process customer groups data for optimization
@@ -2132,6 +2131,7 @@ class DfTools
             // See https://github.com/PrestaShop/PrestaShop/blob/8.1.0/classes/Product.php#L3602.
             // $use_group_reduction and $use_customer_price must remain as false for these cases.
             $specificPriceOutput = null;
+
             return \Product::getPriceStatic(
                 $productId,
                 $includeTaxes,

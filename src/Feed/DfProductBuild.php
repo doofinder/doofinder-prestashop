@@ -489,6 +489,7 @@ class DfProductBuild
             $catData = DfTools::getCategoriesForProductIdAndLanguage($productId, $this->idLang, $this->idShop, false);
             $categories[$productId] = is_array($catData) ? $catData : [];
         }
+
         return $categories;
     }
 
@@ -822,6 +823,7 @@ class DfProductBuild
     public function buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $expanded_variation = array_merge($product, $variation);
+
         return $this->buildProductWithData($expanded_variation, [], $batchData, $extraAttributesHeader, $extraHeaders);
     }
 
@@ -1438,6 +1440,7 @@ class DfProductBuild
                 $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
             }
         }
+
         return $features;
     }
 
@@ -1551,9 +1554,9 @@ class DfProductBuild
                 return [];
             }
 
-        $attributes = DfTools::getAttributesName($productAttributes, $this->idLang);
+            $attributes = DfTools::getAttributesName($productAttributes, $this->idLang);
 
-        $names = array_column($attributes, 'name');
+            $names = array_column($attributes, 'name');
 
             return array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $names);
         }
