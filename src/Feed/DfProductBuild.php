@@ -281,8 +281,7 @@ class DfProductBuild
         }
 
         // Batch fetch all related data upfront to avoid N+1 queries
-        $productIds = array_column($products, 'id_product');
-        $batchData = $this->batchFetchAllData($productIds);
+        $batchData = $this->batchFetchAllData($products);
 
         foreach ($products as $product) {
             $minPriceVariant = null;
@@ -306,33 +305,13 @@ class DfProductBuild
     }
 
     /**
-     * Prepare batch data for products to enable optimized building.
-     * This method can be used by feed scripts to get pre-fetched data.
-     *
-     * @param array $products Array of product data
-     *
-     * @return array Batch data containing all related information
-     */
-    public function prepareBatchData($products)
-    {
-        $productIds = [];
-        foreach ($products as $product) {
-            if (isset($product['id_product'])) {
-                $productIds[] = (int) $product['id_product'];
-            }
-        }
-
-        return $this->batchFetchAllData($productIds);
-    }
-
-    /**
      * Batch fetch all related data for products to avoid N+1 queries.
      *
-     * @param array $productIds Array of product IDs
+     * @param array $products Array of products
      *
      * @return array Batch data containing variations, categories, features, attributes, images, prices, and stock
      */
-    protected function batchFetchAllData($productIds)
+    public function batchFetchAllData($products)
     {
         $data = [
             'variations' => [],
@@ -346,9 +325,11 @@ class DfProductBuild
             'variants_information' => [],
         ];
 
-        if (empty($productIds)) {
+        if (empty($products)) {
             return $data;
         }
+
+        $productIds = array_map('intval', array_column($products, 'id_product'));
 
         // Batch fetch variations for all products
         if ($this->productVariations) {
@@ -362,13 +343,14 @@ class DfProductBuild
         $data['categories'] = $this->batchFetchCategories($productIds);
 
         // Batch fetch category links - collect unique category IDs from products
-        // We need to get products again to access category_ids, but this is still better than N queries per product
-        $productsForCategories = $this->getProductData();
         $allCategoryIds = [];
-        foreach ($productsForCategories as $product) {
-            if (!empty($product['category_ids'])) {
-                $categoryIds = explode(',', $product['category_ids']);
-                $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
+        if ($products !== null) {
+            // Use provided products array to extract category_ids
+            foreach ($products as $product) {
+                if (!empty($product['category_ids'])) {
+                    $categoryIds = explode(',', $product['category_ids']);
+                    $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
+                }
             }
         }
 

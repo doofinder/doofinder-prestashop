@@ -267,7 +267,7 @@ $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariation
 $products = arrayMergeByIdProduct($products, $extraRows);
 
 // Batch fetch all related data upfront to avoid N+1 queries
-$batchData = $dfProductBuild->prepareBatchData($products);
+$batchData = $dfProductBuild->batchFetchAllData($products);
 
 foreach ($products as $product) {
     $minPriceVariant = null;
