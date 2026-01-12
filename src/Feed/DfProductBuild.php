@@ -326,7 +326,6 @@ class DfProductBuild
                 $productIds[] = (int) $product['id_product'];
             }
         }
-        $productIds = array_unique($productIds);
 
         return $this->batchFetchAllData($productIds);
     }
@@ -377,7 +376,7 @@ class DfProductBuild
                 $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
             }
         }
-        $allCategoryIds = array_unique($allCategoryIds);
+
         if (!empty($allCategoryIds)) {
             $data['category_links'] = $this->batchFetchCategoryLinks($allCategoryIds);
         }
@@ -472,7 +471,7 @@ class DfProductBuild
             $result = \Db::getInstance()->executeS($query);
         }
 
-        return $result ?: [];
+        return $result;
     }
 
     /**
@@ -1353,15 +1352,14 @@ class DfProductBuild
 
         if ((int) $this->stockManagement) {
             // Use pre-fetched stock if available
-            $variationId = isset($product['id_product_attribute']) ? $product['id_product_attribute'] : 0;
-            $key = $product['id_product'] . '_' . $variationId;
+            $variationId = isset($product['id_product_attribute']) ? $product['id_product_attribute'] : null;
             if (isset($product['_stock'])) {
                 $stock = $product['_stock']['quantity'];
                 $outOfStock = $product['_stock']['out_of_stock'];
             } else {
                 $stock = \StockAvailable::getQuantityAvailableByProduct(
                     $product['id_product'],
-                    $variationId ?: null,
+                    $variationId,
                     $this->idShop
                 );
                 $outOfStock = isset($product['out_of_stock']) ? $product['out_of_stock'] : 0;
