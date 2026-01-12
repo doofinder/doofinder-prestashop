@@ -971,15 +971,10 @@ class DfProductBuild
             $p['variation_upc'] = DfTools::cleanString($product['variation_upc']);
             $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
             // Use pre-fetched variants information if available
-            // Only set for parent products (not variations), variations should have empty df_variants_information
-            if (!isset($product['id_product_attribute']) || (int) $product['id_product_attribute'] === 0) {
-                if (isset($product['_variants_information']) && is_array($product['_variants_information'])) {
-                    $p['df_variants_information'] = $product['_variants_information'];
-                } else {
-                    $p['df_variants_information'] = $this->getVariantsInformation($product);
-                }
+            if (isset($product['_variants_information']) && is_array($product['_variants_information'])) {
+                $p['df_variants_information'] = $product['_variants_information'];
             } else {
-                $p['df_variants_information'] = [];
+                $p['df_variants_information'] = $this->getVariantsInformation($product);
             }
 
             // Use pre-fetched attributes if available
@@ -1055,15 +1050,7 @@ class DfProductBuild
         $product['images_links'] = implode(DfTools::LIST_SEPARATOR, $product['images_links']);
 
         if (array_key_exists('df_variants_information', $product)) {
-            // Ensure df_variants_information is always an array before processing
-            if (!is_array($product['df_variants_information'])) {
-                $product['df_variants_information'] = [];
-            }
-            if (!empty($product['df_variants_information'])) {
-                $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
-            } else {
-                $product['df_variants_information'] = '';
-            }
+            $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
         }
 
         $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
