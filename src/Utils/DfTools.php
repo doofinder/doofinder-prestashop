@@ -1606,13 +1606,11 @@ class DfTools
             $hasCustomerGroups = false;
         } else {
             $hasCustomerGroups = true;
-            // Pre-process customer groups data for optimization
             $isPrestaShop15 = !self::versionGte('1.6.0.0');
             $cachedCustomers = [];
             $customerGroupTaxSettings = [];
 
             if ($isPrestaShop15) {
-                // Cache Customer objects to avoid repeated instantiation
                 foreach ($customerGroupsData as $customerGroupData) {
                     $customerId = $customerGroupData['id_customer'];
                     if (!isset($cachedCustomers[$customerId])) {
@@ -1669,7 +1667,6 @@ class DfTools
 
                 $multiprice[$currencyCode] = $pricesMap;
 
-                // Process customer group prices using pre-fetched data
                 if ($hasCustomerGroups) {
                     foreach ($customerGroupsData as $customerGroupData) {
                         $groupId = $customerGroupData['id_group'];
