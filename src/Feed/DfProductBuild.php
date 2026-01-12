@@ -786,43 +786,6 @@ class DfProductBuild
     }
 
     /**
-     * Get the minimum price among product variations.
-     *
-     * @param array|null $currentMinPrice Current minimum price array (or null)
-     * @param array $variation Variation data
-     *
-     * @return array|null Minimum price array or null
-     */
-    public function getMinPrice($currentMinPrice, $variation)
-    {
-        if ($this->displayPrices) {
-            $variantPrices = DfTools::getVariantPrices($variation['id_product'], $variation['id_product_attribute'], $this->useTax, $this->currencies, $this->customerGroupsData);
-            if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
-                return $variantPrices;
-            } else {
-                return $currentMinPrice;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Build variation payload from product and variation data.
-     *
-     * @param array $product Base product data
-     * @param array $variation Variation data
-     *
-     * @return array Variation payload
-     */
-    public function buildVariation($product, $variation)
-    {
-        $expanded_variation = array_merge($product, $variation, $extraAttributesHeader = [], $extraHeaders = []);
-
-        return $this->buildProduct($expanded_variation, [], $extraAttributesHeader, $extraHeaders);
-    }
-
-    /**
      * Build product payload.
      *
      * @param array $product Product data
