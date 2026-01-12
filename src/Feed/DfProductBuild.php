@@ -473,7 +473,7 @@ class DfProductBuild
         $categories = [];
         foreach ($productIds as $productId) {
             $catData = DfTools::getCategoriesForProductIdAndLanguage($productId, $this->idLang, $this->idShop, false);
-            $categories[$productId] = is_array($catData) ? $catData : [];
+            $categories[$productId] = (array) $catData;
         }
 
         return $categories;
