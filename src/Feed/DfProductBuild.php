@@ -971,7 +971,7 @@ class DfProductBuild
             $p['variation_upc'] = DfTools::cleanString($product['variation_upc']);
             $p['df_group_leader'] = (is_numeric($product['df_group_leader']) && 0 !== (int) $product['df_group_leader']);
             // Use pre-fetched variants information if available
-            if (isset($product['_variants_information']) && is_array($product['_variants_information'])) {
+            if ($p['df_group_leader'] && isset($product['_variants_information'])) {
                 $p['df_variants_information'] = $product['_variants_information'];
             } else {
                 $p['df_variants_information'] = $this->getVariantsInformation($product);
@@ -1055,7 +1055,7 @@ class DfProductBuild
 
         $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
 
-        if (array_key_exists('features', $product) && is_array($product['features'])) {
+        if (!array_key_exists('features', $product) && is_array($product['features'])) {
             $formattedAttributes = [];
             foreach ($product['features'] as $key => $value) {
                 if (is_array($value)) {
