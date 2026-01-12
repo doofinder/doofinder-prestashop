@@ -1055,7 +1055,7 @@ class DfProductBuild
 
         $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
 
-        if (!array_key_exists('features', $product) && is_array($product['features'])) {
+        if (array_key_exists('features', $product) && is_array($product['features'])) {
             $formattedAttributes = [];
             foreach ($product['features'] as $key => $value) {
                 if (is_array($value)) {
