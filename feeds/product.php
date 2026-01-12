@@ -176,17 +176,14 @@ if ($shouldShowProductVariations) {
     $header[] = 'df_group_leader';
     $header[] = 'df_variants_information';
     $attributeKeys = DfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
-    $altAttributeKeys = [];
 
     foreach ($attributeKeys as $key) {
         $headerValue = DfTools::slugify($key);
         if ($shouldLimitGroupAttributes && !in_array($headerValue, $groupAttributesSlug)) {
             continue;
         }
-        $altAttributeKeys[] = $key;
         $additionalAttributesHeaders[] = $headerValue;
     }
-    $attributeKeys = $altAttributeKeys;
 }
 
 if ($shouldShowProductFeatures) {
