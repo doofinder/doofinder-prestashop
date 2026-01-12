@@ -316,11 +316,6 @@ class DfProductBuild
     public function prepareBatchData($products)
     {
         $productIds = [];
-
-        if (empty($products)) {
-            return $this->batchFetchAllData($productIds);
-        }
-
         foreach ($products as $product) {
             if (isset($product['id_product'])) {
                 $productIds[] = (int) $product['id_product'];
@@ -462,16 +457,8 @@ class DfProductBuild
         $query->leftJoin('product_attribute_shop', 'pas', 'pa.id_product_attribute = pas.id_product_attribute');
         $query->groupBy('pa.id_product_attribute');
 
-        try {
-            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
-            if (!$result) {
-                $result = \Db::getInstance()->executeS($query);
-            }
-        } catch (\PrestaShopException $e) {
-            $result = \Db::getInstance()->executeS($query);
-        }
-
-        return $result;
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        return $result ?: \Db::getInstance()->executeS($query);
     }
 
     /**
@@ -783,7 +770,7 @@ class DfProductBuild
         if (isset($batchData['categories'][$productId])) {
             $product['_categories'] = $batchData['categories'][$productId];
         }
-        if (isset($batchData['category_links']) && !empty($product['category_ids'])) {
+        if (!empty($product['category_ids'])) {
             $categoryIds = explode(',', $product['category_ids']);
             $product['_category_links'] = array_filter(array_map(function ($id) use ($batchData) {
                 return isset($batchData['category_links'][$id]) ? $batchData['category_links'][$id] : null;
@@ -996,15 +983,10 @@ class DfProductBuild
             }
 
             // Use pre-fetched attributes if available
-            if (isset($product['_attributes']) && is_array($product['_attributes'])) {
-                $attributes = $product['_attributes'];
-            } else {
-                $attributes = $this->getAttributes($product);
-            }
+            $attributes = isset($product['_attributes']) ? $product['_attributes'] : $this->getAttributes($product);
 
             // Merge attributes into product payload - attributes take precedence over any product data
-            // This ensures attribute values (like 'White') override any conflicting keys in $product
-            if (!empty($attributes) && is_array($attributes)) {
+            if (!empty($attributes)) {
                 $p = array_merge($p, $attributes);
             }
 
@@ -1232,7 +1214,6 @@ class DfProductBuild
         if ($this->hasVariations($product)) {
             // Use pre-fetched variation images if available
             $variationId = $product['id_product_attribute'];
-            $key = $product['id_product'] . '_' . $variationId;
             if (isset($product['_variation_images']) && !empty($product['_variation_images'])) {
                 $idImage = $product['_variation_images'][0];
             } else {

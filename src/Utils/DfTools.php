@@ -1688,26 +1688,26 @@ class DfTools
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
         $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
 
-        $hasCustomerGroups = !empty($customerGroupsData);
+        if (empty($customerGroupsData)) {
+            $hasCustomerGroups = false;
+        } else {
+            $hasCustomerGroups = true;
+            // Pre-process customer groups data for optimization
+            $isPrestaShop15 = !self::versionGte('1.6.0.0');
+            $cachedCustomers = [];
+            $customerGroupTaxSettings = [];
 
-        // Pre-process customer groups data for optimization
-        // Cache customer objects for PrestaShop 1.5 and pre-calculate tax settings
-        $isPrestaShop15 = !self::versionGte('1.6.0.0');
-        $cachedCustomers = [];
-        $customerGroupTaxSettings = [];
-
-        if ($hasCustomerGroups && $isPrestaShop15) {
-            // Cache Customer objects to avoid repeated instantiation
-            foreach ($customerGroupsData as $customerGroupData) {
-                $customerId = $customerGroupData['id_customer'];
-                if (!isset($cachedCustomers[$customerId])) {
-                    $cachedCustomers[$customerId] = new \Customer($customerId);
+            if ($isPrestaShop15) {
+                // Cache Customer objects to avoid repeated instantiation
+                foreach ($customerGroupsData as $customerGroupData) {
+                    $customerId = $customerGroupData['id_customer'];
+                    if (!isset($cachedCustomers[$customerId])) {
+                        $cachedCustomers[$customerId] = new \Customer($customerId);
+                    }
                 }
             }
-        }
 
-        // Pre-calculate tax settings for each customer group (outside currency loop)
-        if ($hasCustomerGroups) {
+            // Pre-calculate tax settings for each customer group (outside currency loop)
             foreach ($customerGroupsData as $customerGroupData) {
                 $groupId = $customerGroupData['id_group'];
                 // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
@@ -1715,12 +1715,10 @@ class DfTools
                     ? !(bool) $customerGroupData['price_display_method']
                     : $includeTaxes;
             }
-        }
 
-        // Pre-fetch all customer group prices once (outside currency loop) to minimize Product::getPriceStatic calls
-        $customerGroupPrices = [];
-        $customerGroupOnsalePrices = [];
-        if ($hasCustomerGroups) {
+            // Pre-fetch all customer group prices once (outside currency loop) to minimize Product::getPriceStatic calls
+            $customerGroupPrices = [];
+            $customerGroupOnsalePrices = [];
             foreach ($customerGroupsData as $customerGroupData) {
                 $groupId = $customerGroupData['id_group'];
                 $customerId = $customerGroupData['id_customer'];
