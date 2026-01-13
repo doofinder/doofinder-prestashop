@@ -813,7 +813,7 @@ class DfProductBuild
         $p['image_link'] = $this->getImageLink($product);
         $p['images_links'] = $this->getImagesLinks($product);
         $p['main_category'] = DfTools::cleanString($product['main_category']);
-        $p['categories'] = is_array($product['categories']) ? $product['categories'] : [];
+        $p['categories'] = $product['categories'];
         $p['category_merchandising'] = isset($product['category_links']) ? $product['category_links'] : [];
         $p['availability'] = $this->getAvailability($product);
         $p['brand'] = DfTools::cleanString($product['manufacturer']);
