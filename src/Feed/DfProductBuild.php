@@ -489,20 +489,23 @@ class DfProductBuild
      */
     private function batchFetchFeatures($productIds)
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         $features = [];
         $keys = $this->featuresKeys;
 
-        $sql = '
-            SELECT fp.id_product, fl.name, fvl.value
-            FROM ' . _DB_PREFIX_ . 'feature_product fp
-            LEFT JOIN ' . _DB_PREFIX_ . 'feature_lang fl ON (fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $this->idLang . ')
-            LEFT JOIN ' . _DB_PREFIX_ . 'feature_value_lang fvl ON (fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $this->idLang . ')
-            WHERE fp.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
-        ';
-
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $query = new \DbQuery();
+        $query->select('fp.id_product, fl.name, fvl.value');
+        $query->from('feature_product', 'fp');
+        $query->leftJoin('feature_lang', 'fl', 'fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $this->idLang);
+        $query->leftJoin('feature_value_lang', 'fvl', 'fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $this->idLang);
+        $query->where('fp.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+    
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
-            $result = \Db::getInstance()->executeS($sql);
+            $result = \Db::getInstance()->executeS($query);
         }
 
         if ($result) {
@@ -537,18 +540,21 @@ class DfProductBuild
         }
 
         $attributes = [];
-        $attrLimit = $this->attributesShown ? ' AND pa.id_attribute_group IN (' . pSQL($this->attributesShown) . ')' : '';
 
-        $sql = 'SELECT pc.id_product_attribute, pal.name, pagl.name AS group_name
-            FROM ' . _DB_PREFIX_ . 'product_attribute_combination pc
-            LEFT JOIN ' . _DB_PREFIX_ . 'attribute pa ON pc.id_attribute = pa.id_attribute
-            LEFT JOIN ' . _DB_PREFIX_ . 'attribute_lang pal ON (pc.id_attribute = pal.id_attribute AND pal.id_lang = ' . (int) $this->idLang . ')
-            LEFT JOIN ' . _DB_PREFIX_ . 'attribute_group_lang pagl ON (pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = ' . (int) $this->idLang . ')
-            WHERE pc.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')' . $attrLimit;
+        $query = new \DbQuery();
+        $query->select('pc.id_product_attribute, pal.name, pagl.name AS group_name');
+        $query->from('product_attribute_combination', 'pc');
+        $query->leftJoin('attribute', 'pa', 'pc.id_attribute = pa.id_attribute');
+        $query->leftJoin('attribute_lang', 'pal', 'pc.id_attribute = pal.id_attribute AND pal.id_lang = ' . (int) $this->idLang);
+        $query->leftJoin('attribute_group_lang', 'pagl', 'pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = ' . (int) $this->idLang);
+        $query->where('pc.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')');
+        if ($this->attributesShown) {
+            $query->where('pa.id_attribute_group IN (' . pSQL($this->attributesShown) . ')');
+        }
 
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
-            $result = \Db::getInstance()->executeS($sql);
+            $result = \Db::getInstance()->executeS($query);
         }
 
         if ($result) {
@@ -579,15 +585,16 @@ class DfProductBuild
         }
 
         $images = [];
-        $sql = 'SELECT DISTINCT pai.id_product_attribute, pai.id_image, i.id_product, i.position
-            FROM ' . _DB_PREFIX_ . 'product_attribute_image pai
-            INNER JOIN ' . _DB_PREFIX_ . 'image i ON (i.id_image = pai.id_image AND i.id_product IN (' . implode(',', array_map('intval', $productIds)) . '))
-            WHERE pai.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')
-            ORDER BY pai.id_product_attribute, i.position ASC';
+        $query = new \DbQuery();
+        $query->select('DISTINCT pai.id_product_attribute, pai.id_image, i.id_product, i.position');
+        $query->from('product_attribute_image', 'pai');
+        $query->innerJoin('image', 'i', 'i.id_image = pai.id_image AND i.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+        $query->where('pai.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')');
+        $query->orderBy('pai.id_product_attribute, i.position ASC');
 
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
-            $result = \Db::getInstance()->executeS($sql);
+            $result = \Db::getInstance()->executeS($query);
         }
 
         if ($result) {
@@ -621,20 +628,20 @@ class DfProductBuild
         $shopIds = \Shop::getContextListShopID();
         $shopGroupId = \Shop::getContextShopGroupID();
 
+        $query = new \DbQuery();
+        $query->select('id_product, id_product_attribute, quantity, out_of_stock');
+        $query->from('stock_available');
+        $query->where('id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+        $query->where('(id_shop IN (' . implode(',', array_map('intval', $shopIds)) . ') OR (id_shop = 0 AND id_shop_group = ' . (int) $shopGroupId . '))');
         $attributeCondition = 'id_product_attribute = 0';
         if (!empty($variationIds)) {
             $attributeCondition .= ' OR id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')';
         }
+        $query->where('(' . $attributeCondition . ')');
 
-        $sql = 'SELECT id_product, id_product_attribute, quantity, out_of_stock
-            FROM ' . _DB_PREFIX_ . 'stock_available
-            WHERE id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
-            AND (id_shop IN (' . implode(',', array_map('intval', $shopIds)) . ') OR (id_shop = 0 AND id_shop_group = ' . (int) $shopGroupId . '))
-            AND (' . $attributeCondition . ')';
-
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
-            $result = \Db::getInstance()->executeS($sql);
+            $result = \Db::getInstance()->executeS($query);
         }
 
         if ($result) {
@@ -665,18 +672,19 @@ class DfProductBuild
         }
 
         $attrGroups = implode(',', array_map('intval', explode(',', $this->attributesShown)));
-        $sql = 'SELECT DISTINCT p.id_product, a.id_attribute_group
-            FROM ' . _DB_PREFIX_ . 'product p
-            LEFT JOIN ' . _DB_PREFIX_ . 'product_attribute pa ON p.id_product = pa.id_product
-            LEFT JOIN ' . _DB_PREFIX_ . 'product_attribute_combination pac ON pa.id_product_attribute = pac.id_product_attribute
-            LEFT JOIN ' . _DB_PREFIX_ . 'attribute a ON pac.id_attribute = a.id_attribute
-            WHERE p.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')
-            AND a.id_attribute_group IN (' . $attrGroups . ')
-            GROUP BY p.id_product, a.id_attribute_group';
+        $query = new \DbQuery();
+        $query->select('DISTINCT p.id_product, a.id_attribute_group');
+        $query->from('product', 'p');
+        $query->leftJoin('product_attribute', 'pa', 'p.id_product = pa.id_product');
+        $query->leftJoin('product_attribute_combination', 'pac', 'pa.id_product_attribute = pac.id_product_attribute');
+        $query->leftJoin('attribute', 'a', 'pac.id_attribute = a.id_attribute');
+        $query->where('p.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+        $query->where('a.id_attribute_group IN (' . $attrGroups . ')');
+        $query->groupBy('p.id_product, a.id_attribute_group');
 
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
-            $result = \Db::getInstance()->executeS($sql);
+            $result = \Db::getInstance()->executeS($query);
         }
 
         if ($result) {

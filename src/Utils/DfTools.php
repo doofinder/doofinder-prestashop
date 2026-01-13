@@ -660,13 +660,11 @@ class DfTools
         $query->groupBy('product_shop.id_product');
 
         try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
-            // If the result is false or null, fallback to default DB instance
+            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
             if (!$result) {
                 $result = \Db::getInstance()->executeS($query);
             }
         } catch (\PrestaShopException $e) {
-            // Fallback to default DB instance on exception
             $result = \Db::getInstance()->executeS($query);
         }
 
