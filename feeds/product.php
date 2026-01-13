@@ -266,26 +266,9 @@ $products = arrayMergeByIdProduct($products, $extraRows);
 // Batch fetch all related data upfront to avoid N+1 queries
 $batchData = $dfProductBuild->batchFetchAllData($products);
 
-foreach ($products as $product) {
-    $minPriceVariant = null;
-    if ($shouldShowProductVariations && $product['variant_count'] > 0) {
-        $variations = isset($batchData['variations'][$product['id_product']]) ? $batchData['variations'][$product['id_product']] : [];
-        foreach ($variations as $variation) {
-            $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
-            $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
-            if ($variationPrices) {
-                $minPriceVariant = $dfProductBuild->getMinPriceFromData($minPriceVariant, $variationPrices);
-            }
-            $builtVariation = $dfProductBuild->buildVariationWithData($product, $variation, $batchData, $additionalAttributesHeaders, $additionalHeaders);
-            $csvVariation = $dfProductBuild->applySpecificTransformationsForCsv($builtVariation, $extraHeader, $header);
-            fputcsv($csv, $csvVariation, DfTools::TXT_SEPARATOR);
-        }
-        $product = $dfProductBuild->buildProductWithData($product, $minPriceVariant, $batchData, $additionalAttributesHeaders, $additionalHeaders);
-    } else {
-        $product = $dfProductBuild->buildProductWithData($product, null, $batchData, $additionalAttributesHeaders, $additionalHeaders);
-    }
+$dfProductBuild->processProductsWithBatchData($products, $batchData, function ($item) use ($dfProductBuild, $extraHeader, $header, $csv) {
+    $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $extraHeader, $header);
+    fputcsv($csv, $csvItem, DfTools::TXT_SEPARATOR);
+}, $additionalAttributesHeaders, $additionalHeaders);
 
-    $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
-    fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
-}
 fclose($csv);

@@ -283,6 +283,27 @@ class DfProductBuild
         // Batch fetch all related data upfront to avoid N+1 queries
         $batchData = $this->batchFetchAllData($products);
 
+        $this->processProductsWithBatchData($products, $batchData, function ($item) use (&$payload) {
+            $payload[] = $item;
+        });
+
+        return json_encode($payload);
+    }
+
+    /**
+     * Process products with batch data and call callback for each built item.
+     * This unified method eliminates code duplication between JSON and CSV exports.
+     *
+     * @param array $products Array of product data
+     * @param array $batchData Pre-fetched batch data
+     * @param callable $callback Callback function to handle each built item (variation or product)
+     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $extraHeaders Additional product headers to include
+     *
+     * @return void
+     */
+    public function processProductsWithBatchData($products, $batchData, $callback, $extraAttributesHeader = [], $extraHeaders = [])
+    {
         foreach ($products as $product) {
             $minPriceVariant = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
@@ -293,15 +314,16 @@ class DfProductBuild
                     if ($variationPrices) {
                         $minPriceVariant = $this->getMinPriceFromData($minPriceVariant, $variationPrices);
                     }
-                    $payload[] = $this->buildVariationWithData($product, $variation, $batchData);
+                    $builtVariation = $this->buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
+                    call_user_func($callback, $builtVariation);
                 }
-                $payload[] = $this->buildProductWithData($product, $minPriceVariant, $batchData);
+                $builtProduct = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
+                call_user_func($callback, $builtProduct);
             } else {
-                $payload[] = $this->buildProductWithData($product, null, $batchData);
+                $builtProduct = $this->buildProductWithData($product, null, $batchData, $extraAttributesHeader, $extraHeaders);
+                call_user_func($callback, $builtProduct);
             }
         }
-
-        return json_encode($payload);
     }
 
     /**
@@ -523,7 +545,6 @@ class DfProductBuild
             $categories[$productId] = $productCats;
         }
 
-        // Ensure all products have an array (even if empty)
         foreach ($productIds as $productId) {
             if (!isset($categories[$productId])) {
                 $categories[$productId] = [];
