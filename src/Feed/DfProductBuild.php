@@ -286,7 +286,7 @@ class DfProductBuild
         foreach ($products as $product) {
             $minPriceVariant = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = isset($batchData['variations'][$product['id_product']]) ? $batchData['variations'][$product['id_product']] : [];
+                $variations = $batchData['variations'][$product['id_product']];
                 foreach ($variations as $variation) {
                     $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
                     $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
@@ -742,10 +742,10 @@ class DfProductBuild
     public function buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $productId = $product['id_product'];
-        $variationId = isset($product['id_product_attribute']) ? $product['id_product_attribute'] : 0;
+        $variationId = ($this->productVariations) ? $product['id_product_attribute'] : 0;
         $key = $productId . '_' . $variationId;
 
-        $product['categories'] = isset($batchData['categories'][$productId]) ? $batchData['categories'][$productId] : [];
+        $product['categories'] = $batchData['categories'][$productId];
         if (!empty($product['category_ids'])) {
             $categoryIds = explode(',', $product['category_ids']);
             $product['category_links'] = array_filter(array_map(function ($id) use ($batchData) {
@@ -814,7 +814,7 @@ class DfProductBuild
         $p['images_links'] = $this->getImagesLinks($product);
         $p['main_category'] = DfTools::cleanString($product['main_category']);
         $p['categories'] = $product['categories'];
-        $p['category_merchandising'] = isset($product['category_links']) ? $product['category_links'] : [];
+        $p['category_merchandising'] = $product['category_links'];
         $p['availability'] = $this->getAvailability($product);
         $p['brand'] = DfTools::cleanString($product['manufacturer']);
         $p['mpn'] = DfTools::cleanString($product['mpn']);
@@ -891,7 +891,7 @@ class DfProductBuild
                 $p['df_variants_information'] = $product['variants_information'];
             }
 
-            $attributes = isset($product['attributes']) ? $product['attributes'] : $this->getAttributes($product);
+            $attributes = $product['attributes'];
 
             // Merge attributes into product payload - attributes take precedence over any product data
             if (!empty($attributes)) {
@@ -908,7 +908,7 @@ class DfProductBuild
         }
 
         if ($this->showProductFeatures) {
-            $p['features'] = $this->processFeatures(isset($product['features']) ? $product['features'] : []);
+            $p['features'] = $this->processFeatures($product['features']);
         }
 
         // Process extra headers - but exclude attribute headers that were already processed above
@@ -1106,7 +1106,7 @@ class DfProductBuild
     {
         if ($this->hasVariations($product)) {
             $variationId = $product['id_product_attribute'];
-            $variationImages = isset($product['variation_images']) && !empty($product['variation_images']) ? $product['variation_images'] : [];
+            $variationImages = $product['variation_images'];
             $idImage = !empty($variationImages) ? $variationImages[0] : null;
 
             if (!empty($idImage)) {
@@ -1168,7 +1168,7 @@ class DfProductBuild
 
         if ($this->hasVariations($product)) {
             $variationId = $product['id_product_attribute'];
-            $imageIds = isset($product['variation_images']) ? $product['variation_images'] : [];
+            $imageIds = $product['variation_images'];
             $idForImageLink = $variationId;
         } else {
             $imageIds = array_filter(array_map('intval', explode(',', $product['all_image_ids'])));
@@ -1339,37 +1339,6 @@ class DfProductBuild
         } else {
             return $allFeatureKeys;
         }
-    }
-
-    /**
-     * Get attributes for a product variation.
-     *
-     * Attributes are the basis of product variations.
-     * More info at: https://docs.prestashop-project.org/v.8-documentation/user-guide/selling/managing-catalog/managing-product-attributes
-     *
-     * @param array $product Product data
-     *
-     * @return array Processed attributes
-     */
-    private function getAttributes($product)
-    {
-        $attributes = DfTools::getAttributesByCombination(
-            $product['id_product_attribute'],
-            $this->idLang,
-            $this->attributesShown
-        );
-
-        if (empty($attributes)) {
-            return [];
-        }
-
-        $altAttributes = [];
-
-        foreach ($attributes as $attribute) {
-            $altAttributes[DfTools::slugify($attribute['group_name'])] = $attribute['name'];
-        }
-
-        return $altAttributes;
     }
 
     /**
