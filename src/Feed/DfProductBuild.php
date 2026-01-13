@@ -341,12 +341,11 @@ class DfProductBuild
         $data['categories'] = $this->batchFetchCategories($productIds);
 
         $allCategoryIds = [];
-        if (null !== $products) {
-            foreach ($products as $product) {
-                if (!empty($product['category_ids'])) {
-                    $categoryIds = explode(',', $product['category_ids']);
-                    $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
-                }
+
+        foreach ($products as $product) {
+            if (!empty($product['category_ids'])) {
+                $categoryIds = explode(',', $product['category_ids']);
+                $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
             }
         }
 
@@ -443,10 +442,92 @@ class DfProductBuild
      */
     private function batchFetchCategories($productIds)
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         $categories = [];
+        $useMainCategory = (bool) DfTools::cfg($this->idShop, 'DF_FEED_MAINCATEGORY_PATH', DoofinderConstants::YES);
+        $useFullPath = (bool) DfTools::cfg($this->idShop, 'DF_FEED_FULL_PATH', DoofinderConstants::YES);
+
+        $query = new \DbQuery();
+        $query->select('DISTINCT cp.id_product, c.id_category, c.id_parent, c.level_depth, c.nleft, c.nright');
+        $query->from('category', 'c');
+        $query->innerJoin('category_product', 'cp', 'c.id_category = cp.id_category');
+        $query->innerJoin('category_shop', 'cs', 'c.id_category = cs.id_category AND cs.id_shop = ' . (int) $this->idShop);
+        $query->where('c.active = 1');
+        $query->where('cp.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+        if ($useMainCategory) {
+            $query->innerJoin('product_shop', 'ps', 'ps.id_product = cp.id_product AND ps.id_shop = ' . (int) $this->idShop);
+            $query->where('ps.id_category_default = cp.id_category');
+        }
+        $query->orderBy('cp.id_product, c.nleft DESC, c.nright ASC');
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($query);
+        }
+
+        // Group results by product ID and process hierarchy
+        $productCategories = [];
+        foreach ($result as $row) {
+            $productId = (int) $row['id_product'];
+            if (!isset($productCategories[$productId])) {
+                $productCategories[$productId] = [];
+            }
+            $productCategories[$productId][] = $row;
+        }
+
+        // Process each product's categories using the same hierarchy logic
+        foreach ($productCategories as $productId => $rows) {
+            $productCats = [];
+            $lastSaved = 0;
+            $idCategory0 = 0;
+            $nleft0 = 0;
+            $nright0 = 0;
+
+            foreach ($rows as $i => $row) {
+                if (!$i) {
+                    $idCategory0 = (int) $row['id_category'];
+                    $nleft0 = (int) $row['nleft'];
+                    $nright0 = (int) $row['nright'];
+                } else {
+                    $idCategory1 = (int) $row['id_category'];
+                    $nleft1 = (int) $row['nleft'];
+                    $nright1 = (int) $row['nright'];
+
+                    if ($nleft1 < $nleft0 && $nright1 > $nright0) {
+                        // $idCategory1 is an ancestor of $idCategory0
+                    } elseif ($nleft1 < $nleft0 && $nright1 > $nright0) {
+                        // $idCategory1 is a child of $idCategory0 so replace $idCategory0
+                        $idCategory0 = $idCategory1;
+                        $nleft0 = $nleft1;
+                        $nright0 = $nright1;
+                    } else {
+                        // $idCategory1 is not a relative of $idCategory0 so we save
+                        // $idCategory0 now and make $idCategory1 the current category.
+                        $productCats[] = DfTools::getCategoryPath($idCategory0, $this->idLang, $this->idShop, $useFullPath);
+                        $lastSaved = $idCategory0;
+
+                        $idCategory0 = $idCategory1;
+                        $nleft0 = $nleft1;
+                        $nright0 = $nright1;
+                    }
+                }
+            } // endforeach
+
+            if ($lastSaved != $idCategory0) {
+                $productCats[] = DfTools::getCategoryPath($idCategory0, $this->idLang, $this->idShop, $useFullPath);
+            }
+
+            $categories[$productId] = $productCats;
+        }
+
+        // Ensure all products have an array (even if empty)
         foreach ($productIds as $productId) {
-            $catData = DfTools::getCategoriesForProductIdAndLanguage($productId, $this->idLang, $this->idShop, false);
-            $categories[$productId] = (array) $catData;
+            if (!isset($categories[$productId])) {
+                $categories[$productId] = [];
+            }
         }
 
         return $categories;
