@@ -283,27 +283,26 @@ class DfProductBuild
         // Batch fetch all related data upfront to avoid N+1 queries
         $batchData = $this->batchFetchAllData($products);
 
-        $this->processProductsWithBatchData($products, $batchData, function ($item) use (&$payload) {
-            $payload[] = $item;
-        });
+        $processedProducts = $this->processProductsWithBatchData($products, $batchData);
 
-        return json_encode($payload);
+        return json_encode($processedProducts);
     }
 
     /**
-     * Process products with batch data and call callback for each built item.
+     * Process products with batch data and save the results in an array.
      * This unified method eliminates code duplication between JSON and CSV exports.
      *
      * @param array $products Array of product data
      * @param array $batchData Pre-fetched batch data
-     * @param callable $callback Callback function to handle each built item (variation or product)
      * @param array $extraAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
-     * @return void
+     * @return array Processed products
      */
-    public function processProductsWithBatchData($products, $batchData, $callback, $extraAttributesHeader = [], $extraHeaders = [])
+    public function processProductsWithBatchData($products, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
+        $processedProducts = [];
+
         foreach ($products as $product) {
             $minPriceVariant = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
@@ -314,16 +313,15 @@ class DfProductBuild
                     if ($variationPrices) {
                         $minPriceVariant = $this->getMinPriceFromData($minPriceVariant, $variationPrices);
                     }
-                    $builtVariation = $this->buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
-                    call_user_func($callback, $builtVariation);
+                    $processedProducts[] = $this->buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
                 }
-                $builtProduct = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
-                call_user_func($callback, $builtProduct);
+                $processedProducts[] = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
             } else {
-                $builtProduct = $this->buildProductWithData($product, null, $batchData, $extraAttributesHeader, $extraHeaders);
-                call_user_func($callback, $builtProduct);
+                $processedProducts[] = $this->buildProductWithData($product, null, $batchData, $extraAttributesHeader, $extraHeaders);
             }
         }
+
+        return $processedProducts;
     }
 
     /**
@@ -518,12 +516,7 @@ class DfProductBuild
                     $nleft1 = (int) $row['nleft'];
                     $nright1 = (int) $row['nright'];
 
-                    if ($nleft1 < $nleft0 && $nright1 > $nright0) {
-                        // $idCategory1 is a child of $idCategory0 so replace $idCategory0
-                        $idCategory0 = $idCategory1;
-                        $nleft0 = $nleft1;
-                        $nright0 = $nright1;
-                    } else {
+                    if ($nleft1 >= $nleft0 || $nright1 <= $nright0) {
                         // $idCategory1 is not a relative of $idCategory0 so we save
                         // $idCategory0 now and make $idCategory1 the current category.
                         $productCats[] = DfTools::getCategoryPath($idCategory0, $this->idLang, $this->idShop, $useFullPath);
