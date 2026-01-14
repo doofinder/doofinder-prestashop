@@ -393,19 +393,6 @@ class DfProductBuild
             $data['variation_images'] = $this->batchFetchVariationImages($productIds, $variationIds);
         }
 
-        if ($this->displayPrices && $this->productVariations && !empty($allVariations)) {
-            foreach ($allVariations as $variation) {
-                $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
-                $data['variant_prices'][$key] = DfTools::getVariantPrices(
-                    $variation['id_product'],
-                    $variation['id_product_attribute'],
-                    $this->useTax,
-                    $this->currencies,
-                    $this->customerGroupsData
-                );
-            }
-        }
-
         $variationIdsForStock = [];
         if ($this->productVariations && !empty($allVariations)) {
             $variationIdsForStock = array_column($allVariations, 'id_product_attribute');
