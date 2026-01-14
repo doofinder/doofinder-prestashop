@@ -352,7 +352,7 @@ class DfProductBuild
         }
 
         $productIds = array_map('intval', array_column($products, 'id_product'));
-
+        $allVariations = [];
         if ($this->productVariations) {
             $allVariations = $this->batchFetchVariations($productIds);
             foreach ($allVariations as $variation) {
@@ -519,8 +519,6 @@ class DfProductBuild
                     $nright1 = (int) $row['nright'];
 
                     if ($nleft1 < $nleft0 && $nright1 > $nright0) {
-                        // $idCategory1 is an ancestor of $idCategory0
-                    } elseif ($nleft1 < $nleft0 && $nright1 > $nright0) {
                         // $idCategory1 is a child of $idCategory0 so replace $idCategory0
                         $idCategory0 = $idCategory1;
                         $nleft0 = $nleft1;
