@@ -315,10 +315,8 @@ class DfProductBuild
                     }
                     $processedProducts[] = $this->buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
                 }
-                $processedProducts[] = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
-            } else {
-                $processedProducts[] = $this->buildProductWithData($product, null, $batchData, $extraAttributesHeader, $extraHeaders);
             }
+            $processedProducts[] = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
         }
 
         return $processedProducts;
@@ -352,10 +350,9 @@ class DfProductBuild
         $productIds = array_map('intval', array_column($products, 'id_product'));
         $allVariations = [];
         if ($this->productVariations) {
-            $allVariations = $this->batchFetchVariations($productIds);
-            foreach ($allVariations as $variation) {
-                $data['variations'][$variation['id_product']][] = $variation;
-            }
+            $data['variations'] = $this->batchFetchVariations($productIds);
+            // Equivalent to array_merge(...$data['variations']) but supported by lower versions of PHP than 5.6
+            $allVariations = call_user_func_array('array_merge', $data['variations']);
         }
 
         $data['categories'] = $this->batchFetchCategories($productIds);
@@ -366,6 +363,19 @@ class DfProductBuild
             if (!empty($product['category_ids'])) {
                 $categoryIds = explode(',', $product['category_ids']);
                 $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
+            }
+
+            if ($this->displayPrices) {
+                foreach ($allVariations as $variation) {
+                    $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
+                    $data['variant_prices'][$key] = DfTools::getVariantPrices(
+                        $variation['id_product'],
+                        $variation['id_product_attribute'],
+                        $this->useTax,
+                        $this->currencies,
+                        $this->customerGroupsData
+                    );
+                }
             }
         }
 
@@ -450,7 +460,18 @@ class DfProductBuild
         $query->groupBy('pa.id_product_attribute');
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
-        return $result ?: \Db::getInstance()->executeS($query);
+        $result = $result ?: \Db::getInstance()->executeS($query);
+
+        $productVariations = [];
+        foreach ($result as $variation) {
+            $productId = $variation['id_product'];
+            if (!isset($productVariations[$productId])) {
+                $productVariations[$productId] = [];
+            }
+            $productVariations[$productId][] = $variation;
+        }
+
+        return $productVariations;
     }
 
     /**

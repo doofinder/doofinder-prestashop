@@ -1514,22 +1514,15 @@ class DfTools
                 }
             }
 
-            // Pre-calculate tax settings for each customer group (outside currency loop)
-            foreach ($customerGroupsData as $customerGroupData) {
-                $groupId = $customerGroupData['id_group'];
-                // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
-                $customerGroupTaxSettings[$groupId] = isset($customerGroupData['price_display_method'])
-                    ? !(bool) $customerGroupData['price_display_method']
-                    : $includeTaxes;
-            }
-
             // Pre-fetch all customer group prices once (outside currency loop) to minimize Product::getPriceStatic calls
             $customerGroupPrices = [];
             $customerGroupOnsalePrices = [];
             foreach ($customerGroupsData as $customerGroupData) {
                 $groupId = $customerGroupData['id_group'];
                 $customerId = $customerGroupData['id_customer'];
-                $groupIncludeTaxes = $customerGroupTaxSettings[$groupId];
+                $groupIncludeTaxes = isset($customerGroupData['price_display_method'])
+                ? !(bool) $customerGroupData['price_display_method']
+                : $includeTaxes;
 
                 // Set customer context for PrestaShop 1.5 before fetching prices
                 if ($isPrestaShop15) {
