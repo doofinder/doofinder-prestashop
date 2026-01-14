@@ -266,7 +266,7 @@ $products = arrayMergeByIdProduct($products, $extraRows);
 // Batch fetch all related data upfront to avoid N+1 queries
 $batchData = $dfProductBuild->batchFetchAllData($products);
 
-$processedProducts =$dfProductBuild->processProductsWithBatchData($products, $batchData, $additionalAttributesHeaders, $additionalHeaders);
+$processedProducts = $dfProductBuild->processProductsWithBatchData($products, $batchData, $additionalAttributesHeaders, $additionalHeaders);
 
 foreach ($processedProducts as $item) {
     $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $extraHeader, $header);
