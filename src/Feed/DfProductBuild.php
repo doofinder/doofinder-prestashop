@@ -603,7 +603,7 @@ class DfProductBuild
         $query->leftJoin('feature_lang', 'fl', 'fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $this->idLang);
         $query->leftJoin('feature_value_lang', 'fvl', 'fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $this->idLang);
         $query->where('fp.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
-    
+
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
             $result = \Db::getInstance()->executeS($query);
