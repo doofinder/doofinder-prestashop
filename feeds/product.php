@@ -264,9 +264,9 @@ $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariation
 $products = arrayMergeByIdProduct($products, $extraRows);
 
 // Batch fetch all related data upfront to avoid N+1 queries
-$batchData = $dfProductBuild->batchFetchAllData($products);
+$batchData = $dfProductBuild->batchFetchAll($products);
 
-$processedProducts = $dfProductBuild->processProductsWithBatchData($products, $batchData, $additionalAttributesHeaders, $additionalHeaders);
+$processedProducts = $dfProductBuild->processBatchProducts($products, $batchData, $additionalAttributesHeaders, $additionalHeaders);
 
 foreach ($processedProducts as $item) {
     $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $extraHeader, $header);

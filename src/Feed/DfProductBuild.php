@@ -281,9 +281,9 @@ class DfProductBuild
         }
 
         // Batch fetch all related data upfront to avoid N+1 queries
-        $batchData = $this->batchFetchAllData($products);
+        $batchData = $this->batchFetchAll($products);
 
-        $processedProducts = $this->processProductsWithBatchData($products, $batchData);
+        $processedProducts = $this->processBatchProducts($products, $batchData);
 
         return json_encode($processedProducts);
     }
@@ -299,7 +299,7 @@ class DfProductBuild
      *
      * @return array Processed products
      */
-    public function processProductsWithBatchData($products, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
+    public function processBatchProducts($products, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $processedProducts = [];
 
@@ -311,9 +311,9 @@ class DfProductBuild
                     $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
                     $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
                     if ($variationPrices) {
-                        $minPriceVariant = $this->getMinPriceFromData($minPriceVariant, $variationPrices);
+                        $minPriceVariant = $this->getMinPrice($minPriceVariant, $variationPrices);
                     }
-                    $processedProducts[] = $this->buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
+                    $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
                 }
             }
             $processedProducts[] = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
@@ -329,7 +329,7 @@ class DfProductBuild
      *
      * @return array Batch data containing variations, categories, features, attributes, images, prices, and stock
      */
-    public function batchFetchAllData($products)
+    public function batchFetchAll($products)
     {
         $data = [
             'variations' => [],
@@ -816,7 +816,7 @@ class DfProductBuild
      *
      * @return array|null Minimum price array or null
      */
-    public function getMinPriceFromData($currentMinPrice, $variantPrices)
+    public function getMinPrice($currentMinPrice, $variantPrices)
     {
         if (!$this->displayPrices) {
             return null;
@@ -880,7 +880,7 @@ class DfProductBuild
      *
      * @return array Variation payload
      */
-    public function buildVariationWithData($product, $variation, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
+    public function buildVariation($product, $variation, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $expanded_variation = array_merge($product, $variation);
 
@@ -961,6 +961,7 @@ class DfProductBuild
         if ($this->displayPrices) {
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
+            $p['unit_price'] = $product['unit_price'];
 
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);

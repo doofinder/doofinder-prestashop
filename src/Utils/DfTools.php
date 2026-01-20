@@ -1503,7 +1503,6 @@ class DfTools
             $hasCustomerGroups = true;
             $isPrestaShop15 = !self::versionGte('1.6.0.0');
             $cachedCustomers = [];
-            $customerGroupTaxSettings = [];
 
             if ($isPrestaShop15) {
                 foreach ($customerGroupsData as $customerGroupData) {
