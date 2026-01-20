@@ -840,7 +840,7 @@ class DfProductBuild
      *
      * @return array Processed product payload
      */
-    public function buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
+    public function buildProduct($product, $minPriceVariant, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $productId = $product['id_product'];
         $variationId = ($this->productVariations) ? $product['id_product_attribute'] : 0;
@@ -866,7 +866,7 @@ class DfProductBuild
         }
         $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
 
-        return $this->buildProduct($product, $minPriceVariant, $extraAttributesHeader, $extraHeaders);
+        return $this->buildProductBase($product, $minPriceVariant, $extraAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -884,7 +884,87 @@ class DfProductBuild
     {
         $expanded_variation = array_merge($product, $variation);
 
-        return $this->buildProductWithData($expanded_variation, [], $batchData, $extraAttributesHeader, $extraHeaders);
+        return $this->buildProduct($expanded_variation, [], $batchData, $extraAttributesHeader, $extraHeaders);
+    }
+
+    /**
+     * Applies specific transformations to a product's data for CSV export.
+     *
+     * This method performs several modifications on the product array, like:
+     * - If multi-price is enabled, formats the multiprice field.
+     * - Joins category values using a predefined separator.
+     * - If variants information exists, it slugifies and joins them using "%%".
+     * - Casts the group leader flag to an integer.
+     * - Iterates over extra headers to process attribute values:
+     *   - For each non-empty extra header, it concatenates key-value pairs in the format "key=value",
+     *     with the value cleaned and any "/" characters escaped.
+     * - Processes features (if present and an array) by converting them into an attributes string
+     *   formatted as "key=value" pairs joined with "/". The original features key is removed.
+     * - Ensures the final product fields are ordered according to the given headers.
+     *
+     * @param array $product the associative array representing the product data
+     * @param array $extraHeaders an array of additional headers to process in the product data
+     * @param array $allHeaders an array specifying the order of CSV fields
+     *
+     * @return array the transformed product array ready for CSV export
+     */
+    public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
+    {
+        if ($this->multipriceEnabled) {
+            $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
+        }
+        $product['categories'] = implode(DfTools::LIST_SEPARATOR, $product['categories']);
+        $product['category_merchandising'] = implode(DfTools::LIST_SEPARATOR, $product['category_merchandising']);
+        $product['images_links'] = implode(DfTools::LIST_SEPARATOR, $product['images_links']);
+
+        if (array_key_exists('df_variants_information', $product)) {
+            $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
+        }
+
+        $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
+
+        if (array_key_exists('features', $product) && is_array($product['features'])) {
+            $formattedAttributes = [];
+            foreach ($product['features'] as $key => $value) {
+                if (is_array($value)) {
+                    $keyValueToReturn = [];
+                    foreach ($value as $singleValue) {
+                        $keyValueToReturn[] = $key . '=' . str_replace('/', '\/', $singleValue);
+                    }
+                    $formattedAttributes[] = implode('/', $keyValueToReturn);
+                } else {
+                    $formattedAttributes[] = $key . '=' . str_replace('/', '\/', $value);
+                }
+            }
+            $product['attributes'] = str_replace('\"', '"', implode('/', $formattedAttributes));
+            unset($product['features']);
+        }
+
+        $product = self::ensureCsvFieldsOrder($product, $allHeaders);
+
+        return $product;
+    }
+
+    /**
+     * Ensures that CSV fields are sorted in the correct header order.
+     *
+     * This function is required because the number of columns must remain consistent.
+     * Only the attributes included in the headers will be printed, and they will appear
+     * in the exact same order as defined by the headers.
+     *
+     * @param array $product Product data
+     * @param array $allHeaders Full ordered header list
+     *
+     * @return array Product data with keys sorted to match the headers
+     */
+    private static function ensureCsvFieldsOrder($product, $allHeaders)
+    {
+        $productWithSortedAttributes = [];
+        foreach ($allHeaders as $header) {
+            $productWithSortedAttributes[$header] = array_key_exists($header, $product) ? $product[$header] : '';
+        }
+
+        return $productWithSortedAttributes;
     }
 
     /**
@@ -897,7 +977,7 @@ class DfProductBuild
      *
      * @return array Processed product payload
      */
-    public function buildProduct($product, $minPriceVariant = null, $extraAttributesHeader = [], $extraHeaders = [])
+    private function buildProductBase($product, $minPriceVariant = null, $extraAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
@@ -1025,86 +1105,6 @@ class DfProductBuild
         }
 
         return $p;
-    }
-
-    /**
-     * Applies specific transformations to a product's data for CSV export.
-     *
-     * This method performs several modifications on the product array, like:
-     * - If multi-price is enabled, formats the multiprice field.
-     * - Joins category values using a predefined separator.
-     * - If variants information exists, it slugifies and joins them using "%%".
-     * - Casts the group leader flag to an integer.
-     * - Iterates over extra headers to process attribute values:
-     *   - For each non-empty extra header, it concatenates key-value pairs in the format "key=value",
-     *     with the value cleaned and any "/" characters escaped.
-     * - Processes features (if present and an array) by converting them into an attributes string
-     *   formatted as "key=value" pairs joined with "/". The original features key is removed.
-     * - Ensures the final product fields are ordered according to the given headers.
-     *
-     * @param array $product the associative array representing the product data
-     * @param array $extraHeaders an array of additional headers to process in the product data
-     * @param array $allHeaders an array specifying the order of CSV fields
-     *
-     * @return array the transformed product array ready for CSV export
-     */
-    public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
-    {
-        if ($this->multipriceEnabled) {
-            $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
-        }
-        $product['categories'] = implode(DfTools::LIST_SEPARATOR, $product['categories']);
-        $product['category_merchandising'] = implode(DfTools::LIST_SEPARATOR, $product['category_merchandising']);
-        $product['images_links'] = implode(DfTools::LIST_SEPARATOR, $product['images_links']);
-
-        if (array_key_exists('df_variants_information', $product)) {
-            $product['df_variants_information'] = implode('%%', array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $product['df_variants_information']));
-        }
-
-        $product['df_group_leader'] = (is_array($product) && array_key_exists('df_group_leader', $product)) ? (int) $product['df_group_leader'] : DoofinderConstants::NO;
-
-        if (array_key_exists('features', $product) && is_array($product['features'])) {
-            $formattedAttributes = [];
-            foreach ($product['features'] as $key => $value) {
-                if (is_array($value)) {
-                    $keyValueToReturn = [];
-                    foreach ($value as $singleValue) {
-                        $keyValueToReturn[] = $key . '=' . str_replace('/', '\/', $singleValue);
-                    }
-                    $formattedAttributes[] = implode('/', $keyValueToReturn);
-                } else {
-                    $formattedAttributes[] = $key . '=' . str_replace('/', '\/', $value);
-                }
-            }
-            $product['attributes'] = str_replace('\"', '"', implode('/', $formattedAttributes));
-            unset($product['features']);
-        }
-
-        $product = self::ensureCsvFieldsOrder($product, $allHeaders);
-
-        return $product;
-    }
-
-    /**
-     * Ensures that CSV fields are sorted in the correct header order.
-     *
-     * This function is required because the number of columns must remain consistent.
-     * Only the attributes included in the headers will be printed, and they will appear
-     * in the exact same order as defined by the headers.
-     *
-     * @param array $product Product data
-     * @param array $allHeaders Full ordered header list
-     *
-     * @return array Product data with keys sorted to match the headers
-     */
-    private static function ensureCsvFieldsOrder($product, $allHeaders)
-    {
-        $productWithSortedAttributes = [];
-        foreach ($allHeaders as $header) {
-            $productWithSortedAttributes[$header] = array_key_exists($header, $product) ? $product[$header] : '';
-        }
-
-        return $productWithSortedAttributes;
     }
 
     /**
