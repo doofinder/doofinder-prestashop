@@ -1399,35 +1399,6 @@ class DfProductBuild
     }
 
     /**
-     * Get features for a product.
-     *
-     * Features are a way to describe and filter your Products.
-     * More info at: https://docs.prestashop-project.org/v.8-documentation/user-guide/selling/managing-catalog/managing-product-features
-     *
-     * @param array $product Product data
-     *
-     * @return array Processed features
-     */
-    private function getFeatures($product)
-    {
-        $features = [];
-
-        $keys = $this->featuresKeys;
-
-        foreach (DfTools::getFeaturesForProduct($product['id_product'], $this->idLang, $keys) as $key => $values) {
-            if (count($values) > 1) {
-                foreach ($values as $value) {
-                    $features[DfTools::slugify($key)][] = DfTools::cleanString($value);
-                }
-            } else {
-                $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
-            }
-        }
-
-        return $features;
-    }
-
-    /**
      * Get feature keys for filtering.
      *
      * @return array
@@ -1459,31 +1430,5 @@ class DfProductBuild
         }
 
         return false;
-    }
-
-    /**
-     * Get sluggified attribute names for variant information.
-     *
-     * @param array $product Product data
-     *
-     * @return array
-     */
-    private function getVariantsInformation($product)
-    {
-        if (DfTools::hasAttributes($product['id_product']) && !$product['id_product_attribute']) {
-            $productAttributes = DfTools::hasProductAttributes($product['id_product'], $this->attributesShown);
-
-            if (empty($productAttributes)) {
-                return [];
-            }
-
-            $attributes = DfTools::getAttributesName($productAttributes, $this->idLang);
-
-            $names = array_column($attributes, 'name');
-
-            return array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'slugify'], $names);
-        }
-
-        return [];
     }
 }
