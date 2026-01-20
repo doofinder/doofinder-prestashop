@@ -316,7 +316,7 @@ class DfProductBuild
                     $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
                 }
             }
-            $processedProducts[] = $this->buildProductWithData($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
+            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
         }
 
         return $processedProducts;
@@ -364,18 +364,18 @@ class DfProductBuild
                 $categoryIds = explode(',', $product['category_ids']);
                 $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
             }
+        }
 
-            if ($this->displayPrices) {
-                foreach ($allVariations as $variation) {
-                    $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
-                    $data['variant_prices'][$key] = DfTools::getVariantPrices(
-                        $variation['id_product'],
-                        $variation['id_product_attribute'],
-                        $this->useTax,
-                        $this->currencies,
-                        $this->customerGroupsData
-                    );
-                }
+        if ($this->displayPrices) {
+            foreach ($allVariations as $variation) {
+                $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
+                $data['variant_prices'][$key] = DfTools::getVariantPrices(
+                    $variation['id_product'],
+                    $variation['id_product_attribute'],
+                    $this->useTax,
+                    $this->currencies,
+                    $this->customerGroupsData
+                );
             }
         }
 
@@ -884,7 +884,7 @@ class DfProductBuild
     {
         $expanded_variation = array_merge($product, $variation);
 
-        return $this->buildProduct($expanded_variation, [], $batchData, $extraAttributesHeader, $extraHeaders);
+        return $this->buildProduct($expanded_variation, null, $batchData, $extraAttributesHeader, $extraHeaders);
     }
 
     /**
