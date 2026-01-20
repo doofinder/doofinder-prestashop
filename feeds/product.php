@@ -176,17 +176,14 @@ if ($shouldShowProductVariations) {
     $header[] = 'df_group_leader';
     $header[] = 'df_variants_information';
     $attributeKeys = DfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
-    $altAttributeKeys = [];
 
     foreach ($attributeKeys as $key) {
         $headerValue = DfTools::slugify($key);
         if ($shouldLimitGroupAttributes && !in_array($headerValue, $groupAttributesSlug)) {
             continue;
         }
-        $altAttributeKeys[] = $key;
         $additionalAttributesHeaders[] = $headerValue;
     }
-    $attributeKeys = $altAttributeKeys;
 }
 
 if ($shouldShowProductFeatures) {
@@ -266,22 +263,14 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
 $products = arrayMergeByIdProduct($products, $extraRows);
 
-foreach ($products as $product) {
-    $minPriceVariant = null;
-    if ($shouldShowProductVariations && $product['variant_count'] > 0) {
-        $variations = DfTools::getProductVariations($product['id_product']);
-        foreach ($variations as $variation) {
-            $minPriceVariant = $dfProductBuild->getMinPrice($minPriceVariant, $variation);
-            $builtVariation = $dfProductBuild->buildVariation($product, $variation);
-            $csvVariation = $dfProductBuild->applySpecificTransformationsForCsv($builtVariation, $extraHeader, $header);
-            fputcsv($csv, $csvVariation, DfTools::TXT_SEPARATOR);
-        }
-        $product = $dfProductBuild->buildProduct($product, $minPriceVariant, $additionalAttributesHeaders, $additionalHeaders);
-    } else {
-        $product = $dfProductBuild->buildProduct($product, null, $additionalAttributesHeaders, $additionalHeaders);
-    }
+// Batch fetch all related data upfront to avoid N+1 queries
+$batchData = $dfProductBuild->batchFetchAll($products);
 
-    $product = $dfProductBuild->applySpecificTransformationsForCsv($product, $extraHeader, $header);
-    fputcsv($csv, $product, DfTools::TXT_SEPARATOR);
+$processedProducts = $dfProductBuild->processBatchProducts($products, $batchData, $additionalAttributesHeaders, $additionalHeaders);
+
+foreach ($processedProducts as $item) {
+    $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $extraHeader, $header);
+    fputcsv($csv, $csvItem, DfTools::TXT_SEPARATOR);
 }
+
 fclose($csv);

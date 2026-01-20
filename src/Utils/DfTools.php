@@ -660,99 +660,11 @@ class DfTools
         $query->groupBy('product_shop.id_product');
 
         try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
-            // If the result is false or null, fallback to default DB instance
+            $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
             if (!$result) {
                 $result = \Db::getInstance()->executeS($query);
             }
         } catch (\PrestaShopException $e) {
-            // Fallback to default DB instance on exception
-            $result = \Db::getInstance()->executeS($query);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Returns the product variations for a product
-     *
-     * @param int $idProduct ID of the product
-     *
-     * @return array|false|\mysqli_result|\PDOStatement|resource|null
-     */
-    public static function getProductVariations($idProduct)
-    {
-        $query = new \DbQuery();
-
-        $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
-
-        $query->select('false as df_group_leader');
-
-        $query->select('0 as variant_count');
-
-        if (self::versionGte('1.7.0.0')) {
-            $query->select('pa.isbn AS isbn');
-        }
-
-        if (self::versionGte('1.7.7.0')) {
-            $query->select('pa.mpn AS variation_mpn');
-        } else {
-            $query->select('pa.reference AS variation_mpn');
-        }
-
-        // Product attribute table fields
-        $query->select('pa.id_product, pa.id_product_attribute');
-        $query->from('product_attribute', 'pa');
-        // Product shop table fields
-        $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
-        $query->where('pa.id_product = ' . (int) $idProduct);
-
-        $query->leftJoin(
-            'product',
-            'p',
-            'p.id_product = pa.id_product'
-        );
-
-        // Product supplier reference
-        $query->select('psp.product_supplier_reference AS variation_supplier_reference');
-        $query->select('s.name AS supplier_name');
-        $query->leftJoin(
-            'product_supplier',
-            'psp',
-            'p.`id_supplier` = psp.`id_supplier`
-            AND p.`id_product` = psp.`id_product`
-            AND pa.`id_product_attribute` = psp.`id_product_attribute`'
-        );
-
-        $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
-
-        $query->select('sa.out_of_stock as out_of_stock, sa.quantity as stock_quantity');
-        $query->leftJoin(
-            'stock_available',
-            'sa',
-            'p.id_product = sa.id_product
-            AND sa.id_product_attribute = pa.id_product_attribute
-            AND (sa.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')
-            OR (sa.id_shop = 0 AND sa.id_shop_group = ' . (int) \Shop::getContextShopGroupID() . '))'
-        );
-
-        // Product attribute shop reference
-        $query->select('pas.minimal_quantity AS minimum_quantity');
-        $query->leftJoin(
-            'product_attribute_shop',
-            'pas',
-            'pa.id_product_attribute = pas.id_product_attribute'
-        );
-        $query->groupBy('pa.id_product_attribute');
-
-        try {
-            $result = DfDb::getNewDbInstance(_PS_USE_SQL_SLAVE_)->query($query);
-            // If the result is false or null, fallback to default DB instance
-            if (!$result) {
-                $result = \Db::getInstance()->executeS($query);
-            }
-        } catch (\PrestaShopException $e) {
-            // Fallback to default DB instance on exception
             $result = \Db::getInstance()->executeS($query);
         }
 
@@ -877,109 +789,6 @@ class DfTools
         }
 
         return $urls;
-    }
-
-    /**
-     * Returns a string with all the paths for categories for a product in a language
-     * for the selected shop. If $flat == false then returns them as an array.
-     *
-     * @param int $idProduct Product ID
-     * @param int $idLang Language ID
-     * @param int $idShop Shop ID
-     * @param bool $flat optional implode values
-     *
-     * @return string or array
-     */
-    public static function getCategoriesForProductIdAndLanguage($idProduct, $idLang, $idShop, $flat = true)
-    {
-        $useMainCategory = (bool) self::cfg($idShop, 'DF_FEED_MAINCATEGORY_PATH', DoofinderConstants::YES);
-
-        $sql = '
-      SELECT DISTINCT
-        c.id_category,
-        c.id_parent,
-        c.level_depth,
-        c.nleft,
-        c.nright
-      FROM
-        _DB_PREFIX_category c
-        INNER JOIN _DB_PREFIX_category_product cp
-          ON (c.id_category = cp.id_category AND cp.id_product = _ID_PRODUCT_)
-        INNER JOIN _DB_PREFIX_category_shop cs
-          ON (c.id_category = cs.id_category AND cs.id_shop = _ID_SHOP_)
-          _MAIN_CATEGORY_INNER_
-      WHERE
-        c.active = 1
-        _MAIN_CATEGORY_WHERE_
-      ORDER BY
-        c.nleft DESC,
-        c.nright ASC;
-    ';
-        $mainCategoryInner = '';
-        $mainCategoryWhere = '';
-
-        if ($useMainCategory) {
-            $mainInnerSql = 'INNER JOIN _DB_PREFIX_product_shop ps '
-                . 'ON (ps.id_product = _ID_PRODUCT_ AND ps.id_shop = _ID_SHOP_)';
-            $mainCategoryInner = self::prepareSQL(
-                $mainInnerSql,
-                ['_ID_PRODUCT_' => (int) $idProduct, '_ID_SHOP_' => (int) $idShop]
-            );
-            $mainCategoryWhere = 'AND ps.id_category_default = cp.id_category';
-        }
-
-        $sql = self::prepareSQL($sql, [
-            '_ID_PRODUCT_' => (int) $idProduct,
-            '_MAIN_CATEGORY_INNER_' => pSQL($mainCategoryInner),
-            '_MAIN_CATEGORY_WHERE_' => pSQL($mainCategoryWhere),
-            '_ID_SHOP_' => (int) $idShop,
-        ]);
-
-        $sql = str_replace("\'", "'", $sql);
-
-        $categories = [];
-        $lastSaved = 0;
-        $idCategory0 = 0;
-        $nleft0 = 0;
-        $nright0 = 0;
-        $useFullPath = (bool) self::cfg($idShop, 'DF_FEED_FULL_PATH', DoofinderConstants::YES);
-
-        foreach (\Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql) as $i => $row) {
-            if (!$i) {
-                $idCategory0 = (int) $row['id_category'];
-                $nleft0 = (int) $row['nleft'];
-                $nright0 = (int) $row['nright'];
-            } else {
-                $idCategory1 = (int) $row['id_category'];
-                $nleft1 = (int) $row['nleft'];
-                $nright1 = (int) $row['nright'];
-
-                if ($nleft1 < $nleft0 && $nright1 > $nright0) {
-                    // $idCategory1 is an ancestor of $idCategory0
-                } elseif ($nleft1 < $nleft0 && $nright1 > $nright0) {
-                    // $idCategory1 is a child of $idCategory0 so be replace $idCategory0
-                    $idCategory0 = $idCategory1;
-                    $nleft0 = $nleft1;
-                    $nright0 = $nright1;
-                } else {
-                    // $idCategory1 is not a relative of $idCategory0 so we save
-                    // $idCategory0 now and make $idCategory1 the current category.
-                    $categories[] = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
-                    $lastSaved = $idCategory0;
-
-                    $idCategory0 = $idCategory1;
-                    $nleft0 = $nleft1;
-                    $nright0 = $nright1;
-                }
-            }
-        } // endforeach
-
-        if ($lastSaved != $idCategory0) {
-            // The last item in loop didn't trigger the $idCategory0 saving event.
-            $categories[] = self::getCategoryPath($idCategory0, $idLang, $idShop, $useFullPath);
-        }
-
-        return $flat ? implode(self::LIST_SEPARATOR, $categories) : $categories;
     }
 
     /**
@@ -1688,6 +1497,47 @@ class DfTools
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
         $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
 
+        if (empty($customerGroupsData)) {
+            $hasCustomerGroups = false;
+        } else {
+            $hasCustomerGroups = true;
+            $isPrestaShop15 = !self::versionGte('1.6.0.0');
+            $cachedCustomers = [];
+
+            if ($isPrestaShop15) {
+                foreach ($customerGroupsData as $customerGroupData) {
+                    $customerId = $customerGroupData['id_customer'];
+                    if (!isset($cachedCustomers[$customerId])) {
+                        $cachedCustomers[$customerId] = new \Customer($customerId);
+                    }
+                }
+            }
+
+            // Pre-fetch all customer group prices once (outside currency loop) to minimize Product::getPriceStatic calls
+            $customerGroupPrices = [];
+            $customerGroupOnsalePrices = [];
+            foreach ($customerGroupsData as $customerGroupData) {
+                $groupId = $customerGroupData['id_group'];
+                $customerId = $customerGroupData['id_customer'];
+                $groupIncludeTaxes = isset($customerGroupData['price_display_method'])
+                ? !(bool) $customerGroupData['price_display_method']
+                : $includeTaxes;
+
+                // Set customer context for PrestaShop 1.5 before fetching prices
+                if ($isPrestaShop15) {
+                    \Context::getContext()->customer = $cachedCustomers[$customerId];
+                }
+
+                $customerGroupPrices[$groupId] = self::getPrice($productId, $groupIncludeTaxes, $variantId, false, $customerId);
+                $customerGroupOnsalePrices[$groupId] = self::getOnsalePrice($productId, $groupIncludeTaxes, $variantId, false, $customerId);
+            }
+
+            // Reset customer context for PrestaShop 1.5
+            if ($isPrestaShop15) {
+                \Context::getContext()->customer = null;
+            }
+        }
+
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
                 // Backward compatibility with PrestaShop 1.5
@@ -1704,30 +1554,20 @@ class DfTools
 
                 $multiprice[$currencyCode] = $pricesMap;
 
-                foreach ($customerGroupsData as $customerGroupData) {
-                    $pricesMap = [];
-                    // Compatibility for PrestaShop 1.5
-                    if (!self::versionGte('1.6.0.0')) {
-                        \Context::getContext()->customer = new \Customer($customerGroupData['id_customer']);
-                    }
-                    // Note: price_display_method is reversed (0 = with tax, 1 = without tax)
-                    $customerGroupIncludeTaxes = isset($customerGroupData['price_display_method'])
-                        ? !(bool) $customerGroupData['price_display_method']
-                        : $includeTaxes;
+                if ($hasCustomerGroups) {
+                    foreach ($customerGroupsData as $customerGroupData) {
+                        $groupId = $customerGroupData['id_group'];
+                        $customerGroupPrice = $customerGroupPrices[$groupId];
+                        $customerGroupOnsalePrice = $customerGroupOnsalePrices[$groupId];
 
-                    $customerGroupPrice = self::getPrice($productId, $customerGroupIncludeTaxes, $variantId, false, $customerGroupData['id_customer']);
-                    $customerGroupOnsalePrice = self::getOnsalePrice($productId, $customerGroupIncludeTaxes, $variantId, false, $customerGroupData['id_customer']);
-                    $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
-                    $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
-                    $pricesMap = ['price' => $convertedPrice];
-                    if ($convertedPrice !== $convertedOnsalePrice) {
-                        $pricesMap['sale_price'] = $convertedOnsalePrice;
+                        $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
+                        $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
+                        $pricesMap = ['price' => $convertedPrice];
+                        if ($convertedPrice !== $convertedOnsalePrice) {
+                            $pricesMap['sale_price'] = $convertedOnsalePrice;
+                        }
+                        $multiprice[$currencyCode . '_' . $groupId] = $pricesMap;
                     }
-                    $multiprice[$currencyCode . '_' . $customerGroupData['id_group']] = $pricesMap;
-                }
-                // Compatibility for PrestaShop 1.5
-                if (!self::versionGte('1.6.0.0')) {
-                    \Context::getContext()->customer = null;
                 }
             }
         }
@@ -2087,6 +1927,7 @@ class DfTools
             // See https://github.com/PrestaShop/PrestaShop/blob/8.1.0/classes/Product.php#L3602.
             // $use_group_reduction and $use_customer_price must remain as false for these cases.
             $specificPriceOutput = null;
+
             return \Product::getPriceStatic(
                 $productId,
                 $includeTaxes,
