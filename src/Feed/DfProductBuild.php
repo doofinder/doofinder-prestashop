@@ -903,12 +903,11 @@ class DfProductBuild
      * - Ensures the final product fields are ordered according to the given headers.
      *
      * @param array $product the associative array representing the product data
-     * @param array $extraHeaders an array of additional headers to process in the product data
      * @param array $allHeaders an array specifying the order of CSV fields
      *
      * @return array the transformed product array ready for CSV export
      */
-    public function applySpecificTransformationsForCsv($product, $extraHeaders, $allHeaders)
+    public function applySpecificTransformationsForCsv($product, $allHeaders)
     {
         if ($this->multipriceEnabled) {
             $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);

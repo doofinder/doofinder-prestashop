@@ -273,7 +273,7 @@ $processedProducts = $dfProductBuild->processBatchProducts(
 );
 
 foreach ($processedProducts as $item) {
-    $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $extraHeader, $header);
+    $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $header);
     fputcsv($csv, $csvItem, DfTools::TXT_SEPARATOR);
 }
 
