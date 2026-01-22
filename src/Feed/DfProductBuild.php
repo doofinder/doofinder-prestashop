@@ -971,7 +971,7 @@ class DfProductBuild
      *
      * @param array $product Product data
      * @param array|null $minPriceVariant Minimum price data from variations
-     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
      * @return array Processed product payload
