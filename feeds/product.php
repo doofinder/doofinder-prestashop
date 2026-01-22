@@ -187,17 +187,6 @@ if ($shouldShowProductVariations) {
 }
 
 if ($shouldShowProductFeatures) {
-    $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
-
-    if (
-        is_array($featuresShownArray)
-        && count($featuresShownArray) > 0
-        && $featuresShownArray[0] !== ''
-    ) {
-        $featurekeys = DfTools::getSelectedFeatures($allFeatureKeys, $featuresShownArray);
-    } else {
-        $featurekeys = $allFeatureKeys;
-    }
     $additionalAttributesHeaders[] = 'attributes';
 }
 
@@ -253,7 +242,6 @@ Hook::exec('actionDoofinderExtendFeed', [
 $header = array_merge($header, $extraHeader);
 // To avoid indexation failures
 $header = array_unique($header);
-$additionalHeaders = array_merge($additionalAttributesHeaders, $extraHeader);
 
 $csv = fopen('php://output', 'w');
 if (!$limit || (false !== $offset && 0 === (int) $offset)) {
@@ -266,10 +254,15 @@ $products = arrayMergeByIdProduct($products, $extraRows);
 // Batch fetch all related data upfront to avoid N+1 queries
 $batchData = $dfProductBuild->batchFetchAll($products);
 
-$processedProducts = $dfProductBuild->processBatchProducts($products, $batchData, $additionalAttributesHeaders, $additionalHeaders);
+$processedProducts = $dfProductBuild->processBatchProducts(
+    $products,
+    $batchData,
+    $additionalAttributesHeaders,
+    $extraHeader
+);
 
 foreach ($processedProducts as $item) {
-    $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $extraHeader, $header);
+    $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $header);
     fputcsv($csv, $csvItem, DfTools::TXT_SEPARATOR);
 }
 
