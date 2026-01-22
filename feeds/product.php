@@ -187,17 +187,6 @@ if ($shouldShowProductVariations) {
 }
 
 if ($shouldShowProductFeatures) {
-    $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($shop->id, $lang->id);
-
-    if (
-        is_array($featuresShownArray)
-        && count($featuresShownArray) > 0
-        && $featuresShownArray[0] !== ''
-    ) {
-        $featurekeys = DfTools::getSelectedFeatures($allFeatureKeys, $featuresShownArray);
-    } else {
-        $featurekeys = $allFeatureKeys;
-    }
     $additionalAttributesHeaders[] = 'attributes';
 }
 

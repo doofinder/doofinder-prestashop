@@ -294,12 +294,12 @@ class DfProductBuild
      *
      * @param array $products Array of product data
      * @param array $batchData Pre-fetched batch data
-     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
      * @return array Processed products
      */
-    public function processBatchProducts($products, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
+    public function processBatchProducts($products, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $processedProducts = [];
 
@@ -313,10 +313,10 @@ class DfProductBuild
                     if ($variationPrices) {
                         $minPriceVariant = $this->getMinPrice($minPriceVariant, $variationPrices);
                     }
-                    $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $extraAttributesHeader, $extraHeaders);
+                    $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $additionalAttributesHeader, $extraHeaders);
                 }
             }
-            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $extraAttributesHeader, $extraHeaders);
+            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader, $extraHeaders);
         }
 
         return $processedProducts;
@@ -835,12 +835,12 @@ class DfProductBuild
      * @param array $product Product data
      * @param array|null $minPriceVariant Minimum price data from variations
      * @param array $batchData Pre-fetched batch data
-     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
      * @return array Processed product payload
      */
-    public function buildProduct($product, $minPriceVariant, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
+    public function buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $productId = $product['id_product'];
         $variationId = ($this->productVariations) ? $product['id_product_attribute'] : 0;
@@ -866,7 +866,7 @@ class DfProductBuild
         }
         $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
 
-        return $this->buildProductBase($product, $minPriceVariant, $extraAttributesHeader, $extraHeaders);
+        return $this->buildProductBase($product, $minPriceVariant, $additionalAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -875,16 +875,16 @@ class DfProductBuild
      * @param array $product Base product data
      * @param array $variation Variation data
      * @param array $batchData Pre-fetched batch data
-     * @param array $extraAttributesHeader Additional attribute headers to process
+     * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
      * @return array Variation payload
      */
-    public function buildVariation($product, $variation, $batchData, $extraAttributesHeader = [], $extraHeaders = [])
+    public function buildVariation($product, $variation, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $expanded_variation = array_merge($product, $variation);
 
-        return $this->buildProduct($expanded_variation, null, $batchData, $extraAttributesHeader, $extraHeaders);
+        return $this->buildProduct($expanded_variation, null, $batchData, $additionalAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -976,7 +976,7 @@ class DfProductBuild
      *
      * @return array Processed product payload
      */
-    private function buildProductBase($product, $minPriceVariant = null, $extraAttributesHeader = [], $extraHeaders = [])
+    private function buildProductBase($product, $minPriceVariant = null, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
@@ -1079,11 +1079,11 @@ class DfProductBuild
                 $p = array_merge($p, $attributes);
             }
 
-            // Ensure all attribute headers from extraAttributesHeader are present for CSV column consistency
+            // Ensure all attribute headers from additionalAttributesHeader are present for CSV column consistency
             // Add empty values for headers that don't have attributes (already merged ones are skipped)
-            foreach ($extraAttributesHeader as $extraAttributeHeader) {
-                if ('attributes' !== $extraAttributeHeader && !array_key_exists($extraAttributeHeader, $p)) {
-                    $p[$extraAttributeHeader] = '';
+            foreach ($additionalAttributesHeader as $additionalAttributeHeader) {
+                if (!array_key_exists($additionalAttributeHeader, $p)) {
+                    $p[$additionalAttributeHeader] = '';
                 }
             }
         }
@@ -1094,7 +1094,7 @@ class DfProductBuild
 
         // Process extra headers - but exclude attribute headers that were already processed above
         // This prevents overwriting attributes with values from $product array
-        $processedAttributeHeaders = $this->productVariations ? $extraAttributesHeader : [];
+        $processedAttributeHeaders = $this->productVariations ? $additionalAttributesHeader : [];
         foreach ($extraHeaders as $extraHeader) {
             // Skip if this is an attribute header (to prevent overwriting with product data)
             if (array_key_exists($extraHeader, $p) || in_array($extraHeader, $processedAttributeHeaders, true)) {
