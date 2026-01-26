@@ -10,7 +10,7 @@
  *
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
  *
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)

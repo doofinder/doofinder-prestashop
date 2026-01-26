@@ -9,7 +9,7 @@
 *
 * @author    Doofinder
 * @copyright Doofinder
-* @license   GPLv3
+* @license   MIT
 *}	
 	{if $configured}
 		<div class="tab-pane" id="support_tab">{include file='./support_tab.tpl'}</div>

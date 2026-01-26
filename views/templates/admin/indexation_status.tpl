@@ -9,7 +9,7 @@
 *
 * @author    Doofinder
 * @copyright Doofinder
-* @license   GPLv3
+* @license   MIT
 *}
 <div class="doofinder-indexation-status" style="margin-top: 2em; margin-bottom: 2em; background-color: #e2e2e2;">
     <div class="row" >

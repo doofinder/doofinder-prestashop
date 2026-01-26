@@ -9,7 +9,7 @@
  *
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
  */
 
 class DoofinderAddToCartError extends Error {

@@ -9,7 +9,7 @@
 *
 * @author    Doofinder
 * @copyright Doofinder
-* @license   GPLv3
+* @license   MIT
 *}
 {if isset($installation_ID) && $installation_ID}
   <!-- START OF DOOFINDER ADD TO CART SCRIPT -->

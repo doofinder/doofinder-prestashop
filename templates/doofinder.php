@@ -10,7 +10,7 @@
  *
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
  */
 
 /*

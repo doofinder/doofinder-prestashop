@@ -9,7 +9,7 @@
 *
 * @author    Doofinder
 * @copyright Doofinder
-* @license   GPLv3
+* @license   MIT
 *}
 <p>{$text_data_changed|escape:'htmlall':'UTF-8'}</p>
 <p>

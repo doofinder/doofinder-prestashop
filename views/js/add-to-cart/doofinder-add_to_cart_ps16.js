@@ -9,7 +9,7 @@
  *
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
  */
 
 //implementation of "add to cart" functionality for prestashop 1.6.x

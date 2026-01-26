@@ -9,7 +9,7 @@
 *
 * @author    Doofinder
 * @copyright Doofinder
-* @license   GPLv3
+* @license   MIT
 *}
 
 {capture assign="productClasses"}{if !empty($productClass)}{$productClass}{else}col-xs-6 col-xl-4{/if}{/capture}

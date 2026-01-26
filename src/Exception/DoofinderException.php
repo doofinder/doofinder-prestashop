@@ -2,7 +2,7 @@
 /**
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
  */
 
 namespace PrestaShop\Module\Doofinder\Exception;

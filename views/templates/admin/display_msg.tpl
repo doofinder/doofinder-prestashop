@@ -9,7 +9,7 @@
 *
 * @author    Doofinder
 * @copyright Doofinder
-* @license   GPLv3
+* @license   MIT
 *}
 <div class="bootstrap">
     <div class="module_{$d_type_message|escape:'htmlall':'UTF-8'} alert alert-{$d_type_alert|escape:'htmlall':'UTF-8'}" >
