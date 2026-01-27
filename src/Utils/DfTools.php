@@ -1394,11 +1394,11 @@ class DfTools
      *
      * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
      */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies, $customerGroupsData = [])
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies, $extraPrices, $customerGroupsData = [])
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
         $variantOnsalePrice = self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute);
-        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute, $customerGroupsData);
+        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $extraPrices, $idProductAttribute, $customerGroupsData);
 
         return [
             'price' => $variantPrice,
@@ -1491,7 +1491,7 @@ class DfTools
      *
      * @return array
      */
-    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData = [])
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $extraPrices, $variantId = null, $customerGroupsData = [])
     {
         $multiprice = [];
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
@@ -1546,7 +1546,10 @@ class DfTools
                 $convertedPrice = \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
                 $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($onsale_price, $currency), $decimals);
                 $currencyCode = $currency['iso_code'];
-                $pricesMap = ['price' => $convertedPrice];
+                $pricesMap = [
+                    'price' => $convertedPrice,
+                    'purchase_price' => \Tools::ps_round(\Tools::convertPrice($extraPrices['purchase_price'], $currency), $decimals),
+                ];
 
                 if ($convertedPrice != $convertedOnsalePrice) {
                     $pricesMap['sale_price'] = $convertedOnsalePrice;

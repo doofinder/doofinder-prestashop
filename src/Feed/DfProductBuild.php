@@ -373,6 +373,7 @@ class DfProductBuild
                     $variation['id_product'],
                     $variation['id_product_attribute'],
                     $this->useTax,
+                    ['purchase_price' => $variation['wholesale_price']],
                     $this->currencies,
                     $this->customerGroupsData
                 );
@@ -1371,9 +1372,12 @@ class DfProductBuild
     private function getMultiprice($product)
     {
         $productId = $product['id_product'];
+        $extraPrices = [
+            'purchase_price' => $product['wholesale_price'],
+        ];
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
-        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute, $this->customerGroupsData);
+        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $extraPrices, $idProductAttribute, $this->customerGroupsData);
     }
 
     /**
