@@ -1,8 +1,8 @@
 {*
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  *}
 
 {capture assign="productClasses"}{if !empty($productClass)}{$productClass}{else}col-xs-6 col-xl-4{/if}{/capture}

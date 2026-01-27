@@ -1,8 +1,8 @@
 {*
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  *}
 {if isset($installation_ID) && $installation_ID}
   <!-- START OF DOOFINDER ADD TO CART SCRIPT -->

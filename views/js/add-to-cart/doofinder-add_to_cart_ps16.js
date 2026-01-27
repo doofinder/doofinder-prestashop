@@ -1,8 +1,8 @@
 /**
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  */
 
 //implementation of "add to cart" functionality for prestashop 1.6.x

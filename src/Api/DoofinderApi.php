@@ -1,9 +1,9 @@
 <?php
 /**
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  *
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
  * Gilles Devaux (<gilles.devaux@gmail.com>) (https://github.com/flaptor/indextank-php)

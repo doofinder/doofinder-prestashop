@@ -1,9 +1,9 @@
 <?php
 /**
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  */
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');

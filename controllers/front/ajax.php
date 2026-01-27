@@ -1,9 +1,9 @@
 <?php
 /**
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  */
 if (!defined('_PS_VERSION_')) {
     exit;

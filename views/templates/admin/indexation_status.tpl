@@ -1,8 +1,8 @@
 {*
- * Copyright (c) Doofinder
- *
- * @license MIT
- * @see https://opensource.org/licenses/MIT
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  *}
 <div class="doofinder-indexation-status" style="margin-top: 2em; margin-bottom: 2em; background-color: #e2e2e2;">
     <div class="row" >
