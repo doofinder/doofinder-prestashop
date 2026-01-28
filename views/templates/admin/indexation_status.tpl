@@ -1,16 +1,9 @@
 {*
-* NOTICE OF LICENSE
-*
-* This file is licenced under the Software License Agreement.
-* With the purchase or the installation of the software in your application
-* you accept the licence agreement.
-*
-* You must not modify, adapt or create derivative works of this source code
-*
-* @author    Doofinder
-* @copyright Doofinder
-* @license   GPLv3
-*}
+ * @author    Doofinder
+ * @copyright Doofinder
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
+ *}
 <div class="doofinder-indexation-status" style="margin-top: 2em; margin-bottom: 2em; background-color: #e2e2e2;">
     <div class="row" >
         <div class="col-xs-10" style="margin-left: 1em; margin-top: 1em; background-color: #e2e2e2; border-bottom: none;">

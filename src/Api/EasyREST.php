@@ -7,7 +7,8 @@
  *
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  */
 
 namespace PrestaShop\Module\Doofinder\Api;

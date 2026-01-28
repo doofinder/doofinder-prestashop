@@ -1,16 +1,9 @@
 <?php
 /**
- * NOTICE OF LICENSE
- *
- * This file is licenced under the Software License Agreement.
- * With the purchase or the installation of the software in your application
- * you accept the licence agreement.
- *
- * You must not modify, adapt or create derivative works of this source code
- *
  * @author    Doofinder
  * @copyright Doofinder
- * @license   GPLv3
+ * @license   MIT
+ * @see       https://opensource.org/licenses/MIT
  */
 
 use PrestaShop\Module\Doofinder\Feed\DfProductBuild;
@@ -97,7 +90,9 @@ $isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
 $shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
 $shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
 $featuresShownArray = $dfProductBuild->getFeaturesShown();
-$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) { return strlen(trim($a)) > 0; });
+$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) {
+    return strlen(trim($a)) > 0;
+});
 /* ---------- END SHARED CONFIG ---------- */
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
