@@ -366,6 +366,7 @@ class DfProductBuild
                     $variation['id_product'],
                     $variation['id_product_attribute'],
                     $this->useTax,
+                    ['purchase_price' => $variation['wholesale_price']],
                     $this->currencies,
                     $this->customerGroupsData
                 );
@@ -1031,9 +1032,11 @@ class DfProductBuild
         }
 
         if ($this->displayPrices) {
+            $decimals = DfTools::getCurrencyPrecision($this->idCurrency);
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
             $p['unit_price'] = $product['unit_price'];
+            $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $decimals);
 
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);
@@ -1362,9 +1365,12 @@ class DfProductBuild
     private function getMultiprice($product)
     {
         $productId = $product['id_product'];
+        $extraPrices = [
+            'purchase_price' => $product['wholesale_price'],
+        ];
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
-        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute, $this->customerGroupsData);
+        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $extraPrices, $idProductAttribute, $this->customerGroupsData);
     }
 
     /**

@@ -154,6 +154,7 @@ $header[] = 'stock_quantity';
 if ($shouldDisplayPrices) {
     $header[] = 'price';
     $header[] = 'sale_price';
+    $header[] = 'purchase_price';
 
     if ($isMultipriceEnabled) {
         $header[] = 'df_multiprice';
