@@ -1031,9 +1031,11 @@ class DfProductBuild
         }
 
         if ($this->displayPrices) {
+            $decimals = DfTools::getCurrencyPrecision($this->idCurrency);
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
             $p['unit_price'] = $product['unit_price'];
+            $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $decimals);
 
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);
