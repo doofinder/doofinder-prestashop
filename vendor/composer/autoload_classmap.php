@@ -29,7 +29,6 @@ return array(
     'PrestaShop\\Module\\Doofinder\\Manager\\HookManager' => $baseDir . '/src/Manager/HookManager.php',
     'PrestaShop\\Module\\Doofinder\\Manager\\LanguageManager' => $baseDir . '/src/Manager/LanguageManager.php',
     'PrestaShop\\Module\\Doofinder\\Manager\\UrlManager' => $baseDir . '/src/Manager/UrlManager.php',
-    'PrestaShop\\Module\\Doofinder\\Utils\\DfDb' => $baseDir . '/src/Utils/DfDb.php',
     'PrestaShop\\Module\\Doofinder\\Utils\\DfTools' => $baseDir . '/src/Utils/DfTools.php',
     'PrestaShop\\Module\\Doofinder\\View\\DoofinderAdminPanelView' => $baseDir . '/src/View/DoofinderAdminPanelView.php',
 );
