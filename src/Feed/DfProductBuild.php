@@ -345,7 +345,9 @@ class DfProductBuild
         if ($this->productVariations) {
             $data['variations'] = $this->batchFetchVariations($productIds);
             // Equivalent to array_merge(...$data['variations']) but supported by lower versions of PHP than 5.6
-            $allVariations = call_user_func_array('array_merge', $data['variations']);
+            if (!empty($data['variations'])) {
+                $allVariations = call_user_func_array('array_merge', $data['variations']);
+            }
         }
 
         $data['categories'] = $this->batchFetchCategories($productIds);
