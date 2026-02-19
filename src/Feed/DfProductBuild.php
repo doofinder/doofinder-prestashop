@@ -721,14 +721,24 @@ class DfProductBuild
             return $stock;
         }
 
-        $shopIds = \Shop::getContextListShopID();
         $shopGroupId = \Shop::getContextShopGroupID();
+        $shopGroup = new \ShopGroup((int) $shopGroupId);
+        $shareStock = (bool) $shopGroup->share_stock;
 
         $query = new \DbQuery();
         $query->select('id_product, id_product_attribute, quantity, out_of_stock');
         $query->from('stock_available');
         $query->where('id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
-        $query->where('(id_shop IN (' . implode(',', array_map('intval', $shopIds)) . ') OR (id_shop = 0 AND id_shop_group = ' . (int) $shopGroupId . '))');
+
+        if ($shareStock) {
+            // When stock is shared at group level, the group-level row holds the real quantity
+            $query->where('id_shop = 0 AND id_shop_group = ' . (int) $shopGroupId);
+        } else {
+            // When stock is not shared, the shop-level row holds the real quantity
+            $shopIds = \Shop::getContextListShopID();
+            $query->where('id_shop IN (' . implode(',', array_map('intval', $shopIds)) . ')');
+        }
+
         $attributeCondition = 'id_product_attribute = 0';
         if (!empty($variationIds)) {
             $attributeCondition .= ' OR id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')';
