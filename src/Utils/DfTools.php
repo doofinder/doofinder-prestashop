@@ -1636,14 +1636,17 @@ class DfTools
         // trim
         $text = trim($text, '-');
 
-        // transliterate
-        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+        // transliterate (skipped for CJK languages)
+        $translit = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+        if (false !== $translit && '' !== $translit && false === strpos($translit, '?')) {
+            $text = $translit;
+        }
 
         // lowercase
         $text = \Tools::strtolower($text);
 
         // remove unwanted characters
-        $text = preg_replace('~[^-\w]+~', '', $text);
+        $text = preg_replace('~[^-\w]+~u', '', $text);
 
         if (empty($text)) {
             return 'n-a';
