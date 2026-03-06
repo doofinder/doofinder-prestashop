@@ -1,14 +1,27 @@
-name: Prestashop validator V2
+name: PrestaShop Validator V2
 on: [push]
+
 jobs:
   prestashop-validator:
-    name: send module to validator
     runs-on: ubuntu-latest
+
     steps:
-      - name: Send module to validator
-        uses: PrestaShopCorp/github-action-validator@dev
+      - name: Validate module via GitHub branch
         env:
-          VALIDATOR_API_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
-        with:
-          github_link: ${{ github.repository }}
-          github_branch: ${{ github.ref_name }}
+          PS_VALIDATOR_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
+        run: |
+          RESPONSE=$(curl -s -X POST https://validator.prestashop.com/api/modules \
+            -F "github_link=https://github.com/${{ github.repository }}" \
+            -F "github_branch=${{ github.ref_name }}" \
+            -F "key=$PS_VALIDATOR_KEY")
+
+          echo "$RESPONSE"
+
+          ERRORS=$(echo "$RESPONSE" | jq '.errors | length')
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "❌ Validator found errors"
+            exit 1
+          fi
+
+          echo "✅ Module passed validation"
