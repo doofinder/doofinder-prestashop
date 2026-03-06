@@ -17,10 +17,11 @@ jobs:
 
           echo "$RESPONSE"
 
-          ERRORS=$(echo "$RESPONSE" | jq '.errors | length')
+          ERRORS=$(echo "$RESPONSE" | jq '.Details.results.errors // 0')
 
+          # Since we are validating from the branch we will always get at least one error.
           if [ "$ERRORS" -gt 0 ]; then
-            echo "❌ Validator found errors"
+            echo "❌ Validator found $ERRORS errors"
             exit 1
           fi
 
