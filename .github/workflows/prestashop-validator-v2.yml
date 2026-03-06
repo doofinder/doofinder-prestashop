@@ -11,7 +11,7 @@ jobs:
           PS_VALIDATOR_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
         run: |
           RESPONSE=$(curl -s -X POST https://validator.prestashop.com/api/modules \
-            -F "github_link=https://github.com/${{ github.repository }}" \
+            -F "github_link=${{ github.repository }}" \
             -F "github_branch=${{ github.ref_name }}" \
             -F "key=$PS_VALIDATOR_KEY")
 
