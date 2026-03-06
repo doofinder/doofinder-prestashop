@@ -1,11 +1,7 @@
 name: Prestashop validator V2
-on:
-  workflow_run:
-    workflows: ["PHP tests"]
-    types: [completed]
+on: [push]
 jobs:
   prestashop-validator:
-    if: github.event.workflow_run.conclusion == 'success'
     name: send module to validator
     runs-on: ubuntu-latest
     steps:
@@ -14,5 +10,5 @@ jobs:
         env:
           VALIDATOR_API_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
         with:
-          github_link: ${{ github.event.workflow_run.repository.full_name }}
-          github_branch: ${{ github.event.workflow_run.head_branch }}
+          github_link: ${{ github.repository }}
+          github_branch: ${{ github.ref_name }}
