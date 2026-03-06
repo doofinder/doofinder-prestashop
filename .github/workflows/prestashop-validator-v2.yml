@@ -20,8 +20,8 @@ jobs:
           ERRORS=$(echo "$RESPONSE" | jq '.Details.results.errors // 0')
 
           # Since we are validating from the branch we will always get at least one error.
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "❌ Validator found $ERRORS-1 error/s"
+          if [ "$ERRORS" -gt 1 ]; then
+            echo "❌ Validator found $((ERRORS - 1)) error/s"
             exit 1
           fi
 
