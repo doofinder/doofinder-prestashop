@@ -1,4 +1,4 @@
-name: PrestaShop Validator V2
+name: PrestaShop Validator
 on: [push]
 
 jobs:
