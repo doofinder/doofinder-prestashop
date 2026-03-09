@@ -1,20 +1,28 @@
-name: Prestashop validator
-on: [push, pull_request]
+name: PrestaShop Validator
+on: [push]
+
 jobs:
   prestashop-validator:
-    name: Build & Send to validator
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Create temporal tag
-        run: git tag ci
-
-      - name: Build
-        run: sh build.sh ci
-
-      - name: Send to validator API
+      - name: Validate module via GitHub branch
         env:
-            VALIDATOR_API_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
-        run: bash ./.github/scripts/validate-prestashop.sh
+          PS_VALIDATOR_KEY: ${{ secrets.PRESTASHOP_VALIDATOR_API_KEY }}
+        run: |
+          RESPONSE=$(curl -s -X POST https://validator.prestashop.com/api/modules \
+            -F "github_link=${{ github.repository }}" \
+            -F "github_branch=${{ github.ref_name }}" \
+            -F "key=$PS_VALIDATOR_KEY")
+
+          echo "$RESPONSE"
+
+          ERRORS=$(echo "$RESPONSE" | jq '.Details.results.errors // 0')
+
+          # Since we are validating from the branch we will always get at least one error.
+          if [ "$ERRORS" -gt 1 ]; then
+            echo "❌ Validator found $((ERRORS - 1)) error/s"
+            exit 1
+          fi
+
+          echo "✅ Module passed validation"
