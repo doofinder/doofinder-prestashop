@@ -1822,7 +1822,7 @@ class DfTools
     }
 
     /**
-     * Get the additional customer groups and default customers for the current or given shop.
+     * Get the additional customer groups and default customers for the current shop.
      *
      * This method returns a list of customer groups and their default customers.
      * The customer groups are the ones that are not native to PrestaShop.
