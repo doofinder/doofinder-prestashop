@@ -131,7 +131,7 @@ class DfProductBuild
         $this->idShop = $idShop;
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
-        $this->customerGroupsData = DfTools::getAdditionalCustomerGroupsAndDefaultCustomers();
+        $this->customerGroupsData = DfTools::getAdditionalCustomerGroupsAndDefaultCustomers($this->idShop);
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
         $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
         $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
