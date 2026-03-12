@@ -62,9 +62,9 @@ class DfTools
     protected static $cachedCategoryPaths = [];
 
     /**
-     * @var array|null cached customer groups data for optimization
+     * @var array|null cached customer groups data per shop for optimization [id_shop => data]
      */
-    protected static $cachedCustomerGroupsData;
+    protected static $cachedCustomerGroupsData = [];
 
     /**
      * Hash a password using PrestaShop's cookie key.
@@ -1822,12 +1822,14 @@ class DfTools
     }
 
     /**
-     * Get the additional customer groups and default customers.
+     * Get the additional customer groups and default customers for the current shop.
      *
      * This method returns a list of customer groups and their default customers.
      * The customer groups are the ones that are not native to PrestaShop.
      * The default customers are the ones that are associated with the customer groups.
      * The price_display_method field indicates whether prices should include tax (1) or exclude tax (0).
+     * When multistore is enabled, only groups associated with the current shop are returned.
+     * When multistore is disabled, all non-native groups are returned (single-shop behaviour).
      *
      * Result: [['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1], ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0], ...]
      *
@@ -1835,12 +1837,16 @@ class DfTools
      */
     public static function getAdditionalCustomerGroupsAndDefaultCustomers()
     {
-        if (self::$cachedCustomerGroupsData !== null) {
-            return self::$cachedCustomerGroupsData;
+        $idShop = (int) \Context::getContext()->shop->id;
+
+        if (isset(self::$cachedCustomerGroupsData[$idShop])) {
+            return self::$cachedCustomerGroupsData[$idShop];
         }
 
         if (!\Group::isCurrentlyUsed()) {
-            return [];
+            self::$cachedCustomerGroupsData[$idShop] = [];
+
+            return self::$cachedCustomerGroupsData[$idShop];
         }
 
         $unidentifiedGroup = (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
@@ -1852,16 +1858,22 @@ class DfTools
         $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer, g.price_display_method');
         $query->from('customer_group', 'cg');
         $query->leftJoin('group', 'g', 'cg.id_group = g.id_group');
+
+        // When multistore is enabled, restrict to groups associated with the current shop
+        if (\Shop::isFeatureActive()) {
+            $query->innerJoin('group_shop', 'gs', 'gs.id_group = cg.id_group AND gs.id_shop = ' . $idShop);
+        }
+
         $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
         $query->groupBy('cg.id_group, g.price_display_method');
 
         $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         // To guarantee compatibility with PrestaShop 1.5
-        self::$cachedCustomerGroupsData = array_filter($customerGroupsData, function ($groupData) {
+        self::$cachedCustomerGroupsData[$idShop] = array_filter($customerGroupsData, function ($groupData) {
             return is_numeric($groupData['id_group']) && is_numeric($groupData['id_customer']);
         });
 
-        return self::$cachedCustomerGroupsData;
+        return self::$cachedCustomerGroupsData[$idShop];
     }
 
     /**
