@@ -1833,17 +1833,11 @@ class DfTools
      *
      * Result: [['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1], ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0], ...]
      *
-     * @param int|null $idShop Shop ID; if null, uses the current context shop (works with multistore disabled)
-     *
      * @return array
      */
-    public static function getAdditionalCustomerGroupsAndDefaultCustomers($idShop = null)
+    public static function getAdditionalCustomerGroupsAndDefaultCustomers()
     {
-        if (!isset($idShop)) {
-            $idShop = (int) \Context::getContext()->shop->id;
-        } else {
-            $idShop = (int) $idShop;
-        }
+        $idShop = (int) \Context::getContext()->shop->id;
 
         if (isset(self::$cachedCustomerGroupsData[$idShop])) {
             return self::$cachedCustomerGroupsData[$idShop];
