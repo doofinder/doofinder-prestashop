@@ -1828,7 +1828,7 @@ class DfTools
      * The customer groups are the ones that are not native to PrestaShop.
      * The default customers are the ones that are associated with the customer groups.
      * The price_display_method field indicates whether prices should include tax (1) or exclude tax (0).
-     * When multistore is enabled, only groups associated with the given/current shop are returned.
+     * When multistore is enabled, only groups associated with the current shop are returned.
      * When multistore is disabled, all non-native groups are returned (single-shop behaviour).
      *
      * Result: [['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1], ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0], ...]
