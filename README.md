@@ -15,6 +15,8 @@ Doofinder helps stores grow by turning their search into an advanced search engi
 - **Visual & Image Search** — Shoppers can search by image; AI improves findability.
 - **AI Assistant** — Conversational search and support where available.
 
+[Try the demo](https://prestashop.doofinder.com/en/).
+
 ## Requirements
 
 - **PHP:** Minimum 5.4; tested up to 8.4.
