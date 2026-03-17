@@ -15,19 +15,6 @@ Doofinder helps stores grow by turning their search into an advanced search engi
 - **Visual & Image Search** — Shoppers can search by image; AI improves findability.
 - **AI Assistant** — Conversational search and support where available.
 
-<video tabindex="-1" disableremoteplayback="" poster="https://r2.vidzflow.com/thumbnails/elZBX0bTZn_1765527841.jpg" preload="metadata" loop=""
-    muted="muted" src="https://r2.vidzflow.com/v/elZBX0bTZn_1080p_1765527354.mp4">
-
-    <source src="https://r2.vidzflow.com/source/53946337-e87f-40cf-9e1c-e047eab11f99.mp4" type="video/mp4"
-        size="original" label="originalp">
-    <source src="https://r2.vidzflow.com/v/elZBX0bTZn_576p_1765527354.mp4" type="video/mp4" size="576" label="576p">
-    <source src="https://r2.vidzflow.com/v/elZBX0bTZn_720p_1765527354.mp4" type="video/mp4" size="720" label="720p">
-    <source src="https://r2.vidzflow.com/v/elZBX0bTZn_1080p_1765527354.mp4" type="video/mp4" size="1080" label="1080p"
-        selected="true">
-    <source src="https://r2.vidzflow.com/source/53946337-e87f-40cf-9e1c-e047eab11f99.mp4" type="video/mp4" size="★"
-        label="★">
-</video>
-
 ## Requirements
 
 - **PHP:** Minimum 5.4; tested up to 8.4.
