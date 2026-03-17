@@ -15,6 +15,19 @@ Doofinder helps stores grow by turning their search into an advanced search engi
 - **Visual & Image Search** — Shoppers can search by image; AI improves findability.
 - **AI Assistant** — Conversational search and support where available.
 
+<video tabindex="-1" disableremoteplayback="" poster="https://r2.vidzflow.com/thumbnails/elZBX0bTZn_1765527841.jpg" preload="metadata" loop=""
+    muted="muted" src="https://r2.vidzflow.com/v/elZBX0bTZn_1080p_1765527354.mp4">
+
+    <source src="https://r2.vidzflow.com/source/53946337-e87f-40cf-9e1c-e047eab11f99.mp4" type="video/mp4"
+        size="original" label="originalp">
+    <source src="https://r2.vidzflow.com/v/elZBX0bTZn_576p_1765527354.mp4" type="video/mp4" size="576" label="576p">
+    <source src="https://r2.vidzflow.com/v/elZBX0bTZn_720p_1765527354.mp4" type="video/mp4" size="720" label="720p">
+    <source src="https://r2.vidzflow.com/v/elZBX0bTZn_1080p_1765527354.mp4" type="video/mp4" size="1080" label="1080p"
+        selected="true">
+    <source src="https://r2.vidzflow.com/source/53946337-e87f-40cf-9e1c-e047eab11f99.mp4" type="video/mp4" size="★"
+        label="★">
+</video>
+
 ## Requirements
 
 - **PHP:** Minimum 5.4; tested up to 8.4.
@@ -24,60 +37,27 @@ For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestas
 
 ## Quick start / Installation
 
-1. Clone the repo.
-2. Copy `.env.example` to `.env` and set at least `BASE_URL` (and any Doofinder URLs if needed).
-3. Run `make init` to build, install PrestaShop, and start containers.
-4. Open your shop at `https://BASE_URL` (e.g. `https://localhost:4011`). Install or enable the Doofinder module from the admin or run `make doofinder-upgrade`.
+Download the [latest release](https://github.com/doofinder/doofinder-prestashop/releases) or install from [PrestaShop Addons](https://addons.prestashop.com/en/search-filters/30818-doofinder-search-discovery.html). Upload the module in your PrestaShop Back Office (Modules → Module Manager → Upload module), then configure it following the [Doofinder PrestaShop installation guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
 
-Admin panel: `https://BASE_URL/PS_FOLDER_ADMIN` (default credentials in `.env.example`: `test@example.com` / `admin123`).
+## Development / Contributing
 
-> [!NOTE]
-> For PrestaShop versions prior to 1.7 you may need to delete the `install` folder and rename the `admin` folder in `html`. For newer versions this is handled automatically using `PS_FOLDER_ADMIN` (default `/4dm1n`).
+This project relies on the Makefile for local setup and common tasks. Ensure a `.env` file is present in the repo root.
 
-## Environment variables
+> **Note:** `make doofinder-configure` generates the plugin files from the `templates/` directory (using `.env`) and runs `make dump-autoload` to regenerate the Composer autoloader. Many other targets depend on it, so running those targets keeps generated files in sync.
 
-All supported variables are documented in `.env.example`. Copy it to `.env` and adjust. Main groups:
+**Use cases:**
 
-| Purpose | Variables |
-|--------|-----------|
-| Plugin & Doofinder services | `PLUGIN_VERSION`, `DOOMANAGER_REGION_URL`, `DOOPLUGINS_REGION_URL`, `DOOPHOENIX_REGION_URL`, `CONFIG_REGION_URL` |
-| Store | `BASE_URL` |
-| Database (Docker) | `MYSQL_VERSION`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` |
-| PrestaShop installer | `PRESTASHOP_DOCKER_TAG`, `PS_DB_PREFIX`, `PS_LANGUAGE`, `PS_COUNTRY`, `PS_FOLDER_ADMIN`, `PS_ENABLE_SSL`, `PS_ADMIN_EMAIL`, `PS_ADMIN_PASSWORD` |
+- **First-time setup:** Run `make init` once to build images, install PrestaShop, and start containers.
+- **Start / stop the stack:** `make start`, `make stop`.
+- **Install or upgrade the Doofinder module:** `make doofinder-upgrade`.
+- **Uninstall the module:** `make doofinder-uninstall`.
+- **Reinstall the module:** `make doofinder-reinstall`.
+- **Bump plugin version:** Update `PLUGIN_VERSION` in `.env`, then run `make doofinder-upgrade`.
+- **DB snapshot:** `make db-backup` (optionally `make db-backup prefix=_name`). Restore with `make db-restore file=backup.sql.gz`.
+- **Clear cache:** `make cache-flush`.
+- **Shell in the web container:** `make dev-console`.
 
-You can override any of these in `.env.local`; the Makefile loads `.env` then `.env.local`. Use production URLs only in committed files.
-
-## Make targets
-
-| Target | Description |
-|--------|-------------|
-| `make all` | Show this list of targets. |
-| `make init` | Build images, run PrestaShop installer, start containers. Run once for a fresh install. |
-| `make start` | Start Docker containers (runs `doofinder-configure` first). |
-| `make stop` | Stop Docker containers. |
-| `make doofinder-configure` | Substitute env vars into `composer.json`, `src/Core/DoofinderConstants.php`, and `doofinder.php`; run dump-autoload. |
-| `make doofinder-upgrade` | Install/enable/upgrade the Doofinder module. |
-| `make doofinder-uninstall` | Disable and uninstall the Doofinder module. |
-| `make doofinder-reinstall` | Uninstall then reinstall the module. |
-| `make cache-flush` | Clear PrestaShop cache. |
-| `make db-backup [prefix=_name]` | Dump MySQL DB to a timestamped `.sql.gz` file. |
-| `make db-restore file=backup.sql.gz` | Restore DB from a backup file. |
-| `make consistency` | Run PHP CS Fixer for code style. |
-| `make dev-console` | Open a shell in the web container. |
-| `make dump-autoload` | Regenerate Composer autoload (run after adding classes). |
-| `make clean` | Remove Docker volumes and `./html` (destructive; prompts for confirmation). |
-
-## Uninstall / Upgrade
-
-- **Uninstall the module:** `make doofinder-uninstall`
-- **Upgrade or reinstall:** Edit `PLUGIN_VERSION` in `.env`, run `make doofinder-configure`, then `make doofinder-upgrade`. You must also set `$this->version` in `doofinder.php` to the same value (PrestaShop requires it hardcoded).
-
-## Backup & restore
-
-- **Backup:** `make db-backup` or `make db-backup prefix=_some_state`
-- **Restore:** `make db-restore file=backup_YYYYMMDDHHMMSS.sql.gz`
-
-## Support / Contributing
+## Support
 
 For help, feature requests, or bugs: [Doofinder Support](https://support.doofinder.com/). When reporting issues, include your PrestaShop and plugin version.
 
