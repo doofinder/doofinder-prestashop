@@ -69,6 +69,8 @@ This repository is optimized for local development using a **Makefile** and **Do
 - **DB snapshot:** `make db-backup` (optionally `make db-backup prefix=_name`). Restore with `make db-restore file=backup.sql.gz`.
 - **Clear cache:** `make cache-flush`.
 - **Shell in the web container:** `make dev-console`.
+- **Start from scratch:** Run `make clean` to drop Docker volumes and `./html`; type `DELETE` when prompted, then run `make init` for a fresh PrestaShop.
+- **Debug with Xdebug:** The stack already enables Xdebug in Docker. Set `XDEBUG_HOST` and `XDEBUG_KEY` in `.env` or `.env.local` (e.g. `host.docker.internal` on Docker Desktop, your host IP on Linux), use the same key in your IDE, listen for connections, and browse the shop.
 
 ---
 
