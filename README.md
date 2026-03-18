@@ -32,15 +32,15 @@ Doofinder turns your basic search bar into an advanced discovery engine. Using A
 
 ## 🛠 Installation & Quick Start
 
-### For Merchants
-1.  **Download:** Get the [latest release zip](https://github.com/doofinder/doofinder-prestashop/releases).
-2.  **Upload:** Go to your PrestaShop Back Office → **Modules** → **Module Manager** and click **Upload a module**.
-3.  **Configure:** Follow our [Step-by-Step Installation Guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
+**From GitHub (manual zip)**  
+1. Download the [latest release zip](https://github.com/doofinder/doofinder-prestashop/releases).  
+2. In your Back Office go to **Modules** → **Module Manager** → **Upload a module** and select the zip.
 
-### For Developers (Composer)
-```bash
-composer require doofinder/doofinder-prestashop
-```
+**From PrestaShop Addons**  
+Install [Doofinder from PrestaShop Addons](https://addons.prestashop.com/en/search-filters/30818-doofinder-search-discovery.html) via the marketplace in your Back Office or the steps Addons gives you after download.
+
+**Then**  
+Complete setup using our [step-by-step installation guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
 
 **Requirements**
 
