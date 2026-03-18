@@ -26,12 +26,6 @@ Doofinder turns your basic search bar into an advanced discovery engine. Using A
 * **Auto-Indexing** — Your catalog stays in sync automatically as you scale.
 * **AI Assistant** — Conversational search and support where available.
 
-## Requirements
-
-- **PHP:** Minimum 5.4; tested up to 8.4.
-- **PrestaShop:** From 1.5.0.17 to latest (1.6, 1.7, 8.x, 9.x).
-
-For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/), and [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/).
 
 ---
 
@@ -46,6 +40,13 @@ For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestas
 ```bash
 composer require doofinder/doofinder-prestashop
 ```
+
+**Requirements**
+
+- **PHP:** Minimum 5.4; tested up to 8.4.
+- **PrestaShop:** From 1.5.0.17 to latest (1.6, 1.7, 8.x, 9.x).
+
+For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/), and [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/).
 
 ---
 
@@ -67,16 +68,6 @@ This repository is optimized for local development using a **Makefile** and **Do
 - **DB snapshot:** `make db-backup` (optionally `make db-backup prefix=_name`). Restore with `make db-restore file=backup.sql.gz`.
 - **Clear cache:** `make cache-flush`.
 - **Shell in the web container:** `make dev-console`.
-
-## Support
-
-For help, feature requests, or bugs: [Doofinder Support](https://support.doofinder.com/). When reporting issues, include your PrestaShop and plugin version.
-
-Installation and configuration details: [Doofinder Support – PrestaShop installation guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
-
-## Try Doofinder / Learn more
-
-Ready to improve your store search? [Get started with Doofinder for PrestaShop](https://www.doofinder.com/en/solutions/prestashop).
 
 ---
 
@@ -106,3 +97,7 @@ Set `PRESTASHOP_DOCKER_TAG` and (if needed) PHP version in your Docker build arg
 * **Want to help?** PRs are welcome!
 
 **If you find this plugin useful, please give us a ⭐ to support the project!**
+
+## Try Doofinder / Learn more
+
+Ready to improve your store search? [Get started with Doofinder for PrestaShop](https://www.doofinder.com/en/solutions/prestashop).
