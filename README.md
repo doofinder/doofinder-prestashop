@@ -1,8 +1,8 @@
 # Doofinder for PrestaShop
 
-![Release](https://img.shields.io/github/v/release/doofinder/doofinder-prestashop?style=flat-square) 
+![Release](https://img.shields.io/github/v/release/doofinder/doofinder-prestashop?style=flat-square)
 ![PrestaShop](https://img.shields.io/badge/PrestaShop-1.5%20--%209.x-blue?style=flat-square) 
-![PHP](https://img.shields.io/badge/PHP-%3E%3D%205.4-777bb4?style=flat-square) 
+![PHP](https://img.shields.io/badge/PHP-%3E%3D%205.4-777bb4?style=flat-square)
 ![License](https://img.shields.io/github/license/doofinder/doofinder-prestashop?style=flat-square)
 
 **Transform your PrestaShop search into a conversion machine.** Join 10,000+ merchants using AI-powered search to increase sales and improve customer experience.
@@ -25,8 +25,6 @@ Doofinder turns your basic search bar into an advanced discovery engine. Using A
 * **Personalized Recommendations** — Intelligent cross-selling based on real customer behavior.
 * **Visual Search** — Let your shoppers find products using images.
 * **Auto-Indexing** — Your catalog stays in sync automatically as you scale.
-
-
 
 ---
 
@@ -54,6 +52,8 @@ For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestas
 ## 👨‍💻 Development & Maintainer Guide
 
 This repository is optimized for local development using a **Makefile** and **Docker**.
+
+**`.env`** sits at the repo root and powers both your **Docker** stack and the **generated module files** (what `doofinder-configure` pulls from `templates/`). It ships with sensible defaults—skim it, adjust shop URL, PrestaShop tag, plugin version, Doofinder URLs, then `make init`. Need extra vars or overrides? **`.env.local`** loads on top of `.env` when you add it.
 
 > [!NOTE]
 > `make doofinder-configure` generates the plugin files from the `templates/` directory (using `.env`) and runs `make dump-autoload` to regenerate the Composer autoloader. Many other targets depend on it, so running those targets keeps generated files in sync.
@@ -88,7 +88,7 @@ Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prest
 
 [^ps15]: PrestaShop 1.5: patched for auto installation (see Dockerfile). Use MySQL 5.5 and without SSL.
 
-Set `PRESTASHOP_DOCKER_TAG` and (if needed) PHP version in your Docker build args when using these combinations.
+Set `PRESTASHOP_DOCKER_TAG` in the `.env` file and (if needed) PHP version in your Docker build args when using these combinations.
 
 ---
 
