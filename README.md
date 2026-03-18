@@ -1,21 +1,30 @@
 # Doofinder for PrestaShop
 
-Official Doofinder integration for PrestaShop. Replaces default search with AI-powered site search, recommendations, and searchandising—so your store performs like the 10,000+ shops already using Doofinder.
+![Release](https://img.shields.io/github/v/release/doofinder/doofinder-prestashop?style=flat-square) 
+![PrestaShop](https://img.shields.io/badge/PrestaShop-1.5%20--%209.x-blue?style=flat-square) 
+![PHP](https://img.shields.io/badge/PHP-%3E%3D%205.4-777bb4?style=flat-square) 
+![License](https://img.shields.io/github/license/doofinder/doofinder-prestashop?style=flat-square)
 
-## About Doofinder
+**Transform your PrestaShop search into a conversion machine.** Join 10,000+ merchants using AI-powered search to increase sales and improve customer experience.
 
-Doofinder helps stores grow by turning their search into an advanced search engine. AI-powered search, searchandising, and recommendations drive measurable gains in conversion and discovery. Try it free—no commitment.
+![Doofinder in Action]()
 
-## Features
+[🚀 Get Started for Free](https://www.doofinder.com/en/solutions/prestashop) | [🖥️ Live Demo](https://prestashop.doofinder.com/en/) | [📖 Full Documentation](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop)
 
-- **AI Smart Search** — Understands intent and delivers relevant results even with typos, synonyms, or vague terms.
-- **Searchandising** — Boost, hide, or pin products and run campaigns directly in search results.
-- **Personalized Recommendations** — Cross-sell and upsell based on customer behavior.
-- **Auto-Indexing** — Keeps your catalog in sync with minimal setup as you scale.
-- **Visual & Image Search** — Shoppers can search by image; AI improves findability.
-- **AI Assistant** — Conversational search and support where available.
+---
 
-[Try the demo](https://prestashop.doofinder.com/en/).
+## Why Doofinder?
+
+Doofinder turns your basic search bar into an advanced discovery engine. Using AI-powered searchandising and recommendations, we drive measurable gains in conversion and product discovery.
+
+### Key Features
+
+* **AI Smart Search** — Understands intent and handles typos or synonyms effortlessly.
+* **Searchandising** — Boost, hide, or pin products to run targeted campaigns.
+* **Personalized Recommendations** — Intelligent cross-selling based on real customer behavior.
+* **Visual Search** — Let your shoppers find products using images.
+* **Auto-Indexing** — Your catalog stays in sync automatically as you scale.
+* **AI Assistant** — Conversational search and support where available.
 
 ## Requirements
 
@@ -24,15 +33,28 @@ Doofinder helps stores grow by turning their search into an advanced search engi
 
 For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/), and [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/).
 
-## Quick start / Installation
+---
 
-Download the [latest release](https://github.com/doofinder/doofinder-prestashop/releases) or install from [PrestaShop Addons](https://addons.prestashop.com/en/search-filters/30818-doofinder-search-discovery.html). Upload the module in your PrestaShop Back Office (Modules → Module Manager → Upload module), then configure it following the [Doofinder PrestaShop installation guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
+## 🛠 Installation & Quick Start
 
-## Development / Contributing
+### For Merchants
+1.  **Download:** Get the [latest release zip](https://github.com/doofinder/doofinder-prestashop/releases).
+2.  **Upload:** Go to your PrestaShop Back Office → **Modules** → **Module Manager** and click **Upload a module**.
+3.  **Configure:** Follow our [Step-by-Step Installation Guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
 
-This project relies on the Makefile for local setup and common tasks. Ensure a `.env` file is present in the repo root.
+### For Developers (Composer)
+```bash
+composer require doofinder/doofinder-prestashop
+```
 
-> **Note:** `make doofinder-configure` generates the plugin files from the `templates/` directory (using `.env`) and runs `make dump-autoload` to regenerate the Composer autoloader. Many other targets depend on it, so running those targets keeps generated files in sync.
+---
+
+## 👨‍💻 Development & Maintainer Guide
+
+This repository is optimized for local development using a **Makefile** and **Docker**.
+
+> [!NOTE]
+> `make doofinder-configure` generates the plugin files from the `templates/` directory (using `.env`) and runs `make dump-autoload` to regenerate the Composer autoloader. Many other targets depend on it, so running those targets keeps generated files in sync.
 
 **Use cases:**
 
@@ -58,9 +80,9 @@ Ready to improve your store search? [Get started with Doofinder for PrestaShop](
 
 ---
 
-## Test other PrestaShop versions
+## Compatibility Matrix
 
-You can test different PrestaShop and PHP versions. Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prestashop/prestashop/tags):
+We test against a wide range of PrestaShop and PHP combinations to ensure stability.Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prestashop/prestashop/tags):
 
 | PrestaShop | PHP                     |
 | ---------- | ----------------------- |
@@ -74,3 +96,13 @@ You can test different PrestaShop and PHP versions. Example combinations from [P
 [^ps15]: PrestaShop 1.5: patched for auto installation (see Dockerfile). Use MySQL 5.5 and without SSL.
 
 Set `PRESTASHOP_DOCKER_TAG` and (if needed) PHP version in your Docker build args when using these combinations.
+
+---
+
+## Support & Contributing
+
+* **Need Help?** Visit our [Support Portal](https://support.doofinder.com/).
+* **Found a Bug?** Please [contact Doofinder Support](https://support.doofinder.com/pages/contact-us) from the Doofinder website.
+* **Want to help?** PRs are welcome!
+
+**If you find this plugin useful, please give us a ⭐ to support the project!**
