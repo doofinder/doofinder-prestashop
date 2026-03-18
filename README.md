@@ -19,12 +19,13 @@ Doofinder turns your basic search bar into an advanced discovery engine. Using A
 
 ### Key Features
 
+* **AI Assistant** — A smart shopping guide that helps customers find products through natural conversation.
 * **AI Smart Search** — Understands intent and handles typos or synonyms effortlessly.
 * **Searchandising** — Boost, hide, or pin products to run targeted campaigns.
 * **Personalized Recommendations** — Intelligent cross-selling based on real customer behavior.
 * **Visual Search** — Let your shoppers find products using images.
 * **Auto-Indexing** — Your catalog stays in sync automatically as you scale.
-* **AI Assistant** — Conversational search and support where available.
+
 
 
 ---
