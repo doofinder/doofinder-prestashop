@@ -73,7 +73,8 @@ This repository is optimized for local development using a **Makefile** and **Do
 
 ## Compatibility Matrix
 
-We test against a wide range of PrestaShop and PHP combinations to ensure stability.Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prestashop/prestashop/tags):
+We test against a wide range of PrestaShop and PHP combinations to ensure stability.
+Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prestashop/prestashop/tags):
 
 | PrestaShop | PHP                     |
 | ---------- | ----------------------- |
