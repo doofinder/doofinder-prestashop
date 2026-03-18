@@ -7,7 +7,7 @@
 
 **Transform your PrestaShop search into a conversion machine.** Join 10,000+ merchants using AI-powered search to increase sales and improve customer experience.
 
-![Doofinder in Action](https://s6.imgcdn.dev/YvX3Lo.gif)
+![Doofinder in Action](https://github.com/user-attachments/assets/cac4ec30-02e4-4280-8ba4-8a738ab823f1)
 
 [🚀 Get Started for Free](https://www.doofinder.com/en/solutions/prestashop) | [🖥️ Live Demo](https://prestashop.doofinder.com/en/) | [📖 Full Documentation](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop)
 
