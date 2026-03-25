@@ -53,10 +53,34 @@ For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestas
 
 This repository is optimized for local development using a **Makefile** and **Docker**.
 
-**`.env`** sits at the repo root and powers both your **Docker** stack and the **generated module files** (what `doofinder-configure` pulls from `templates/`). It ships with sensible defaults—skim it, adjust shop URL, PrestaShop tag, plugin version, Doofinder URLs, then `make init`. Need extra vars or overrides? **`.env.local`** loads on top of `.env` when you add it.
+**`.env`** sits at the repo root and powers both your **Docker** stack and the **generated module files** (what `doofinder-configure` pulls from `templates/`). It ships with sensible defaults—skim it, adjust shop URL, PrestaShop tag, and plugin version, then `make init`. Optional overrides go in **`.env.local`**, which loads on top of `.env`.
 
 > [!NOTE]
 > `make doofinder-configure` generates the plugin files from the `templates/` directory (using `.env`) and runs `make dump-autoload` to regenerate the Composer autoloader. Many other targets depend on it, so running those targets keeps generated files in sync.
+
+### Environment and shop access
+
+The root **`.env`** lists all variables with comments. For the **dev stack**, these are the ones you usually touch first:
+
+| Variable | Role |
+| -------- | ---- |
+| `BASE_URL` | Shop hostname as seen by Docker (no `https://`). |
+| `PRESTASHOP_DOCKER_TAG` | PrestaShop image/version used by the stack. |
+| `MYSQL_*` | Database for the local shop. |
+| `PS_*` | Installer options (language, country, domain, SSL, etc.). |
+| `PS_ADMIN_EMAIL` / `PS_ADMIN_PASSWORD` | Back-office login after install. |
+| `PS_FOLDER_ADMIN` | URL segment for the admin (see **Default access** below). |
+
+**Default access (Docker dev stack):** After **`make init`**, open the shop using the host ports from **`docker-compose.yml`** (stock mapping: **9011** → HTTP, **4011** → HTTPS on the container). With the default **`BASE_URL=localhost`** and **`PS_FOLDER_ADMIN=4dm1n`** from `.env`, typical URLs are:
+
+| | URL |
+| -- | -- |
+| Storefront (HTTP) | `http://localhost:9011/` |
+| Storefront (HTTPS) | `https://localhost:4011/` |
+| Back office (HTTP) | `http://localhost:9011/4dm1n` |
+| Back office (HTTPS) | `https://localhost:4011/4dm1n` |
+
+Back-office login is **`PS_ADMIN_EMAIL`** / **`PS_ADMIN_PASSWORD`** in `.env` (stock file uses `test@example.com` / `admin123`—change these for anything beyond local-only use). **`make init`** prints usable links; if you change ports or `BASE_URL`, adjust accordingly.
 
 **Use cases:**
 
@@ -65,7 +89,6 @@ This repository is optimized for local development using a **Makefile** and **Do
 - **Install or upgrade the Doofinder module:** `make doofinder-upgrade`.
 - **Uninstall the module:** `make doofinder-uninstall`.
 - **Reinstall the module:** `make doofinder-reinstall`.
-- **Bump plugin version:** Update `PLUGIN_VERSION` in `.env`, then run `make doofinder-upgrade`.
 - **DB snapshot:** `make db-backup` (optionally `make db-backup prefix=_name`). Restore with `make db-restore file=backup.sql.gz`.
 - **Clear cache:** `make cache-flush`.
 - **Shell in the web container:** `make dev-console`.
