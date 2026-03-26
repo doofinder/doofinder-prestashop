@@ -586,7 +586,7 @@ class DfTools
         $query->select('s.name AS supplier_name');
         $query->leftJoin('supplier', 's', 's.`id_supplier` = p.`id_supplier`');
 
-        $query->select('GROUP_CONCAT(tag.name ORDER BY tag.name) AS tags');
+        $query->select('GROUP_CONCAT(DISTINCT(tag.name) ORDER BY tag.name) AS tags');
         $query->leftJoin(
             'product_tag',
             'pt',
