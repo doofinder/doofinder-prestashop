@@ -1,128 +1,106 @@
-# doofinder-prestashop
+# Doofinder for PrestaShop
 
-Plugin that allows to configure the [Doofinder](https://www.doofinder.com) search service in a Prestashop 1.5 store with less effort than configuring it from scratch.
+![Release](https://img.shields.io/github/v/release/doofinder/doofinder-prestashop?style=flat-square)
+![PrestaShop](https://img.shields.io/badge/PrestaShop-1.5%20--%209.x-blue?style=flat-square) 
+![PHP](https://img.shields.io/badge/PHP-%3E%3D%205.4-777bb4?style=flat-square)
+![License](https://img.shields.io/github/license/doofinder/doofinder-prestashop?style=flat-square)
 
-> [!IMPORTANT]
-> If you experience any issue with the module, please [contact Doofinder Support](https://support.doofinder.com/pages/contact-us) from the Doofinder website.
+**Transform your PrestaShop search into a conversion machine.** Join 10,000+ merchants using AI-powered search to increase sales and improve customer experience.
 
-## How to install and configure Doofinder
+![Doofinder in Action](https://github.com/user-attachments/assets/cac4ec30-02e4-4280-8ba4-8a738ab823f1)
 
-Refer to [Doofinder Support Documentation for Prestashop](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop) for the latest and up to date instructions.
+[🚀 Get Started for Free](https://www.doofinder.com/en/solutions/prestashop) | [🖥️ Live Demo](https://prestashop.doofinder.com/en/) | [📖 Full Documentation](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop)
 
-## Module Compatibility
+---
 
-### PHP
+## Why Doofinder?
 
-The minimum php required for this module is php 5.4
-The maximum php version tested is 8.4
+Doofinder turns your basic search bar into an advanced discovery engine. Using AI-powered searchandising and recommendations, we drive measurable gains in conversion and product discovery.
 
-### PrestaShop
+### Key Features
 
-From 1.5.0.17 to latest version
+* **AI Assistant** — A smart shopping guide that helps customers find products through natural conversation.
+* **AI Smart Search** — Understands intent and handles typos or synonyms effortlessly.
+* **Searchandising** — Boost, hide, or pin products to run targeted campaigns.
+* **Personalized Recommendations** — Intelligent cross-selling based on real customer behavior.
+* **Visual Search** — Let your shoppers find products using images.
+* **Auto-Indexing** — Your catalog stays in sync automatically as you scale.
 
-For more compatibility details check the following documentation
+---
 
-- [Prestashop 1.x](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/) system requirements.
-- [Prestashop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/) system requirements.
-- [Prestashop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/) system requirements.
+## 🛠 Installation & Quick Start
 
-## Docker Environment
+**From GitHub (manual zip)**  
+1. Download the [latest release zip](https://github.com/doofinder/doofinder-prestashop/releases).  
+2. In your Back Office go to **Modules** → **Module Manager** → **Upload a module** and select the zip.
 
-### Configure ngrok
+**From PrestaShop Addons**  
+Install [Doofinder from PrestaShop Addons](https://addons.prestashop.com/en/search-filters/30818-doofinder-search-discovery.html) via the marketplace in your Back Office or the steps Addons gives you after download.
 
-In order to be able to create an account or login to an existing Doofinder account during the module initial setup, you will have to expose your local webserver to the internet (to receive a callback).
+**Then**  
+Complete setup using our [step-by-step installation guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop).
 
-To do so, you can use, for example, the utility ngrok: https://dashboard.ngrok.com/get-started/setup
+**Requirements**
 
-Once the external URL is created, simply set the `BASE_URL` environment variable (see [Environment Variables](#environment-variables)).
+- **PHP:** Minimum 5.4; tested up to 8.4.
+- **PrestaShop:** From 1.5.0.17 to latest (1.6, 1.7, 8.x, 9.x).
 
-So, when the installation process finished, instead of accessing to `https://localhost:4011` you will use your url, for example, `https://forcibly-ethical-apple.ngrok-free.app`).
-Notice that you'll need to specify the 4011 port when executing ngrok.
+For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/), and [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/).
 
-### Environment variables
+---
 
-> [!TIP]
-> You can create an `.env.local` file to override the environment variables defined in `.env` such as PrestaShop installation data to fit your needs.
+## 👨‍💻 Development & Maintainer Guide
 
-For example, below is a base `.env.local` file:
+This repository is optimized for local development using a **Makefile** and **Docker**.
 
-```bash
-#PrestaShop setup configuration data
-BASE_URL=your-url.ngrok-free.app
-PS_ENV=dev
-
-```
-
-The `Makefile` automatically overrides `.env` vars with the ones found in `.env.local`.
-
-> [!IMPORTANT]
-> The `Makefile` internally appends `--env-file .env --env-file .env.local` to `docker compose` command for properly configuring container environment. So take it into account when interacting directly with `docker compose`.
-
-### Initial setup
-
-You can set up a fresh PrestaShop installation using the provided `Makefile` target `init`. This command will:
-
-- Pulls and build a PrestaShop docker image with xdebug extension and maybe other tweaks. This build is configurable using the environment variables `PHP_VERSION` and `PS_VERSION` environment variables.
-- Starts the containers
-- Runs the installer script with the defined environment variables.
-
-Finally, PrestaShop is installed and will be running at `https://BASE_URL`.
-
-You can install the Doofinder module through the admin or execute `make doofinder-upgrade`.
-
-The admin panel will be available at `https://BASE_URL/PS_FOLDER_ADMIN`. Admin credentials are defined in the `.env`, if you used the `env.example` would be:
-
-- User: `test@example.com`
-- Pass: `admin123`
+**`.env`** sits at the repo root and powers both your **Docker** stack and the **generated module files** (what `doofinder-configure` pulls from `templates/`). It ships with sensible defaults—skim it, adjust shop URL, PrestaShop tag, and plugin version, then `make init`. Optional overrides go in **`.env.local`**, which loads on top of `.env`.
 
 > [!NOTE]
-> Keep in mind that for versions prior to 1.7 PrestaShop will ask you to delete the `install` folder and rename the `admin` folder located in the `html` directory.
-> For newer versions this is done automatically, using the value on the environment variable `PS_FOLDER_ADMIN` (by default, `/4dm1n`).
+> `make doofinder-configure` generates the plugin files from the `templates/` directory (using `.env`) and runs `make dump-autoload` to regenerate the Composer autoloader. Many other targets depend on it, so running those targets keeps generated files in sync.
 
-## Autoload
+### Environment and shop access
 
-Starting from version 6.0.0, this plugin uses the Composer autoloader, which is generated by running `composer dump-autoload` via the `make dump-autoload` command. This target is always executed after `make doofinder-configure`. If you create a new class, you must run `make dump-autoload` manually to make the class discoverable by PrestaShop.
+The root **`.env`** lists all variables with comments. For the **dev stack**, these are the ones you usually touch first:
 
-## Version Upgrade
+| Variable | Role |
+| -------- | ---- |
+| `BASE_URL` | Shop hostname as seen by Docker (no `https://`). |
+| `PRESTASHOP_DOCKER_TAG` | PrestaShop image/version used by the stack. |
+| `MYSQL_*` | Database for the local shop. |
+| `PS_*` | Installer options (language, country, domain, SSL, etc.). |
+| `PS_ADMIN_EMAIL` / `PS_ADMIN_PASSWORD` | Back-office login after install. |
+| `PS_FOLDER_ADMIN` | URL segment for the admin (see **Default access** below). |
 
-To upgrade the package version, simply edit the `PLUGIN_VERSION` environment variable in the `.env` file and run `make doofinder-configure`. This will update all the necessary files. However, you must manually edit the `doofinder.php` file, as PrestaShop requires that `$this->version` be a hardcoded value.
+**Default access (Docker dev stack):** After **`make init`**, open the shop using the host ports from **`docker-compose.yml`** (stock mapping: **9011** → HTTP, **4011** → HTTPS on the container). With the default **`BASE_URL=localhost`** and **`PS_FOLDER_ADMIN=4dm1n`** from `.env`, typical URLs are:
 
-## Xdebug ready to use
+| | URL |
+| -- | -- |
+| Storefront (HTTP) | `http://localhost:9011/` |
+| Storefront (HTTPS) | `https://localhost:4011/` |
+| Back office (HTTP) | `http://localhost:9011/4dm1n` |
+| Back office (HTTPS) | `https://localhost:4011/4dm1n` |
 
-If you wish to debug your new PrestaShop installation, the `XDEBUG_CONFIG` and `XDEBUG_MODE` environment variables are already configured in `docker-compose.yml`. Simply configure your IDE accordingly and have fun!
+Back-office login is **`PS_ADMIN_EMAIL`** / **`PS_ADMIN_PASSWORD`** in `.env` (stock file uses `test@example.com` / `admin123`—change these for anything beyond local-only use). **`make init`** prints usable links; if you change ports or `BASE_URL`, adjust accordingly.
 
-## Uninstall the module
+**Use cases:**
 
-You can remove the Doofinder module using this straightforward method:
+- **First-time setup:** Run `make init` once to build images, install PrestaShop, and start containers.
+- **Start / stop the stack:** `make start`, `make stop`.
+- **Install or upgrade the Doofinder module:** `make doofinder-upgrade`.
+- **Uninstall the module:** `make doofinder-uninstall`.
+- **Reinstall the module:** `make doofinder-reinstall`.
+- **DB snapshot:** `make db-backup` (optionally `make db-backup prefix=_name`). Restore with `make db-restore file=backup.sql.gz`.
+- **Clear cache:** `make cache-flush`.
+- **Shell in the web container:** `make dev-console`.
+- **Start from scratch:** Run `make clean` to drop Docker volumes and `./html`; type `DELETE` when prompted, then run `make init` for a fresh PrestaShop.
+- **Debug with Xdebug:** The stack already enables Xdebug in Docker. Set `XDEBUG_HOST` and `XDEBUG_KEY` in `.env` or `.env.local` (e.g. `host.docker.internal` on Docker Desktop, your host IP on Linux), use the same key in your IDE, listen for connections, and browse the shop.
 
-```sh
-make doofinder-uninstall
-```
+---
 
-## Test another versions of the module
+## Compatibility Matrix
 
-Change your branch to the tag that you want inside package directory
-
-```sh
-make doofinder-upgrade
-```
-
-## Backup and Restore Database
-
-During development, it is sometimes useful to create a data snapshot before performing an action.
-
-- To create a database dump, use:
-  ```sh
-  make db-backup [prefix=_some_state]
-  ```
-- To restore a previous state, run:
-  ```sh
-  make db-restore file=backup_file.sql.gz
-  ```
-
-## Test other PrestaShop versions
-
-You can test different Prestashop versions along with different PHP versions. These are the latest combinations available gathered from [PrestaShop Docker Hub](https://hub.docker.com/r/prestashop/prestashop/tags)
+We test against a wide range of PrestaShop and PHP combinations to ensure stability.
+Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prestashop/prestashop/tags):
 
 | PrestaShop | PHP                     |
 | ---------- | ----------------------- |
@@ -133,4 +111,20 @@ You can test different Prestashop versions along with different PHP versions. Th
 | 1.6        | 7.2, 7.1, 7.0, 5.6      |
 | 1.5[^ps15] | 7.2, 7.1, 7.0, 5.6, 5.5 |
 
-[^ps15]: Prestashop 1.5: This version is patched to allow auto installation (See Dockerfile). MySQL version must be 5.5. Must be used without SSL.
+[^ps15]: PrestaShop 1.5: patched for auto installation (see Dockerfile). Use MySQL 5.5 and without SSL.
+
+Set `PRESTASHOP_DOCKER_TAG` in the `.env` file and (if needed) PHP version in your Docker build args when using these combinations.
+
+---
+
+## Support & Contributing
+
+* **Need Help?** Visit our [Support Portal](https://support.doofinder.com/).
+* **Found a Bug?** Please [contact Doofinder Support](https://support.doofinder.com/pages/contact-us) from the Doofinder website.
+* **Want to help?** PRs are welcome!
+
+**If you find this plugin useful, please give us a ⭐ to support the project!**
+
+## Try Doofinder / Learn more
+
+Ready to improve your store search? [Get started with Doofinder for PrestaShop](https://www.doofinder.com/en/solutions/prestashop).
