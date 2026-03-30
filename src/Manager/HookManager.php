@@ -136,22 +136,7 @@ class HookManager
     private static function getPageType()
     {
         $context = \Context::getContext();
-        $phpSelf = isset($context->controller->php_self) ? $context->controller->php_self : '';
-
-        switch ($phpSelf) {
-            case 'index':
-                return 'home';
-            case 'product':
-            case 'category':
-            case 'search':
-            case 'cart':
-                return $phpSelf;
-            case 'order':
-            case 'order-opc':
-                return 'checkout';
-            default:
-                return 'other';
-        }
+        return isset($context->controller->php_self) ? $context->controller->php_self : '';
     }
 
     /**
