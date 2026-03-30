@@ -46,6 +46,14 @@
   </script>
   <!-- END OF DOOFINDER INTEGRATIONS SUPPORT -->
 
+  <!-- START OF DOOFINDER PAGE CONTEXT -->
+  <script data-keepinline>
+    var dfPageType = "{$df_page_type|escape:'javascript':'UTF-8' nofilter}";
+    var dfProductId = "{$df_product_id|escape:'javascript':'UTF-8' nofilter}";
+    var dfCategoryName = "{$df_category_name|escape:'javascript':'UTF-8' nofilter}";
+  </script>
+  <!-- END OF DOOFINDER PAGE CONTEXT -->
+
   <!-- START OF DOOFINDER UNIQUE SCRIPT -->
   <script data-keepinline>
     {literal}
