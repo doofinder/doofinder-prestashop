@@ -276,7 +276,7 @@ class DoofinderInstallation
 
             SearchEngine::setSearchEnginesByConfig($shopGroupId, $shopId);
 
-            $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, $shopGroupId, $shopId);
+            $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, $shopGroupId, $shopId, true);
 
             foreach ($languages as $lang) {
                 if ($lang['active'] == 0) {

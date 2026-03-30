@@ -675,7 +675,7 @@ class DoofinderAdminPanelView
     {
         $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
         $isManualInstallation = (bool) \Tools::getValue('skip', 0);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
         $inputs = [
             [
                 'type' => 'text',
@@ -809,7 +809,7 @@ class DoofinderAdminPanelView
         $urls = [];
         $context = \Context::getContext();
         $languages = \Language::getLanguages(true, $context->shop->id);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
 
         foreach ($languages as $lang) {
             $langIso = \Tools::strtoupper($lang['iso_code']);

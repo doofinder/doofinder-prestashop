@@ -106,7 +106,7 @@ class UpdateOnSave
         $currencies = \Currency::getCurrenciesByIdShop($shopId);
         $defaultCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId);
         $defaultCurrency = new \Currency($defaultCurrencyId);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
 
         foreach (['product', 'cms', 'category'] as $type) {
             $itemsUpdate = self::getItemsQueue($shopId, $type, 'update');

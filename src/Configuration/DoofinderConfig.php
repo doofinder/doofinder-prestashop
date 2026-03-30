@@ -229,7 +229,7 @@ class DoofinderConfig
 
         $hashidKeys = DfTools::getHashidKeys();
         $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
         $keyToUse = 'key';
         if ($multipriceEnabled) {
             $keyToUse = 'keyMultiprice';
