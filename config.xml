@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>doofinder</name>
+    <displayName><![CDATA[Doofinder]]></displayName>
+    <version><![CDATA[8.0.7]]></version>
+    <description><![CDATA[Install Doofinder in your shop with no effort]]></description>
+    <author><![CDATA[Doofinder (http://www.doofinder.com)]]></author>
+    <tab><![CDATA[search_filter]]></tab>
+	<confirmUninstall><![CDATA[Are you sure? This will not cancel your account in Doofinder service]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
