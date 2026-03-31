@@ -142,7 +142,7 @@ class DfProductBuild
         $this->showProductFeatures = (bool) \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
         $this->useTax = (bool) DfTools::cfg($idShop, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES);
-        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
         $this->featuresShown = explode(',', DfTools::cfg($idShop, 'DF_FEATURES_SHOWN', ''));
         $this->featuresKeys = $this->getFeaturesKeys();
     }

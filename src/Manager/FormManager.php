@@ -80,7 +80,7 @@ class FormManager
             DoofinderConfig::setSharedGlobalDefaultConfig();
         }
 
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED');
+        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
             UpdateOnSave::indexApiInvokeReindexing();
