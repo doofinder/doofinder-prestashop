@@ -24,7 +24,7 @@
       }
 
       // This is because the quizzes don't support the "id" field, so we need to use the "item_id" field instead.
-      const getDfItemId =(cartObject) => {
+      const getDfItemId = (cartObject) => {
         return "undefined" !== typeof cartObject.id ? cartObject.id : cartObject.item_id;
       }
 
