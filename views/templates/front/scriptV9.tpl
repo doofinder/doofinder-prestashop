@@ -47,16 +47,10 @@
   <!-- END OF DOOFINDER INTEGRATIONS SUPPORT -->
 
   <!-- START OF DOOFINDER PAGE CONTEXT -->
-  <div id="df-page-context" style="display:none"
-    data-page-type="{$df_page_type|escape:'htmlall':'UTF-8'}"
-    data-product-id="{$df_product_id|escape:'htmlall':'UTF-8'}"
-    data-category-name="{$df_category_name|escape:'htmlall':'UTF-8'}">
-  </div>
   <script data-keepinline>
-    var dfCtx = document.getElementById('df-page-context');
-    var dfPageType = dfCtx.dataset.pageType;
-    var dfProductId = dfCtx.dataset.productId;
-    var dfCategoryName = dfCtx.dataset.categoryName;
+    var dfPageType = "{$df_page_type|escape:'javascript'}";
+    var dfProductId = "{$df_product_id|escape:'javascript'}";
+    var dfCategoryName = "{$df_category_name|escape:'javascript'}".replace(/&gt;/g, ">");
   </script>
   <!-- END OF DOOFINDER PAGE CONTEXT -->
 
