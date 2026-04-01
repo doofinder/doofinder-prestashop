@@ -23,10 +23,15 @@
         return variationID.replace(/\D/g, "")
       }
 
+      // This is because the quizzes don't support the "id" field, so we need to use the "item_id" field instead.
+      const getDfItemId =(cartObject) => {
+        return "undefined" !== typeof cartObject.id ? cartObject.id : cartObject.item_id;
+      }
+
       doofinderManageCart({
         cartURL          : "{if isset($urls)}{$urls.pages.cart|escape:'htmlall':'UTF-8'}{/if}",  //required for prestashop 1.7, in previous versions it will be empty.
         cartToken        : "{$static_token|escape:'htmlall':'UTF-8'}",
-        productID        : checkIfCartItemHasVariation(event.detail) ? event.detail.grouping_id : event.detail.id,
+        productID        : checkIfCartItemHasVariation(event.detail) ? event.detail.grouping_id : getDfItemId(event.detail),
         customizationID  : checkIfCartItemHasVariation(event.detail) ? sanitizeVariationID(event.detail.item_id) : 0,   // If there are no combinations, the value will be 0
         quantity         : event.detail.amount,
         statusPromise    : event.detail.statusPromise,
