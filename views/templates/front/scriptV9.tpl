@@ -48,9 +48,9 @@
 
   <!-- START OF DOOFINDER PAGE CONTEXT -->
   <script data-keepinline>
-    var dfPageType = "{$df_page_type|escape:'javascript'}";
-    var dfProductId = "{$df_product_id|escape:'javascript'}";
-    var dfCategoryName = "{$df_category_name|escape:'javascript'}".replace(/&gt;/g, ">");
+    var dfPageType = "{$df_page_type|escape:'javascript':'UTF-8'}";
+    var dfProductId = "{$df_product_id|escape:'javascript':'UTF-8'}";
+    var dfCategoryName = "{$df_category_name|escape:'javascript':'UTF-8'}".replace(/&gt;/g, ">");
   </script>
   <!-- END OF DOOFINDER PAGE CONTEXT -->
 
