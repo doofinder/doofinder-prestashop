@@ -66,7 +66,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '8.0.9';
+        $this->version = '8.1.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.5', 'max' => '9.1.0'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -143,6 +143,11 @@ class Doofinder extends Module
     public function getProductLinks()
     {
         return $this->productLinks;
+    }
+
+    public function hookActionFrontControllerSetMedia($params)
+    {
+        PrestaShop\Module\Doofinder\Manager\HookManager::getHookActionFrontControllerSetMedia();
     }
 
     /**
