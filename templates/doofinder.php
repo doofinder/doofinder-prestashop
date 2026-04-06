@@ -147,7 +147,7 @@ class Doofinder extends Module
 
     public function hookActionFrontControllerSetMedia($params)
     {
-       PrestaShop\Module\Doofinder\Manager\HookManager::getHookActionFrontControllerSetMedia();
+        PrestaShop\Module\Doofinder\Manager\HookManager::getHookActionFrontControllerSetMedia();
     }
 
     /**
