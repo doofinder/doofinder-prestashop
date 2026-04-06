@@ -145,6 +145,11 @@ class Doofinder extends Module
         return $this->productLinks;
     }
 
+    public function hookActionFrontControllerSetMedia($params)
+    {
+       PrestaShop\Module\Doofinder\Manager\HookManager::getHookActionFrontControllerSetMedia();
+    }
+
     /**
      * Add controller routes.
      *

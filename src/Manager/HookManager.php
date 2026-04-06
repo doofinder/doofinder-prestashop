@@ -58,9 +58,24 @@ class HookManager
             && $this->module->registerHook('actionObjectCmsDeleteAfter')
             && $this->module->registerHook('actionObjectCategoryAddAfter')
             && $this->module->registerHook('actionObjectCategoryUpdateAfter')
-            && $this->module->registerHook('actionObjectCategoryDeleteAfter');
+            && $this->module->registerHook('actionObjectCategoryDeleteAfter')
+            && $this->module->registerHook('actionFrontControllerSetMedia');
 
         return $result;
+    }
+
+    /**
+     * Sets the page type and product/category data as JS definitions.
+     */
+    public static function getHookActionFrontControllerSetMedia()
+    {
+        if (DfTools::versionGte('1.6.0.0')) {
+            \Media::addJsDef([
+                'dfPageType' => self::getPageType(),
+                'dfProductId' => self::getProductId(),
+                'dfCategoryName' => self::getCategoryName(),
+            ]);
+        }
     }
 
     /**
@@ -117,10 +132,6 @@ class HookManager
         if ($context->customer->isLogged()) {
             $templateVars['customer_group_hide_prices'] = (DfTools::getCustomerGroupPriceVisibility($context->customer->id_default_group)) ? 'false' : 'true';
         }
-
-        $templateVars['df_page_type'] = self::getPageType();
-        $templateVars['df_product_id'] = self::getProductId();
-        $templateVars['df_category_name'] = self::getCategoryName();
 
         return $templateVars;
     }
