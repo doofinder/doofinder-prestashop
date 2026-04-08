@@ -74,6 +74,7 @@ class HookManager
                 'dfPageType' => self::getPageType(),
                 'dfProductId' => self::getProductId(),
                 'dfCategoryName' => self::getCategoryName(),
+                'dfPlatform' => 'prestashop',
             ]);
         }
     }
