@@ -94,7 +94,7 @@ $_MODULE['<{doofinder}prestashop>onboarding_tab_484ebd8da685828c8892dbbb1a570f89
 $_MODULE['<{doofinder}prestashop>onboarding_tab_8e94cbfc7639e8d47a939179b12a8eac'] = 'Held on our servers for a faster page load time';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_18947c4da2bdf6834e993001d003293d'] = 'More than 5000 e-commerce sites over 35 countries are already using it';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_d3de93cac749c0caa87290a2a4a7c8a9'] = 'What are you waiting for?';
-$_MODULE['<{doofinder}prestashop>onboarding_tab_e6665248f64ed1908bf95510e06c1694'] = 'Test our solution for 30 days, for free!';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_e6665248f64ed1908bf95510e06c1694'] = 'Test our solution for 15 days, for free!';
 $_MODULE['<{doofinder}prestashop>indexation_status_51160de843c8d9ed5564f4f26208c02e'] = 'Doofinder Indexation Status';
 $_MODULE['<{doofinder}prestashop>indexation_status_b1d48d617a09cbe4e68eb72c83dea83d'] = 'The product feed is being processed. Depending on the size of the product catalog in the store, this process may take a few minutes.';
 $_MODULE['<{doofinder}prestashop>indexation_status_e0dba0265fde532f75126eab6fedb8a8'] = 'Your products may not appear correctly updated in the search results until the process has been completed.';
