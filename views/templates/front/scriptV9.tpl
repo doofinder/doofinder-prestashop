@@ -40,7 +40,7 @@
   <!-- START OF DOOFINDER INTEGRATIONS SUPPORT -->
   <script data-keepinline>
     var dfKvCustomerEmail;
-    if (typeof klCustomer !== 'undefined' && klCustomer !== null && "" !== klCustomer.email) {
+    if ('undefined' !== typeof klCustomer && null !== klCustomer && "" !== klCustomer.email) {
       dfKvCustomerEmail = klCustomer.email;
     }
   </script>
