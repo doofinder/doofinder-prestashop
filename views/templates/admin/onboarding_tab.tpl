@@ -98,7 +98,7 @@
 					<br />
 					<p>{l s='What are you waiting for?' mod='doofinder'}</p>
 					<br />
-					<p><a onclick="javascript:popupDoofinder('signup')" href="#">{l s='Test our solution for 30 days, for free!' mod='doofinder'}</a></p>
+					<p><a onclick="javascript:popupDoofinder('signup')" href="#">{l s='Test our solution for 15 days, for free!' mod='doofinder'}</a></p>
 				</div>
 			</div>
 		</div>

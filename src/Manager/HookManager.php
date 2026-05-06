@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -57,9 +58,24 @@ class HookManager
             && $this->module->registerHook('actionObjectCmsDeleteAfter')
             && $this->module->registerHook('actionObjectCategoryAddAfter')
             && $this->module->registerHook('actionObjectCategoryUpdateAfter')
-            && $this->module->registerHook('actionObjectCategoryDeleteAfter');
+            && $this->module->registerHook('actionObjectCategoryDeleteAfter')
+            && $this->module->registerHook('actionFrontControllerSetMedia');
 
         return $result;
+    }
+
+    /**
+     * Sets the page type and product/category data as JS definitions.
+     */
+    public static function getHookActionFrontControllerSetMedia()
+    {
+        if (DfTools::versionGte('1.6.0.0')) {
+            \Media::addJsDef([
+                'dfPageType' => self::getPageType(),
+                'dfProductId' => self::getProductId(),
+                'dfCategoryName' => self::getCategoryName(),
+            ]);
+        }
     }
 
     /**
@@ -118,6 +134,75 @@ class HookManager
         }
 
         return $templateVars;
+    }
+
+    /**
+     * Resolve the current page type from the front controller.
+     *
+     * Maps PrestaShop's controller php_self value to a canonical page type
+     * string consumed by the Doofinder layer.
+     *
+     * @return string One of: home, product, category, search, cart, checkout, other
+     */
+    private static function getPageType()
+    {
+        $context = \Context::getContext();
+        return isset($context->controller->php_self) ? $context->controller->php_self : '';
+    }
+
+    /**
+     * Get the current product ID when on a product page.
+     *
+     * @return string Product ID as string, or empty string when not on a product page
+     */
+    private static function getProductId()
+    {
+        $context = \Context::getContext();
+        $phpSelf = isset($context->controller->php_self) ? $context->controller->php_self : '';
+
+        if ($phpSelf !== 'product') {
+            return '';
+        }
+
+        $idProduct = (int) \Tools::getValue('id_product');
+
+        return $idProduct > 0 ? (string) $idProduct : '';
+    }
+
+    /**
+     * Get the category name (full tree path) for the current page.
+     *
+     * On a product page returns the path of the product's default category.
+     * On a category page returns the path of the viewed category.
+     * Uses DfTools::getCategoryPath with the DF_FEED_FULL_PATH setting so the
+     * value matches what is indexed in the product feed.
+     *
+     * @return string Category path using ">" as separator, or empty string
+     */
+    private static function getCategoryName()
+    {
+        $context = \Context::getContext();
+        $phpSelf = isset($context->controller->php_self) ? $context->controller->php_self : '';
+        $idLang = (int) $context->language->id;
+        $idShop = (int) $context->shop->id;
+        $useFullPath = (bool) DfTools::cfg($idShop, 'DF_FEED_FULL_PATH', DoofinderConstants::YES);
+
+        if ($phpSelf === 'product') {
+            $idProduct = (int) \Tools::getValue('id_product');
+            if ($idProduct > 0) {
+                $product = new \Product($idProduct, false, $idLang, $idShop);
+                if (\Validate::isLoadedObject($product) && $product->id_category_default) {
+                    return DfTools::getCategoryPath((int) $product->id_category_default, $idLang, $idShop, $useFullPath);
+                }
+            }
+        } elseif ($phpSelf === 'category') {
+            $idCategory = (int) \Tools::getValue('id_category');
+            if ($idCategory > 0) {
+                return DfTools::getCategoryPath($idCategory, $idLang, $idShop, $useFullPath);
+            }
+        }
+
+        return '';
     }
 
     /**

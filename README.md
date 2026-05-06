@@ -5,7 +5,7 @@
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D%205.4-777bb4?style=flat-square)
 ![License](https://img.shields.io/github/license/doofinder/doofinder-prestashop?style=flat-square)
 
-**Transform your PrestaShop search into a conversion machine.** Join 10,000+ merchants using AI-powered search to increase sales and improve customer experience.
+**Transform your PrestaShop search into a conversion machine.** Join thousands of merchants using AI-powered search to increase sales and improve customer experience.
 
 ![Doofinder in Action](https://github.com/user-attachments/assets/cac4ec30-02e4-4280-8ba4-8a738ab823f1)
 
@@ -30,7 +30,7 @@ Doofinder turns your basic search bar into an advanced discovery engine. Using A
 
 ## 🛠 Installation & Quick Start
 
-**From GitHub (manual zip)**  
+**From GitHub (latest release)**  
 1. Download the [latest release zip](https://github.com/doofinder/doofinder-prestashop/releases).  
 2. In your Back Office go to **Modules** → **Module Manager** → **Upload a module** and select the zip.
 
@@ -42,8 +42,10 @@ Complete setup using our [step-by-step installation guide](https://support.doofi
 
 **Requirements**
 
-- **PHP:** Minimum 5.4; tested up to 8.4.
-- **PrestaShop:** From 1.5.0.17 to latest (1.6, 1.7, 8.x, 9.x).
+| | Supported versions |
+| -- | -- |
+| PHP | 5.4 – 8.4 |
+| PrestaShop | 1.5.0.17 – 9.x (1.6, 1.7, 8.x, 9.x) |
 
 For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/), and [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/).
 
@@ -85,8 +87,8 @@ Back-office login is **`PS_ADMIN_EMAIL`** / **`PS_ADMIN_PASSWORD`** in `.env` (s
 **Use cases:**
 
 - **First-time setup:** Run `make init` once to build images, install PrestaShop, and start containers.
+- **Install the Doofinder module:** after `make init`, follow the [installation guide](https://support.doofinder.com/plugins/prestashop/installation-guide/installation-steps-prestashop). Alternatively, use `make doofinder-upgrade` from the CLI.
 - **Start / stop the stack:** `make start`, `make stop`.
-- **Install or upgrade the Doofinder module:** `make doofinder-upgrade`.
 - **Uninstall the module:** `make doofinder-uninstall`.
 - **Reinstall the module:** `make doofinder-reinstall`.
 - **DB snapshot:** `make db-backup` (optionally `make db-backup prefix=_name`). Restore with `make db-restore file=backup.sql.gz`.
@@ -121,7 +123,7 @@ Set `PRESTASHOP_DOCKER_TAG` in the `.env` file and (if needed) PHP version in yo
 
 * **Need Help?** Visit our [Support Portal](https://support.doofinder.com/).
 * **Found a Bug?** Please [contact Doofinder Support](https://support.doofinder.com/pages/contact-us) from the Doofinder website.
-* **Want to help?** PRs are welcome!
+* **Want to contribute?** PRs are welcome!
 
 **If you find this plugin useful, please give us a ⭐ to support the project!**
 

@@ -95,7 +95,7 @@ $_MODULE['<{doofinder}prestashop>onboarding_tab_484ebd8da685828c8892dbbb1a570f89
 $_MODULE['<{doofinder}prestashop>onboarding_tab_8e94cbfc7639e8d47a939179b12a8eac'] = 'Tout passe par nos serveurs, ce qui vous garantit un chargement extrêmement rapide';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_18947c4da2bdf6834e993001d003293d'] = 'Plus de 5000 e-commerces nous font confiance';
 $_MODULE['<{doofinder}prestashop>onboarding_tab_d3de93cac749c0caa87290a2a4a7c8a9'] = 'Qu’attendez-vous?';
-$_MODULE['<{doofinder}prestashop>onboarding_tab_e6665248f64ed1908bf95510e06c1694'] = 'Testez notre solution pendant 30 jours, gratuitement !';
+$_MODULE['<{doofinder}prestashop>onboarding_tab_e6665248f64ed1908bf95510e06c1694'] = 'Testez notre solution pendant 15 jours, gratuitement !';
 $_MODULE['<{doofinder}prestashop>indexation_status_51160de843c8d9ed5564f4f26208c02e'] = 'Statut d\'indexation de Doofinder';
 $_MODULE['<{doofinder}prestashop>indexation_status_b1d48d617a09cbe4e68eb72c83dea83d'] = 'Le flux de produits est en cours de traitement. Selon la taille du catalogue de produits de la boutique, ce processus peut prendre quelques minutes.';
 $_MODULE['<{doofinder}prestashop>indexation_status_e0dba0265fde532f75126eab6fedb8a8'] = 'Il se peut que vos produits n\'apparaissent pas correctement mis à jour dans les résultats de recherche tant que le processus n\'est pas terminé.';
