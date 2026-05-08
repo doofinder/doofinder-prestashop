@@ -29,7 +29,7 @@
 				<div class="module_warning alert alert-danger">
 					<button type="button" class="close" data-dismiss="alert">&times;</button>
 					{l s='An error occurred during the installation process. Please contact our support team on' mod='doofinder'} 
-					<a href="https://admin.doofinder.com/admin/support/contact-us" target="_blank" rel="noopener noreferrer">https://admin.doofinder.com/admin/support/contact-us</a>
+					<a href="https://admin.doofinder.com/admin/support" target="_blank" rel="noopener noreferrer">https://admin.doofinder.com/admin/support</a>
 					<ul id="installation-errors"></ul>
 				</div>
 			</div>
