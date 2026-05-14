@@ -32,7 +32,7 @@ jobs:
             echo "Tag v${{ steps.version.outputs.version }} already exists, skipping."
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Tag v${{ steps.version.outputs.version }} does not exist, will create it."
+            echo "Tag v${{ steps.version.outputs.version }} does not exist, it will be created."
           fi
 
       - name: Create and push tag
