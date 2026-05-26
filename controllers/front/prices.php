@@ -11,6 +11,9 @@ if (!defined('_PS_VERSION_')) {
 
 class DoofinderPricesModuleFrontController extends ModuleFrontController
 {
+    /** @var int */
+    private $idGroup;
+
     public function initContent()
     {
         parent::initContent();
@@ -35,7 +38,8 @@ class DoofinderPricesModuleFrontController extends ModuleFrontController
         }
 
         $customer = Context::getContext()->customer;
-        $includeTaxes = $this->resolveIncludeTaxes((int) $customer->id_default_group);
+        $this->idGroup = (int) $customer->id_default_group;
+        $includeTaxes = $this->resolveIncludeTaxes($this->idGroup);
 
         $products = [];
         foreach ($data['ids'] as $rawId) {
@@ -112,18 +116,52 @@ class DoofinderPricesModuleFrontController extends ModuleFrontController
         return $minPrice;
     }
 
+    /**
+     * Fetches the contextual price for a product/variant with two cache layers:
+     *
+     *   1. Cache::store/retrieve (static, request-scoped) — always active, avoids redundant
+     *      getPriceStatic calls for the same product within a single request.
+     *
+     *   2. Cache::getInstance()->set/get (persistent backend with TTL) — when a PS cache backend
+     *      (Memcache, APC, file…) is configured, prices are shared across requests for all
+     *      customers in the same group. Falls back gracefully when no backend is available.
+     */
     private function fetchPrice($idProduct, $idProductAttribute, $includeTaxes)
     {
-        $price = Product::getPriceStatic(
+        $cacheKey = 'doofinder_price_' . $this->idGroup . '_' . $idProduct . '_' . (int) $idProductAttribute . '_' . ($includeTaxes ? '1' : '0');
+
+        // Level 1: request-scoped static cache (PS built-in, no TTL needed)
+        if (Cache::isStored($cacheKey)) {
+            return Cache::retrieve($cacheKey);
+        }
+
+        // Level 2: persistent backend cache with TTL
+        $persistentCache = null;
+        try {
+            $persistentCache = Cache::getInstance();
+            $cached = $persistentCache->get($cacheKey);
+            if (false !== $cached) {
+                Cache::store($cacheKey, $cached);
+
+                return $cached;
+            }
+        } catch (Exception $e) {
+            $persistentCache = null;
+        }
+
+        $raw = Product::getPriceStatic(
             $idProduct,
             $includeTaxes,
             $idProductAttribute,
             6
         );
-        if (null === $price || false === $price) {
-            return null;
+        $result = is_numeric($raw) ? round((float) $raw, 2) : null;
+
+        Cache::store($cacheKey, $result);
+        if (null !== $persistentCache) {
+            $persistentCache->set($cacheKey, $result, 120);
         }
 
-        return round((float) $price, 2);
+        return $result;
     }
 }
