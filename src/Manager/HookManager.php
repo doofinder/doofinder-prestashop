@@ -127,6 +127,7 @@ class HookManager
             'is_customer_logged' => $context->customer->isLogged(),
             'is_customer_group_feature_active' => \Group::isFeatureActive(),
             'customer_group_hide_prices' => 'false',
+            'df_ps_contextual_prices_enabled' => self::isContextualPricesEnabled($context),
         ];
 
         if ($context->customer->isLogged()) {
@@ -255,7 +256,35 @@ class HookManager
                     'controller' => 'callback',
                 ],
             ],
+            'module-doofinder-prices' => [
+                'controller' => 'prices',
+                'rule' => 'module/doofinder/prices',
+                'keywords' => [],
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'doofinder',
+                    'controller' => 'prices',
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Returns true when the logged-in customer's group has prices visible,
+     * meaning on-the-fly contextual prices should be fetched via /module/doofinder/prices.
+     *
+     * @param \Context $context
+     *
+     * @return bool
+     */
+    private static function isContextualPricesEnabled(\Context $context)
+    {
+        if (!$context->customer->isLogged()) {
+            return false;
+        }
+        $idGroup = (int) $context->customer->id_default_group;
+
+        return DfTools::getCustomerGroupPriceVisibility($idGroup);
     }
 
     /**

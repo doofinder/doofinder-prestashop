@@ -56,10 +56,19 @@
     doofinderApp("config", "language", "{$lang|escape:'htmlall':'UTF-8'}");
     doofinderApp("config", "currency", "{$currency|escape:'htmlall':'UTF-8'}");
     {if $is_customer_group_feature_active && $is_customer_logged}
-    doofinderApp("config", "priceName", "{$currency|escape:'htmlall':'UTF-8'}_{$customer.id_default_group|escape:'htmlall':'UTF-8'}");
     doofinderApp("config", "hidePrices", {$customer_group_hide_prices|escape:'htmlall':'UTF-8'});
     {/if}
   </script>
   <script src="{$config_script_base_url|escape}/{$installation_ID|escape:'htmlall':'UTF-8'}.js" async></script>
   <!-- END OF DOOFINDER UNIQUE SCRIPT -->
+
+  {if isset($df_ps_contextual_prices_enabled) && $df_ps_contextual_prices_enabled}
+  <!-- START OF DOOFINDER CONTEXTUAL PRICES -->
+  <script data-keepinline>
+    window.dfPsContextualPricesEnabled = true;
+  </script>
+  <script src="https://cdn.doofinder.com/contextual-prices/contextual-prices.js" defer></script>
+  <script src="https://cdn.doofinder.com/plugins/prestashop.js" defer></script>
+  <!-- END OF DOOFINDER CONTEXTUAL PRICES -->
+  {/if}
 {/if}
