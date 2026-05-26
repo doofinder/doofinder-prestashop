@@ -1392,12 +1392,9 @@ class DfProductBuild
     {
         $features = [];
         foreach ($featuresData as $key => $values) {
-            if (count($values) > 1) {
-                foreach ($values as $value) {
-                    $features[DfTools::slugify($key)][] = DfTools::cleanString($value);
-                }
-            } else {
-                $features[DfTools::slugify($key)] = DfTools::cleanString($values[0]);
+            $slug = DfTools::slugify($key);
+            foreach ($values as $value) {
+                $features[$slug][] = DfTools::cleanString($value);
             }
         }
 
