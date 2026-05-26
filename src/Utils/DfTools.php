@@ -62,11 +62,6 @@ class DfTools
     protected static $cachedCategoryPaths = [];
 
     /**
-     * @var array|null cached customer groups data per shop for optimization [id_shop => data]
-     */
-    protected static $cachedCustomerGroupsData = [];
-
-    /**
      * Hash a password using PrestaShop's cookie key.
      *
      * @param string $passwd Plain password to hash
@@ -1367,31 +1362,18 @@ class DfTools
     /**
      * Get all price information for a product variant.
      *
-     * This method retrieves the regular price, onsale price, and multiprice
-     * information for a specific product variant (combination).
-     *
-     * For B2B cases, the input data structure for $customerGroupsData is:
-     * [
-     *    ['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1],
-     *    ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0],
-     *    ...
-     * ]
-     * The price_display_method field (0 = with tax, 1 = without tax) determines whether
-     * prices for each customer group should include taxes.
-     *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
      * @param array $currencies Array of currency information for multiprice calculation
-     * @param array $customerGroupsData List of customer groups to consider for price calculation (optional)
      *
      * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
      */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies, $customerGroupsData = [])
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies)
     {
         $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
         $variantOnsalePrice = self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute);
-        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute, $customerGroupsData);
+        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute);
 
         return [
             'price' => $variantPrice,
@@ -1457,79 +1439,21 @@ class DfTools
     /**
      * Given a product and a list of currencies, returns the multiprice map.
      *
-     * For B2B cases, the input data structure for $customerGroupsData is:
-     * [
-     *    ['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1],
-     *    ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0],
-     *    ...
-     * ]
-     * The price_display_method field (0 = with tax, 1 = without tax) determines whether
-     * prices for each customer group should include taxes. If not provided, it will be
-     * retrieved from the customer group settings.
-     *
-     * An example of a value for this field is
+     * Example return value for currencies ["EUR", "GBP"]:
      * ["EUR" => ["price" => 5, "sale_price" => 3], "GBP" => ["price" => 4.3, "sale_price" => 2.7]]
-     * for a list containing two currencies ["EUR", "GBP"].
-     * In case of B2B prices it would be:
-     * ["EUR" => ["price" => 5, "sale_price" => 3], "EUR_5" => ["price" => 4, "sale_price" => 2], ...]
-     *
-     * Note: The $includeTaxes parameter is used for base currency prices (non-B2B).
-     * For B2B customer group prices, each group's price_display_method setting is used instead.
      *
      * @param int $productId Id of the product to calculate the multiprice for
-     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices (for base currency prices only)
+     * @param bool $includeTaxes Determines if taxes have to be included in the calculated prices
      * @param array $currencies List of currencies to consider for the multiprice calculation
-     * @param int $variantId When specified, the multiprice will be calculated for that variant
-     * @param array $customerGroupsData List of customer groups to consider for price calculation
+     * @param int|null $variantId When specified, the multiprice will be calculated for that variant
      *
      * @return array
      */
-    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null, $customerGroupsData = [])
+    public static function getMultiprice($productId, $includeTaxes, $currencies, $variantId = null)
     {
         $multiprice = [];
         $price = self::getPrice($productId, $includeTaxes, $variantId, false);
         $onsale_price = self::getOnsalePrice($productId, $includeTaxes, $variantId, false);
-
-        if (empty($customerGroupsData)) {
-            $hasCustomerGroups = false;
-        } else {
-            $hasCustomerGroups = true;
-            $isPrestaShop15 = !self::versionGte('1.6.0.0');
-            $cachedCustomers = [];
-
-            if ($isPrestaShop15) {
-                foreach ($customerGroupsData as $customerGroupData) {
-                    $customerId = $customerGroupData['id_customer'];
-                    if (!isset($cachedCustomers[$customerId])) {
-                        $cachedCustomers[$customerId] = new \Customer($customerId);
-                    }
-                }
-            }
-
-            // Pre-fetch all customer group prices once (outside currency loop) to minimize Product::getPriceStatic calls
-            $customerGroupPrices = [];
-            $customerGroupOnsalePrices = [];
-            foreach ($customerGroupsData as $customerGroupData) {
-                $groupId = $customerGroupData['id_group'];
-                $customerId = $customerGroupData['id_customer'];
-                $groupIncludeTaxes = isset($customerGroupData['price_display_method'])
-                ? !(bool) $customerGroupData['price_display_method']
-                : $includeTaxes;
-
-                // Set customer context for PrestaShop 1.5 before fetching prices
-                if ($isPrestaShop15) {
-                    \Context::getContext()->customer = $cachedCustomers[$customerId];
-                }
-
-                $customerGroupPrices[$groupId] = self::getPrice($productId, $groupIncludeTaxes, $variantId, false, $customerId);
-                $customerGroupOnsalePrices[$groupId] = self::getOnsalePrice($productId, $groupIncludeTaxes, $variantId, false, $customerId);
-            }
-
-            // Reset customer context for PrestaShop 1.5
-            if ($isPrestaShop15) {
-                \Context::getContext()->customer = null;
-            }
-        }
 
         foreach ($currencies as $currency) {
             if ($currency['deleted'] == 0 && $currency['active'] == 1) {
@@ -1538,30 +1462,13 @@ class DfTools
                 $decimals = self::getCurrencyPrecision($currencyId);
                 $convertedPrice = \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
                 $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($onsale_price, $currency), $decimals);
-                $currencyCode = $currency['iso_code'];
                 $pricesMap = ['price' => $convertedPrice];
 
                 if ($convertedPrice != $convertedOnsalePrice) {
                     $pricesMap['sale_price'] = $convertedOnsalePrice;
                 }
 
-                $multiprice[$currencyCode] = $pricesMap;
-
-                if ($hasCustomerGroups) {
-                    foreach ($customerGroupsData as $customerGroupData) {
-                        $groupId = $customerGroupData['id_group'];
-                        $customerGroupPrice = $customerGroupPrices[$groupId];
-                        $customerGroupOnsalePrice = $customerGroupOnsalePrices[$groupId];
-
-                        $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
-                        $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
-                        $pricesMap = ['price' => $convertedPrice];
-                        if ($convertedPrice !== $convertedOnsalePrice) {
-                            $pricesMap['sale_price'] = $convertedOnsalePrice;
-                        }
-                        $multiprice[$currencyCode . '_' . $groupId] = $pricesMap;
-                    }
-                }
+                $multiprice[$currency['iso_code']] = $pricesMap;
             }
         }
 
@@ -1819,61 +1726,6 @@ class DfTools
 
         // Fallback (it shouldn't happen)
         return 2;
-    }
-
-    /**
-     * Get the additional customer groups and default customers for the current shop.
-     *
-     * This method returns a list of customer groups and their default customers.
-     * The customer groups are the ones that are not native to PrestaShop.
-     * The default customers are the ones that are associated with the customer groups.
-     * The price_display_method field indicates whether prices should include tax (1) or exclude tax (0).
-     * When multistore is enabled, only groups associated with the current shop are returned.
-     * When multistore is disabled, all non-native groups are returned (single-shop behaviour).
-     *
-     * Result: [['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1], ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0], ...]
-     *
-     * @return array
-     */
-    public static function getAdditionalCustomerGroupsAndDefaultCustomers()
-    {
-        $idShop = (int) \Context::getContext()->shop->id;
-
-        if (isset(self::$cachedCustomerGroupsData[$idShop])) {
-            return self::$cachedCustomerGroupsData[$idShop];
-        }
-
-        if (!\Group::isCurrentlyUsed()) {
-            self::$cachedCustomerGroupsData[$idShop] = [];
-
-            return self::$cachedCustomerGroupsData[$idShop];
-        }
-
-        $unidentifiedGroup = (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
-        $guestGroup = (int) \Configuration::get('PS_GUEST_GROUP');
-        $customerGroup = (int) \Configuration::get('PS_CUSTOMER_GROUP');
-        $nativeGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
-
-        $query = new \DbQuery();
-        $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer, g.price_display_method');
-        $query->from('customer_group', 'cg');
-        $query->leftJoin('group', 'g', 'cg.id_group = g.id_group');
-
-        // When multistore is enabled, restrict to groups associated with the current shop
-        if (\Shop::isFeatureActive()) {
-            $query->innerJoin('group_shop', 'gs', 'gs.id_group = cg.id_group AND gs.id_shop = ' . $idShop);
-        }
-
-        $query->where('cg.id_group NOT IN (' . implode(',', $nativeGroups) . ')');
-        $query->groupBy('cg.id_group, g.price_display_method');
-
-        $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
-        // To guarantee compatibility with PrestaShop 1.5
-        self::$cachedCustomerGroupsData[$idShop] = array_filter($customerGroupsData, function ($groupData) {
-            return is_numeric($groupData['id_group']) && is_numeric($groupData['id_customer']);
-        });
-
-        return self::$cachedCustomerGroupsData[$idShop];
     }
 
     /**

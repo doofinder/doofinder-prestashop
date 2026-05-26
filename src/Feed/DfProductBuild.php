@@ -113,11 +113,6 @@ class DfProductBuild
     private $featuresKeys;
 
     /**
-     * @var array A list of customer Groups data
-     */
-    private $customerGroupsData;
-
-    /**
      * Constructor.
      *
      * Initializes configuration settings for building product data.
@@ -131,7 +126,6 @@ class DfProductBuild
         $this->idShop = $idShop;
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
-        $this->customerGroupsData = []; // B2B on-the-fly contextual prices replace static group indexation
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
         $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
         $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
@@ -368,8 +362,7 @@ class DfProductBuild
                     $variation['id_product'],
                     $variation['id_product_attribute'],
                     $this->useTax,
-                    $this->currencies,
-                    $this->customerGroupsData
+                    $this->currencies
                 );
             }
         }
@@ -1378,7 +1371,7 @@ class DfProductBuild
         $productId = $product['id_product'];
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
-        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute, $this->customerGroupsData);
+        return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute);
     }
 
     /**
