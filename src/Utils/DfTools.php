@@ -1855,9 +1855,10 @@ class DfTools
         $nativeGroups = [$unidentifiedGroup, $guestGroup, $customerGroup];
 
         $query = new \DbQuery();
-        $query->select('cg.id_group, MIN(cg.id_customer) AS id_customer, g.price_display_method');
+        $query->select('cg.id_group, MIN(c.id_customer) AS id_customer, g.price_display_method');
         $query->from('customer_group', 'cg');
         $query->leftJoin('group', 'g', 'cg.id_group = g.id_group');
+        $query->innerJoin('customer', 'c', 'c.id_customer = cg.id_customer AND c.id_default_group = cg.id_group');
 
         // When multistore is enabled, restrict to groups associated with the current shop
         if (\Shop::isFeatureActive()) {
