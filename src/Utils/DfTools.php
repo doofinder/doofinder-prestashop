@@ -1822,9 +1822,9 @@ class DfTools
     }
 
     /**
-     * Get customer groups with a price modifier and one representative default customer for the current shop.
+     * Get customer groups and one representative default customer for the current shop.
      *
-     * This method returns one row per customer group that has a non-zero reduction (discount or surcharge).
+     * This method returns one row per customer group.
      * Only customers whose id_default_group matches the group are considered as candidates.
      * The price_display_method field indicates whether prices should include tax (1) or exclude tax (0).
      * When multistore is enabled, only groups associated with the current shop are returned.
@@ -1859,7 +1859,6 @@ class DfTools
             $query->innerJoin('group_shop', 'gs', 'gs.id_group = cg.id_group AND gs.id_shop = ' . $idShop);
         }
 
-        $query->where('g.reduction <> 0');
         $query->groupBy('cg.id_group, g.price_display_method');
 
         $customerGroupsData = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
