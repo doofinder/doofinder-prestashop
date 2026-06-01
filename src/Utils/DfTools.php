@@ -1773,7 +1773,7 @@ class DfTools
         try {
             $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery);
             // Only fallback on actual failure (false), not on empty results
-            if ($response === false) {
+            if (false === $response) {
                 $response = \Db::getInstance()->executeS($idQuery);
             }
         } catch (\PrestaShopException $e) {
