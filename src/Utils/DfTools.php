@@ -1772,8 +1772,8 @@ class DfTools
 
         try {
             $response = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($idQuery);
-            // If the result is false or null, fallback to default DB instance
-            if (!$response) {
+            // Only fallback on actual failure (false), not on empty results
+            if (false === $response) {
                 $response = \Db::getInstance()->executeS($idQuery);
             }
         } catch (\PrestaShopException $e) {

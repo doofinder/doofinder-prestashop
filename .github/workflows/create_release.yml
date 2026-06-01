@@ -3,17 +3,24 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
 jobs:
   create-release:
     name: Build & Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Build
         id: vars
         run: |
-          tag=${GITHUB_REF#refs/*/}
+          tag="${{ inputs.tag || github.ref_name }}"
           zip_path="doofinder-prestashop.zip"
           echo "tag=$tag" >> $GITHUB_OUTPUT
           echo "zip_path=$zip_path" >> $GITHUB_OUTPUT
@@ -21,6 +28,7 @@ jobs:
       - name: Create release & upload asset
         uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ steps.vars.outputs.tag }}
           draft: true
           files: ${{ steps.vars.outputs.zip_path }}
           name: Doofinder Prestashop Addon ${{ steps.vars.outputs.tag }}
