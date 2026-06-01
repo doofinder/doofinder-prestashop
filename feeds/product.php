@@ -245,7 +245,9 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 }
 
 $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
-$products = arrayMergeByIdProduct($products, $extraRows);
+if (!empty($products)) {
+    $products = arrayMergeByIdProduct($products, $extraRows);
+}
 
 // Batch fetch all related data upfront to avoid N+1 queries
 $batchData = $dfProductBuild->batchFetchAll($products);

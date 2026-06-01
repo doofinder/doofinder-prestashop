@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      tag_created: ${{ steps.create_tag.outputs.created }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -36,9 +39,18 @@ jobs:
           fi
 
       - name: Create and push tag
+        id: create_tag
         if: steps.tag_check.outputs.exists == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ steps.version.outputs.tag }}
           git push origin ${{ steps.version.outputs.tag }}
+          echo "created=true" >> $GITHUB_OUTPUT
+
+  create-release:
+    needs: auto-tag
+    if: needs.auto-tag.outputs.tag_created == 'true'
+    uses: ./.github/workflows/create_release.yml
+    with:
+      tag: ${{ needs.auto-tag.outputs.tag }}
