@@ -296,23 +296,74 @@ class DfProductBuild
     {
         $processedProducts = [];
 
-        foreach ($products as $product) {
-            $minPriceVariant = null;
-            if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = $batchData['variations'][$product['id_product']];
-                foreach ($variations as $variation) {
-                    $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
-                    $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
-                    if ($variationPrices) {
-                        $minPriceVariant = $this->getMinPrice($minPriceVariant, $variationPrices);
+        $previousCurrency = $this->pinContextCurrencyToDefault();
+
+        try {
+            foreach ($products as $product) {
+                $minPriceVariant = null;
+                if ($this->productVariations && $product['variant_count'] > 0) {
+                    $variations = $batchData['variations'][$product['id_product']];
+                    foreach ($variations as $variation) {
+                        $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
+                        $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
+                        if ($variationPrices) {
+                            $minPriceVariant = $this->getMinPrice($minPriceVariant, $variationPrices);
+                        }
+                        $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $additionalAttributesHeader, $extraHeaders);
                     }
-                    $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $additionalAttributesHeader, $extraHeaders);
                 }
+                $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader, $extraHeaders);
             }
-            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader, $extraHeaders);
+        } finally {
+            $this->restoreContextCurrency($previousCurrency);
         }
 
         return $processedProducts;
+    }
+
+    /**
+     * Pin the context currency to the shop's default (reference) currency.
+     *
+     * Product prices are computed by Product::getPriceStatic(), which always
+     * returns the price expressed in the *context* currency. Afterwards the feed
+     * converts that price to each target currency with Tools::convertPrice(),
+     * which assumes its input is expressed in the shop's default reference
+     * currency (the one whose conversion_rate is 1). When the storefront context
+     * currency is a secondary currency, getPriceStatic() already returns a
+     * converted price and Tools::convertPrice() converts it a second time,
+     * producing prices off by the conversion rate (double currency conversion).
+     *
+     * Pinning the context currency to PS_CURRENCY_DEFAULT before any price is
+     * computed guarantees getPriceStatic() returns the reference price and the
+     * subsequent conversion is applied exactly once.
+     *
+     * @return \Currency|null The previous context currency, to be restored afterwards
+     */
+    private function pinContextCurrencyToDefault()
+    {
+        $context = \Context::getContext();
+        $previousCurrency = $context->currency;
+        $defaultCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $this->idShop);
+
+        if ($defaultCurrencyId && (!$previousCurrency || (int) $previousCurrency->id !== $defaultCurrencyId)) {
+            $context->currency = new \Currency($defaultCurrencyId);
+        }
+
+        return $previousCurrency;
+    }
+
+    /**
+     * Restore the context currency previously replaced by pinContextCurrencyToDefault().
+     *
+     * @param \Currency|null $previousCurrency The currency to restore
+     *
+     * @return void
+     */
+    private function restoreContextCurrency($previousCurrency)
+    {
+        if (null !== $previousCurrency) {
+            \Context::getContext()->currency = $previousCurrency;
+        }
     }
 
     /**
@@ -362,15 +413,21 @@ class DfProductBuild
         }
 
         if ($this->displayPrices) {
-            foreach ($allVariations as $variation) {
-                $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
-                $data['variant_prices'][$key] = DfTools::getVariantPrices(
-                    $variation['id_product'],
-                    $variation['id_product_attribute'],
-                    $this->useTax,
-                    $this->currencies,
-                    $this->customerGroupsData
-                );
+            $previousCurrency = $this->pinContextCurrencyToDefault();
+
+            try {
+                foreach ($allVariations as $variation) {
+                    $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
+                    $data['variant_prices'][$key] = DfTools::getVariantPrices(
+                        $variation['id_product'],
+                        $variation['id_product_attribute'],
+                        $this->useTax,
+                        $this->currencies,
+                        $this->customerGroupsData
+                    );
+                }
+            } finally {
+                $this->restoreContextCurrency($previousCurrency);
             }
         }
 
