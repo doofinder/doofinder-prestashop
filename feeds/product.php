@@ -79,6 +79,12 @@ $context->language = $lang;
 $country = (int) DfTools::cfg($shop->id, 'PS_COUNTRY_DEFAULT');
 $context->country = new Country($country);
 $currency = DfTools::getCurrencyForLanguageFromRequest($lang);
+// Prices are read with Product::getPriceStatic(), which returns them in the
+// context currency, and then converted to the target currency with
+// Tools::convertPrice(), which expects its input in the default (reference)
+// currency. Pin the context currency to the default one so the conversion is
+// applied exactly once and not twice (double currency conversion).
+$context->currency = new Currency((int) Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shop->id));
 
 $dfProductBuild = new DfProductBuild($shop->id, $lang->id, $currency->id);
 
