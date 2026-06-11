@@ -1,8 +1,10 @@
 <?php
+
 /**
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  *
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
@@ -76,9 +78,8 @@ class DoofinderApi
 
         if ($hashid != false && !preg_match($patt, $hashid)) {
             throw new DoofinderException('Wrong hashid');
-        } else {
-            $this->hashid = $hashid;
         }
+        $this->hashid = $hashid;
     }
 
     /**
@@ -262,9 +263,9 @@ class DoofinderApi
 
         if ($onlyOneLang) {
             return $result;
-        } else {
-            return $messages;
         }
+
+        return $messages;
     }
 
     /**

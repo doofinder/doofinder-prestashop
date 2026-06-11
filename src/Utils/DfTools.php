@@ -1,8 +1,10 @@
 <?php
+
 /**
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -353,6 +355,7 @@ class DfTools
     public static function getVariationImg($idProduct, $idProductAttribute)
     {
         $images = self::getVariationImages($idProduct, $idProductAttribute);
+
         return !empty($images) ? $images[0] : null;
     }
 
@@ -436,9 +439,9 @@ class DfTools
             ]);
 
             return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        } else {
-            return [];
         }
+
+        return [];
     }
 
     /**
@@ -1799,7 +1802,7 @@ class DfTools
     public static function getCurrencyPrecision($currency)
     {
         // Ensure we have a Currency object
-        if (!($currency instanceof \Currency)) {
+        if (!$currency instanceof \Currency) {
             $currency = new \Currency((int) $currency);
         }
 

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 if (!defined('_PS_VERSION_')) {
@@ -60,12 +62,11 @@ class DoofinderConfigModuleFrontController extends ModuleFrontController
                 }
                 echo json_encode(['success' => true]);
                 exit;
-            } else {
-                header('HTTP/1.1 403 Forbidden', true, 403);
-                $msgError = 'Forbidden access.'
-                    . ' Token for autoinstaller invalid.';
-                exit($msgError);
             }
+            header('HTTP/1.1 403 Forbidden', true, 403);
+            $msgError = 'Forbidden access.'
+                . ' Token for autoinstaller invalid.';
+            exit($msgError);
         }
 
         $languages = [];
