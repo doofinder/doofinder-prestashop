@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author    Doofinder
  * @copyright Doofinder
@@ -31,14 +30,14 @@ if (!defined('_PS_VERSION_')) {
 
 class DoofinderConstants
 {
-    const DOOMANAGER_REGION_URL = '${DOOMANAGER_REGION_URL}';
-    const DOOPLUGINS_REGION_URL = '${DOOPLUGINS_REGION_URL}';
-    const DOOPHOENIX_REGION_URL = '${DOOPHOENIX_REGION_URL}';
-    const CONFIG_REGION_URL = '${CONFIG_REGION_URL}';
-    const GS_SHORT_DESCRIPTION = 1;
-    const GS_LONG_DESCRIPTION = 2;
-    const VERSION = '${PLUGIN_VERSION}';
-    const NAME = 'doofinder';
-    const YES = 1;
-    const NO = 0;
+    public const DOOMANAGER_REGION_URL = '${DOOMANAGER_REGION_URL}';
+    public const DOOPLUGINS_REGION_URL = '${DOOPLUGINS_REGION_URL}';
+    public const DOOPHOENIX_REGION_URL = '${DOOPHOENIX_REGION_URL}';
+    public const CONFIG_REGION_URL = '${CONFIG_REGION_URL}';
+    public const GS_SHORT_DESCRIPTION = 1;
+    public const GS_LONG_DESCRIPTION = 2;
+    public const VERSION = '${PLUGIN_VERSION}';
+    public const NAME = 'doofinder';
+    public const YES = 1;
+    public const NO = 0;
 }

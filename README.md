@@ -44,8 +44,11 @@ Complete setup using our [step-by-step installation guide](https://support.doofi
 
 | | Supported versions |
 | -- | -- |
-| PHP | 5.4 – 8.4 |
+| PHP | 7.1 – 8.4 |
 | PrestaShop | 1.5.0.17 – 9.x (1.6, 1.7, 8.x, 9.x) |
+
+> [!IMPORTANT]
+> The module requires **PHP 7.1 or higher**. The code uses class constant visibility (`public const`), a syntax introduced in PHP 7.1, so it cannot run on PHP 5.x or 7.0 (a fatal parse error occurs). PrestaShop 1.5/1.6 stores are still supported, but only when served by PHP 7.1+.
 
 For system requirements by version, see [PrestaShop 1.7](https://devdocs.prestashop-project.org/1.7/basics/installation/system-requirements/), [PrestaShop 8](https://devdocs.prestashop-project.org/8/basics/installation/system-requirements/), and [PrestaShop 9](https://devdocs.prestashop-project.org/9/basics/installation/system-requirements/).
 
@@ -110,8 +113,11 @@ Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prest
 | 8.1.7      | 8.1, 8.0, 7.4, 7.3, 7.2 |
 | 8.0.5      | 8.1, 8.0, 7.4, 7.3, 7.2 |
 | 1.7.8.9    | 7.4, 7.3, 7.2, 7.1      |
-| 1.6        | 7.2, 7.1, 7.0, 5.6      |
-| 1.5[^ps15] | 7.2, 7.1, 7.0, 5.6, 5.5 |
+| 1.6        | 7.2, 7.1                |
+| 1.5[^ps15] | 7.2, 7.1                |
+
+> [!NOTE]
+> PHP 7.0 and 5.x are no longer supported (the module uses `public const`, which requires PHP 7.1+). PrestaShop 1.5/1.6 stores must run on PHP 7.1 or higher.
 
 [^ps15]: PrestaShop 1.5: patched for auto installation (see Dockerfile). Use MySQL 5.5 and without SSL.
 

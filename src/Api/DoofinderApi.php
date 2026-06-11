@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author    Doofinder
  * @copyright Doofinder
@@ -32,8 +31,8 @@ use PrestaShop\Module\Doofinder\View\DoofinderAdminPanelView;
  */
 class DoofinderApi
 {
-    const API_VERSION = '5';
-    const VERSION = '5.2.3';
+    public const API_VERSION = '5';
+    public const VERSION = '5.2.3';
 
     /**
      * @var string User's API key for Doofinder authentication
