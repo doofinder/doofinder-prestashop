@@ -108,6 +108,12 @@ class UpdateOnSave
         $defaultCurrency = new \Currency($defaultCurrencyId);
         $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
 
+        // Prices are read in the context currency and then converted with
+        // Tools::convertPrice(), which expects the default (reference) currency
+        // as input. Pin the context currency to the default one to avoid a
+        // double currency conversion.
+        \Context::getContext()->currency = $defaultCurrency;
+
         foreach (['product', 'cms', 'category'] as $type) {
             $itemsUpdate = self::getItemsQueue($shopId, $type, 'update');
             $itemsDelete = self::getItemsQueue($shopId, $type, 'delete');

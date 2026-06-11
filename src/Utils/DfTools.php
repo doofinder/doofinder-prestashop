@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -30,24 +31,24 @@ class DfTools
     /**
      * Separator used for list fields.
      */
-    const LIST_SEPARATOR = ' %% ';
+    public const LIST_SEPARATOR = ' %% ';
 
     /**
      * Separator used for category tree paths.
      */
-    const CATEGORY_TREE_SEPARATOR = '>';
+    public const CATEGORY_TREE_SEPARATOR = '>';
 
     /**
      * Separator used for text values.
      */
-    const TXT_SEPARATOR = '|';
+    public const TXT_SEPARATOR = '|';
 
     /**
      * Regex to filter valid UTF-8 characters.
      *
      * @see http://stackoverflow.com/questions/4224141/php-removing-invalid-utf-8-characters-in-xml-using-filter
      */
-    const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF]
+    public const VALID_UTF8 = '/([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF]
     [\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F]
     [\x80-\xBF]{2})|./x';
 
@@ -353,6 +354,7 @@ class DfTools
     public static function getVariationImg($idProduct, $idProductAttribute)
     {
         $images = self::getVariationImages($idProduct, $idProductAttribute);
+
         return !empty($images) ? $images[0] : null;
     }
 
@@ -436,9 +438,9 @@ class DfTools
             ]);
 
             return \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        } else {
-            return [];
         }
+
+        return [];
     }
 
     /**
@@ -1799,7 +1801,7 @@ class DfTools
     public static function getCurrencyPrecision($currency)
     {
         // Ensure we have a Currency object
-        if (!($currency instanceof \Currency)) {
+        if (!$currency instanceof \Currency) {
             $currency = new \Currency((int) $currency);
         }
 

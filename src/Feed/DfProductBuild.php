@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -1329,9 +1330,9 @@ class DfProductBuild
             $allowOosp = \Product::isAvailableWhenOutOfStock($outOfStock);
 
             return $available && ($stock > 0 || $allowOosp) ? 'in stock' : 'out of stock';
-        } else {
-            return $available ? 'in stock' : 'out of stock';
         }
+
+        return $available ? 'in stock' : 'out of stock';
     }
 
     /**
@@ -1358,12 +1359,11 @@ class DfProductBuild
 
         if (!$salePrice) {
             return $productPrice ? \Tools::convertPrice($productPrice, $this->idCurrency) : null;
-        } else {
-            $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
-
-            return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
-                ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
         }
+        $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
+
+        return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
+            ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
     }
 
     /**
@@ -1412,9 +1412,9 @@ class DfProductBuild
 
         if (is_array($this->featuresShown) && count($this->featuresShown) > 0 && $this->featuresShown[0] !== '') {
             return DfTools::getSelectedFeatures($allFeatureKeys, $this->featuresShown);
-        } else {
-            return $allFeatureKeys;
         }
+
+        return $allFeatureKeys;
     }
 
     /**

@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  *
  * Based on original from Author:: JoeZ99 (<jzarate@gmail.com>). all credit to
@@ -30,8 +31,8 @@ use PrestaShop\Module\Doofinder\View\DoofinderAdminPanelView;
  */
 class DoofinderApi
 {
-    const API_VERSION = '5';
-    const VERSION = '5.2.3';
+    public const API_VERSION = '5';
+    public const VERSION = '5.2.3';
 
     /**
      * @var string User's API key for Doofinder authentication
@@ -76,9 +77,8 @@ class DoofinderApi
 
         if ($hashid != false && !preg_match($patt, $hashid)) {
             throw new DoofinderException('Wrong hashid');
-        } else {
-            $this->hashid = $hashid;
         }
+        $this->hashid = $hashid;
     }
 
     /**
@@ -262,9 +262,9 @@ class DoofinderApi
 
         if ($onlyOneLang) {
             return $result;
-        } else {
-            return $messages;
         }
+
+        return $messages;
     }
 
     /**

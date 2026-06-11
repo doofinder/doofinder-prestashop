@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 if (!defined('_PS_VERSION_')) {
@@ -37,10 +38,9 @@ class DoofinderCallbackModuleFrontController extends ModuleFrontController
             Configuration::updateValue('DF_FEED_INDEXED', true);
 
             exit(json_encode(['status' => 'success']));
-        } else {
-            http_response_code(405);
-            exit;
         }
+        http_response_code(405);
+        exit;
     }
 
     /**
