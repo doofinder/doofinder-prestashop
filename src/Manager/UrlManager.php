@@ -115,6 +115,18 @@ class UrlManager
     }
 
     /**
+     * Get update store options endpoint URL
+     *
+     * @param string $region
+     *
+     * @return string
+     */
+    public static function getUpdateStoreOptionsUrl($region)
+    {
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/store-options-update');
+    }
+
+    /**
      * Gets an URL with its region filled in. You can also append a path (optional).
      * If the region is provided as '' it will return a regionless URL.
      *
