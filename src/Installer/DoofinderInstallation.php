@@ -373,7 +373,7 @@ class DoofinderInstallation
 
             $shopUrl = UrlManager::getShopURL($shopId);
             $payload = json_encode([
-                'installation_id' => $installationID,
+                'store_id' => $installationID,
                 'options' => [
                     'url' => preg_replace('#^https?://#', '', $shopUrl),
                     'shop_id' => (int) $shopId,
