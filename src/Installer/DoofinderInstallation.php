@@ -381,7 +381,7 @@ class DoofinderInstallation
                 ],
             ]);
 
-            $response = $client->post(
+            $response = $client->patch(
                 UrlManager::getUpdateStoreOptionsUrl(\Configuration::get('DF_REGION')),
                 $payload,
                 null,

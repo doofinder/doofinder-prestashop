@@ -123,7 +123,7 @@ class UrlManager
      */
     public static function getUpdateStoreOptionsUrl($region)
     {
-        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/stores/options-update');
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/stores/options');
     }
 
     /**

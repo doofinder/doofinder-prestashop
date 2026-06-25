@@ -375,6 +375,23 @@ class EasyREST
     }
 
     /**
+     * Convenience method wrapping a common PATCH call
+     *
+     * @param string $url
+     * @param string $params
+     * @param string $user=null [optional]
+     * @param string $password=null [optional]
+     * @param string $contentType="multipart/form-data" [optional]
+     * @param array $httpHeaders=[] [optional] additional HTTP headers to be sent
+     *
+     * @return EasyREST
+     */
+    public static function patch($url, $params = null, $user = null, $password = null, $contentType = 'multipart/form-data', $httpHeaders = [])
+    {
+        return self::call('PATCH', $url, $params, $user, $password, $contentType, $httpHeaders);
+    }
+
+    /**
      * Convenience method wrapping a commom GET call
      *
      * @param string $url
