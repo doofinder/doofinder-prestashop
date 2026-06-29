@@ -76,6 +76,14 @@ class EasyREST
                 $params = $this->params;
             }
             curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
+        } elseif ($this->method === 'PATCH') {
+            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            if (is_object($this->params) || is_array($this->params)) {
+                $params = http_build_query($this->params);
+            } else {
+                $params = $this->params;
+            }
+            curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
         } else {
             curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $this->method);
         }
