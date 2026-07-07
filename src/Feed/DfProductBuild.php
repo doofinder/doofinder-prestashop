@@ -1375,6 +1375,10 @@ class DfProductBuild
      */
     private function getMultiprice($product)
     {
+        if (!$product['show_price']) {
+            return [];
+        }
+
         $productId = $product['id_product'];
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
