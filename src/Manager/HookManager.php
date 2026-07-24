@@ -129,8 +129,14 @@ class HookManager
             'customer_group_hide_prices' => 'false',
         ];
 
-        if ($context->customer->isLogged()) {
-            $templateVars['customer_group_hide_prices'] = (DfTools::getCustomerGroupPriceVisibility($context->customer->id_default_group)) ? 'false' : 'true';
+        // Resolve the applicable customer group: the default group for logged in
+        // customers, or the unidentified visitor group for anonymous visitors.
+        $idCustomerGroup = $context->customer->isLogged()
+            ? (int) $context->customer->id_default_group
+            : (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
+
+        if (!DfTools::getCustomerGroupPriceVisibility($idCustomerGroup)) {
+            $templateVars['customer_group_hide_prices'] = 'true';
         }
 
         return $templateVars;

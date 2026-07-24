@@ -36,7 +36,7 @@ class DoofinderConstants
     public const CONFIG_REGION_URL = 'https://%s-config.doofinder.com';
     public const GS_SHORT_DESCRIPTION = 1;
     public const GS_LONG_DESCRIPTION = 2;
-    public const VERSION = '8.1.11';
+    public const VERSION = '8.1.12';
     public const NAME = 'doofinder';
     public const YES = 1;
     public const NO = 0;
