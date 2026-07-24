@@ -30,6 +30,12 @@ use PrestaShop\Module\Doofinder\Manager\UrlManager;
 class UpdateOnSave
 {
     /**
+     * Maximum number of final documents (parents and variants) sent in a
+     * single product bulk update request.
+     */
+    const MAX_DOCUMENTS_PER_REQUEST = 100;
+
+    /**
      * Check if the necessary time has passed to run the update on save again.
      *
      * @return bool
@@ -194,14 +200,32 @@ class UpdateOnSave
         }
 
         if ('update' === $action) {
+            // Parent products are processed in chunks to keep the batch DB
+            // queries efficient, but a single parent can expand into many
+            // variant documents. To avoid oversized requests, the generated
+            // documents are buffered and flushed in batches of at most
+            // self::MAX_DOCUMENTS_PER_REQUEST final documents, so the chunk
+            // limit applies to the documents actually sent, not to parents.
             $chunks = array_chunk($products, 100);
             $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
+            $buffer = [];
             foreach ($chunks as $chunk) {
                 $builder->setProducts($chunk);
-                $payload = $builder->build();
+                $documents = $builder->buildProductsArray();
 
-                self::updateItemsApi($hashid, 'product', $payload);
+                foreach ($documents as $document) {
+                    $buffer[] = $document;
+
+                    if (count($buffer) >= self::MAX_DOCUMENTS_PER_REQUEST) {
+                        self::updateItemsApi($hashid, 'product', json_encode($buffer));
+                        $buffer = [];
+                    }
+                }
+            }
+
+            if (!empty($buffer)) {
+                self::updateItemsApi($hashid, 'product', json_encode($buffer));
             }
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);

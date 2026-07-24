@@ -265,21 +265,31 @@ class DfProductBuild
      */
     public function build()
     {
-        $payload = [];
+        return json_encode($this->buildProductsArray());
+    }
 
+    /**
+     * Build the final documents (parents and variants) for the configured products.
+     *
+     * Unlike build(), this returns the expanded documents as an array without
+     * JSON-encoding them, so callers can chunk by final document count and avoid
+     * building a single oversized payload.
+     *
+     * @return array Final documents, one per parent product and per variant
+     */
+    public function buildProductsArray()
+    {
         \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
         if (empty($products)) {
-            return json_encode($payload);
+            return [];
         }
 
         // Batch fetch all related data upfront to avoid N+1 queries
         $batchData = $this->batchFetchAll($products);
 
-        $processedProducts = $this->processBatchProducts($products, $batchData);
-
-        return json_encode($processedProducts);
+        return $this->processBatchProducts($products, $batchData);
     }
 
     /**
