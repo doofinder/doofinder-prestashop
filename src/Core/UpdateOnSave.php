@@ -33,7 +33,7 @@ class UpdateOnSave
      * Maximum number of final documents (parents and variants) sent in a
      * single product bulk update request.
      */
-    const MAX_DOCUMENTS_PER_REQUEST = 100;
+    private const MAX_DOCUMENTS_PER_REQUEST = 100;
 
     /**
      * Check if the necessary time has passed to run the update on save again.
