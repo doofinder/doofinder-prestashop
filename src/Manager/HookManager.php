@@ -129,8 +129,10 @@ class HookManager
             'customer_group_hide_prices' => 'false',
         ];
 
-        // Resolve the applicable customer group: the default group for logged in
-        // customers, or the unidentified visitor group for anonymous visitors.
+        /*
+         * Resolve the applicable customer group: the default group for logged in
+         * customers, or the unidentified visitor group for anonymous visitors.
+         */
         $idCustomerGroup = $context->customer->isLogged()
             ? (int) $context->customer->id_default_group
             : (int) \Configuration::get('PS_UNIDENTIFIED_GROUP');
