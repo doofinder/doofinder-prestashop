@@ -30,6 +30,13 @@ use PrestaShop\Module\Doofinder\Manager\UrlManager;
 class UpdateOnSave
 {
     /**
+     * Number of parent products loaded and processed per DB batch. Controls
+     * query efficiency and memory usage while building documents; unrelated
+     * to how many documents are sent per request.
+     */
+    private const PRODUCTS_PER_BATCH = 100;
+
+    /**
      * Maximum number of final documents (parents and variants) sent in a
      * single product bulk update request.
      */
@@ -206,7 +213,7 @@ class UpdateOnSave
             // documents are buffered and flushed in batches of at most
             // self::MAX_DOCUMENTS_PER_REQUEST final documents, so the chunk
             // limit applies to the documents actually sent, not to parents.
-            $chunks = array_chunk($products, 100);
+            $chunks = array_chunk($products, self::PRODUCTS_PER_BATCH);
             $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
             $buffer = [];
