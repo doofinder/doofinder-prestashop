@@ -29,17 +29,8 @@ use PrestaShop\Module\Doofinder\Manager\UrlManager;
  */
 class UpdateOnSave
 {
-    /**
-     * Number of parent products loaded and processed per DB batch. Controls
-     * query efficiency and memory usage while building documents; unrelated
-     * to how many documents are sent per request.
-     */
     private const PRODUCTS_PER_BATCH = 100;
 
-    /**
-     * Maximum number of final documents (parents and variants) sent in a
-     * single product bulk update request.
-     */
     private const MAX_DOCUMENTS_PER_REQUEST = 100;
 
     /**
@@ -207,32 +198,26 @@ class UpdateOnSave
         }
 
         if ('update' === $action) {
-            // Parent products are processed in chunks to keep the batch DB
-            // queries efficient, but a single parent can expand into many
-            // variant documents. To avoid oversized requests, the generated
-            // documents are buffered and flushed in batches of at most
-            // self::MAX_DOCUMENTS_PER_REQUEST final documents, so the chunk
-            // limit applies to the documents actually sent, not to parents.
-            $chunks = array_chunk($products, self::PRODUCTS_PER_BATCH);
+            $productBatches = array_chunk($products, self::PRODUCTS_PER_BATCH);
             $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
-            $buffer = [];
-            foreach ($chunks as $chunk) {
-                $builder->setProducts($chunk);
+            $documentsToSend = [];
+            foreach ($productBatches as $productBatch) {
+                $builder->setProducts($productBatch);
                 $documents = $builder->buildProductsArray();
 
                 foreach ($documents as $document) {
-                    $buffer[] = $document;
+                    $documentsToSend[] = $document;
 
-                    if (count($buffer) >= self::MAX_DOCUMENTS_PER_REQUEST) {
-                        self::updateItemsApi($hashid, 'product', json_encode($buffer));
-                        $buffer = [];
+                    if (count($documentsToSend) >= self::MAX_DOCUMENTS_PER_REQUEST) {
+                        self::updateItemsApi($hashid, 'product', json_encode($documentsToSend));
+                        $documentsToSend = [];
                     }
                 }
             }
 
-            if (!empty($buffer)) {
-                self::updateItemsApi($hashid, 'product', json_encode($buffer));
+            if (!empty($documentsToSend)) {
+                self::updateItemsApi($hashid, 'product', json_encode($documentsToSend));
             }
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);

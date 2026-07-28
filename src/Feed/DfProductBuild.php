@@ -259,21 +259,7 @@ class DfProductBuild
     }
 
     /**
-     * Build the JSON payload of products for Doofinder export.
-     *
-     * @return string JSON-encoded payload
-     */
-    public function build()
-    {
-        return json_encode($this->buildProductsArray());
-    }
-
-    /**
      * Build the final documents (parents and variants) for the configured products.
-     *
-     * Unlike build(), this returns the expanded documents as an array without
-     * JSON-encoding them, so callers can chunk by final document count and avoid
-     * building a single oversized payload.
      *
      * @return array Final documents, one per parent product and per variant
      */
