@@ -259,27 +259,23 @@ class DfProductBuild
     }
 
     /**
-     * Build the JSON payload of products for Doofinder export.
+     * Build the final documents (parents and variants) for the configured products.
      *
-     * @return string JSON-encoded payload
+     * @return array Final documents, one per parent product and per variant
      */
-    public function build()
+    public function buildProductsArray()
     {
-        $payload = [];
-
         \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
         $products = $this->getProductData();
 
         if (empty($products)) {
-            return json_encode($payload);
+            return [];
         }
 
         // Batch fetch all related data upfront to avoid N+1 queries
         $batchData = $this->batchFetchAll($products);
 
-        $processedProducts = $this->processBatchProducts($products, $batchData);
-
-        return json_encode($processedProducts);
+        return $this->processBatchProducts($products, $batchData);
     }
 
     /**
