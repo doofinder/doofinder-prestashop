@@ -68,7 +68,7 @@ class DoofinderAdminController extends ModuleAdminController
         $idCurrency = (int) Tools::getValue('id_currency');
         $shopId = (int) $this->context->shop->id;
 
-        $hashid = \PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::createSearchEngineForLanguageAndCurrency($shopId, $idLang, $idCurrency);
+        $hashid = \PrestaShop\Module\Doofinder\Core\SearchEngine::createForLanguageAndCurrency($shopId, $idLang, $idCurrency);
 
         if (!$hashid) {
             $this->ajaxRender(json_encode(['success' => false]));
