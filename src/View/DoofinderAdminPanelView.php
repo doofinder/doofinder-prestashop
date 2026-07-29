@@ -716,25 +716,23 @@ class DoofinderAdminPanelView
             ];
         }
 
-        if ($isAdvParamPresent) {
-            if ($multipriceEnabled) {
-                $hashidKeys = self::getMultipriceKeys();
-                $keyToUse = 'keyMultiprice';
-                $labelToUse = 'labelMultiprice';
-            } else {
-                $hashidKeys = DfTools::getHashidKeys();
-                $keyToUse = 'key';
-                $labelToUse = 'label';
-            }
+        if ($multipriceEnabled) {
+            $hashidKeys = self::getMultipriceKeys();
+            $keyToUse = 'keyMultiprice';
+            $labelToUse = 'labelMultiprice';
+        } else {
+            $hashidKeys = DfTools::getHashidKeys();
+            $keyToUse = 'key';
+            $labelToUse = 'label';
+        }
 
-            foreach ($hashidKeys as $hashidKey) {
-                $inputs[] = [
-                    'type' => 'text',
-                    'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey[$labelToUse],
-                    'name' => $hashidKey[$keyToUse],
-                    'readonly' => !$isManualInstallation,
-                ];
-            }
+        foreach ($hashidKeys as $hashidKey) {
+            $inputs[] = [
+                'type' => 'html',
+                'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey[$labelToUse],
+                'name' => $hashidKey[$keyToUse],
+                'html_content' => $this->hashidInputWithButtonHtml($hashidKey, $keyToUse),
+            ];
         }
 
         $inputs[] = [
@@ -761,6 +759,12 @@ class DoofinderAdminPanelView
     /**
      * Returns an array of multiprice keys indexed by key name.
      *
+     * One entry is kept per language: whichever currency variant already has
+     * a value wins (mirrors DoofinderConfig::getConfigFormValuesStoreInfo(),
+     * which only ever writes the first non-empty value it finds and skips
+     * the rest). Without this, the last currency iterated would always win,
+     * even if it has no value while an earlier one does.
+     *
      * @return array<string,array> multiprice key data
      */
     private static function getMultipriceKeys()
@@ -769,7 +773,13 @@ class DoofinderAdminPanelView
         $arrayKeys = [];
 
         foreach ($hashidKeys as $hashidKey) {
-            $arrayKeys[$hashidKey['keyMultiprice']] = $hashidKey;
+            $multipriceKey = $hashidKey['keyMultiprice'];
+
+            if (isset($arrayKeys[$multipriceKey]) && \Configuration::get($arrayKeys[$multipriceKey]['key'])) {
+                continue;
+            }
+
+            $arrayKeys[$multipriceKey] = $hashidKey;
         }
 
         return $arrayKeys;
@@ -832,6 +842,55 @@ class DoofinderAdminPanelView
         }
 
         return $urls;
+    }
+
+    /**
+     * Builds the HTML for a hashid input with a "Create Search Engine" button
+     * attached to it via Bootstrap's input-group-btn (not input-group-addon,
+     * which doesn't render a <button> correctly). The button is always
+     * visible, disabled once the field already has a value (mirrors the
+     * Magento2 plugin's behavior).
+     *
+     * Built by hand instead of relying on HelperForm's native 'text' type
+     * + 'suffix', since 'suffix' is hard-wired to an input-group-addon
+     * wrapper in the core template.
+     *
+     * @param array $hashidKey Hashid key data, as returned by DfTools::getHashidKeys()/getMultipriceKeys().
+     * @param string $keyToUse Which key of $hashidKey holds the actual Configuration name ('key' or 'keyMultiprice').
+     *
+     * @return string
+     */
+    private function hashidInputWithButtonHtml($hashidKey, $keyToUse)
+    {
+        $fieldName = $hashidKey[$keyToUse];
+        // The real value is always stored under the per-currency key ('key'),
+        // even in multiprice mode, where $fieldName is the bare (currency-less)
+        // key used for form submission — see DoofinderConfig::getConfigFormValuesStoreInfo().
+        $value = \Configuration::get($hashidKey['key']);
+        $hasHash = (bool) $value;
+
+        $field = htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8');
+        $valueAttr = htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        $idLang = (int) $hashidKey['id_lang'];
+        $idCurrency = (int) $hashidKey['id_currency'];
+        $label = htmlspecialchars($this->module->l('Create Search Engine', 'doofinderadminpanelview'), ENT_QUOTES, 'UTF-8');
+        $ajaxUrl = htmlspecialchars(
+            \Context::getContext()->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1&action=CreateSearchEngine',
+            ENT_QUOTES,
+            'UTF-8'
+        );
+
+        return '<div class="input-group">'
+            . '<input type="text" class="form-control" id="' . $field . '" name="' . $field . '" value="' . $valueAttr . '">'
+            . '<span class="input-group-btn">'
+            . '<button type="button" class="btn btn-default doofinder-create-search-engine"'
+            . ' data-field="' . $field . '" data-id-lang="' . $idLang . '" data-id-currency="' . $idCurrency . '" data-ajax-url="' . $ajaxUrl . '"'
+            . ($hasHash ? ' disabled="disabled"' : '') . '>'
+            . $label . '</button>'
+            . '</span>'
+            . '</div>'
+            . '<span class="doofinder-create-search-engine-spinner loader" style="display:none; width: 16px; height: 16px; border-width: 2px; vertical-align: middle; margin-top: 6px;"></span>'
+            . '<span class="doofinder-create-search-engine-result"></span>';
     }
 
     /**

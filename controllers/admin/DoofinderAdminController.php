@@ -57,6 +57,29 @@ class DoofinderAdminController extends ModuleAdminController
     }
 
     /**
+     * AJAX action to create the Search Engine for a given language/currency
+     * combination, for the currently selected shop.
+     *
+     * @return void
+     */
+    public function displayAjaxCreateSearchEngine()
+    {
+        $idLang = (int) Tools::getValue('id_lang');
+        $idCurrency = (int) Tools::getValue('id_currency');
+        $shopId = (int) $this->context->shop->id;
+
+        $hashid = \PrestaShop\Module\Doofinder\Installer\DoofinderInstallation::createSearchEngineForLanguageAndCurrency($shopId, $idLang, $idCurrency);
+
+        if (!$hashid) {
+            $this->ajaxRender(json_encode(['success' => false]));
+
+            return;
+        }
+
+        $this->ajaxRender(json_encode(['success' => true, 'hashid' => $hashid]));
+    }
+
+    /**
      * Renders AJAX responses, with compatibility for several PrestaShop versions.
      *
      * Note that `ajaxRender` method is only available since PrestaShop 1.7

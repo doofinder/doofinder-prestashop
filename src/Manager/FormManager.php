@@ -67,7 +67,6 @@ class FormManager
         $idShop = $context->shop->id;
 
         $isFirstTime = (bool) \Tools::getValue('first_time', 0);
-        $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
 
         if ($isFirstTime) {
             $shops = \Shop::getShops();
@@ -137,7 +136,7 @@ class FormManager
             }
             $value = trim($value);
             // Special case for Hashids due to the Multiprice
-            if ($isAdvParamPresent && $multipriceEnabled && DfTools::str_contains($postKey, 'DF_HASHID')) {
+            if ($multipriceEnabled && DfTools::str_contains($postKey, 'DF_HASHID')) {
                 self::updateHashIds($postKey, $value);
                 continue;
             }

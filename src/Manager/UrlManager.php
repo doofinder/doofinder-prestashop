@@ -115,6 +115,18 @@ class UrlManager
     }
 
     /**
+     * Get the universal "create a single Search Engine" endpoint URL
+     *
+     * @param string $region
+     *
+     * @return string
+     */
+    public static function getCreateSearchEngineUrl($region)
+    {
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/install/search-engine');
+    }
+
+    /**
      * Get update store options endpoint URL
      *
      * @param string $region

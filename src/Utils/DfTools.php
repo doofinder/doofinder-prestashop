@@ -170,6 +170,8 @@ class DfTools
                     'labelMultiprice' => $langFullIso,
                     'key' => 'DF_HASHID_' . $currencyIso . '_' . $langFullIso,
                     'keyMultiprice' => 'DF_HASHID_' . $langFullIso,
+                    'id_lang' => (int) $language['id_lang'],
+                    'id_currency' => (int) $currency['id_currency'],
                 ];
             }
         }
