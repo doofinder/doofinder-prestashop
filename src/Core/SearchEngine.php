@@ -9,6 +9,7 @@
 namespace PrestaShop\Module\Doofinder\Core;
 
 use PrestaShop\Module\Doofinder\Api\DoofinderLayerApi;
+use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Manager\LanguageManager;
 
 if (!defined('_PS_VERSION_')) {
@@ -80,7 +81,13 @@ class SearchEngine
 
         $data = DoofinderLayerApi::getInstallationData($installationID, $apiKey, $region);
 
-        foreach ($data['config']['search_engines'] as $lang => $currencies) {
+        $searchEngines = isset($data['config']['search_engines']) ? $data['config']['search_engines'] : [];
+
+        if (empty($searchEngines)) {
+            DoofinderConfig::debug("Unable to resolve the search engines for the installation $installationID. The hashids were not updated.");
+        }
+
+        foreach ($searchEngines as $lang => $currencies) {
             foreach ($currencies as $currency => $hashid) {
                 $hashidKey = 'DF_HASHID_' . strtoupper($currency) . '_' . strtoupper($lang);
                 \Configuration::updateValue($hashidKey, $hashid, false, $idShopGroup, $idShop);

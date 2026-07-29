@@ -145,9 +145,9 @@ class FormManager
         }
 
         if ($formUpdated == 'data_feed_tab') {
-            if ((bool) \Configuration::get('DF_UPDATE_ON_SAVE_DELAY')) {
-                SearchEngine::setSearchEnginesByConfig();
-            }
+            // Refreshed on every save, and not only when the update on save is enabled, because this is
+            // the only place where the hashids are resolved after the store creation.
+            SearchEngine::setSearchEnginesByConfig();
             if (\Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') && (int) \Tools::getValue('DF_UPDATE_ON_SAVE_DELAY') < 5) {
                 \Configuration::updateValue('DF_UPDATE_ON_SAVE_DELAY', 5);
             }
