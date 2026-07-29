@@ -223,9 +223,6 @@ class DoofinderInstallation
                 DoofinderConfig::debug("Set installation ID: $installationID");
                 \Configuration::updateValue('DF_INSTALLATION_ID', $installationID, false, $shopGroupId, $shopId);
                 \Configuration::updateValue('DF_SHOW_LAYER', true, false, $shopGroupId, $shopId);
-            // The hashids are not resolved here on purpose: they are fetched from the installation
-            // endpoint when the Data Feed tab is saved, which is also where the update on save,
-            // the only feature that needs them, is enabled.
             } else {
                 DoofinderConfig::debug('Invalid installation ID');
                 exit('ko');
