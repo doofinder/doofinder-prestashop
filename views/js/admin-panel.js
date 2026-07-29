@@ -110,8 +110,10 @@ $(document).ready(function() {
         $spinner.hide();
 
         if (response.success && response.hashid) {
-          $wrapper.find('input[name="' + $button.data('field') + '"]').val(response.hashid);
+          $wrapper.find('input[name="' + $button.data('field') + '"]').val(response.hashid).prop('readonly', true);
           $result.text('Search Engine created!');
+          $button.closest('.input-group-btn').remove();
+          $spinner.remove();
           return;
         }
 

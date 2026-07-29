@@ -847,9 +847,8 @@ class DoofinderAdminPanelView
     /**
      * Builds the HTML for a hashid input with a "Create Search Engine" button
      * attached to it via Bootstrap's input-group-btn (not input-group-addon,
-     * which doesn't render a <button> correctly). The button is always
-     * visible, disabled once the field already has a value (mirrors the
-     * Magento2 plugin's behavior).
+     * which doesn't render a <button> correctly). The button disappears, and
+     * the field becomes read-only, once the field already has a value.
      *
      * Built by hand instead of relying on HelperForm's native 'text' type
      * + 'suffix', since 'suffix' is hard-wired to an input-group-addon
@@ -880,14 +879,15 @@ class DoofinderAdminPanelView
             'UTF-8'
         );
 
-        return '<div class="input-group">'
-            . '<input type="text" class="form-control" id="' . $field . '" name="' . $field . '" value="' . $valueAttr . '">'
-            . '<span class="input-group-btn">'
+        $button = $hasHash ? '' : '<span class="input-group-btn">'
             . '<button type="button" class="btn btn-default doofinder-create-search-engine"'
-            . ' data-field="' . $field . '" data-id-lang="' . $idLang . '" data-id-currency="' . $idCurrency . '" data-ajax-url="' . $ajaxUrl . '"'
-            . ($hasHash ? ' disabled="disabled"' : '') . '>'
+            . ' data-field="' . $field . '" data-id-lang="' . $idLang . '" data-id-currency="' . $idCurrency . '" data-ajax-url="' . $ajaxUrl . '">'
             . $label . '</button>'
-            . '</span>'
+            . '</span>';
+
+        return '<div class="input-group">'
+            . '<input type="text" class="form-control" id="' . $field . '" name="' . $field . '" value="' . $valueAttr . '"' . ($hasHash ? ' readonly="readonly"' : '') . '>'
+            . $button
             . '</div>'
             . '<span class="doofinder-create-search-engine-spinner loader" style="display:none; width: 16px; height: 16px; border-width: 2px; vertical-align: middle; margin-top: 6px;"></span>'
             . '<span class="doofinder-create-search-engine-result"></span>';
