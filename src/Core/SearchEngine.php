@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -103,7 +104,7 @@ class SearchEngine
      * @param int $idLang
      * @param int $idCurrency
      *
-     * @return string|null The new Search Engine hashid, or null on failure.
+     * @return string|null the new Search Engine hashid, or null on failure
      */
     public static function createForLanguageAndCurrency($shopId, $idLang, $idCurrency)
     {

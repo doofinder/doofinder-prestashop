@@ -3,11 +3,14 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
 
 /**
  * Admin controller for managing Doofinder module configuration.
@@ -68,7 +71,7 @@ class DoofinderAdminController extends ModuleAdminController
         $idCurrency = (int) Tools::getValue('id_currency');
         $shopId = (int) $this->context->shop->id;
 
-        $hashid = \PrestaShop\Module\Doofinder\Core\SearchEngine::createForLanguageAndCurrency($shopId, $idLang, $idCurrency);
+        $hashid = SearchEngine::createForLanguageAndCurrency($shopId, $idLang, $idCurrency);
 
         if (!$hashid) {
             $this->ajaxRender(json_encode(['success' => false]));

@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -854,8 +855,8 @@ class DoofinderAdminPanelView
      * + 'suffix', since 'suffix' is hard-wired to an input-group-addon
      * wrapper in the core template.
      *
-     * @param array $hashidKey Hashid key data, as returned by DfTools::getHashidKeys()/getMultipriceKeys().
-     * @param string $keyToUse Which key of $hashidKey holds the actual Configuration name ('key' or 'keyMultiprice').
+     * @param array $hashidKey hashid key data, as returned by DfTools::getHashidKeys()/getMultipriceKeys()
+     * @param string $keyToUse which key of $hashidKey holds the actual Configuration name ('key' or 'keyMultiprice')
      *
      * @return string
      */

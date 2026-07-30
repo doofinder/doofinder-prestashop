@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -43,7 +44,8 @@ class UrlManager
      * Build feed urls
      *
      * @param int $shopId
-     * @param int $language
+     * @param string $language
+     * @param string|null $currency
      *
      * @return string
      */
