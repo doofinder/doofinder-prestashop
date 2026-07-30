@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -43,7 +44,8 @@ class UrlManager
      * Build feed urls
      *
      * @param int $shopId
-     * @param int $language
+     * @param string $language
+     * @param string|null $currency
      *
      * @return string
      */
@@ -112,6 +114,18 @@ class UrlManager
     public static function getUpdateFeedUrl($region)
     {
         return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/feed-url-update');
+    }
+
+    /**
+     * Get the universal "create a single Search Engine" endpoint URL
+     *
+     * @param string $region
+     *
+     * @return string
+     */
+    public static function getCreateSearchEngineUrl($region)
+    {
+        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/install/search-engine');
     }
 
     /**
