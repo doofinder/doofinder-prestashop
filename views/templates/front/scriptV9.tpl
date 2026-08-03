@@ -12,10 +12,6 @@
 
       item_link = event.detail.link;
 
-      const checkIfCartItemHasVariation = (cartObject) => {
-        return (true !== cartObject.group_leader && cartObject.item_id === cartObject.grouping_id) ? false : true;
-      }
-
       /**
       * Returns only ID from string
       */
@@ -26,8 +22,8 @@
       doofinderManageCart({
         cartURL          : "{if isset($urls)}{$urls.pages.cart|escape:'htmlall':'UTF-8'}{/if}",  //required for prestashop 1.7, in previous versions it will be empty.
         cartToken        : "{$static_token|escape:'htmlall':'UTF-8'}",
-        productID        : checkIfCartItemHasVariation(event.detail) ? event.detail.grouping_id : event.detail.item_id,
-        customizationID  : checkIfCartItemHasVariation(event.detail) ? sanitizeVariationID(event.detail.item_id) : 0,   // If there are no combinations, the value will be 0
+        productID        : event.detail.group_leader ? event.detail.grouping_id : event.detail.item_id,
+        customizationID  : event.detail.group_leader ? sanitizeVariationID(event.detail.item_id) : 0,   // If there are no combinations, the value will be 0
         quantity         : event.detail.amount,
         statusPromise    : event.detail.statusPromise,
         itemLink         : event.detail.link,
