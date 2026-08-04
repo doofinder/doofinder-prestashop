@@ -337,6 +337,76 @@ class DoofinderInstallation
     }
 
     /**
+     * Sends a request to the plugins API to update the store options (url, shop_id, shop_group_id)
+     * for every shop that has a Doofinder installation registered.
+     *
+     * @return void
+     *
+     * @throws \Exception If the API key is missing or a request fails
+     */
+    public static function updateStoreOptions()
+    {
+        $shops = \Shop::getShops();
+
+        DoofinderConfig::debug('Update store options for the following shops:');
+        DoofinderConfig::debug(print_r($shops, true));
+
+        $apiKey = DfTools::getFormattedApiKey();
+
+        if (empty($apiKey)) {
+            $errorMsg = 'Unable to update store options: Missing API KEY';
+            DoofinderConfig::debug($errorMsg);
+            throw new \Exception($errorMsg);
+        }
+
+        foreach ($shops as $shop) {
+            $client = new EasyREST();
+            $shopId = $shop['id_shop'];
+            $shopGroupId = $shop['id_shop_group'];
+            $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $shopGroupId, $shopId);
+
+            if (empty($installationID)) {
+                continue;
+            }
+
+            DoofinderConfig::debug("Updating store options for shop: {$shopId} and group: {$shopGroupId}");
+
+            $shopUrl = UrlManager::getShopURL($shopId);
+            $payload = json_encode([
+                'store_id' => $installationID,
+                'options' => [
+                    'url' => preg_replace('#^https?://#', '', $shopUrl),
+                    'shop_id' => (int) $shopId,
+                    'shop_group_id' => (int) $shopGroupId,
+                ],
+            ]);
+
+            $response = $client->patch(
+                UrlManager::getUpdateStoreOptionsUrl(\Configuration::get('DF_REGION')),
+                $payload,
+                null,
+                null,
+                'application/json',
+                ['Authorization: Token ' . $apiKey]
+            );
+
+            if ($response->getResponseCode() !== 200) {
+                $errorMsg = sprintf(
+                    'Update store options failed with code %1$s and message "%2$s"',
+                    $response->getResponseCode(),
+                    $response->getResponseMessage()
+                );
+                DoofinderConfig::debug($errorMsg);
+
+                throw new \Exception('An error occurred when updating store options.', $response->getResponseCode());
+            }
+
+            DoofinderConfig::debug('Update store options response:');
+            DoofinderConfig::debug(print_r(json_decode($response->response, true), true));
+        }
+    }
+
+    /**
      * Create the module admin tab in PrestaShop.
      *
      * @return bool True if tab was successfully created

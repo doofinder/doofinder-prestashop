@@ -76,6 +76,14 @@ class EasyREST
                 $params = $this->params;
             }
             curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
+        } elseif ($this->method === 'PATCH') {
+            curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            if (is_object($this->params) || is_array($this->params)) {
+                $params = http_build_query($this->params);
+            } else {
+                $params = $this->params;
+            }
+            curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
         } else {
             curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $this->method);
         }
@@ -372,6 +380,23 @@ class EasyREST
     public static function put($url, $body, $user = null, $password = null, $contentType = null)
     {
         return self::call('PUT', $url, $body, $user, $password, $contentType);
+    }
+
+    /**
+     * Convenience method wrapping a common PATCH call
+     *
+     * @param string $url
+     * @param string $params
+     * @param string $user=null [optional]
+     * @param string $password=null [optional]
+     * @param string $contentType="multipart/form-data" [optional]
+     * @param array $httpHeaders=[] [optional] additional HTTP headers to be sent
+     *
+     * @return EasyREST
+     */
+    public static function patch($url, $params = null, $user = null, $password = null, $contentType = 'multipart/form-data', $httpHeaders = [])
+    {
+        return self::call('PATCH', $url, $params, $user, $password, $contentType, $httpHeaders);
     }
 
     /**

@@ -3,11 +3,14 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
 
 /**
  * Admin controller for managing Doofinder module configuration.
@@ -54,6 +57,29 @@ class DoofinderAdminController extends ModuleAdminController
     {
         $is_feed_indexed = Configuration::get('DF_FEED_INDEXED', null, null, null, false);
         $this->ajaxRender(json_encode(['success' => $is_feed_indexed]));
+    }
+
+    /**
+     * AJAX action to create the Search Engine for a given language/currency
+     * combination, for the currently selected shop.
+     *
+     * @return void
+     */
+    public function displayAjaxCreateSearchEngine()
+    {
+        $idLang = (int) Tools::getValue('id_lang');
+        $idCurrency = (int) Tools::getValue('id_currency');
+        $shopId = (int) $this->context->shop->id;
+
+        $hashid = SearchEngine::createForLanguageAndCurrency($shopId, $idLang, $idCurrency);
+
+        if (!$hashid) {
+            $this->ajaxRender(json_encode(['success' => false]));
+
+            return;
+        }
+
+        $this->ajaxRender(json_encode(['success' => true, 'hashid' => $hashid]));
     }
 
     /**

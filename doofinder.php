@@ -66,9 +66,9 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '8.1.9';
+        $this->version = '8.2.1';
         $this->author = 'Doofinder (http://www.doofinder.com)';
-        $this->ps_versions_compliancy = ['min' => '1.6.1.0', 'max' => '9.1.3'];
+        $this->ps_versions_compliancy = ['min' => '1.6.1.0', 'max' => '9.1.4'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
         $this->bootstrap = true;
         parent::__construct();

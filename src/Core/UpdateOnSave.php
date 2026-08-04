@@ -29,6 +29,10 @@ use PrestaShop\Module\Doofinder\Manager\UrlManager;
  */
 class UpdateOnSave
 {
+    private const PRODUCTS_PER_BATCH = 100;
+
+    private const MAX_DOCUMENTS_PER_REQUEST = 100;
+
     /**
      * Check if the necessary time has passed to run the update on save again.
      *
@@ -194,14 +198,26 @@ class UpdateOnSave
         }
 
         if ('update' === $action) {
-            $chunks = array_chunk($products, 100);
+            $productBatches = array_chunk($products, self::PRODUCTS_PER_BATCH);
             $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
-            foreach ($chunks as $chunk) {
-                $builder->setProducts($chunk);
-                $payload = $builder->build();
+            $documentsToSend = [];
+            foreach ($productBatches as $productBatch) {
+                $builder->setProducts($productBatch);
+                $documents = $builder->buildProductsArray();
 
-                self::updateItemsApi($hashid, 'product', $payload);
+                foreach ($documents as $document) {
+                    $documentsToSend[] = $document;
+
+                    if (count($documentsToSend) >= self::MAX_DOCUMENTS_PER_REQUEST) {
+                        self::updateItemsApi($hashid, 'product', json_encode($documentsToSend));
+                        $documentsToSend = [];
+                    }
+                }
+            }
+
+            if (!empty($documentsToSend)) {
+                self::updateItemsApi($hashid, 'product', json_encode($documentsToSend));
             }
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);

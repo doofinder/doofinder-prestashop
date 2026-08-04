@@ -87,4 +87,44 @@ $(document).ready(function() {
     const allChecked =  checkboxesTotalCount === checkboxesCheckedcount;
     $parentTable.find('[data-checkboxes-toggle]').prop('checked', allChecked);
   });
+
+  $('.doofinder-create-search-engine').on('click', function () {
+    const $button = $(this);
+    const $wrapper = $button.closest('.input-group');
+    const $spinner = $wrapper.siblings('.doofinder-create-search-engine-spinner');
+    const $result = $wrapper.siblings('.doofinder-create-search-engine-result');
+
+    $button.prop('disabled', true);
+    $spinner.show();
+    $result.empty();
+
+    $.ajax({
+      type: 'POST',
+      dataType: 'json',
+      url: $button.data('ajax-url'),
+      data: {
+        id_lang: $button.data('id-lang'),
+        id_currency: $button.data('id-currency')
+      },
+      success: function (response) {
+        $spinner.hide();
+
+        if (response.success && response.hashid) {
+          $wrapper.find('input[name="' + $button.data('field') + '"]').val(response.hashid).prop('readonly', true);
+          $result.text('Search Engine created!');
+          $button.closest('.input-group-btn').remove();
+          $spinner.remove();
+          return;
+        }
+
+        $button.prop('disabled', false);
+        $result.text('Error creating the Search Engine, please try again later');
+      },
+      error: function () {
+        $spinner.hide();
+        $button.prop('disabled', false);
+        $result.text('Error creating the Search Engine, please try again later');
+      }
+    });
+  });
 });
