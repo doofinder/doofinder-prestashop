@@ -295,8 +295,9 @@ class DfProductBuild
 
         foreach ($products as $product) {
             $minPriceVariant = null;
+            $parentStockOverride = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = $batchData['variations'][$product['id_product']];
+                $variations = isset($batchData['variations'][$product['id_product']]) ? $batchData['variations'][$product['id_product']] : [];
                 foreach ($variations as $variation) {
                     $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
                     $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
@@ -305,11 +306,49 @@ class DfProductBuild
                     }
                     $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $additionalAttributesHeader, $extraHeaders);
                 }
+                if (!empty($variations)) {
+                    // The parent's own stock_available row (id_product_attribute = 0) can be
+                    // desynced from its combinations (imports, direct SQL updates, etc.), so the
+                    // parent's stock must be derived from its variants instead of its own row.
+                    $parentStockOverride = $this->aggregateVariantsStock($product['id_product'], $variations, $batchData['stock']);
+                }
             }
-            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader, $extraHeaders);
+            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader, $extraHeaders, $parentStockOverride);
         }
 
         return $processedProducts;
+    }
+
+    /**
+     * Aggregate the stock of a product's variations so the parent reflects them:
+     * quantity is the sum across all variants, and the parent is considered in
+     * stock if any variant is in stock or purchasable while out of stock.
+     *
+     * @param int $productId Parent product ID
+     * @param array $variations Variations of the product
+     * @param array $stockByKey Batch-fetched stock data indexed by "productId_variationId"
+     *
+     * @return array Aggregated stock data with 'quantity' and 'in_stock'
+     */
+    private function aggregateVariantsStock($productId, $variations, $stockByKey)
+    {
+        $totalQuantity = 0;
+        $inStock = false;
+
+        foreach ($variations as $variation) {
+            $key = $productId . '_' . $variation['id_product_attribute'];
+            $variantStock = isset($stockByKey[$key]) ? $stockByKey[$key] : ['quantity' => 0, 'out_of_stock' => 0];
+            $totalQuantity += $variantStock['quantity'];
+
+            if ($variantStock['quantity'] > 0 || \Product::isAvailableWhenOutOfStock($variantStock['out_of_stock'])) {
+                $inStock = true;
+            }
+        }
+
+        return [
+            'quantity' => $totalQuantity,
+            'in_stock' => $inStock,
+        ];
     }
 
     /**
@@ -839,10 +878,12 @@ class DfProductBuild
      * @param array $batchData Pre-fetched batch data
      * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
+     * @param array|null $stockOverride Pre-computed stock data (e.g. aggregated from variants) that
+     *                                  takes precedence over the product's own stock_available row
      *
      * @return array Processed product payload
      */
-    public function buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
+    public function buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader = [], $extraHeaders = [], $stockOverride = null)
     {
         $productId = $product['id_product'];
         $variationId = ($this->productVariations) ? $product['id_product_attribute'] : 0;
@@ -866,7 +907,12 @@ class DfProductBuild
             $product['variation_images'] = isset($batchData['variation_images'][$key]) ? $batchData['variation_images'][$key] : [];
             $product['variants_information'] = isset($batchData['variants_information'][$productId]) ? $batchData['variants_information'][$productId] : [];
         }
-        $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
+        if (null !== $stockOverride) {
+            $product['stock'] = $stockOverride;
+            $product['stock_quantity'] = $stockOverride['quantity'];
+        } else {
+            $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
+        }
 
         return $this->buildProductBase($product, $minPriceVariant, $additionalAttributesHeader, $extraHeaders);
     }
@@ -1321,6 +1367,12 @@ class DfProductBuild
 
         if ((int) $this->stockManagement) {
             $stockData = isset($product['stock']) ? $product['stock'] : ['quantity' => 0, 'out_of_stock' => 0];
+
+            // Parents built from aggregated variant stock already carry a resolved 'in_stock' flag.
+            if (array_key_exists('in_stock', $stockData)) {
+                return $available && $stockData['in_stock'] ? 'in stock' : 'out of stock';
+            }
+
             $stock = $stockData['quantity'];
             $outOfStock = $stockData['out_of_stock'];
             $allowOosp = \Product::isAvailableWhenOutOfStock($outOfStock);
