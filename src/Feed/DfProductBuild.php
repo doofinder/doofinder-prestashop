@@ -297,7 +297,7 @@ class DfProductBuild
             $minPriceVariant = null;
             $parentStockOverride = null;
             if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = isset($batchData['variations'][$product['id_product']]) ? $batchData['variations'][$product['id_product']] : [];
+                $variations = $batchData['variations'][$product['id_product']];
                 foreach ($variations as $variation) {
                     $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
                     $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
