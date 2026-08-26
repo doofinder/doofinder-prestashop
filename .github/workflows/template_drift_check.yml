@@ -1,0 +1,79 @@
+# Check that generated files (from templates + envsubst) match committed files.
+# Detects drift when templates or env-substituted outputs change without updating the versioned files.
+# Uses committed .env as source of truth for PLUGIN_VERSION and the regional URLs.
+name: Template drift check
+
+on:
+  pull_request:
+    paths:
+      - 'templates/**'
+      - 'doofinder.php'
+      - 'composer.json'
+      - 'src/Core/DoofinderConstants.php'
+      - '.env'
+  push:
+    paths:
+      - 'templates/**'
+      - 'doofinder.php'
+      - 'composer.json'
+      - 'src/Core/DoofinderConstants.php'
+      - '.env'
+
+jobs:
+  drift-check:
+    name: Template vs versioned files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Generate from templates (canonical env from .env)
+        run: |
+          set -a
+          # shellcheck source=/dev/null
+          source .env
+          set +a
+          ENVSUBST_VARS='$PLUGIN_VERSION,$DOOMANAGER_REGION_URL,$DOOPLUGINS_REGION_URL,$DOOPHOENIX_REGION_URL,$CONFIG_REGION_URL'
+          mkdir -p .drift-out/src/Core
+          envsubst "$ENVSUBST_VARS" < templates/doofinder.php > .drift-out/doofinder.php
+          envsubst "$ENVSUBST_VARS" < templates/composer.json > .drift-out/composer.json
+          envsubst "$ENVSUBST_VARS" < templates/src/Core/DoofinderConstants.php > .drift-out/src/Core/DoofinderConstants.php
+
+      - name: Check ps_versions_compliancy (min/max) alignment
+        run: |
+          tpl=$(grep -n 'ps_versions_compliancy' templates/doofinder.php || true)
+          mod=$(grep -n 'ps_versions_compliancy' doofinder.php || true)
+          if [ -z "$tpl" ] || [ -z "$mod" ]; then
+            echo "::error::Could not find \$this->ps_versions_compliancy in templates/doofinder.php and/or doofinder.php."
+            exit 1
+          fi
+          if [ "${tpl#*:}" != "${mod#*:}" ]; then
+            echo "templates/doofinder.php: $tpl"
+            echo "doofinder.php:           $mod"
+            echo "::error::Drift: ps_versions_compliancy differs between templates/doofinder.php and doofinder.php. Update the template first, then run 'make doofinder-configure' and commit."
+            exit 1
+          fi
+          echo "ps_versions_compliancy matches: ${tpl#*:}"
+
+      - name: Diff doofinder.php
+        run: |
+          if ! diff -u doofinder.php .drift-out/doofinder.php; then
+            echo "::error::Drift: doofinder.php differs from templates/doofinder.php output. Run 'make doofinder-configure' with canonical env and commit."
+            exit 1
+          fi
+
+      - name: Diff composer.json
+        run: |
+          if ! diff -u composer.json .drift-out/composer.json; then
+            echo "::error::Drift: composer.json differs from templates/composer.json output. Run 'make doofinder-configure' with canonical env and commit."
+            exit 1
+          fi
+
+      - name: Diff src/Core/DoofinderConstants.php
+        run: |
+          if ! diff -u src/Core/DoofinderConstants.php .drift-out/src/Core/DoofinderConstants.php; then
+            echo "::error::Drift: src/Core/DoofinderConstants.php differs from templates/src/Core/DoofinderConstants.php output. Run 'make doofinder-configure' with canonical env and commit."
+            exit 1
+          fi
+
+      - name: No drift
+        run: 'echo "No template drift: versioned files match template output."'
