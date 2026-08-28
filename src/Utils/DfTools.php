@@ -1009,9 +1009,6 @@ class DfTools
         // Replace control characters with spaces
         $text = preg_replace('/[^\P{C}]+/u', ' ', $text);
 
-        // Remove HTML and PHP tags
-        $text = strip_tags($text);
-
         // Normalize whitespace by replacing consecutive spaces with a single space
         $text = preg_replace('/\s+/', ' ', $text);
 
