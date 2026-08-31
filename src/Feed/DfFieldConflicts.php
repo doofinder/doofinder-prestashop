@@ -33,6 +33,11 @@ class DfFieldConflicts
      * Field names the product feed can emit on its own. Some of them are conditional
      * (prices, variations, isbn), but all of them are reserved regardless.
      *
+     * Not to be confused with the minimal field set of the backend, which is a different
+     * list: it holds fields this feed never emits, such as `color`, and misses ones it does,
+     * such as `extra_title_1` or the `variation_*` family. Keep this one in sync with the
+     * header built in feeds/product.php, not with anything else.
+     *
      * @var string[]
      */
     private const CANONICAL_FIELDS = [
