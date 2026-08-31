@@ -231,27 +231,6 @@ class DfTools
     }
 
     /**
-     * Returns the features selected by user
-     *
-     * @param array $features
-     * @param array $selectedKeys
-     *
-     * @return array
-     */
-    public static function getSelectedFeatures($features, $selectedKeys)
-    {
-        $selectedFeatures = [];
-
-        foreach ($features as $key => $value) {
-            if (in_array((string) $key, $selectedKeys, true)) {
-                $selectedFeatures[] = $value;
-            }
-        }
-
-        return $selectedFeatures;
-    }
-
-    /**
      * Returns the features of a product
      *
      * @param int $idShop shop ID
@@ -287,17 +266,17 @@ class DfTools
     }
 
     /**
-     * Returns the features of a product
+     * Returns the attribute group names of a shop, indexed by attribute group ID
      *
      * @param int $idShop shop ID
      * @param int $idLang language ID
      *
-     * @return array of rows (assoc arrays)
+     * @return array id_attribute_group => name
      */
     public static function getAttributeKeysForShopAndLang($idShop, $idLang)
     {
         $sql = '
-      SELECT agl.name
+      SELECT agl.name, agl.id_attribute_group
 
       FROM
         _DB_PREFIX_attribute_group_shop ags
@@ -316,7 +295,7 @@ class DfTools
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
         $names = [];
         foreach ($result as $elem) {
-            $names[] = $elem['name'];
+            $names[$elem['id_attribute_group']] = $elem['name'];
         }
 
         return $names;

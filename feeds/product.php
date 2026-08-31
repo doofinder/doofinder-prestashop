@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -94,15 +95,9 @@ $shouldDisplayPrices = $dfProductBuild->shouldDisplayPrices();
 $shouldPricesUseTaxes = $dfProductBuild->shouldUseTaxes();
 $isMultipriceEnabled = $dfProductBuild->isMultipriceEnabled();
 $shouldShowProductVariations = $dfProductBuild->shouldShowProductVariations();
-$shouldShowProductFeatures = $dfProductBuild->shouldShowProductFeatures();
-$featuresShownArray = $dfProductBuild->getFeaturesShown();
-$attributesShownArray = array_filter(explode(',', $dfProductBuild->getAttributesShown()), function ($a) {
-    return strlen(trim($a)) > 0;
-});
 /* ---------- END SHARED CONFIG ---------- */
 
 /* ---------- START CSV-SPECIFIC CONFIG ---------- */
-$shouldLimitGroupAttributes = false;
 $isDebugEnabled = DfTools::cfg($shop->id, 'DF_DEBUG');
 $debug = DfTools::getBooleanFromRequest('debug');
 $limit = Tools::getValue('limit', false);
@@ -116,17 +111,6 @@ if ($debug) {
 } else {
     error_reporting(0);
     ini_set('display_errors', 0);
-}
-
-$groupAttributesSlug = [];
-if (count($attributesShownArray) > 0) {
-    $groupAttributes = AttributeGroup::getAttributesGroups($lang->id);
-    foreach ($groupAttributes as $g) {
-        if (in_array($g['id_attribute_group'], $attributesShownArray)) {
-            $groupAttributesSlug[] = DfTools::slugify($g['name']);
-        }
-    }
-    $shouldLimitGroupAttributes = true;
 }
 
 if ($isDebugEnabled) {
@@ -179,18 +163,16 @@ if ($shouldShowProductVariations) {
     $header[] = 'df_variants_information';
     $attributeKeys = DfTools::getAttributeKeysForShopAndLang($shop->id, $lang->id);
 
-    foreach ($attributeKeys as $key) {
-        $headerValue = DfTools::slugify($key);
-        if ($shouldLimitGroupAttributes && !in_array($headerValue, $groupAttributesSlug)) {
+    foreach ($attributeKeys as $idAttributeGroup => $key) {
+        $headerValue = $dfProductBuild->attributeFieldName($key, (int) $idAttributeGroup);
+        if (null === $headerValue) {
             continue;
         }
         $additionalAttributesHeaders[] = $headerValue;
     }
 }
 
-if ($shouldShowProductFeatures) {
-    $additionalAttributesHeaders[] = 'attributes';
-}
+$additionalAttributesHeaders[] = 'attributes';
 
 $header = array_merge($header, $additionalAttributesHeaders);
 

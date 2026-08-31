@@ -106,3 +106,8 @@ $_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] 
 $_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'Comment configurer les filtres de la couche de recherche';
 $_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Apprendre les bases de Live Layer';
 $_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'Ou contacter directement notre support, nous serons ravis de vous guider';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_540223987100746665665400e1eaf386'] = 'Groupes d\'attributs remplaçant les champs d\'origine';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_64c0612849fd00318b32b94f03dab655'] = 'Caractéristiques remplaçant les champs d\'origine';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_5d00a671159d3bad20efaf872dfbc0f8'] = 'Ces groupes d\'attributs portent le même nom qu\'un champ d\'origine du produit. Cochez-en un et sa valeur remplace ce champ d\'origine, sur les produits qui l\'utilisent. Laissez-le décoché et le champ d\'origine est conservé, tandis que le groupe d\'attributs n\'est pas indexé.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_8e3f77dcf0e4fa2568570258fed932e3'] = 'Ces caractéristiques portent le même nom qu\'un champ d\'origine du produit. Cochez-en une et sa valeur remplace ce champ d\'origine, sur les produits qui la possèdent. Laissez-la décochée et le champ d\'origine est conservé, tandis que la caractéristique n\'est pas indexée.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_82ad4429b486b7a98583b56833c4f955'] = '%1$s (remplace "%2$s")';

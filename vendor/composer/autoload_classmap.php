@@ -23,6 +23,7 @@ return array(
     'PrestaShop\\Module\\Doofinder\\Exception\\DoofinderException' => $baseDir . '/src/Exception/DoofinderException.php',
     'PrestaShop\\Module\\Doofinder\\Feed\\DfCategoryBuild' => $baseDir . '/src/Feed/DfCategoryBuild.php',
     'PrestaShop\\Module\\Doofinder\\Feed\\DfCmsBuild' => $baseDir . '/src/Feed/DfCmsBuild.php',
+    'PrestaShop\\Module\\Doofinder\\Feed\\DfFieldConflicts' => $baseDir . '/src/Feed/DfFieldConflicts.php',
     'PrestaShop\\Module\\Doofinder\\Feed\\DfProductBuild' => $baseDir . '/src/Feed/DfProductBuild.php',
     'PrestaShop\\Module\\Doofinder\\Installer\\DoofinderInstallation' => $baseDir . '/src/Installer/DoofinderInstallation.php',
     'PrestaShop\\Module\\Doofinder\\Manager\\FormManager' => $baseDir . '/src/Manager/FormManager.php',
