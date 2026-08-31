@@ -467,7 +467,9 @@ class DoofinderInstallation
     {
         $value = \Configuration::get($key, null, $shopGroupId, $shopId);
 
-        return array_map('intval', array_filter(explode(',', (string) $value), 'strlen'));
+        return array_map('intval', array_filter(explode(',', (string) $value), static function ($id) {
+            return '' !== $id;
+        }));
     }
 
     /**

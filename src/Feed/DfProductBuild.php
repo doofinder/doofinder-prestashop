@@ -151,7 +151,9 @@ class DfProductBuild
      */
     private static function configuredIds($config)
     {
-        return array_map('intval', array_filter(explode(',', (string) $config), 'strlen'));
+        return array_map('intval', array_filter(explode(',', (string) $config), static function ($id) {
+            return '' !== $id;
+        }));
     }
 
     /**
@@ -1474,7 +1476,7 @@ class DfProductBuild
      * @param string $groupName Attribute group name in the feed language
      * @param int $idAttributeGroup Attribute group ID
      *
-     * @return string
+     * @return string|null The name to emit, or null when it must not be indexed
      */
     public function attributeFieldName($groupName, $idAttributeGroup)
     {
