@@ -535,7 +535,7 @@ class DoofinderAdminPanelView
      */
     private function getFieldConflictInputs($idShop, $idLang)
     {
-        $conflicts = DfFieldConflicts::detect($idShop, $idLang);
+        $conflicts = DfFieldConflicts::detectConflictingFields($idShop, $idLang);
         if (empty($conflicts)) {
             return [];
         }

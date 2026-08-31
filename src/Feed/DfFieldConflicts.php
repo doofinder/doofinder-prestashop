@@ -136,7 +136,7 @@ class DfFieldConflicts
      *
      * @return array<int,array{type:string,id:int,name:string,slug:string}>
      */
-    public static function detect($idShop, $idLang)
+    public static function detectConflictingFields($idShop, $idLang)
     {
         $conflicts = [];
 

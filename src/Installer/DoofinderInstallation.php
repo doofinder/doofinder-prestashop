@@ -431,7 +431,7 @@ class DoofinderInstallation
             $replacing = [DfFieldConflicts::TYPE_ATTRIBUTE => [], DfFieldConflicts::TYPE_FEATURE => []];
 
             foreach (\Language::getLanguages(true, $shopId) as $lang) {
-                foreach (DfFieldConflicts::detect($shopId, (int) $lang['id_lang']) as $conflict) {
+                foreach (DfFieldConflicts::detectConflictingFields($shopId, (int) $lang['id_lang']) as $conflict) {
                     $isAttribute = $conflict['type'] === DfFieldConflicts::TYPE_ATTRIBUTE;
                     $enabled = $isAttribute ? $exportsVariations : $exportsFeatures;
                     $shown = $isAttribute ? $shownAttributes : $shownFeatures;
