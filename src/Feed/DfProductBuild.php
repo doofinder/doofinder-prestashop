@@ -1032,7 +1032,7 @@ class DfProductBuild
         if ($this->productVariations) {
             $p['item_group_id'] = $this->getItemGroupId($product);
         }
-        $p['title'] = $product['name'];
+        $p['title'] = DfTools::cleanString($product['name']);
         $p['link'] = $this->getLink($product);
         $p['description'] = DfTools::cleanString($product['description_short']);
         $p['alternate_description'] = DfTools::cleanString($product['description']);
