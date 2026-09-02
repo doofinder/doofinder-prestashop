@@ -1032,7 +1032,7 @@ class DfProductBuild
         if ($this->productVariations) {
             $p['item_group_id'] = $this->getItemGroupId($product);
         }
-        $p['title'] = DfTools::cleanString($product['name']);
+        $p['title'] = DfTools::cleanStringMinimal($product['name']);
         $p['link'] = $this->getLink($product);
         $p['description'] = DfTools::cleanString($product['description_short']);
         $p['alternate_description'] = DfTools::cleanString($product['description']);
@@ -1051,7 +1051,7 @@ class DfProductBuild
         $p['reference'] = DfTools::cleanString($product['reference']);
         $p['supplier_reference'] = DfTools::cleanString($product['supplier_reference']);
         $p['supplier_name'] = DfTools::cleanString($product['supplier_name']);
-        $p['extra_title_1'] = $p['title'];
+        $p['extra_title_1'] = DfTools::cleanStringMinimal($p['title']);
         $p['extra_title_2'] = DfTools::splitReferences($p['title']);
         $p['minimum_quantity'] = DfTools::cleanString($product['minimum_quantity']);
         $p['creation_date'] = DfTools::dateStringToIso8601($product['creation_date']);

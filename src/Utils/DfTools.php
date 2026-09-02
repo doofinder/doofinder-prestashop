@@ -1022,10 +1022,31 @@ class DfTools
         // $text = stripcslashes($text);
 
         // Remove escaping as for CSV we escape with "
-        $text = str_replace('\\', '', $text);
+        $text = self::cleanStringMinimal($text);
 
         // Filter out invalid UTF-8 sequences using a predefined regex pattern
         return preg_replace(self::VALID_UTF8, '$1', $text);
+    }
+
+    /**
+     * Apply the minimal cleaning required to keep a value safe inside the CSV feed.
+     *
+     * Only removes backslashes, so a value ending up as `\"` does not defeat the
+     * proprietary escape mechanism of fputcsv() and break the enclosure. Use this
+     * instead of cleanString() for fields whose original content must be preserved
+     * (HTML markup, for instance).
+     *
+     * @param string|null $text The text to clean
+     *
+     * @return string|null The cleaned text, or null if input was null
+     */
+    public static function cleanStringMinimal($text)
+    {
+        if (is_null($text)) {
+            return null;
+        }
+
+        return str_replace('\\', '', $text);
     }
 
     /**
@@ -1044,7 +1065,7 @@ class DfTools
             return $text;
         }
 
-        return preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
+        return DfTools::cleanStringMinimal(preg_replace("/([^\d\s])([\d])/", '$1 $2', $text));
     }
 
     //
