@@ -1047,7 +1047,7 @@ class DfTools
      *
      * @return int|false The number of bytes written, or false on failure
      */
-    public static function fputcsvRfc($stream, array $fields, $delimiter = self::TXT_SEPARATOR)
+    public static function fputcsvRfc($stream, $fields, $delimiter = self::TXT_SEPARATOR)
     {
         $encoded = [];
 
