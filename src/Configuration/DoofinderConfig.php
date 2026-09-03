@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -180,9 +181,6 @@ class DoofinderConfig
             'DF_GS_PRICES_USE_TAX' => \Configuration::get('DF_GS_PRICES_USE_TAX'),
             'DF_FEED_FULL_PATH' => \Configuration::get('DF_FEED_FULL_PATH'),
             'DF_SHOW_PRODUCT_VARIATIONS' => DfTools::getConfigByShop('DF_SHOW_PRODUCT_VARIATIONS', $idShop),
-            'DF_GROUP_ATTRIBUTES_SHOWN[]' => explode(',', DfTools::getConfigByShop('DF_GROUP_ATTRIBUTES_SHOWN', $idShop)),
-            'DF_SHOW_PRODUCT_FEATURES' => DfTools::getConfigByShop('DF_SHOW_PRODUCT_FEATURES', $idShop),
-            'DF_FEATURES_SHOWN[]' => explode(',', DfTools::getConfigByShop('DF_FEATURES_SHOWN', $idShop)),
             'DF_GS_IMAGE_SIZE' => \Configuration::get('DF_GS_IMAGE_SIZE'),
             'DF_UPDATE_ON_SAVE_DELAY' => DfTools::getConfigByShop('DF_UPDATE_ON_SAVE_DELAY', $idShop),
         ];
@@ -207,6 +205,8 @@ class DoofinderConfig
             'DF_DEBUG_CURL' => DfTools::getConfigByShop('DF_DEBUG_CURL', $idShop),
             'DF_ENABLED_V9' => DfTools::getConfigByShop('DF_ENABLED_V9', $idShop, true),
             'DF_MULTIPRICE_ENABLED' => \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true),
+            'DF_ATTRIBUTES_REPLACE[]' => explode(',', DfTools::getConfigByShop('DF_ATTRIBUTES_REPLACE', $idShop)),
+            'DF_FEATURES_REPLACE[]' => explode(',', DfTools::getConfigByShop('DF_FEATURES_REPLACE', $idShop)),
         ];
     }
 

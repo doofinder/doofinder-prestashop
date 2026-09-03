@@ -26,9 +26,6 @@ $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_2e50fba97feb0e9b740a5c7
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_11a4b29c886f33dc95b29c02318e179f'] = 'If you activate this option, the price of the products that will be displayed will be inclusive of taxes.';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_73c34b49888ccdf22dd73e7eafc0edd8'] = 'Index the full path of the product category';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_cdfda1adef135661c21a248cb159c6f4'] = 'Index product attribute combinations';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_e730c40ec1617ecf160fa29d8a1dc05c'] = 'Define which combinations of product attributes you want to index for';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_bbf76abf65b7e5530ebf33b0f8a666c9'] = 'Index customized product features';
-$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ebe75aa799359b32559a09eae8594835'] = 'Select features will be shown in feed';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_90dce1b992114b5c7ab37ee99ea195ec'] = 'Product Image Size';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_ae29d32626c4da07fe58def585bbc283'] = 'Automatically process modified products';
 $_MODULE['<{doofinder}prestashop>doofinderadminpanelview_acc697e9b9f3dae4b46e08fc16374b06'] = 'This action will only be executed if there are changes. If you see the field disabled, it is because you are making a usage in the indexes that is not supported by the automatic processing of modified products.';
@@ -105,3 +102,8 @@ $_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] 
 $_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'How to configure the search layer filters';
 $_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Learn the basics about Live Layer';
 $_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'Or contact directly with us. We will be glad to help you';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_540223987100746665665400e1eaf386'] = 'Attribute groups replacing original fields';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_64c0612849fd00318b32b94f03dab655'] = 'Features replacing original fields';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_5d00a671159d3bad20efaf872dfbc0f8'] = 'These attribute groups have the same name as an original product field. Check one and its value replaces that original field, on the products that use it. Leave it unchecked and the original field is kept, while the attribute group is not indexed.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_8e3f77dcf0e4fa2568570258fed932e3'] = 'These features have the same name as an original product field. Check one and its value replaces that original field, on the products that have it. Leave it unchecked and the original field is kept, while the feature is not indexed.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_82ad4429b486b7a98583b56833c4f955'] = '%1$s (replaces "%2$s")';

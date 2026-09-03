@@ -3,6 +3,7 @@
  * @author    Doofinder
  * @copyright Doofinder
  * @license   MIT
+ *
  * @see       https://opensource.org/licenses/MIT
  */
 
@@ -12,6 +13,7 @@ use PrestaShop\Module\Doofinder\Api\EasyREST;
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Core\SearchEngine;
+use PrestaShop\Module\Doofinder\Feed\DfFieldConflicts;
 use PrestaShop\Module\Doofinder\Manager\UrlManager;
 use PrestaShop\Module\Doofinder\Utils\DfTools;
 
@@ -407,6 +409,83 @@ class DoofinderInstallation
     }
 
     /**
+     * Record which attribute groups and features take over the feed field their name collides
+     * with, based on what each shop was exporting through the removed selectors.
+     *
+     * Only what was already reaching the feed keeps taking the field over; anything the
+     * selectors were leaving out is exported from now on under the `custom_` prefix, so it
+     * cannot start overwriting a field that works today.
+     *
+     * @return void
+     */
+    public static function migrateFieldConflicts()
+    {
+        foreach (\Shop::getShops() as $shop) {
+            $shopId = (int) $shop['id_shop'];
+            $shopGroupId = (int) $shop['id_shop_group'];
+            $exportsVariations = (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS', null, $shopGroupId, $shopId);
+            $exportsFeatures = (bool) \Configuration::get('DF_SHOW_PRODUCT_FEATURES', null, $shopGroupId, $shopId);
+            $shownAttributes = self::configuredIds('DF_GROUP_ATTRIBUTES_SHOWN', $shopGroupId, $shopId);
+            $shownFeatures = self::configuredIds('DF_FEATURES_SHOWN', $shopGroupId, $shopId);
+
+            $replacing = [DfFieldConflicts::TYPE_ATTRIBUTE => [], DfFieldConflicts::TYPE_FEATURE => []];
+
+            foreach (\Language::getLanguages(true, $shopId) as $lang) {
+                foreach (DfFieldConflicts::detectConflictingFields($shopId, (int) $lang['id_lang']) as $conflict) {
+                    $isAttribute = $conflict['type'] === DfFieldConflicts::TYPE_ATTRIBUTE;
+                    $enabled = $isAttribute ? $exportsVariations : $exportsFeatures;
+                    $shown = $isAttribute ? $shownAttributes : $shownFeatures;
+
+                    // An empty selector means every attribute group or feature was being exported.
+                    if ($enabled && (empty($shown) || in_array($conflict['id'], $shown, true))) {
+                        $replacing[$conflict['type']][] = $conflict['id'];
+                    }
+                }
+            }
+
+            foreach ([
+                DfFieldConflicts::TYPE_ATTRIBUTE => 'DF_ATTRIBUTES_REPLACE',
+                DfFieldConflicts::TYPE_FEATURE => 'DF_FEATURES_REPLACE',
+            ] as $type => $key) {
+                $ids = array_unique($replacing[$type]);
+                \Configuration::updateValue($key, implode(',', $ids), false, $shopGroupId, $shopId);
+                DoofinderConfig::debug("Shop {$shopId}: {$key} = " . implode(',', $ids));
+            }
+        }
+    }
+
+    /**
+     * Read a configuration value holding a comma separated list of IDs.
+     *
+     * @param string $key Configuration key
+     * @param int $shopGroupId
+     * @param int $shopId
+     *
+     * @return int[]
+     */
+    private static function configuredIds($key, $shopGroupId, $shopId)
+    {
+        $value = \Configuration::get($key, null, $shopGroupId, $shopId);
+
+        return array_map('intval', array_filter(explode(',', (string) $value), static function ($id) {
+            return '' !== $id;
+        }));
+    }
+
+    /**
+     * Remove the configuration of the attribute group and feature selectors.
+     *
+     * @return void
+     */
+    public static function deleteFieldSelectionConfig()
+    {
+        foreach (['DF_GROUP_ATTRIBUTES_SHOWN', 'DF_FEATURES_SHOWN', 'DF_SHOW_PRODUCT_FEATURES'] as $key) {
+            \Configuration::deleteByName($key);
+            DoofinderConfig::debug("Deleted configuration {$key}");
+        }
+    }
+
+    /**
      * Create the module admin tab in PrestaShop.
      *
      * @return bool True if tab was successfully created
@@ -454,6 +533,8 @@ class DoofinderInstallation
         $configVars = [
             'DF_AI_ADMIN_ENDPOINT',
             'DF_AI_API_ENDPOINT',
+            'DF_ATTRIBUTES_REPLACE',
+            'DF_FEATURES_REPLACE',
             'DF_AI_APIKEY',
             'DF_API_KEY',
             'DF_API_LAYER_DESCRIPTION',
@@ -473,11 +554,9 @@ class DoofinderInstallation
             'DF_ENABLE_HASH',
             'DF_EXTRA_CSS',
             'DF_FACETS_TOKEN',
-            'DF_FEATURES_SHOWN',
             'DF_FEED_FULL_PATH',
             'DF_FEED_INDEXED',
             'DF_FEED_MAINCATEGORY_PATH',
-            'DF_GROUP_ATTRIBUTES_SHOWN',
             'DF_GS_DESCRIPTION_TYPE',
             'DF_GS_DISPLAY_PRICES',
             'DF_GS_IMAGE_SIZE',
@@ -487,7 +566,6 @@ class DoofinderInstallation
             'DF_SHOW_LAYER_MOBILE',
             'DF_REGION',
             'DF_RESTART_OV',
-            'DF_SHOW_PRODUCT_FEATURES',
             'DF_SHOW_PRODUCT_VARIATIONS',
             'DF_UPDATE_ON_SAVE_DELAY',
             'DF_UPDATE_ON_SAVE_LAST_EXEC',

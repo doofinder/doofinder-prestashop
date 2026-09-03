@@ -12,6 +12,7 @@ namespace PrestaShop\Module\Doofinder\View;
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
 use PrestaShop\Module\Doofinder\Core\UpdateOnSave;
+use PrestaShop\Module\Doofinder\Feed\DfFieldConflicts;
 use PrestaShop\Module\Doofinder\Manager\FormManager;
 use PrestaShop\Module\Doofinder\Manager\UrlManager;
 use PrestaShop\Module\Doofinder\Utils\DfTools;
@@ -445,23 +446,6 @@ class DoofinderAdminPanelView
             ];
         }
 
-        $selectCommonFieldsForAttributesShownOptions = [
-            'query' => \AttributeGroup::getAttributesGroups(\Context::getContext()->language->id),
-            'id' => 'id_attribute_group',
-            'name' => 'name',
-        ];
-        $selectFullFieldsForAttributesShown = array_merge($selectCommonFieldsForAttributesShownOptions, ['field' => 'DF_GROUP_ATTRIBUTES_SHOWN']);
-
-        $selectCommonFieldsForFeaturesShownOptions = ['query' => \Feature::getFeatures(
-            $context->language->id,
-            $context->shop->id
-        ),
-            'id' => 'id_feature',
-            'name' => 'name'];
-        $selectFullFieldsForFeaturesShown = array_merge($selectCommonFieldsForFeaturesShownOptions, ['field' => 'DF_FEATURES_SHOWN']);
-        // For PrestaShop 1.5 Multiselects requires [] appended at the end of the field name.
-        $maybeAppendArrayToMultiselectName = version_compare(_PS_VERSION_, '1.6.0', '>=') ? '' : '[]';
-
         return [
             'form' => [
                 'legend' => [
@@ -507,29 +491,6 @@ class DoofinderAdminPanelView
                         'values' => $this->getBooleanFormValue(),
                     ],
                     [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
-                        'label' => $this->module->l('Define which combinations of product attributes you want to index for', 'doofinderadminpanelview'),
-                        'name' => $selectFullFieldsForAttributesShown['field'] . $maybeAppendArrayToMultiselectName,
-                        'multiple' => true,
-                        'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForAttributesShown),
-                        'options' => $selectCommonFieldsForAttributesShownOptions,
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
-                        'label' => $this->module->l('Index customized product features', 'doofinderadminpanelview'),
-                        'name' => 'DF_SHOW_PRODUCT_FEATURES',
-                        'is_bool' => true,
-                        'values' => $this->getBooleanFormValue(),
-                    ],
-                    [
-                        'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'html' : 'select'),
-                        'label' => $this->module->l('Select features will be shown in feed', 'doofinderadminpanelview'),
-                        'name' => $selectFullFieldsForFeaturesShown['field'] . $maybeAppendArrayToMultiselectName,
-                        'multiple' => true,
-                        'html_content' => $this->checkboxSelectorFormatHtml($selectFullFieldsForFeaturesShown),
-                        'options' => $selectCommonFieldsForFeaturesShownOptions,
-                    ],
-                    [
                         'type' => 'select',
                         'label' => $this->module->l('Product Image Size', 'doofinderadminpanelview'),
                         'name' => 'DF_GS_IMAGE_SIZE',
@@ -558,6 +519,76 @@ class DoofinderAdminPanelView
                 ],
             ],
         ];
+    }
+
+    /**
+     * Build the form inputs that let the merchant decide which of their attribute groups or
+     * features take over the feed field they collide with.
+     *
+     * Returns an empty array when the shop has no colliding names, so the section only shows
+     * up where it means something.
+     *
+     * @param int $idShop Shop ID
+     * @param int $idLang Language ID
+     *
+     * @return array
+     */
+    private function getFieldConflictInputs($idShop, $idLang)
+    {
+        $conflicts = DfFieldConflicts::detectConflictingFields($idShop, $idLang);
+        if (empty($conflicts)) {
+            return [];
+        }
+
+        $inputs = [];
+        $types = [
+            DfFieldConflicts::TYPE_ATTRIBUTE => [
+                'field' => 'DF_ATTRIBUTES_REPLACE',
+                'label' => $this->module->l('Attribute groups replacing original fields', 'doofinderadminpanelview'),
+                'desc' => $this->module->l('These attribute groups have the same name as an original product field. Check one and its value replaces that original field, on the products that use it. Leave it unchecked and the original field is kept, while the attribute group is not indexed.', 'doofinderadminpanelview'),
+            ],
+            DfFieldConflicts::TYPE_FEATURE => [
+                'field' => 'DF_FEATURES_REPLACE',
+                'label' => $this->module->l('Features replacing original fields', 'doofinderadminpanelview'),
+                'desc' => $this->module->l('These features have the same name as an original product field. Check one and its value replaces that original field, on the products that have it. Leave it unchecked and the original field is kept, while the feature is not indexed.', 'doofinderadminpanelview'),
+            ],
+        ];
+
+        foreach ($types as $type => $config) {
+            $query = [];
+            foreach ($conflicts as $conflict) {
+                if ($conflict['type'] !== $type) {
+                    continue;
+                }
+                $query[] = [
+                    'id' => $conflict['id'],
+                    'name' => sprintf(
+                        $this->module->l('%1$s (replaces "%2$s")', 'doofinderadminpanelview'),
+                        $conflict['name'],
+                        $conflict['slug']
+                    ),
+                ];
+            }
+
+            if (empty($query)) {
+                continue;
+            }
+
+            $inputs[] = [
+                'type' => 'html',
+                'label' => $config['label'],
+                'name' => $config['field'] . '[]',
+                'desc' => $config['desc'],
+                'html_content' => $this->checkboxSelectorFormatHtml([
+                    'query' => $query,
+                    'id' => 'id',
+                    'name' => 'name',
+                    'field' => $config['field'],
+                ]),
+            ];
+        }
+
+        return $inputs;
     }
 
     /**
@@ -621,13 +652,15 @@ class DoofinderAdminPanelView
      */
     protected function getConfigFormAdvanced()
     {
+        $context = \Context::getContext();
+
         return [
             'form' => [
                 'legend' => [
                     'title' => $this->module->l('Advanced Options', 'doofinderadminpanelview'),
                     'icon' => 'icon-cogs',
                 ],
-                'input' => [
+                'input' => array_merge([
                     [
                         'type' => (version_compare(_PS_VERSION_, '1.6.0', '>=') ? 'switch' : 'radio'),
                         'label' => $this->module->l('Debug Mode. Write info logs in doofinder.log file', 'doofinderadminpanelview'),
@@ -658,7 +691,7 @@ class DoofinderAdminPanelView
                         'is_bool' => true,
                         'values' => $this->getBooleanFormValue(),
                     ],
-                ],
+                ], $this->getFieldConflictInputs($context->shop->id, $context->language->id)),
                 'submit' => [
                     'title' => $this->module->l('Save Internal Search Options', 'doofinderadminpanelview'),
                     'name' => 'submitDoofinderModuleAdvanced',

@@ -106,3 +106,8 @@ $_MODULE['<{doofinder}prestashop>support_tab_6b8f482bb34c8983f0bcb2651b776e9f'] 
 $_MODULE['<{doofinder}prestashop>support_tab_105dad09bf429ff180f1465aba5b2164'] = 'Cómo configurar los filtros de la capa de búsqueda';
 $_MODULE['<{doofinder}prestashop>support_tab_57efee3b429d91cddf66edbe6efb9b87'] = 'Cónoce los básicos sobre Live Layer';
 $_MODULE['<{doofinder}prestashop>support_tab_f52757c491e99a76cb21926a04bd1c73'] = 'O contacta directamente con nosotros. Estaremos encantados de ayudarte.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_540223987100746665665400e1eaf386'] = 'Grupos de atributos que reemplazan campos originales';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_64c0612849fd00318b32b94f03dab655'] = 'Características que reemplazan campos originales';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_5d00a671159d3bad20efaf872dfbc0f8'] = 'Estos grupos de atributos tienen el mismo nombre que un campo original del producto. Si marcas uno, su valor reemplaza a ese campo original en los productos que lo usan. Si lo dejas sin marcar, se conserva el campo original y el grupo de atributos no se indexa.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_8e3f77dcf0e4fa2568570258fed932e3'] = 'Estas características tienen el mismo nombre que un campo original del producto. Si marcas una, su valor reemplaza a ese campo original en los productos que la tienen. Si la dejas sin marcar, se conserva el campo original y la característica no se indexa.';
+$_MODULE['<{doofinder}prestashop>doofinderadminpanelview_82ad4429b486b7a98583b56833c4f955'] = '%1$s (reemplaza a "%2$s")';

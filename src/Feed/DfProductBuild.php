@@ -54,11 +54,6 @@ class DfProductBuild
     private $products;
 
     /**
-     * @var string attribute group configuration to display
-     */
-    private $attributesShown;
-
-    /**
      * @var bool whether product prices should be displayed
      */
     private $displayPrices;
@@ -84,11 +79,6 @@ class DfProductBuild
     private $productVariations;
 
     /**
-     * @var bool whether product features should be exported
-     */
-    private $showProductFeatures;
-
-    /**
      * @var mixed whether stock management is enabled (from PS configuration)
      */
     private $stockManagement;
@@ -104,14 +94,19 @@ class DfProductBuild
     private $multipriceEnabled;
 
     /**
-     * @var array IDs of features to export
-     */
-    private $featuresShown;
-
-    /**
-     * @var array keys of features selected for export
+     * @var array names of the features of the shop, indexed by feature ID
      */
     private $featuresKeys;
+
+    /**
+     * @var int[] IDs of attribute groups that replace the feed field they collide with
+     */
+    private $attributesReplace;
+
+    /**
+     * @var int[] IDs of features that replace the feed field they collide with
+     */
+    private $featuresReplace;
 
     /**
      * @var array A list of customer Groups data
@@ -134,18 +129,31 @@ class DfProductBuild
         $this->idCurrency = $idCurrency;
         $this->customerGroupsData = DfTools::getAdditionalCustomerGroupsAndDefaultCustomers();
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
-        $this->attributesShown = DfTools::cfg($idShop, 'DF_GROUP_ATTRIBUTES_SHOWN', '');
         $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
         $this->imageSize = \Configuration::get('DF_GS_IMAGE_SIZE');
         $this->link = \Context::getContext()->link;
         $this->linkRewriteConf = \Configuration::get('PS_REWRITING_SETTINGS');
         $this->productVariations = (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
-        $this->showProductFeatures = (bool) \Configuration::get('DF_SHOW_PRODUCT_FEATURES');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
         $this->useTax = (bool) DfTools::cfg($idShop, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES);
         $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
-        $this->featuresShown = explode(',', DfTools::cfg($idShop, 'DF_FEATURES_SHOWN', ''));
-        $this->featuresKeys = $this->getFeaturesKeys();
+        $this->featuresKeys = DfTools::getFeatureKeysForShopAndLang($idShop, $idLang);
+        $this->attributesReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_ATTRIBUTES_REPLACE', ''));
+        $this->featuresReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_FEATURES_REPLACE', ''));
+    }
+
+    /**
+     * Parse a stored list of IDs into an array of integers.
+     *
+     * @param string $config Comma separated IDs
+     *
+     * @return int[]
+     */
+    private static function configuredIds($config)
+    {
+        return array_map('intval', array_filter(explode(',', (string) $config), static function ($id) {
+            return '' !== $id;
+        }));
     }
 
     /**
@@ -156,16 +164,6 @@ class DfProductBuild
     public function getCurrencies()
     {
         return $this->currencies;
-    }
-
-    /**
-     * Get the configured attributes to be shown.
-     *
-     * @return string
-     */
-    public function getAttributesShown()
-    {
-        return $this->attributesShown;
     }
 
     /**
@@ -189,16 +187,6 @@ class DfProductBuild
     }
 
     /**
-     * Get the configured features to be shown.
-     *
-     * @return array
-     */
-    public function getFeaturesShown()
-    {
-        return $this->featuresShown;
-    }
-
-    /**
      * Check if product variations should be shown.
      *
      * @return bool
@@ -206,16 +194,6 @@ class DfProductBuild
     public function shouldShowProductVariations()
     {
         return $this->productVariations;
-    }
-
-    /**
-     * Check if product features should be shown.
-     *
-     * @return bool
-     */
-    public function shouldShowProductFeatures()
-    {
-        return $this->showProductFeatures;
     }
 
     /**
@@ -414,9 +392,7 @@ class DfProductBuild
             $data['category_links'] = $this->batchFetchCategoryLinks($allCategoryIds);
         }
 
-        if ($this->showProductFeatures) {
-            $data['features'] = $this->batchFetchFeatures($productIds);
-        }
+        $data['features'] = $this->batchFetchFeatures($productIds);
 
         if ($this->productVariations && !empty($allVariations)) {
             $variationIds = array_column($allVariations, 'id_product_attribute');
@@ -629,7 +605,7 @@ class DfProductBuild
         $keys = $this->featuresKeys;
 
         $query = new \DbQuery();
-        $query->select('fp.id_product, fl.name, fvl.value');
+        $query->select('fp.id_product, fp.id_feature, fl.name, fvl.value');
         $query->from('feature_product', 'fp');
         $query->leftJoin('feature_lang', 'fl', 'fl.id_feature = fp.id_feature AND fl.id_lang = ' . (int) $this->idLang);
         $query->leftJoin('feature_value_lang', 'fvl', 'fvl.id_feature_value = fp.id_feature_value AND fvl.id_lang = ' . (int) $this->idLang);
@@ -644,13 +620,14 @@ class DfProductBuild
             foreach ($result as $row) {
                 if (in_array($row['name'], $keys, true)) {
                     $productId = (int) $row['id_product'];
+                    $idFeature = (int) $row['id_feature'];
                     if (!isset($features[$productId])) {
                         $features[$productId] = [];
                     }
-                    if (!isset($features[$productId][$row['name']])) {
-                        $features[$productId][$row['name']] = [];
+                    if (!isset($features[$productId][$idFeature])) {
+                        $features[$productId][$idFeature] = ['name' => $row['name'], 'values' => []];
                     }
-                    $features[$productId][$row['name']][] = $row['value'];
+                    $features[$productId][$idFeature]['values'][] = $row['value'];
                 }
             }
         }
@@ -674,15 +651,12 @@ class DfProductBuild
         $attributes = [];
 
         $query = new \DbQuery();
-        $query->select('pc.id_product_attribute, pal.name, pagl.name AS group_name');
+        $query->select('pc.id_product_attribute, pal.name, pagl.name AS group_name, pa.id_attribute_group');
         $query->from('product_attribute_combination', 'pc');
         $query->leftJoin('attribute', 'pa', 'pc.id_attribute = pa.id_attribute');
         $query->leftJoin('attribute_lang', 'pal', 'pc.id_attribute = pal.id_attribute AND pal.id_lang = ' . (int) $this->idLang);
         $query->leftJoin('attribute_group_lang', 'pagl', 'pagl.id_attribute_group = pa.id_attribute_group AND pagl.id_lang = ' . (int) $this->idLang);
         $query->where('pc.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')');
-        if ($this->attributesShown) {
-            $query->where('pa.id_attribute_group IN (' . pSQL($this->attributesShown) . ')');
-        }
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         if (!$result) {
@@ -691,11 +665,18 @@ class DfProductBuild
 
         if ($result) {
             foreach ($result as $row) {
+                if (empty($row['group_name'])) {
+                    continue;
+                }
                 $variationId = (int) $row['id_product_attribute'];
                 if (!isset($attributes[$variationId])) {
                     $attributes[$variationId] = [];
                 }
-                $attributes[$variationId][DfTools::slugify($row['group_name'])] = $row['name'];
+                $fieldName = $this->attributeFieldName($row['group_name'], (int) $row['id_attribute_group']);
+                if (null === $fieldName) {
+                    continue;
+                }
+                $attributes[$variationId][$fieldName] = $row['name'];
             }
         }
 
@@ -809,11 +790,7 @@ class DfProductBuild
     private function batchFetchVariantsInformation($productIds)
     {
         $variantsInfo = [];
-        if (empty($this->attributesShown)) {
-            return $variantsInfo;
-        }
 
-        $attrGroups = implode(',', array_map('intval', explode(',', $this->attributesShown)));
         $query = new \DbQuery();
         $query->select('DISTINCT p.id_product, a.id_attribute_group');
         $query->from('product', 'p');
@@ -821,7 +798,7 @@ class DfProductBuild
         $query->leftJoin('product_attribute_combination', 'pac', 'pa.id_product_attribute = pac.id_product_attribute');
         $query->leftJoin('attribute', 'a', 'pac.id_attribute = a.id_attribute');
         $query->where('p.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
-        $query->where('a.id_attribute_group IN (' . $attrGroups . ')');
+        $query->where('a.id_attribute_group IS NOT NULL');
         $query->groupBy('p.id_product, a.id_attribute_group');
 
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
@@ -899,9 +876,7 @@ class DfProductBuild
             $product['category_links'] = [];
         }
 
-        if ($this->showProductFeatures) {
-            $product['features'] = isset($batchData['features'][$productId]) ? $batchData['features'][$productId] : [];
-        }
+        $product['features'] = isset($batchData['features'][$productId]) ? $batchData['features'][$productId] : [];
         if ($this->productVariations) {
             $product['attributes'] = isset($batchData['attributes'][$variationId]) ? $batchData['attributes'][$variationId] : [];
             $product['variation_images'] = isset($batchData['variation_images'][$key]) ? $batchData['variation_images'][$key] : [];
@@ -1138,9 +1113,9 @@ class DfProductBuild
             }
         }
 
-        if ($this->showProductFeatures) {
-            $p['features'] = $this->processFeatures($product['features']);
-        }
+        $p['features'] = $this->processFeatures($product['features']);
+        // Written last so that a feature that replaces a feed field wins over its original value.
+        $p = array_merge($p, $this->processReplacingFeatures($product['features']));
 
         // Process extra headers - but exclude attribute headers that were already processed above
         // This prevents overwriting attributes with values from $product array
@@ -1443,10 +1418,16 @@ class DfProductBuild
     private function processFeatures($featuresData)
     {
         $features = [];
-        foreach ($featuresData as $key => $values) {
-            $slug = DfTools::slugify($key);
-            foreach ($values as $value) {
-                $features[$slug][] = DfTools::cleanString($value);
+        foreach ($featuresData as $idFeature => $feature) {
+            if ($this->featureReplaces($feature['name'], (int) $idFeature)) {
+                continue;
+            }
+            $name = DfFieldConflicts::fieldName(DfTools::slugify($feature['name']), false);
+            if (null === $name) {
+                continue;
+            }
+            foreach ($feature['values'] as $value) {
+                $features[$name][] = DfTools::cleanString($value);
             }
         }
 
@@ -1454,19 +1435,54 @@ class DfProductBuild
     }
 
     /**
-     * Get feature keys for filtering.
+     * Get the values of the features that replace the feed field they collide with,
+     * indexed by that field name.
+     *
+     * @param array $featuresData Raw features data from batch fetch
      *
      * @return array
      */
-    private function getFeaturesKeys()
+    private function processReplacingFeatures($featuresData)
     {
-        $allFeatureKeys = DfTools::getFeatureKeysForShopAndLang($this->idShop, $this->idLang);
-
-        if (is_array($this->featuresShown) && count($this->featuresShown) > 0 && $this->featuresShown[0] !== '') {
-            return DfTools::getSelectedFeatures($allFeatureKeys, $this->featuresShown);
+        $replacing = [];
+        foreach ($featuresData as $idFeature => $feature) {
+            if (!$this->featureReplaces($feature['name'], (int) $idFeature)) {
+                continue;
+            }
+            $values = array_map(['\PrestaShop\Module\Doofinder\Utils\DfTools', 'cleanString'], $feature['values']);
+            $replacing[DfTools::slugify($feature['name'])] = implode(DfTools::LIST_SEPARATOR, $values);
         }
 
-        return $allFeatureKeys;
+        return $replacing;
+    }
+
+    /**
+     * Check whether a feature collides with a feed field and replaces it.
+     *
+     * @param string $featureName Feature name in the feed language
+     * @param int $idFeature Feature ID
+     *
+     * @return bool
+     */
+    private function featureReplaces($featureName, $idFeature)
+    {
+        return DfFieldConflicts::isCanonical(DfTools::slugify($featureName))
+            && in_array($idFeature, $this->featuresReplace, true);
+    }
+
+    /**
+     * Resolve the field name an attribute group is emitted under.
+     *
+     * @param string $groupName Attribute group name in the feed language
+     * @param int $idAttributeGroup Attribute group ID
+     *
+     * @return string|null The name to emit, or null when it must not be indexed
+     */
+    public function attributeFieldName($groupName, $idAttributeGroup)
+    {
+        $slug = DfTools::slugify($groupName);
+
+        return DfFieldConflicts::fieldName($slug, in_array($idAttributeGroup, $this->attributesReplace, true));
     }
 
     /**
