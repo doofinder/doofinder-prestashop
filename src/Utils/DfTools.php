@@ -1080,7 +1080,7 @@ class DfTools
             return $text;
         }
 
-        return str_replace('\\', '', preg_replace("/([^\d\s])([\d])/", '$1 $2', $text));
+        return preg_replace("/([^\d\s])([\d])/", '$1 $2', $text);
     }
 
     //
