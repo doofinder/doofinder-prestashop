@@ -247,7 +247,7 @@ $header = array_unique($header);
 
 $csv = fopen('php://output', 'w');
 if (!$limit || (false !== $offset && 0 === (int) $offset)) {
-    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
+    DfTools::fputcsvRfc($csv, $header, DfTools::TXT_SEPARATOR);
 }
 
 $products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
@@ -265,7 +265,7 @@ $processedProducts = $dfProductBuild->processBatchProducts(
 
 foreach ($processedProducts as $item) {
     $csvItem = $dfProductBuild->applySpecificTransformationsForCsv($item, $header);
-    fputcsv($csv, $csvItem, DfTools::TXT_SEPARATOR);
+    DfTools::fputcsvRfc($csv, $csvItem, DfTools::TXT_SEPARATOR);
 }
 
 fclose($csv);

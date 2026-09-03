@@ -61,7 +61,7 @@ $header = ['id', 'title', 'description', 'meta_title', 'meta_description', 'link
 
 $csv = fopen('php://output', 'w');
 if (!$limit || (false !== $offset && 0 === (int) $offset)) {
-    fputcsv($csv, $header, DfTools::TXT_SEPARATOR);
+    DfTools::fputcsvRfc($csv, $header, DfTools::TXT_SEPARATOR);
 }
 
 // CATEGORIES
@@ -70,6 +70,6 @@ foreach ($rows as $row) {
     foreach ($header as $field) {
         $csvRow[$field] = array_key_exists($field, $row) ? $row[$field] : '';
     }
-    fputcsv($csv, $csvRow, DfTools::TXT_SEPARATOR);
+    DfTools::fputcsvRfc($csv, $csvRow, DfTools::TXT_SEPARATOR);
 }
 fclose($csv);

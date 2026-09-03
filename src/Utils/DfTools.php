@@ -1022,31 +1022,46 @@ class DfTools
         // $text = stripcslashes($text);
 
         // Remove escaping as for CSV we escape with "
-        $text = self::cleanStringMinimal($text);
+        $text = str_replace('\\', '', $text);
 
         // Filter out invalid UTF-8 sequences using a predefined regex pattern
         return preg_replace(self::VALID_UTF8, '$1', $text);
     }
 
     /**
-     * Apply the minimal cleaning required to keep a value safe inside the CSV feed.
+     * Write a CSV line following RFC 4180 strictly.
      *
-     * Only removes backslashes, so a value ending up as `\"` does not defeat the
-     * proprietary escape mechanism of fputcsv() and break the enclosure. Use this
-     * instead of cleanString() for fields whose original content must be preserved
-     * (HTML markup, for instance).
+     * Replacement for fputcsv(), which applies a proprietary escape mechanism: a
+     * double quote preceded by a backslash is emitted as is instead of being
+     * doubled, which breaks the enclosure and makes the whole feed unparseable.
+     * Disabling that mechanism through the native $escape argument would require
+     * PHP >= 7.4, so the encoding is done here instead.
      *
-     * @param string|null $text The text to clean
+     * Values are never altered: quotes are doubled, and backslashes are preserved.
+     * A field is enclosed under the same conditions as fputcsv() does, so the
+     * output stays byte for byte identical except for the case described above.
      *
-     * @return string|null The cleaned text, or null if input was null
+     * @param resource $stream The stream to write the line to
+     * @param array $fields The values of the line, already in header order
+     * @param string $delimiter The field delimiter
+     *
+     * @return int|false The number of bytes written, or false on failure
      */
-    public static function cleanStringMinimal($text)
+    public static function fputcsvRfc($stream, array $fields, $delimiter = self::TXT_SEPARATOR)
     {
-        if (is_null($text)) {
-            return null;
+        $encoded = [];
+
+        foreach ($fields as $field) {
+            $field = (string) $field;
+
+            if ('' !== $field && false !== strpbrk($field, $delimiter . "\"\\\n\r\t ")) {
+                $field = '"' . str_replace('"', '""', $field) . '"';
+            }
+
+            $encoded[] = $field;
         }
 
-        return str_replace('\\', '', $text);
+        return fwrite($stream, implode($delimiter, $encoded) . "\n");
     }
 
     /**
@@ -1065,7 +1080,7 @@ class DfTools
             return $text;
         }
 
-        return DfTools::cleanStringMinimal(preg_replace("/([^\d\s])([\d])/", '$1 $2', $text));
+        return str_replace('\\', '', preg_replace("/([^\d\s])([\d])/", '$1 $2', $text));
     }
 
     //
