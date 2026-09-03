@@ -1029,6 +1029,42 @@ class DfTools
     }
 
     /**
+     * Write a CSV line following RFC 4180 strictly.
+     *
+     * Replacement for fputcsv(), which applies a proprietary escape mechanism: a
+     * double quote preceded by a backslash is emitted as is instead of being
+     * doubled, which breaks the enclosure and makes the whole feed unparseable.
+     * Disabling that mechanism through the native $escape argument would require
+     * PHP >= 7.4, so the encoding is done here instead.
+     *
+     * Values are never altered: quotes are doubled, and backslashes are preserved.
+     * A field is enclosed under the same conditions as fputcsv() does, so the
+     * output stays byte for byte identical except for the case described above.
+     *
+     * @param resource $stream The stream to write the line to
+     * @param array $fields The values of the line, already in header order
+     * @param string $delimiter The field delimiter
+     *
+     * @return int|false The number of bytes written, or false on failure
+     */
+    public static function fputcsvRfc($stream, $fields, $delimiter = self::TXT_SEPARATOR)
+    {
+        $encoded = [];
+
+        foreach ($fields as $field) {
+            $field = (string) $field;
+
+            if ('' !== $field && false !== strpbrk($field, $delimiter . "\"\\\n\r\t ")) {
+                $field = '"' . str_replace('"', '""', $field) . '"';
+            }
+
+            $encoded[] = $field;
+        }
+
+        return fwrite($stream, implode($delimiter, $encoded) . "\n");
+    }
+
+    /**
      * Split references by adding spaces between non-digit and digit characters.
      *
      * This method adds spaces between non-digit and digit characters in a string,
