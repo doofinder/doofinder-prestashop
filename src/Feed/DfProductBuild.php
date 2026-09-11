@@ -1361,6 +1361,12 @@ class DfProductBuild
     /**
      * Get product price (normal or sale).
      *
+     * Rounded the same way as DfTools::getMultiprice() (Tools::ps_round() to the
+     * currency's decimal precision) so that this root-level value can be safely
+     * compared against the equivalent df_multiprice entry: Mutator::dropRedundantMultiprice()
+     * relies on that equality to drop multiprice entries that duplicate the root price,
+     * and an unrounded root price never matches its rounded multiprice counterpart.
+     *
      * @param array $product Product data
      * @param bool $salePrice Whether to return the sale price
      *
@@ -1378,15 +1384,16 @@ class DfProductBuild
             $idProductAttribute = null;
         }
 
+        $decimals = DfTools::getCurrencyPrecision($this->idCurrency);
         $productPrice = DfTools::getPrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
         if (!$salePrice) {
-            return $productPrice ? \Tools::convertPrice($productPrice, $this->idCurrency) : null;
+            return $productPrice ? \Tools::ps_round(\Tools::convertPrice($productPrice, $this->idCurrency), $decimals) : null;
         }
         $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
         return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
-            ? \Tools::convertPrice($onsalePrice, $this->idCurrency) : null;
+            ? \Tools::ps_round(\Tools::convertPrice($onsalePrice, $this->idCurrency), $decimals) : null;
     }
 
     /**
