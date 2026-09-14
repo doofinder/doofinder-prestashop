@@ -114,6 +114,13 @@ class DfProductBuild
     private $customerGroupsData;
 
     /**
+     * @var int Decimal precision of. Computed once in the constructor
+     *          because DfTools::getCurrencyPrecision() instantiates a Currency object, and
+     *          this is otherwise read per product while building the feed.
+     */
+    private $decimals;
+
+    /**
      * Constructor.
      *
      * Initializes configuration settings for building product data.
@@ -127,6 +134,7 @@ class DfProductBuild
         $this->idShop = $idShop;
         $this->idLang = $idLang;
         $this->idCurrency = $idCurrency;
+        $this->decimals = DfTools::getCurrencyPrecision($idCurrency);
         $this->customerGroupsData = DfTools::getAdditionalCustomerGroupsAndDefaultCustomers();
         $this->currencies = \Currency::getCurrenciesByIdShop($idShop);
         $this->displayPrices = (bool) DfTools::cfg($idShop, 'DF_GS_DISPLAY_PRICES', DoofinderConstants::YES);
@@ -1061,11 +1069,10 @@ class DfProductBuild
         }
 
         if ($this->displayPrices) {
-            $decimals = DfTools::getCurrencyPrecision($this->idCurrency);
             $p['price'] = $this->getPrice($product);
             $p['sale_price'] = $this->getPrice($product, true);
             $p['unit_price'] = $product['unit_price'];
-            $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $decimals);
+            $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $this->decimals);
 
             if ($this->multipriceEnabled) {
                 $p['df_multiprice'] = $this->getMultiprice($product);
@@ -1384,16 +1391,20 @@ class DfProductBuild
             $idProductAttribute = null;
         }
 
-        $decimals = DfTools::getCurrencyPrecision($this->idCurrency);
+        // DfTools::getPrice()/getOnsalePrice() always return a float (never false or null,
+        // see their own @return), so a product legitimately priced at 0 must still be rounded
+        // and returned here, exactly like DfTools::getMultiprice() does — otherwise the root
+        // price ends up empty while its df_multiprice counterpart reports 0, and
+        // Mutator::dropRedundantMultiprice() can never treat them as the same value.
         $productPrice = DfTools::getPrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
         if (!$salePrice) {
-            return $productPrice ? \Tools::ps_round(\Tools::convertPrice($productPrice, $this->idCurrency), $decimals) : null;
+            return \Tools::ps_round(\Tools::convertPrice($productPrice, $this->idCurrency), $this->decimals);
         }
         $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
-        return ($productPrice && $onsalePrice && $productPrice != $onsalePrice)
-            ? \Tools::ps_round(\Tools::convertPrice($onsalePrice, $this->idCurrency), $decimals) : null;
+        return $productPrice != $onsalePrice
+            ? \Tools::ps_round(\Tools::convertPrice($onsalePrice, $this->idCurrency), $this->decimals) : null;
     }
 
     /**
