@@ -114,9 +114,9 @@ class DfProductBuild
     private $customerGroupsData;
 
     /**
-     * @var int Decimal precision of $idCurrency. Computed once in the constructor because
-     *          DfTools::getCurrencyPrecision() instantiates a Currency object, and this is
-     *          otherwise read per product while building the feed.
+     * @var int Decimal precision of. Computed once in the constructor
+     *          because DfTools::getCurrencyPrecision() instantiates a Currency object, and
+     *          this is otherwise read per product while building the feed.
      */
     private $decimals;
 
@@ -1391,19 +1391,19 @@ class DfProductBuild
             $idProductAttribute = null;
         }
 
+        // DfTools::getPrice()/getOnsalePrice() always return a float (never false or null,
+        // see their own @return), so a product legitimately priced at 0 must still be rounded
+        // and returned here, exactly like DfTools::getMultiprice() does — otherwise the root
+        // price ends up empty while its df_multiprice counterpart reports 0, and
+        // Mutator::dropRedundantMultiprice() can never treat them as the same value.
         $productPrice = DfTools::getPrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
-        // false !== $productPrice (not a plain truthy check): a product legitimately priced
-        // at 0 must still be returned and rounded, exactly like DfTools::getMultiprice() does,
-        // or the root price ends up empty while its df_multiprice counterpart reports 0,
-        // and Mutator::dropRedundantMultiprice() can never treat them as the same value.
         if (!$salePrice) {
-            return false !== $productPrice
-                ? \Tools::ps_round(\Tools::convertPrice($productPrice, $this->idCurrency), $this->decimals) : null;
+            return \Tools::ps_round(\Tools::convertPrice($productPrice, $this->idCurrency), $this->decimals);
         }
         $onsalePrice = DfTools::getOnsalePrice($product['id_product'], $this->useTax, $idProductAttribute, true, null);
 
-        return (false !== $productPrice && false !== $onsalePrice && $productPrice != $onsalePrice)
+        return $productPrice != $onsalePrice
             ? \Tools::ps_round(\Tools::convertPrice($onsalePrice, $this->idCurrency), $this->decimals) : null;
     }
 
