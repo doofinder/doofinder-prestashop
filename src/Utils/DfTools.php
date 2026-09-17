@@ -581,6 +581,8 @@ class DfTools
             'pt.`id_tag` = tag.`id_tag` AND tag.`id_lang` = ' . (int) $idLang
         );
 
+        $nonBrowsableCategoryIds = self::getNonBrowsableCategoryIds($idLang);
+
         $query->select('GROUP_CONCAT(DISTINCT(cl.id_category) ORDER BY cl.id_category) AS category_ids');
         $query->leftJoin(
             'category_product',
@@ -592,8 +594,9 @@ class DfTools
             'cl',
             'cl.`id_category` = cp.`id_category`
             AND cl.`id_shop` IN (' . implode(', ', \Shop::getContextListShopID()) . ')
-            AND cl.`id_lang` = ' . (int) $idLang . '
-            AND cp.id_category > 2'
+            AND cl.`id_lang` = ' . (int) $idLang
+            . (empty($nonBrowsableCategoryIds) ? '' : '
+            AND cp.`id_category` NOT IN (' . implode(', ', $nonBrowsableCategoryIds) . ')')
         );
 
         $query->select('IFNULL(vc.count, 0) as variant_count');
@@ -663,6 +666,38 @@ class DfTools
         }
 
         return self::$rootCategoryIds;
+    }
+
+    /**
+     * Returns the IDs of the categories that have no front office page, so they can
+     * never be a valid `category_merchandising` value.
+     *
+     * The top category, the only one without a parent, never has a page. Shop root
+     * categories are a different thing: up to 1.6.1 `CategoryController::init()`
+     * answered a 404 for `PS_ROOT_CATEGORY` and `PS_HOME_CATEGORY`, but since 1.7.0
+     * any active category associated to the shop is rendered, so they are browsable
+     * pages that can hold products and must be exported.
+     *
+     * @param int $idLang Language ID
+     *
+     * @return array
+     */
+    public static function getNonBrowsableCategoryIds($idLang)
+    {
+        $categoryIds = [];
+        $topCategory = \Category::getTopCategory($idLang);
+
+        if (\Validate::isLoadedObject($topCategory)) {
+            $categoryIds[] = (int) $topCategory->id;
+        }
+
+        if (!self::versionGte('1.7.0.0')) {
+            $idShop = (int) \Context::getContext()->shop->id;
+            $categoryIds[] = (int) self::cfg($idShop, 'PS_ROOT_CATEGORY');
+            $categoryIds[] = (int) self::cfg($idShop, 'PS_HOME_CATEGORY');
+        }
+
+        return array_values(array_unique(array_filter($categoryIds)));
     }
 
     /**
