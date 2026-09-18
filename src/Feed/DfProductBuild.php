@@ -940,7 +940,9 @@ class DfProductBuild
      */
     public function applySpecificTransformationsForCsv($product, $allHeaders)
     {
-        if ($this->multipriceEnabled) {
+        // The key is absent when the payload carries no multiprice: either because every
+        // entry only repeated the root price, or because prices are not being exported.
+        if ($this->multipriceEnabled && array_key_exists('df_multiprice', $product)) {
             $product['df_multiprice'] = DfTools::getFormattedMultiprice($product['df_multiprice']);
         }
         $product['categories'] = implode(DfTools::LIST_SEPARATOR, $product['categories']);
@@ -1075,7 +1077,7 @@ class DfProductBuild
             $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $this->decimals);
 
             if ($this->multipriceEnabled) {
-                $p['df_multiprice'] = $this->getMultiprice($product);
+                $this->setMultiprice($p, $this->getMultiprice($product));
             }
 
             if (DfTools::isParent($product) && is_array($minPriceVariant)) {
@@ -1087,7 +1089,9 @@ class DfProductBuild
                     $p['price'] = $minPriceVariant['price'];
                     $p['sale_price'] = ($minPriceVariant['onsale_price'] === $minPriceVariant['price']) ? null : $minPriceVariant['onsale_price'];
                     if ($this->multipriceEnabled) {
-                        $p['df_multiprice'] = $minPriceVariant['multiprice'];
+                        // Set after price and sale_price so the redundant entries are dropped
+                        // against the inherited values, which are the ones the document carries.
+                        $this->setMultiprice($p, $minPriceVariant['multiprice']);
                     }
                 }
             }
@@ -1424,6 +1428,33 @@ class DfProductBuild
         $idProductAttribute = $this->productVariations ? $product['id_product_attribute'] : null;
 
         return DfTools::getMultiprice($productId, $this->useTax, $this->currencies, $idProductAttribute, $this->customerGroupsData);
+    }
+
+    /**
+     * Write the multiprice into the payload, without the entries that only repeat the
+     * payload's own price fields.
+     *
+     * The key is left out entirely when nothing survives, which is the usual outcome for a
+     * shop whose customer groups all pay the same price. An empty PHP array would be encoded
+     * as a JSON list rather than an object, and the consumer already falls back to the root
+     * price fields when a document carries no multiprice.
+     *
+     * @param array $p Payload being built, by reference
+     * @param array $multiprice Multiprice map to write
+     *
+     * @return void
+     */
+    private function setMultiprice(&$p, $multiprice)
+    {
+        $multiprice = DfTools::dropRedundantMultiprice($multiprice, $p);
+
+        if (empty($multiprice)) {
+            unset($p['df_multiprice']);
+
+            return;
+        }
+
+        $p['df_multiprice'] = $multiprice;
     }
 
     /**
