@@ -1620,6 +1620,71 @@ class DfTools
     }
 
     /**
+     * Remove the entries of a multiprice map that are identical to the root fields of the
+     * document, because a consumer that finds no entry for a currency or customer group
+     * falls back to those root fields.
+     *
+     * An entry is removed when ALL of its fields match the root field of the same name. An
+     * entry holding a field with no counterpart in the root is kept, since dropping it would
+     * lose that field.
+     *
+     * This is the plugin side of ItemsTransformations.Mutator.drop_redundant_multiprice/2,
+     * which the backend already applies to every feed. Doing it here too means a shop with
+     * one customer group per client no longer builds, keeps in memory and uploads thousands
+     * of entries that all repeat the root price.
+     *
+     * @param array $multiprice Multiprice map, as built by getMultiprice()
+     * @param array $rootFields Root fields of the document to compare against, keyed by name
+     *
+     * @return array The map without its redundant entries
+     */
+    public static function dropRedundantMultiprice($multiprice, $rootFields)
+    {
+        $kept = [];
+
+        foreach ($multiprice as $key => $entry) {
+            foreach ($entry as $field => $value) {
+                if (!array_key_exists($field, $rootFields)
+                    || !self::sameMultipriceValue($rootFields[$field], $value)) {
+                    $kept[$key] = $entry;
+
+                    break;
+                }
+            }
+        }
+
+        return $kept;
+    }
+
+    /**
+     * Compare a root field against its multiprice counterpart the same way the backend does.
+     *
+     * A loose comparison cannot be used here: the root sale_price is null when there is no
+     * discount, and getPrice() returns false when the product hides its price, and PHP holds
+     * both null == 0.0 and false == 0.0 to be true, which would drop legitimate entries.
+     *
+     * @param mixed $rootValue Value of the root field
+     * @param mixed $entryValue Value of the same field inside the multiprice entry
+     *
+     * @return bool
+     */
+    private static function sameMultipriceValue($rootValue, $entryValue)
+    {
+        if (null === $rootValue || null === $entryValue) {
+            return null === $rootValue && null === $entryValue;
+        }
+
+        // Only one of them is a string: compare them as numbers, as the backend does, but
+        // only when both actually are numbers. A price like "consultar" never matches.
+        if (is_string($rootValue) !== is_string($entryValue)) {
+            return is_numeric($rootValue) && is_numeric($entryValue)
+                && (float) $rootValue === (float) $entryValue;
+        }
+
+        return $rootValue === $entryValue;
+    }
+
+    /**
      * Returns the API Key without the region part.
      *
      * @return string
