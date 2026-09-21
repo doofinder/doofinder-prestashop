@@ -389,9 +389,7 @@ class DfProductBuild
                 $data['variant_prices'][$key] = DfTools::getVariantPrices(
                     $variation['id_product'],
                     $variation['id_product_attribute'],
-                    $this->useTax,
-                    $this->currencies,
-                    $this->customerGroupsData
+                    $this->useTax
                 );
             }
         }
@@ -1074,22 +1072,32 @@ class DfProductBuild
             $p['unit_price'] = $product['unit_price'];
             $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $this->decimals);
 
-            if ($this->multipriceEnabled) {
-                $p['df_multiprice'] = $this->getMultiprice($product);
+            $inheritsVariantPrice = DfTools::isParent($product)
+                && is_array($minPriceVariant)
+                && !is_null($minPriceVariant['onsale_price'])
+                && !is_null($minPriceVariant['price'])
+                && (empty($p['sale_price']) || $minPriceVariant['onsale_price'] < $p['sale_price']);
+
+            if ($inheritsVariantPrice) {
+                $p['price'] = $minPriceVariant['price'];
+                $p['sale_price'] = ($minPriceVariant['onsale_price'] === $minPriceVariant['price']) ? null : $minPriceVariant['onsale_price'];
             }
 
-            if (DfTools::isParent($product) && is_array($minPriceVariant)) {
-                if (
-                    !is_null($minPriceVariant['onsale_price'])
-                    && !is_null($minPriceVariant['price'])
-                    && (empty($p['sale_price']) || $minPriceVariant['onsale_price'] < $p['sale_price'])
-                ) {
-                    $p['price'] = $minPriceVariant['price'];
-                    $p['sale_price'] = ($minPriceVariant['onsale_price'] === $minPriceVariant['price']) ? null : $minPriceVariant['onsale_price'];
-                    if ($this->multipriceEnabled) {
-                        $p['df_multiprice'] = $minPriceVariant['multiprice'];
-                    }
-                }
+            if ($this->multipriceEnabled) {
+                // A parent that takes over the price of its cheapest variant takes over its
+                // multiprice too. It goes through DfTools::getMultiprice() and not through
+                // self::getMultiprice() on purpose: this route does not apply the show_price
+                // guard, exactly like DfTools::getVariantPrices() did before. Changing it
+                // would alter the payload of the products that hide their price.
+                $p['df_multiprice'] = $inheritsVariantPrice
+                    ? DfTools::getMultiprice(
+                        $product['id_product'],
+                        $this->useTax,
+                        $this->currencies,
+                        $minPriceVariant['id_product_attribute'],
+                        $this->customerGroupsData
+                    )
+                    : $this->getMultiprice($product);
             }
         }
 
@@ -1135,7 +1143,41 @@ class DfProductBuild
             $p[$extraHeader] = isset($product[$extraHeader]) ? DfTools::cleanString($product[$extraHeader]) : '';
         }
 
+        $this->flushPriceCaches();
+
         return $p;
+    }
+
+    /**
+     * Discard the price caches PrestaShop fills while this document was being built.
+     *
+     * Product::getPriceStatic() leaves an entry in SpecificPrice::$_specificPriceCache, which
+     * holds a whole row of that table, and another in Product::$_prices. Their keys carry the
+     * combination and the customer group, so a product with hundreds of combinations in a shop
+     * with one group per client fills them with combinations x groups entries, and nothing
+     * frees them for the rest of the request. That is what exhausts the memory limit: the
+     * whole product, every combination of it, is built within a single feed request.
+     *
+     * Nothing is lost by dropping them here. An entry is only ever read while the document it
+     * belongs to is being built, because the next document is a different combination and its
+     * keys are different ones.
+     *
+     * SpecificPrice::flushCache() also calls Product::flushPriceCache(), so one call clears
+     * both. Shops with no customer groups never grow those caches, so they skip the work.
+     *
+     * @return void
+     */
+    private function flushPriceCaches()
+    {
+        if (!$this->displayPrices || empty($this->customerGroupsData)) {
+            return;
+        }
+
+        if (method_exists('SpecificPrice', 'flushCache')) {
+            \SpecificPrice::flushCache();
+        } elseif (method_exists('Product', 'flushPriceCache')) {
+            \Product::flushPriceCache();
+        }
     }
 
     /**
