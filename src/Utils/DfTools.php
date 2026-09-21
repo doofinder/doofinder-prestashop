@@ -1416,13 +1416,9 @@ class DfTools
     }
 
     /**
-     * Get the prices that decide which variant of a product is the cheapest one.
-     *
-     * Only what DfProductBuild::getMinPrice() needs: it compares onsale_price, and the
-     * parent takes over the price of the winner. The multiprice of that winner is built
-     * later, once, in DfProductBuild::buildProductBase(). Building it here for every
-     * variant used to cost one price calculation per customer group and per variant, all
-     * of them discarded but one.
+     * Get the regular and the discounted price of a product combination, both in the
+     * currency of the context and rounded to its precision, along with the ID of the
+     * combination they belong to.
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
@@ -1435,8 +1431,6 @@ class DfTools
         return [
             'price' => self::getPrice($idProduct, $includeTaxes, $idProductAttribute),
             'onsale_price' => self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute),
-            // Read back by buildProductBase() to build the multiprice of the winning
-            // variant. Not decoration: dropping it would silently price the base product.
             'id_product_attribute' => $idProductAttribute,
         ];
     }
