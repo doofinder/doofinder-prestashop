@@ -114,6 +114,12 @@ class DfProductBuild
     private $customerGroupsData;
 
     /**
+     * @var string|null Class that can drop PrestaShop's price caches on this version,
+     *                  resolved once because it depends on the version, not on the product
+     */
+    private $priceCacheFlusher;
+
+    /**
      * @var int Decimal precision of. Computed once in the constructor
      *          because DfTools::getCurrencyPrecision() instantiates a Currency object, and
      *          this is otherwise read per product while building the feed.
@@ -148,6 +154,7 @@ class DfProductBuild
         $this->featuresKeys = DfTools::getFeatureKeysForShopAndLang($idShop, $idLang);
         $this->attributesReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_ATTRIBUTES_REPLACE', ''));
         $this->featuresReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_FEATURES_REPLACE', ''));
+        $this->priceCacheFlusher = self::resolvePriceCacheFlusher();
     }
 
     /**
@@ -1162,8 +1169,7 @@ class DfProductBuild
      * belongs to is being built, because the next document is a different combination and its
      * keys are different ones.
      *
-     * SpecificPrice::flushCache() also calls Product::flushPriceCache(), so one call clears
-     * both. Shops with no customer groups never grow those caches, so they skip the work.
+     * Shops with no customer groups never grow those caches, so they skip the work.
      *
      * @return void
      */
@@ -1173,11 +1179,57 @@ class DfProductBuild
             return;
         }
 
-        if (method_exists('SpecificPrice', 'flushCache')) {
+        if ('SpecificPrice' === $this->priceCacheFlusher) {
             \SpecificPrice::flushCache();
-        } elseif (method_exists('Product', 'flushPriceCache')) {
+        } elseif ('Product' === $this->priceCacheFlusher) {
             \Product::flushPriceCache();
         }
+    }
+
+    /**
+     * Decide which class can be asked to drop the price caches on this PrestaShop.
+     *
+     * SpecificPrice::flushCache() is the one that clears both, because it empties its own
+     * caches and then calls Product::flushPriceCache(). But it is only public and static from
+     * PrestaShop 1.7.4 on: in 1.6.1 and up to 1.7.3 it is protected, and method_exists() finds
+     * it just the same, so calling it statically there is a fatal error rather than a flush.
+     *
+     * Product::flushPriceCache() is public and static across the whole supported range, so it
+     * is what the older versions get. It only clears Product::$_prices and $_pricesLevel2,
+     * which is the smaller half, so those shops get less relief than the rest.
+     *
+     * @return string|null Name of the class to call, or null when neither can be used
+     */
+    private static function resolvePriceCacheFlusher()
+    {
+        if (self::isPublicStatic('SpecificPrice', 'flushCache')) {
+            return 'SpecificPrice';
+        }
+
+        if (self::isPublicStatic('Product', 'flushPriceCache')) {
+            return 'Product';
+        }
+
+        return null;
+    }
+
+    /**
+     * Check that a method exists and can actually be called statically from outside its class.
+     *
+     * @param string $class Class name
+     * @param string $method Method name
+     *
+     * @return bool
+     */
+    private static function isPublicStatic($class, $method)
+    {
+        if (!method_exists($class, $method)) {
+            return false;
+        }
+
+        $reflection = new \ReflectionMethod($class, $method);
+
+        return $reflection->isPublic() && $reflection->isStatic();
     }
 
     /**
