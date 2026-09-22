@@ -1188,7 +1188,6 @@ class DfProductBuild
         \Product::flushPriceCache();
     }
 
-
     /**
      * Retrieve available products information for a specific language.
      *
