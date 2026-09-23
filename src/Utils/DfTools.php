@@ -1416,38 +1416,21 @@ class DfTools
     }
 
     /**
-     * Get all price information for a product variant.
-     *
-     * This method retrieves the regular price, onsale price, and multiprice
-     * information for a specific product variant (combination).
-     *
-     * For B2B cases, the input data structure for $customerGroupsData is:
-     * [
-     *    ['id_group' => 4, 'id_customer' => 120, 'price_display_method' => 1],
-     *    ['id_group' => 5, 'id_customer' => 251, 'price_display_method' => 0],
-     *    ...
-     * ]
-     * The price_display_method field (0 = with tax, 1 = without tax) determines whether
-     * prices for each customer group should include taxes.
+     * Get the regular and the discounted price of a product combination, both in the
+     * currency of the context and rounded to its precision, along with the ID of the
+     * combination they belong to.
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
-     * @param array $currencies Array of currency information for multiprice calculation
-     * @param array $customerGroupsData List of customer groups to consider for price calculation (optional)
      *
-     * @return array Array containing price, onsale_price, multiprice, and id_product_attribute
+     * @return array Array containing price, onsale_price and id_product_attribute
      */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currencies, $customerGroupsData = [])
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes)
     {
-        $variantPrice = self::getPrice($idProduct, $includeTaxes, $idProductAttribute);
-        $variantOnsalePrice = self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute);
-        $variantMultiprice = self::getMultiprice($idProduct, $includeTaxes, $currencies, $idProductAttribute, $customerGroupsData);
-
         return [
-            'price' => $variantPrice,
-            'onsale_price' => $variantOnsalePrice,
-            'multiprice' => $variantMultiprice,
+            'price' => self::getPrice($idProduct, $includeTaxes, $idProductAttribute),
+            'onsale_price' => self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute),
             'id_product_attribute' => $idProductAttribute,
         ];
     }
