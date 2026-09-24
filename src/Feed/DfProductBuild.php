@@ -389,7 +389,9 @@ class DfProductBuild
                 $data['variant_prices'][$key] = DfTools::getVariantPrices(
                     $variation['id_product'],
                     $variation['id_product_attribute'],
-                    $this->useTax
+                    $this->useTax,
+                    $this->idCurrency,
+                    $this->decimals
                 );
             }
         }

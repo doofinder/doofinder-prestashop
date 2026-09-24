@@ -1416,21 +1416,36 @@ class DfTools
     }
 
     /**
-     * Get the regular and the discounted price of a product combination, both in the
-     * currency of the context and rounded to its precision, along with the ID of the
-     * combination they belong to.
+     * Get the regular and the discounted price of a product combination, both converted to
+     * the given currency and rounded to its precision, along with the ID of the combination
+     * they belong to.
+     *
+     * A parent product takes these values over as its own root price, so they are converted
+     * and rounded exactly like every other price the feed emits. Mutator::dropRedundantMultiprice()
+     * only drops a df_multiprice entry when every one of its fields equals the root value, and
+     * the parent's df_multiprice is calculated from this very combination: a root price left
+     * unconverted never matches its own entry, so no entry is ever dropped and the index runs
+     * out of fields.
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
      * @param bool $includeTaxes Whether to include taxes in prices
+     * @param int|array|\Currency $currency Currency to convert the prices to
+     * @param int $decimals Decimal precision of that currency
      *
      * @return array Array containing price, onsale_price and id_product_attribute
      */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes)
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currency, $decimals)
     {
         return [
-            'price' => self::getPrice($idProduct, $includeTaxes, $idProductAttribute),
-            'onsale_price' => self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute),
+            'price' => \Tools::ps_round(
+                \Tools::convertPrice(self::getPrice($idProduct, $includeTaxes, $idProductAttribute), $currency),
+                $decimals
+            ),
+            'onsale_price' => \Tools::ps_round(
+                \Tools::convertPrice(self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute), $currency),
+                $decimals
+            ),
             'id_product_attribute' => $idProductAttribute,
         ];
     }
