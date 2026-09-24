@@ -1420,12 +1420,9 @@ class DfTools
      * the given currency and rounded to its precision, along with the ID of the combination
      * they belong to.
      *
-     * A parent product takes these values over as its own root price, so they are converted
-     * and rounded exactly like every other price the feed emits. Mutator::dropRedundantMultiprice()
-     * only drops a df_multiprice entry when every one of its fields equals the root value, and
-     * the parent's df_multiprice is calculated from this very combination: a root price left
-     * unconverted never matches its own entry, so no entry is ever dropped and the index runs
-     * out of fields.
+     * A parent product takes these values over as its own root price, and its df_multiprice is
+     * calculated from this very combination, so they are finished through
+     * self::convertAndRoundPrice() like every other price the feed emits.
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product attribute/variant ID
@@ -1438,12 +1435,14 @@ class DfTools
     public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currency, $decimals)
     {
         return [
-            'price' => \Tools::ps_round(
-                \Tools::convertPrice(self::getPrice($idProduct, $includeTaxes, $idProductAttribute), $currency),
+            'price' => self::convertAndRoundPrice(
+                self::getPrice($idProduct, $includeTaxes, $idProductAttribute),
+                $currency,
                 $decimals
             ),
-            'onsale_price' => \Tools::ps_round(
-                \Tools::convertPrice(self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute), $currency),
+            'onsale_price' => self::convertAndRoundPrice(
+                self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute),
+                $currency,
                 $decimals
             ),
             'id_product_attribute' => $idProductAttribute,
@@ -1501,6 +1500,30 @@ class DfTools
     public static function getOnsalePrice($productId, $includeTaxes, $variantId = null, $applyDecimalRounding = true, $customerId = null)
     {
         return self::calculatePrice($productId, $includeTaxes, $variantId, $applyDecimalRounding, $customerId);
+    }
+
+    /**
+     * Convert a price into a currency and round it to that currency's precision.
+     *
+     * Every price the feed emits, be it a root field or a df_multiprice entry, is finished
+     * here. Mutator::dropRedundantMultiprice() only drops a df_multiprice entry when every
+     * one of its fields equals the root value, so a root price and its entry have to come
+     * out of the very same arithmetic: finish one of them any other way and the entry never
+     * matches, so none is ever dropped and the index runs out of fields.
+     *
+     * The price must be the one self::getPrice()/self::getOnsalePrice() return, read in the
+     * context currency, which the feed pins to the shop's default (reference) currency
+     * because that is what Tools::convertPrice() expects as input.
+     *
+     * @param float $price Price in the reference currency
+     * @param int|array|\Currency $currency Currency to convert the price to
+     * @param int $decimals Decimal precision of that currency
+     *
+     * @return float
+     */
+    public static function convertAndRoundPrice($price, $currency, $decimals)
+    {
+        return \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
     }
 
     /**
@@ -1585,8 +1608,8 @@ class DfTools
                 // Backward compatibility with PrestaShop 1.5
                 $currencyId = !empty($currency['id']) ? $currency['id'] : $currency['id_currency'];
                 $decimals = self::getCurrencyPrecision($currencyId);
-                $convertedPrice = \Tools::ps_round(\Tools::convertPrice($price, $currency), $decimals);
-                $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($onsale_price, $currency), $decimals);
+                $convertedPrice = self::convertAndRoundPrice($price, $currency, $decimals);
+                $convertedOnsalePrice = self::convertAndRoundPrice($onsale_price, $currency, $decimals);
                 $currencyCode = $currency['iso_code'];
                 $pricesMap = ['price' => $convertedPrice];
 
@@ -1602,8 +1625,8 @@ class DfTools
                         $customerGroupPrice = $customerGroupPrices[$groupId];
                         $customerGroupOnsalePrice = $customerGroupOnsalePrices[$groupId];
 
-                        $convertedPrice = \Tools::ps_round(\Tools::convertPrice($customerGroupPrice, $currency), $decimals);
-                        $convertedOnsalePrice = \Tools::ps_round(\Tools::convertPrice($customerGroupOnsalePrice, $currency), $decimals);
+                        $convertedPrice = self::convertAndRoundPrice($customerGroupPrice, $currency, $decimals);
+                        $convertedOnsalePrice = self::convertAndRoundPrice($customerGroupOnsalePrice, $currency, $decimals);
                         $pricesMap = ['price' => $convertedPrice];
                         if ($convertedPrice !== $convertedOnsalePrice) {
                             $pricesMap['sale_price'] = $convertedOnsalePrice;
