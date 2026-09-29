@@ -436,7 +436,6 @@ class DfProductBuild
         return $batchData;
     }
 
-
     /**
      * Batch fetch every variation of the given products.
      *
