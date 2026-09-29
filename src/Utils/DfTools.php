@@ -1416,40 +1416,6 @@ class DfTools
     }
 
     /**
-     * Get the regular and the discounted price of a product combination, both converted to
-     * the given currency and rounded to its precision, along with the ID of the combination
-     * they belong to.
-     *
-     * A parent product takes these values over as its own root price, and its df_multiprice is
-     * calculated from this very combination, so they are finished through
-     * self::convertAndRoundPrice() like every other price the feed emits.
-     *
-     * @param int $idProduct Product ID
-     * @param int $idProductAttribute Product attribute/variant ID
-     * @param bool $includeTaxes Whether to include taxes in prices
-     * @param int|array|\Currency $currency Currency to convert the prices to
-     * @param int $decimals Decimal precision of that currency
-     *
-     * @return array Array containing price, onsale_price and id_product_attribute
-     */
-    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currency, $decimals)
-    {
-        return [
-            'price' => self::convertAndRoundPrice(
-                self::getPrice($idProduct, $includeTaxes, $idProductAttribute),
-                $currency,
-                $decimals
-            ),
-            'onsale_price' => self::convertAndRoundPrice(
-                self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute),
-                $currency,
-                $decimals
-            ),
-            'id_product_attribute' => $idProductAttribute,
-        ];
-    }
-
-    /**
      * Check if a product is a parent product (not a variant).
      *
      * A product is considered a parent if it has an id_product_attribute field
@@ -1808,6 +1774,68 @@ class DfTools
         }
 
         return false;
+    }
+
+    /**
+     * Get the rows of the feed page: one per product plus one per combination.
+     *
+     * Paginating over rows instead of over products is what keeps a page bounded. When the unit
+     * is the product, a single product with 302 combinations puts 303 rows into one request, so
+     * the page size has to be set for the worst product of the catalog rather than the usual one.
+     *
+     * Kept deliberately narrow, with no joins that can return more than one row per pair: the
+     * offset is applied here and the payload is fetched afterwards by id. Running the limit over
+     * the full product query instead makes MySQL build and sort the whole join before discarding
+     * it, which is what made deep offsets take minutes on large catalogs.
+     *
+     * A product's combinations precede its parent row, the order the feed's consumer relies on
+     * to rebuild the parent's aggregated fields.
+     *
+     * @param int|false $limit The maximum number of rows to return
+     * @param int|false $offset The offset for pagination
+     * @param bool $includeVariations Whether combinations get a row of their own
+     *
+     * @return array Rows as ['id_product' => int, 'id_product_attribute' => int]
+     */
+    public static function getAvailableRows($limit, $offset, $includeVariations)
+    {
+        $shopIds = implode(', ', \Shop::getContextListShopID());
+        $eligible = 'ps.`active` = 1 AND ps.`visibility` IN (\'search\', \'both\')';
+
+        $sql = 'SELECT ps.`id_product`, 0 AS `id_product_attribute`
+            FROM ' . _DB_PREFIX_ . 'product_shop ps
+            WHERE ps.`id_shop` IN (' . $shopIds . ') AND ' . $eligible;
+
+        if ($includeVariations) {
+            $sql .= ' UNION ALL SELECT pa.`id_product`, pa.`id_product_attribute`
+                FROM ' . _DB_PREFIX_ . 'product_attribute pa
+                INNER JOIN ' . _DB_PREFIX_ . 'product_attribute_shop pas
+                    ON pas.`id_product_attribute` = pa.`id_product_attribute`
+                    AND pas.`id_shop` IN (' . $shopIds . ')
+                INNER JOIN ' . _DB_PREFIX_ . 'product_shop ps
+                    ON ps.`id_product` = pa.`id_product` AND ps.`id_shop` IN (' . $shopIds . ')
+                WHERE ' . $eligible;
+        }
+
+        // (id_product_attribute = 0) sorts the parent after its combinations, and the pair is
+        // unique across the union, so the order is total and the pages tile without gaps.
+        $sql = 'SELECT * FROM (' . $sql . ') feed_rows
+            ORDER BY `id_product`, (`id_product_attribute` = 0), `id_product_attribute`';
+
+        if ($limit) {
+            $sql .= ' LIMIT ' . (int) $offset . ', ' . (int) $limit;
+        }
+
+        try {
+            $rows = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+            if (false === $rows) {
+                $rows = \Db::getInstance()->executeS($sql);
+            }
+        } catch (\PrestaShopException $e) {
+            $rows = \Db::getInstance()->executeS($sql);
+        }
+
+        return $rows ?: [];
     }
 
     /**

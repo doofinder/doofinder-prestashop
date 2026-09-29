@@ -232,13 +232,29 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
     DfTools::fputcsvRfc($csv, $header, DfTools::TXT_SEPARATOR);
 }
 
-$products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
+// The page is a window over rows, not over products, so a product with many combinations
+// cannot flood a single request.
+$rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations);
+
+$productIds = [];
+$variationIds = [];
+foreach ($rows as $row) {
+    $productIds[(int) $row['id_product']] = true;
+    if ((int) $row['id_product_attribute'] > 0) {
+        $variationIds[] = (int) $row['id_product_attribute'];
+    }
+}
+
+$products = empty($productIds)
+    ? []
+    : DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, false, false, array_keys($productIds));
 $products = arrayMergeByIdProduct($products, $extraRows);
 
 // Batch fetch all related data upfront to avoid N+1 queries
-$batchData = $dfProductBuild->batchFetchAll($products);
+$batchData = $dfProductBuild->batchFetchAll($products, $variationIds);
 
-$processedProducts = $dfProductBuild->processBatchProducts(
+$processedProducts = $dfProductBuild->processBatchRows(
+    $rows,
     $products,
     $batchData,
     $additionalAttributesHeaders,

@@ -280,71 +280,80 @@ class DfProductBuild
         $processedProducts = [];
 
         foreach ($products as $product) {
-            $minPriceVariant = null;
-            $parentStockOverride = null;
+            // The combinations must keep preceding their parent: that is the order the feed's
+            // consumer relies on to rebuild the parent's aggregated fields.
             if ($this->productVariations && $product['variant_count'] > 0) {
                 $variations = $batchData['variations'][$product['id_product']];
                 foreach ($variations as $variation) {
-                    $variationKey = $product['id_product'] . '_' . $variation['id_product_attribute'];
-                    $variationPrices = isset($batchData['variant_prices'][$variationKey]) ? $batchData['variant_prices'][$variationKey] : null;
-                    if ($variationPrices) {
-                        $minPriceVariant = $this->getMinPrice($minPriceVariant, $variationPrices);
-                    }
                     $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $additionalAttributesHeader, $extraHeaders);
                 }
-                if (!empty($variations)) {
-                    // The parent's own stock_available row (id_product_attribute = 0) can be
-                    // desynced from its combinations (imports, direct SQL updates, etc.), so the
-                    // parent's stock must be derived from its variants instead of its own row.
-                    $parentStockOverride = $this->aggregateVariantsStock($product['id_product'], $variations, $batchData['stock']);
-                }
             }
-            $processedProducts[] = $this->buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader, $extraHeaders, $parentStockOverride);
+            $processedProducts[] = $this->buildProduct($product, $batchData, $additionalAttributesHeader, $extraHeaders);
         }
 
         return $processedProducts;
     }
 
     /**
-     * Aggregate the stock of a product's variations so the parent reflects them:
-     * quantity is the sum across all variants, and the parent is considered in
-     * stock if any variant is in stock or purchasable while out of stock.
+     * Build the payload of a page of feed rows.
      *
-     * @param int $productId Parent product ID
-     * @param array $variations Variations of the product
-     * @param array $stockByKey Batch-fetched stock data indexed by "productId_variationId"
+     * Unlike processBatchProducts(), which expands every product into all of its combinations,
+     * this emits exactly the rows the page asked for, in the order the page gives them. That is
+     * what lets a product be split across pages.
      *
-     * @return array Aggregated stock data with 'quantity' and 'in_stock'
+     * @param array $rows Rows as returned by DfTools::getAvailableRows()
+     * @param array $products Products the rows belong to
+     * @param array $batchData Pre-fetched batch data
+     * @param array $additionalAttributesHeader Additional attribute headers to process
+     * @param array $extraHeaders Additional product headers to include
+     *
+     * @return array Processed payloads, one per row
      */
-    private function aggregateVariantsStock($productId, $variations, $stockByKey)
+    public function processBatchRows($rows, $products, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
     {
-        $totalQuantity = 0;
-        $inStock = false;
+        $productsById = [];
+        foreach ($products as $product) {
+            $productsById[(int) $product['id_product']] = $product;
+        }
 
-        foreach ($variations as $variation) {
-            $key = $productId . '_' . $variation['id_product_attribute'];
-            $variantStock = isset($stockByKey[$key]) ? $stockByKey[$key] : ['quantity' => 0, 'out_of_stock' => 0];
-            $totalQuantity += $variantStock['quantity'];
-
-            if ($variantStock['quantity'] > 0 || \Product::isAvailableWhenOutOfStock($variantStock['out_of_stock'])) {
-                $inStock = true;
+        $variationsById = [];
+        foreach ($batchData['variations'] as $productVariations) {
+            foreach ($productVariations as $variation) {
+                $variationsById[(int) $variation['id_product_attribute']] = $variation;
             }
         }
 
-        return [
-            'quantity' => $totalQuantity,
-            'in_stock' => $inStock,
-        ];
+        $processedProducts = [];
+
+        foreach ($rows as $row) {
+            $productId = (int) $row['id_product'];
+            $variationId = (int) $row['id_product_attribute'];
+
+            if (!isset($productsById[$productId])) {
+                continue;
+            }
+
+            if (0 === $variationId) {
+                $processedProducts[] = $this->buildProduct($productsById[$productId], $batchData, $additionalAttributesHeader, $extraHeaders);
+            } elseif (isset($variationsById[$variationId])) {
+                $processedProducts[] = $this->buildVariation($productsById[$productId], $variationsById[$variationId], $batchData, $additionalAttributesHeader, $extraHeaders);
+            }
+        }
+
+        return $processedProducts;
     }
 
     /**
      * Batch fetch all related data for products to avoid N+1 queries.
      *
      * @param array $products Array of products
+     * @param array|null $variationIds When given, only these combinations are fetched, so the
+     *                                 batch stays bounded by the page instead of by the products
+     *                                 it happens to contain
      *
      * @return array Batch data containing variations, categories, features, attributes, images, prices, and stock
      */
-    public function batchFetchAll($products)
+    public function batchFetchAll($products, $variationIds = null)
     {
         $data = [
             'variations' => [],
@@ -353,7 +362,6 @@ class DfProductBuild
             'features' => [],
             'attributes' => [],
             'variation_images' => [],
-            'variant_prices' => [],
             'stock' => [],
             'variants_information' => [],
         ];
@@ -365,7 +373,7 @@ class DfProductBuild
         $productIds = array_map('intval', array_column($products, 'id_product'));
         $allVariations = [];
         if ($this->productVariations) {
-            $data['variations'] = $this->batchFetchVariations($productIds);
+            $data['variations'] = $this->batchFetchVariations($productIds, $variationIds);
             // Equivalent to array_merge(...$data['variations']) but supported by lower versions of PHP than 5.6
             if (!empty($data['variations'])) {
                 $allVariations = call_user_func_array('array_merge', $data['variations']);
@@ -380,19 +388,6 @@ class DfProductBuild
             if (!empty($product['category_ids'])) {
                 $categoryIds = explode(',', $product['category_ids']);
                 $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
-            }
-        }
-
-        if ($this->displayPrices) {
-            foreach ($allVariations as $variation) {
-                $key = $variation['id_product'] . '_' . $variation['id_product_attribute'];
-                $data['variant_prices'][$key] = DfTools::getVariantPrices(
-                    $variation['id_product'],
-                    $variation['id_product_attribute'],
-                    $this->useTax,
-                    $this->idCurrency,
-                    $this->decimals
-                );
             }
         }
 
@@ -428,9 +423,13 @@ class DfProductBuild
      *
      * @return array All variations indexed by product ID
      */
-    private function batchFetchVariations($productIds)
+    private function batchFetchVariations($productIds, $variationIds = null)
     {
         if (empty($productIds)) {
+            return [];
+        }
+
+        if (is_array($variationIds) && empty($variationIds)) {
             return [];
         }
 
@@ -449,6 +448,10 @@ class DfProductBuild
         $query->from('product_attribute', 'pa');
         $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
         $query->where('pa.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+
+        if (is_array($variationIds)) {
+            $query->where('pa.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')');
+        }
 
         $query->leftJoin('product', 'p', 'p.id_product = pa.id_product');
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
@@ -835,40 +838,16 @@ class DfProductBuild
     }
 
     /**
-     * Get the minimum price from pre-fetched data.
-     *
-     * @param array|null $currentMinPrice Current minimum price array (or null)
-     * @param array $variantPrices Pre-fetched variant prices
-     *
-     * @return array|null Minimum price array or null
-     */
-    public function getMinPrice($currentMinPrice, $variantPrices)
-    {
-        if (!$this->displayPrices) {
-            return null;
-        }
-
-        if (!isset($currentMinPrice['onsale_price']) || $variantPrices['onsale_price'] < $currentMinPrice['onsale_price']) {
-            return $variantPrices;
-        }
-
-        return $currentMinPrice;
-    }
-
-    /**
      * Build product payload using pre-fetched batch data.
      *
      * @param array $product Product data
-     * @param array|null $minPriceVariant Minimum price data from variations
      * @param array $batchData Pre-fetched batch data
      * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
-     * @param array|null $stockOverride Pre-computed stock data (e.g. aggregated from variants) that
-     *                                  takes precedence over the product's own stock_available row
      *
      * @return array Processed product payload
      */
-    public function buildProduct($product, $minPriceVariant, $batchData, $additionalAttributesHeader = [], $extraHeaders = [], $stockOverride = null)
+    public function buildProduct($product, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $productId = $product['id_product'];
         $variationId = ($this->productVariations) ? $product['id_product_attribute'] : 0;
@@ -890,14 +869,9 @@ class DfProductBuild
             $product['variation_images'] = isset($batchData['variation_images'][$key]) ? $batchData['variation_images'][$key] : [];
             $product['variants_information'] = isset($batchData['variants_information'][$productId]) ? $batchData['variants_information'][$productId] : [];
         }
-        if (null !== $stockOverride) {
-            $product['stock'] = $stockOverride;
-            $product['stock_quantity'] = $stockOverride['quantity'];
-        } else {
-            $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
-        }
+        $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
 
-        return $this->buildProductBase($product, $minPriceVariant, $additionalAttributesHeader, $extraHeaders);
+        return $this->buildProductBase($product, $additionalAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -915,7 +889,7 @@ class DfProductBuild
     {
         $expanded_variation = array_merge($product, $variation);
 
-        return $this->buildProduct($expanded_variation, null, $batchData, $additionalAttributesHeader, $extraHeaders);
+        return $this->buildProduct($expanded_variation, $batchData, $additionalAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -1001,13 +975,12 @@ class DfProductBuild
      * Build product payload.
      *
      * @param array $product Product data
-     * @param array|null $minPriceVariant Minimum price data from variations
      * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
      * @return array Processed product payload
      */
-    private function buildProductBase($product, $minPriceVariant = null, $additionalAttributesHeader = [], $extraHeaders = [])
+    private function buildProductBase($product, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
@@ -1074,32 +1047,8 @@ class DfProductBuild
             $p['unit_price'] = $product['unit_price'];
             $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $this->decimals);
 
-            $inheritsVariantPrice = DfTools::isParent($product)
-                && is_array($minPriceVariant)
-                && !is_null($minPriceVariant['onsale_price'])
-                && !is_null($minPriceVariant['price'])
-                && (empty($p['sale_price']) || $minPriceVariant['onsale_price'] < $p['sale_price']);
-
-            if ($inheritsVariantPrice) {
-                $p['price'] = $minPriceVariant['price'];
-                $p['sale_price'] = ($minPriceVariant['onsale_price'] === $minPriceVariant['price']) ? null : $minPriceVariant['onsale_price'];
-            }
-
             if ($this->multipriceEnabled) {
-                // A parent that takes over the price of its cheapest variant takes over its
-                // multiprice too. It goes through DfTools::getMultiprice() and not through
-                // self::getMultiprice() on purpose: this route does not apply the show_price
-                // guard, exactly like DfTools::getVariantPrices() did before. Changing it
-                // would alter the payload of the products that hide their price.
-                $p['df_multiprice'] = $inheritsVariantPrice
-                    ? DfTools::getMultiprice(
-                        $product['id_product'],
-                        $this->useTax,
-                        $this->currencies,
-                        $minPriceVariant['id_product_attribute'],
-                        $this->customerGroupsData
-                    )
-                    : $this->getMultiprice($product);
+                $p['df_multiprice'] = $this->getMultiprice($product);
             }
         }
 
