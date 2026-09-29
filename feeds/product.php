@@ -251,7 +251,14 @@ $products = empty($productIds)
 $products = arrayMergeByIdProduct($products, $extraRows);
 
 // Batch fetch all related data upfront to avoid N+1 queries
-$batchData = $dfProductBuild->batchFetchAll($products, $variationIds);
+$batchData = $dfProductBuild->batchFetchAll($products);
+
+if ($shouldShowProductVariations && !empty($variationIds)) {
+    $batchData = $dfProductBuild->withVariationsData(
+        $batchData,
+        $dfProductBuild->batchFetchVariationsByIds($variationIds)
+    );
+}
 
 $processedProducts = $dfProductBuild->processBatchRows(
     $rows,

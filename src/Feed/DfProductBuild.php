@@ -261,6 +261,11 @@ class DfProductBuild
         // Batch fetch all related data upfront to avoid N+1 queries
         $batchData = $this->batchFetchAll($products);
 
+        if ($this->productVariations) {
+            $productIds = array_map('intval', array_column($products, 'id_product'));
+            $batchData = $this->withVariationsData($batchData, $this->batchFetchProductVariations($productIds));
+        }
+
         return $this->processBatchProducts($products, $batchData);
     }
 
@@ -344,16 +349,16 @@ class DfProductBuild
     }
 
     /**
-     * Batch fetch all related data for products to avoid N+1 queries.
+     * Batch fetch the product-level data of a page, to avoid N+1 queries.
+     *
+     * Everything here is keyed by product. What a combination adds on top of its product comes
+     * from withVariationsData(), so that neither has to know how the other picked its rows.
      *
      * @param array $products Array of products
-     * @param array|null $variationIds When given, only these combinations are fetched, so the
-     *                                 batch stays bounded by the page instead of by the products
-     *                                 it happens to contain
      *
-     * @return array Batch data containing variations, categories, features, attributes, images, prices, and stock
+     * @return array Batch data containing categories, features, stock and variants information
      */
-    public function batchFetchAll($products, $variationIds = null)
+    public function batchFetchAll($products)
     {
         $data = [
             'variations' => [],
@@ -371,16 +376,6 @@ class DfProductBuild
         }
 
         $productIds = array_map('intval', array_column($products, 'id_product'));
-        $allVariations = [];
-        if ($this->productVariations) {
-            $data['variations'] = null === $variationIds
-                ? $this->batchFetchProductVariations($productIds)
-                : $this->batchFetchVariationsByIds($variationIds);
-            // Equivalent to array_merge(...$data['variations']) but supported by lower versions of PHP than 5.6
-            if (!empty($data['variations'])) {
-                $allVariations = call_user_func_array('array_merge', $data['variations']);
-            }
-        }
 
         $data['categories'] = $this->batchFetchCategories($productIds);
 
@@ -398,15 +393,7 @@ class DfProductBuild
         }
 
         $data['features'] = $this->batchFetchFeatures($productIds);
-
-        $fetchedVariationIds = [];
-        if ($this->productVariations && !empty($allVariations)) {
-            $fetchedVariationIds = array_column($allVariations, 'id_product_attribute');
-            $data['attributes'] = $this->batchFetchAttributes($fetchedVariationIds);
-            $data['variation_images'] = $this->batchFetchVariationImages($productIds, $fetchedVariationIds);
-        }
-
-        $data['stock'] = $this->batchFetchStock($productIds, $fetchedVariationIds);
+        $data['stock'] = $this->batchFetchStock($productIds, []);
 
         if ($this->productVariations) {
             $data['variants_information'] = $this->batchFetchVariantsInformation($productIds);
@@ -416,13 +403,48 @@ class DfProductBuild
     }
 
     /**
+     * Add to a batch everything the given combinations need on top of their product.
+     *
+     * Takes the combinations already fetched rather than a way of finding them, because the two
+     * callers ask for different sets: a feed page names the combinations it contains, while the
+     * update-on-save path wants all of a product's.
+     *
+     * @param array $batchData Batch data as returned by batchFetchAll()
+     * @param array $variations Variations indexed by product ID
+     *
+     * @return array The batch, with the combinations' own data folded in
+     */
+    public function withVariationsData($batchData, $variations)
+    {
+        if (empty($variations)) {
+            return $batchData;
+        }
+
+        // Equivalent to array_merge(...$variations) but supported by lower versions of PHP than 5.6
+        $allVariations = call_user_func_array('array_merge', $variations);
+        $variationIds = array_column($allVariations, 'id_product_attribute');
+        $productIds = array_unique(array_column($allVariations, 'id_product'));
+
+        $batchData['variations'] = $variations;
+        $batchData['attributes'] = $this->batchFetchAttributes($variationIds);
+        $batchData['variation_images'] = $this->batchFetchVariationImages($productIds, $variationIds);
+
+        // The product rows' stock is keyed "<product>_0" and a combination's "<product>_<id>",
+        // so the two sets never collide.
+        $batchData['stock'] += $this->batchFetchStock($productIds, $variationIds);
+
+        return $batchData;
+    }
+
+
+    /**
      * Batch fetch every variation of the given products.
      *
      * @param array $productIds Array of product IDs
      *
      * @return array Variations indexed by product ID
      */
-    private function batchFetchProductVariations($productIds)
+    public function batchFetchProductVariations($productIds)
     {
         if (empty($productIds)) {
             return [];
@@ -444,7 +466,7 @@ class DfProductBuild
      *
      * @return array Variations indexed by product ID
      */
-    private function batchFetchVariationsByIds($variationIds)
+    public function batchFetchVariationsByIds($variationIds)
     {
         if (empty($variationIds)) {
             return [];
