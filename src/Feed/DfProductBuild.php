@@ -373,7 +373,9 @@ class DfProductBuild
         $productIds = array_map('intval', array_column($products, 'id_product'));
         $allVariations = [];
         if ($this->productVariations) {
-            $data['variations'] = $this->batchFetchVariations($productIds, $variationIds);
+            $data['variations'] = null === $variationIds
+                ? $this->batchFetchProductVariations($productIds)
+                : $this->batchFetchVariationsByIds($variationIds);
             // Equivalent to array_merge(...$data['variations']) but supported by lower versions of PHP than 5.6
             if (!empty($data['variations'])) {
                 $allVariations = call_user_func_array('array_merge', $data['variations']);
@@ -397,17 +399,14 @@ class DfProductBuild
 
         $data['features'] = $this->batchFetchFeatures($productIds);
 
+        $fetchedVariationIds = [];
         if ($this->productVariations && !empty($allVariations)) {
-            $variationIds = array_column($allVariations, 'id_product_attribute');
-            $data['attributes'] = $this->batchFetchAttributes($variationIds);
-            $data['variation_images'] = $this->batchFetchVariationImages($productIds, $variationIds);
+            $fetchedVariationIds = array_column($allVariations, 'id_product_attribute');
+            $data['attributes'] = $this->batchFetchAttributes($fetchedVariationIds);
+            $data['variation_images'] = $this->batchFetchVariationImages($productIds, $fetchedVariationIds);
         }
 
-        $variationIdsForStock = [];
-        if ($this->productVariations && !empty($allVariations)) {
-            $variationIdsForStock = array_column($allVariations, 'id_product_attribute');
-        }
-        $data['stock'] = $this->batchFetchStock($productIds, $variationIdsForStock);
+        $data['stock'] = $this->batchFetchStock($productIds, $fetchedVariationIds);
 
         if ($this->productVariations) {
             $data['variants_information'] = $this->batchFetchVariantsInformation($productIds);
@@ -417,22 +416,53 @@ class DfProductBuild
     }
 
     /**
-     * Batch fetch variations for multiple products.
+     * Batch fetch every variation of the given products.
      *
      * @param array $productIds Array of product IDs
      *
-     * @return array All variations indexed by product ID
+     * @return array Variations indexed by product ID
      */
-    private function batchFetchVariations($productIds, $variationIds = null)
+    private function batchFetchProductVariations($productIds)
     {
         if (empty($productIds)) {
             return [];
         }
 
-        if (is_array($variationIds) && empty($variationIds)) {
+        $query = $this->variationsQuery();
+        $query->where('pa.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
+
+        return $this->indexVariationsByProduct($query);
+    }
+
+    /**
+     * Batch fetch the given variations, whichever products they belong to.
+     *
+     * A feed page is a window over rows, so it names the combinations it needs instead of the
+     * products they hang from: a product's variations can be spread over several pages.
+     *
+     * @param array $variationIds Array of product attribute IDs
+     *
+     * @return array Variations indexed by product ID
+     */
+    private function batchFetchVariationsByIds($variationIds)
+    {
+        if (empty($variationIds)) {
             return [];
         }
 
+        $query = $this->variationsQuery();
+        $query->where('pa.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')');
+
+        return $this->indexVariationsByProduct($query);
+    }
+
+    /**
+     * The variation payload, without the clause that picks which ones to fetch.
+     *
+     * @return \DbQuery
+     */
+    private function variationsQuery()
+    {
         $query = new \DbQuery();
         $query->select('pa.reference AS variation_reference, pa.ean13 AS variation_ean13, pa.upc AS variation_upc');
         $query->select('false as df_group_leader, 0 as variant_count');
@@ -447,12 +477,6 @@ class DfProductBuild
         $query->select('pa.id_product, pa.id_product_attribute');
         $query->from('product_attribute', 'pa');
         $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
-        $query->where('pa.id_product IN (' . implode(',', array_map('intval', $productIds)) . ')');
-
-        if (is_array($variationIds)) {
-            $query->where('pa.id_product_attribute IN (' . implode(',', array_map('intval', $variationIds)) . ')');
-        }
-
         $query->leftJoin('product', 'p', 'p.id_product = pa.id_product');
         $query->select('psp.product_supplier_reference AS variation_supplier_reference');
         $query->select('s.name AS supplier_name');
@@ -464,6 +488,18 @@ class DfProductBuild
         $query->leftJoin('product_attribute_shop', 'pas', 'pa.id_product_attribute = pas.id_product_attribute');
         $query->groupBy('pa.id_product_attribute');
 
+        return $query;
+    }
+
+    /**
+     * Run a variations query and group its rows by the product they belong to.
+     *
+     * @param \DbQuery $query Variations query
+     *
+     * @return array Variations indexed by product ID
+     */
+    private function indexVariationsByProduct($query)
+    {
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
         $result = $result ?: \Db::getInstance()->executeS($query);
 
