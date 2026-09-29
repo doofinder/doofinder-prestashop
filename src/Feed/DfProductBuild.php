@@ -333,10 +333,10 @@ class DfProductBuild
                 continue;
             }
 
-            if (0 === $variationId) {
-                $processedProducts[] = $this->buildProduct($productsById[$productId], $batchData, $additionalAttributesHeader, $extraHeaders);
-            } elseif (isset($variationsById[$variationId])) {
+            if (isset($variationsById[$variationId])) {
                 $processedProducts[] = $this->buildVariation($productsById[$productId], $variationsById[$variationId], $batchData, $additionalAttributesHeader, $extraHeaders);
+            } else {
+                $processedProducts[] = $this->buildProduct($productsById[$productId], $batchData, $additionalAttributesHeader, $extraHeaders);
             }
         }
 
