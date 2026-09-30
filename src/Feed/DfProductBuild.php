@@ -1151,49 +1151,7 @@ class DfProductBuild
             $p[$extraHeader] = isset($product[$extraHeader]) ? DfTools::cleanString($product[$extraHeader]) : '';
         }
 
-        $this->flushPriceCaches();
-
         return $p;
-    }
-
-    /**
-     * Discard the price caches PrestaShop fills while this document was being built.
-     *
-     * Product::getPriceStatic() leaves an entry in SpecificPrice::$_specificPriceCache, which
-     * holds a whole row of that table, and another in Product::$_prices. Their keys carry the
-     * combination and the customer group, so a product with hundreds of combinations in a shop
-     * with one group per client fills them with combinations x groups entries, and nothing
-     * frees them for the rest of the request. That is what exhausts the memory limit: the
-     * whole product, every combination of it, is built within a single feed request.
-     *
-     * Nothing is lost by dropping them here. An entry is only ever read while the document it
-     * belongs to is being built, because the next document is a different combination and its
-     * keys are different ones.
-     *
-     * Shops with no customer groups never grow those caches, so they skip the work.
-     *
-     * @return void
-     */
-    private function flushPriceCaches()
-    {
-        if (!$this->displayPrices || empty($this->customerGroupsData)) {
-            return;
-        }
-
-        // SpecificPrice::flushCache() empties its own caches and then calls
-        // Product::flushPriceCache(), so it is the one that drops both. It is only public and
-        // static from PrestaShop 1.7.4 on; before that it is protected, and calling it
-        // statically would be a fatal error rather than a flush.
-        if (DfTools::versionGte('1.7.4.0')) {
-            \SpecificPrice::flushCache();
-
-            return;
-        }
-
-        // Older shops get Product::flushPriceCache(), public and static across the whole
-        // supported range. It clears only Product::$_prices and $_pricesLevel2, the smaller
-        // half of what accumulates, so they get less relief than the rest.
-        \Product::flushPriceCache();
     }
 
     /**
