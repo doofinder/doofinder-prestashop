@@ -1431,6 +1431,40 @@ class DfTools
     }
 
     /**
+     * Get the regular and the discounted price of a product combination, both converted to
+     * the given currency and rounded to its precision, along with the ID of the combination
+     * they belong to.
+     *
+     * A parent product takes these values over as its own root price, and its df_multiprice is
+     * calculated from this very combination, so they are finished through
+     * self::convertAndRoundPrice() like every other price the feed emits.
+     *
+     * @param int $idProduct Product ID
+     * @param int $idProductAttribute Product attribute/variant ID
+     * @param bool $includeTaxes Whether to include taxes in prices
+     * @param int|array|\Currency $currency Currency to convert the prices to
+     * @param int $decimals Decimal precision of that currency
+     *
+     * @return array Array containing price, onsale_price and id_product_attribute
+     */
+    public static function getVariantPrices($idProduct, $idProductAttribute, $includeTaxes, $currency, $decimals)
+    {
+        return [
+            'price' => self::convertAndRoundPrice(
+                self::getPrice($idProduct, $includeTaxes, $idProductAttribute),
+                $currency,
+                $decimals
+            ),
+            'onsale_price' => self::convertAndRoundPrice(
+                self::getOnsalePrice($idProduct, $includeTaxes, $idProductAttribute),
+                $currency,
+                $decimals
+            ),
+            'id_product_attribute' => $idProductAttribute,
+        ];
+    }
+
+    /**
      * Get the regular price for a product or variant.
      *
      * This method retrieves the standard price for a product, optionally for a specific variant.
@@ -1783,8 +1817,8 @@ class DfTools
      * the limit over the full product query makes MySQL build and sort the whole join before
      * discarding it, which is what made deep offsets take minutes on large catalogs.
      *
-     * A product's combinations precede its parent row, the order the feed's consumer relies on
-     * to rebuild the parent's aggregated fields.
+     * A product's combinations precede its parent row. Nothing depends on that any more, but it
+     * is the order the feed has always had, and keeping it spares every store a diff.
      *
      * @param int|false $limit The maximum number of rows to return
      * @param int|false $offset The offset for pagination

@@ -264,6 +264,7 @@ class DfProductBuild
         if ($this->productVariations) {
             $productIds = array_map('intval', array_column($products, 'id_product'));
             $batchData = $this->withVariationsData($batchData, $this->batchFetchProductVariations($productIds));
+            $batchData = $this->withParentAggregates($batchData, $productIds);
         }
 
         return $this->processBatchProducts($products, $batchData);
@@ -285,8 +286,6 @@ class DfProductBuild
         $processedProducts = [];
 
         foreach ($products as $product) {
-            // The combinations must keep preceding their parent: that is the order the feed's
-            // consumer relies on to rebuild the parent's aggregated fields.
             if ($this->productVariations && $product['variant_count'] > 0) {
                 $variations = $batchData['variations'][$product['id_product']];
                 foreach ($variations as $variation) {
@@ -369,6 +368,7 @@ class DfProductBuild
             'variation_images' => [],
             'stock' => [],
             'variants_information' => [],
+            'parent_aggregates' => [],
         ];
 
         if (empty($products)) {
@@ -434,6 +434,105 @@ class DfProductBuild
         $batchData['stock'] += $this->batchFetchStock($productIds, $variationIds);
 
         return $batchData;
+    }
+
+    /**
+     * Add to a batch the fields a parent takes over from its combinations.
+     *
+     * A page is a window over rows, so a parent's row can fall in a page that carries none of
+     * its combinations. They are fetched again here, always.
+     *
+     * @param array $batchData Batch data as returned by batchFetchAll()
+     * @param array $parentIds IDs of the products whose own row is being built
+     *
+     * @return array The batch, with one aggregate per parent that has combinations
+     */
+    public function withParentAggregates($batchData, $parentIds)
+    {
+        if (!$this->productVariations || empty($parentIds)) {
+            return $batchData;
+        }
+
+        $variationsByProduct = $this->batchFetchProductVariations($parentIds);
+
+        if (empty($variationsByProduct)) {
+            return $batchData;
+        }
+
+        $allVariations = call_user_func_array('array_merge', $variationsByProduct);
+        $stock = $this->batchFetchStock(
+            array_keys($variationsByProduct),
+            array_column($allVariations, 'id_product_attribute')
+        );
+
+        foreach ($variationsByProduct as $productId => $variations) {
+            $batchData['parent_aggregates'][$productId] = [
+                'min_price' => $this->displayPrices ? $this->minPriceVariant($variations) : null,
+                'stock' => $this->aggregateVariantsStock($productId, $variations, $stock),
+            ];
+        }
+
+        return $batchData;
+    }
+
+    /**
+     * The prices of the cheapest combination of a product, the ones its parent takes over.
+     *
+     * @param array $variations Combinations of a single product
+     *
+     * @return array|null Prices as DfTools::getVariantPrices() returns them, null when there are none
+     */
+    private function minPriceVariant($variations)
+    {
+        $minPriceVariant = null;
+
+        foreach ($variations as $variation) {
+            $variantPrices = DfTools::getVariantPrices(
+                $variation['id_product'],
+                $variation['id_product_attribute'],
+                $this->useTax,
+                $this->idCurrency,
+                $this->decimals
+            );
+
+            if (!isset($minPriceVariant['onsale_price']) || $variantPrices['onsale_price'] < $minPriceVariant['onsale_price']) {
+                $minPriceVariant = $variantPrices;
+            }
+        }
+
+        return $minPriceVariant;
+    }
+
+    /**
+     * Aggregate the stock of a product's variations so the parent reflects them: quantity is
+     * the sum across all variants, and the parent is in stock if any variant is in stock or
+     * purchasable while out of stock.
+     *
+     * @param int $productId Parent product ID
+     * @param array $variations Variations of the product
+     * @param array $stockByKey Batch-fetched stock data indexed by "productId_variationId"
+     *
+     * @return array Aggregated stock data with 'quantity' and 'in_stock'
+     */
+    private function aggregateVariantsStock($productId, $variations, $stockByKey)
+    {
+        $totalQuantity = 0;
+        $inStock = false;
+
+        foreach ($variations as $variation) {
+            $key = $productId . '_' . $variation['id_product_attribute'];
+            $variantStock = isset($stockByKey[$key]) ? $stockByKey[$key] : ['quantity' => 0, 'out_of_stock' => 0];
+            $totalQuantity += $variantStock['quantity'];
+
+            if ($variantStock['quantity'] > 0 || \Product::isAvailableWhenOutOfStock($variantStock['out_of_stock'])) {
+                $inStock = true;
+            }
+        }
+
+        return [
+            'quantity' => $totalQuantity,
+            'in_stock' => $inStock,
+        ];
     }
 
     /**
@@ -926,9 +1025,17 @@ class DfProductBuild
             $product['variation_images'] = isset($batchData['variation_images'][$key]) ? $batchData['variation_images'][$key] : [];
             $product['variants_information'] = isset($batchData['variants_information'][$productId]) ? $batchData['variants_information'][$productId] : [];
         }
-        $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
+        $minPriceVariant = null;
+        if (DfTools::isParent($product) && isset($batchData['parent_aggregates'][$productId])) {
+            $aggregate = $batchData['parent_aggregates'][$productId];
+            $minPriceVariant = $aggregate['min_price'];
+            $product['stock'] = $aggregate['stock'];
+            $product['stock_quantity'] = $aggregate['stock']['quantity'];
+        } else {
+            $product['stock'] = isset($batchData['stock'][$key]) ? $batchData['stock'][$key] : ['quantity' => 0, 'out_of_stock' => 0];
+        }
 
-        return $this->buildProductBase($product, $additionalAttributesHeader, $extraHeaders);
+        return $this->buildProductBase($product, $minPriceVariant, $additionalAttributesHeader, $extraHeaders);
     }
 
     /**
@@ -1032,12 +1139,13 @@ class DfProductBuild
      * Build product payload.
      *
      * @param array $product Product data
+     * @param array|null $minPriceVariant Prices of the cheapest combination, for a parent
      * @param array $additionalAttributesHeader Additional attribute headers to process
      * @param array $extraHeaders Additional product headers to include
      *
      * @return array Processed product payload
      */
-    private function buildProductBase($product, $additionalAttributesHeader = [], $extraHeaders = [])
+    private function buildProductBase($product, $minPriceVariant = null, $additionalAttributesHeader = [], $extraHeaders = [])
     {
         $p = [];
 
@@ -1104,8 +1212,30 @@ class DfProductBuild
             $p['unit_price'] = $product['unit_price'];
             $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $this->decimals);
 
+            $inheritsVariantPrice = is_array($minPriceVariant)
+                && !is_null($minPriceVariant['onsale_price'])
+                && !is_null($minPriceVariant['price'])
+                && (empty($p['sale_price']) || $minPriceVariant['onsale_price'] < $p['sale_price']);
+
+            if ($inheritsVariantPrice) {
+                $p['price'] = $minPriceVariant['price'];
+                $p['sale_price'] = ($minPriceVariant['onsale_price'] === $minPriceVariant['price']) ? null : $minPriceVariant['onsale_price'];
+            }
+
             if ($this->multipriceEnabled) {
-                $p['df_multiprice'] = $this->getMultiprice($product);
+                // A parent that takes over the price of its cheapest variant takes over its
+                // multiprice too. It goes through DfTools::getMultiprice() and not through
+                // self::getMultiprice() on purpose: this route does not apply the show_price
+                // guard, exactly like DfTools::getVariantPrices() does not.
+                $p['df_multiprice'] = $inheritsVariantPrice
+                    ? DfTools::getMultiprice(
+                        $product['id_product'],
+                        $this->useTax,
+                        $this->currencies,
+                        $minPriceVariant['id_product_attribute'],
+                        $this->customerGroupsData
+                    )
+                    : $this->getMultiprice($product);
             }
         }
 

@@ -239,6 +239,11 @@ $rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations)
 $productIds = array_unique(array_map('intval', array_column($rows, 'id_product')));
 $variationIds = array_filter(array_map('intval', array_column($rows, 'id_product_attribute')));
 
+$parentRows = array_filter($rows, function ($row) {
+    return 0 === (int) $row['id_product_attribute'];
+});
+$parentIds = array_map('intval', array_column($parentRows, 'id_product'));
+
 $products = empty($productIds)
     ? []
     : DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, false, false, $productIds);
@@ -253,6 +258,8 @@ if ($shouldShowProductVariations && !empty($variationIds)) {
         $dfProductBuild->batchFetchVariationsByIds($variationIds)
     );
 }
+
+$batchData = $dfProductBuild->withParentAggregates($batchData, $parentIds);
 
 $processedProducts = $dfProductBuild->processBatchRows(
     $rows,
