@@ -106,7 +106,7 @@ class UpdateOnSave
     {
         self::setExecUpdateOnSave();
 
-        $searchEngineSlots = SearchEngine::getSearchEngineSlots($shopId);
+        $searchEngines = SearchEngine::getSearchEngines($shopId);
         $defaultCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId);
         $defaultCurrency = new \Currency($defaultCurrencyId);
 
@@ -120,15 +120,15 @@ class UpdateOnSave
             $itemsUpdate = self::getItemsQueue($shopId, $type, 'update');
             $itemsDelete = self::getItemsQueue($shopId, $type, 'delete');
 
-            foreach ($searchEngineSlots as $slot) {
+            foreach ($searchEngines as $searchEngine) {
                 /*
                  * For Stores with Multiprice SE, we only have one SE per language.
                  * In these cases, we can just use the default currency as all
                  * Language-Currency will point to the same SE HashId
                  */
-                $idCurrency = $slot['multiprice'] ? $defaultCurrency->id : $slot['id_currency'];
-                self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $slot['id_lang'], $idCurrency);
-                self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $slot['id_lang'], $idCurrency, 'delete');
+                $idCurrency = $searchEngine['multiprice'] ? $defaultCurrency->id : $searchEngine['id_currency'];
+                self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $searchEngine['id_lang'], $idCurrency);
+                self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $searchEngine['id_lang'], $idCurrency, 'delete');
             }
         }
 

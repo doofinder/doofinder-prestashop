@@ -276,11 +276,11 @@ class DoofinderInstallation
 
             SearchEngine::setSearchEnginesByConfig($shopGroupId, $shopId);
 
-            foreach (SearchEngine::getSearchEngineSlots($shopId) as $slot) {
-                $feedUrl = UrlManager::getFeedUrl($shopId, $slot['lang_iso'], $slot['feedCurrency']);
+            foreach (SearchEngine::getSearchEngines($shopId) as $searchEngine) {
+                $feedUrl = UrlManager::getFeedUrl($shopId, $searchEngine['lang_iso'], $searchEngine['feedCurrency']);
 
-                foreach ($slot['storageKeys'] as $idCurrency => $hashidKey) {
-                    $hashid = SearchEngine::getHashId($slot['id_lang'], $idCurrency, $shopGroupId, $shopId);
+                foreach ($searchEngine['storageKeys'] as $idCurrency => $hashidKey) {
+                    $hashid = SearchEngine::getHashId($searchEngine['id_lang'], $idCurrency, $shopGroupId, $shopId);
 
                     DoofinderConfig::debug("Hashid for $hashidKey :  $hashid");
 

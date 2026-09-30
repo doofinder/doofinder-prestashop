@@ -750,12 +750,12 @@ class DoofinderAdminPanelView
             ];
         }
 
-        foreach (SearchEngine::getSearchEngineSlots() as $slot) {
+        foreach (SearchEngine::getSearchEngines() as $searchEngine) {
             $inputs[] = [
                 'type' => 'html',
-                'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $slot['label'],
-                'name' => $slot['formKey'],
-                'html_content' => $this->hashidInputWithButtonHtml($slot),
+                'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $searchEngine['label'],
+                'name' => $searchEngine['formKey'],
+                'html_content' => $this->hashidInputWithButtonHtml($searchEngine),
             ];
         }
 
@@ -814,13 +814,13 @@ class DoofinderAdminPanelView
         $urls = [];
         $shopId = \Context::getContext()->shop->id;
 
-        foreach (SearchEngine::getSearchEngineSlots() as $slot) {
+        foreach (SearchEngine::getSearchEngines() as $searchEngine) {
             $url = [
-                'url' => UrlManager::getFeedUrl($shopId, $slot['lang_iso'], $slot['feedCurrency']),
-                'lang' => $slot['lang_iso'],
+                'url' => UrlManager::getFeedUrl($shopId, $searchEngine['lang_iso'], $searchEngine['feedCurrency']),
+                'lang' => $searchEngine['lang_iso'],
             ];
-            if ($slot['feedCurrency']) {
-                $url['currency'] = $slot['feedCurrency'];
+            if ($searchEngine['feedCurrency']) {
+                $url['currency'] = $searchEngine['feedCurrency'];
             }
             $urls[] = $url;
         }
@@ -838,19 +838,19 @@ class DoofinderAdminPanelView
      * + 'suffix', since 'suffix' is hard-wired to an input-group-addon
      * wrapper in the core template.
      *
-     * @param array $slot Search Engine slot, as returned by SearchEngine::getSearchEngineSlots()
+     * @param array $searchEngine Search Engine, as returned by SearchEngine::getSearchEngines()
      *
      * @return string
      */
-    private function hashidInputWithButtonHtml($slot)
+    private function hashidInputWithButtonHtml($searchEngine)
     {
-        $value = $slot['hashid'];
+        $value = $searchEngine['hashid'];
         $hasHash = (bool) $value;
 
-        $field = htmlspecialchars($slot['formKey'], ENT_QUOTES, 'UTF-8');
+        $field = htmlspecialchars($searchEngine['formKey'], ENT_QUOTES, 'UTF-8');
         $valueAttr = htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-        $idLang = (int) $slot['id_lang'];
-        $idCurrency = (int) $slot['id_currency'];
+        $idLang = (int) $searchEngine['id_lang'];
+        $idCurrency = (int) $searchEngine['id_currency'];
         $label = htmlspecialchars($this->module->l('Create Search Engine', 'doofinderadminpanelview'), ENT_QUOTES, 'UTF-8');
         $ajaxUrl = htmlspecialchars(
             \Context::getContext()->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1&action=CreateSearchEngine',

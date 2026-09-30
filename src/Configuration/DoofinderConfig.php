@@ -229,8 +229,8 @@ class DoofinderConfig
             'DF_REGION' => \Configuration::get('DF_REGION'),
         ];
 
-        foreach (SearchEngine::getSearchEngineSlots() as $slot) {
-            $config[$slot['formKey']] = $slot['hashid'];
+        foreach (SearchEngine::getSearchEngines() as $searchEngine) {
+            $config[$searchEngine['formKey']] = $searchEngine['hashid'];
         }
 
         return $config;

@@ -79,7 +79,7 @@ class FormManager
             DoofinderConfig::setSharedGlobalDefaultConfig();
         }
 
-        $hashidSlots = [];
+        $searchEngines = [];
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
             UpdateOnSave::indexApiInvokeReindexing();
@@ -116,7 +116,7 @@ class FormManager
             }
 
             if (!$storeSubmissionErrors) {
-                $hashidSlots = SearchEngine::getSearchEngineSlots();
+                $searchEngines = SearchEngine::getSearchEngines();
                 $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
                 $formUpdated = 'store_info_tab';
             }
@@ -137,8 +137,8 @@ class FormManager
             }
             $value = trim($value);
             // A hashid field may stand for several currency keys (multiprice)
-            if (isset($hashidSlots[$postKey])) {
-                SearchEngine::saveHashid($hashidSlots[$postKey], $value);
+            if (isset($searchEngines[$postKey])) {
+                SearchEngine::saveHashid($searchEngines[$postKey], $value);
                 continue;
             }
             \Configuration::updateValue($postKey, $value);
