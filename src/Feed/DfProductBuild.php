@@ -89,7 +89,7 @@ class DfProductBuild
     private $useTax;
 
     /**
-     * @var mixed whether multi-price export is enabled
+     * @var bool whether multi-price export is enabled
      */
     private $multipriceEnabled;
 
@@ -144,7 +144,7 @@ class DfProductBuild
         $this->productVariations = (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS');
         $this->stockManagement = \Configuration::get('PS_STOCK_MANAGEMENT');
         $this->useTax = (bool) DfTools::cfg($idShop, 'DF_GS_PRICES_USE_TAX', DoofinderConstants::YES);
-        $this->multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
+        $this->multipriceEnabled = DfTools::isMultipriceEnabled();
         $this->featuresKeys = DfTools::getFeatureKeysForShopAndLang($idShop, $idLang);
         $this->attributesReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_ATTRIBUTES_REPLACE', ''));
         $this->featuresReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_FEATURES_REPLACE', ''));

@@ -141,18 +141,32 @@ class DfTools
     }
 
     /**
+     * Whether the store works with one Search Engine per language (multiprice)
+     * instead of one per language and currency.
+     *
+     * @param int|null $shopGroupId Shop group to read the value from (context one if null)
+     * @param int|null $shopId Shop to read the value from (context one if null)
+     *
+     * @return bool
+     */
+    public static function isMultipriceEnabled($shopGroupId = null, $shopId = null)
+    {
+        return (bool) \Configuration::get('DF_MULTIPRICE_ENABLED', null, $shopGroupId, $shopId, true);
+    }
+
+    /**
      * Generate all hash ID keys for each active language and currency.
      *
-     * Builds labels and keys for single-price and multiprice modes.
+     * @param int|null $shopId Shop to list languages and currencies from (context one if null)
      *
      * @return array Array of hash ID keys and labels
      */
-    public static function getHashidKeys()
+    public static function getHashidKeys($shopId = null)
     {
         $hashidKeys = [];
-        $context = \Context::getContext();
-        $currencies = \Currency::getCurrenciesByIdShop($context->shop->id);
-        $languages = \Language::getLanguages(true, $context->shop->id);
+        $shopId = isset($shopId) ? $shopId : \Context::getContext()->shop->id;
+        $currencies = \Currency::getCurrenciesByIdShop($shopId);
+        $languages = \Language::getLanguages(true, $shopId);
         foreach ($languages as $language) {
             if (0 === (int) $language['active']) {
                 continue;
@@ -166,10 +180,9 @@ class DfTools
                 $hashidKeys[] = [
                     'currency' => $currencyIso,
                     'language' => $langFullIso,
+                    'lang_iso' => strtoupper($language['iso_code']),
                     'label' => $currencyIso . ' - ' . $langFullIso,
-                    'labelMultiprice' => $langFullIso,
                     'key' => 'DF_HASHID_' . $currencyIso . '_' . $langFullIso,
-                    'keyMultiprice' => 'DF_HASHID_' . $langFullIso,
                     'id_lang' => (int) $language['id_lang'],
                     'id_currency' => (int) $currency['id_currency'],
                 ];
@@ -1416,21 +1429,6 @@ class DfTools
     }
 
     /**
-     * Check if a product is a parent product (not a variant).
-     *
-     * A product is considered a parent if it has an id_product_attribute field
-     * that is numeric and equals 0, indicating it's the base product rather than a variant.
-     *
-     * @param array $product Product data array
-     *
-     * @return bool True if the product is a parent, false otherwise
-     */
-    public static function isParent($product)
-    {
-        return isset($product['id_product_attribute']) && is_numeric($product['id_product_attribute']) && (int) $product['id_product_attribute'] === 0;
-    }
-
-    /**
      * Get the regular and the discounted price of a product combination, both converted to
      * the given currency and rounded to its precision, along with the ID of the combination
      * they belong to.
@@ -1462,6 +1460,21 @@ class DfTools
             ),
             'id_product_attribute' => $idProductAttribute,
         ];
+    }
+
+    /**
+     * Check if a product is a parent product (not a variant).
+     *
+     * A product is considered a parent if it has an id_product_attribute field
+     * that is numeric and equals 0, indicating it's the base product rather than a variant.
+     *
+     * @param array $product Product data array
+     *
+     * @return bool True if the product is a parent, false otherwise
+     */
+    public static function isParent($product)
+    {
+        return isset($product['id_product_attribute']) && is_numeric($product['id_product_attribute']) && (int) $product['id_product_attribute'] === 0;
     }
 
     /**

@@ -106,11 +106,9 @@ class UpdateOnSave
     {
         self::setExecUpdateOnSave();
 
-        $languages = \Language::getLanguages(true, $shopId);
-        $currencies = \Currency::getCurrenciesByIdShop($shopId);
+        $searchEngines = SearchEngine::getSearchEngines($shopId);
         $defaultCurrencyId = (int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $shopId);
         $defaultCurrency = new \Currency($defaultCurrencyId);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
 
         // Prices are read in the context currency and then converted with
         // Tools::convertPrice(), which expects the default (reference) currency
@@ -122,21 +120,15 @@ class UpdateOnSave
             $itemsUpdate = self::getItemsQueue($shopId, $type, 'update');
             $itemsDelete = self::getItemsQueue($shopId, $type, 'delete');
 
-            foreach ($languages as $language) {
+            foreach ($searchEngines as $searchEngine) {
                 /*
                  * For Stores with Multiprice SE, we only have one SE per language.
                  * In these cases, we can just use the default currency as all
                  * Language-Currency will point to the same SE HashId
                  */
-                if ($multipriceEnabled) {
-                    self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $language['id_lang'], $defaultCurrency->id);
-                    self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $language['id_lang'], $defaultCurrency->id, 'delete');
-                } else {
-                    foreach ($currencies as $currency) {
-                        self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $language['id_lang'], $currency['id_currency']);
-                        self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $language['id_lang'], $currency['id_currency'], 'delete');
-                    }
-                }
+                $idCurrency = $searchEngine['multiprice'] ? $defaultCurrency->id : $searchEngine['id_currency'];
+                self::{'send' . $type . 'Api'}($itemsUpdate, $shopId, $searchEngine['id_lang'], $idCurrency);
+                self::{'send' . $type . 'Api'}($itemsDelete, $shopId, $searchEngine['id_lang'], $idCurrency, 'delete');
             }
         }
 

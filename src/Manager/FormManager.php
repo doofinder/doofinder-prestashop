@@ -79,7 +79,7 @@ class FormManager
             DoofinderConfig::setSharedGlobalDefaultConfig();
         }
 
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
+        $searchEngines = [];
 
         if ((bool) \Tools::isSubmit('submitDoofinderModuleLaunchReindexing')) {
             UpdateOnSave::indexApiInvokeReindexing();
@@ -116,6 +116,7 @@ class FormManager
             }
 
             if (!$storeSubmissionErrors) {
+                $searchEngines = SearchEngine::getSearchEngines();
                 $formValues = array_merge($formValues, DoofinderConfig::getConfigFormValuesStoreInfo($idShop));
                 $formUpdated = 'store_info_tab';
             }
@@ -135,9 +136,9 @@ class FormManager
                 \Configuration::updateValue('DF_FEED_MAINCATEGORY_PATH', 0);
             }
             $value = trim($value);
-            // Special case for Hashids due to the Multiprice
-            if ($multipriceEnabled && DfTools::str_contains($postKey, 'DF_HASHID')) {
-                self::updateHashIds($postKey, $value);
+            // A hashid field may stand for several currency keys (multiprice)
+            if (isset($searchEngines[$postKey])) {
+                SearchEngine::saveHashid($searchEngines[$postKey], $value);
                 continue;
             }
             \Configuration::updateValue($postKey, $value);
@@ -171,27 +172,5 @@ class FormManager
         }
 
         return $messages;
-    }
-
-    /**
-     * Update Hashids configuration for multiprice scenarios
-     *
-     * When advanced parameters are present and multiprice is enabled,
-     * this method updates all related Hashids configuration keys.
-     *
-     * @param string $postKey The configuration key being updated
-     * @param string $value The new value to set
-     *
-     * @return void
-     */
-    private static function updateHashIds($postKey, $value)
-    {
-        $hashidKeys = DfTools::getHashidKeys();
-        $hashidKeys = array_filter($hashidKeys, function ($hashidKey) use ($postKey) {
-            return $hashidKey['keyMultiprice'] === $postKey;
-        });
-        foreach ($hashidKeys as $hashidKey) {
-            \Configuration::updateValue($hashidKey['key'], $value);
-        }
     }
 }
