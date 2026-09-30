@@ -1779,14 +1779,9 @@ class DfTools
     /**
      * Get the rows of the feed page: one per product plus one per combination.
      *
-     * Paginating over rows instead of over products is what keeps a page bounded. When the unit
-     * is the product, a single product with 302 combinations puts 303 rows into one request, so
-     * the page size has to be set for the worst product of the catalog rather than the usual one.
-     *
-     * Kept deliberately narrow, with no joins that can return more than one row per pair: the
-     * offset is applied here and the payload is fetched afterwards by id. Running the limit over
-     * the full product query instead makes MySQL build and sort the whole join before discarding
-     * it, which is what made deep offsets take minutes on large catalogs.
+     * Kept deliberately narrow, with no join that can return more than one row per pair: running
+     * the limit over the full product query makes MySQL build and sort the whole join before
+     * discarding it, which is what made deep offsets take minutes on large catalogs.
      *
      * A product's combinations precede its parent row, the order the feed's consumer relies on
      * to rebuild the parent's aggregated fields.
@@ -1816,12 +1811,10 @@ class DfTools
 
         try {
             $rows = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-            // Only fallback on actual failure (false), not on empty results
             if (false === $rows) {
                 $rows = \Db::getInstance()->executeS($sql);
             }
         } catch (\PrestaShopException $e) {
-            // Fallback to default DB instance on exception
             $rows = \Db::getInstance()->executeS($sql);
         }
 

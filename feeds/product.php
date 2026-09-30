@@ -232,14 +232,11 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
     DfTools::fputcsvRfc($csv, $header, DfTools::TXT_SEPARATOR);
 }
 
-// The page is a window over rows, not over products, so a product with many combinations
-// cannot flood a single request.
 $rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations);
 
 // A combination is built as its product plus its own fields, so the page needs the payload of
 // every product it mentions, whether or not that product's own row falls in this page.
 $productIds = array_unique(array_map('intval', array_column($rows, 'id_product')));
-// array_filter drops the zeros, which are the product rows.
 $variationIds = array_filter(array_map('intval', array_column($rows, 'id_product_attribute')));
 
 $products = empty($productIds)
