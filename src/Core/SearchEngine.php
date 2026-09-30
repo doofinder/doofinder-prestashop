@@ -67,6 +67,74 @@ class SearchEngine
     }
 
     /**
+     * Returns one entry per Search Engine of the shop, indexed by its form field name.
+     *
+     * With multiprice there is one Search Engine per language, and its hashid is
+     * copied to every currency key of that language (`storageKeys`). Without it,
+     * there is one Search Engine per language and currency, with a single key.
+     *
+     * @param int|null $shopId Shop to build the list for (context one if null)
+     *
+     * @return array<string,array> Search Engine slots:
+     *                             - formKey: form field name
+     *                             - label: text to identify it in the admin panel
+     *                             - id_lang, language (full ISO code), lang_iso
+     *                             - id_currency: currency to use for this Search Engine
+     *                             - feedCurrency: currency ISO code for the feed URL (null with multiprice)
+     *                             - multiprice: whether the slot covers every currency of the language
+     *                             - storageKeys: Configuration keys holding its hashid, indexed by id_currency
+     *                             - hashid: currently stored hashid
+     */
+    public static function getSearchEngineSlots($shopId = null)
+    {
+        $shopGroupId = isset($shopId) ? (int) \Shop::getGroupFromShop($shopId) : null;
+        $multipriceEnabled = DfTools::isMultipriceEnabled($shopGroupId, $shopId);
+        $slots = [];
+
+        foreach (DfTools::getHashidKeys($shopId) as $hashidKey) {
+            $formKey = $multipriceEnabled ? 'DF_HASHID_' . $hashidKey['language'] : $hashidKey['key'];
+
+            if (!isset($slots[$formKey])) {
+                $slots[$formKey] = [
+                    'formKey' => $formKey,
+                    'label' => $multipriceEnabled ? $hashidKey['language'] : $hashidKey['label'],
+                    'id_lang' => $hashidKey['id_lang'],
+                    'language' => $hashidKey['language'],
+                    'lang_iso' => $hashidKey['lang_iso'],
+                    'feedCurrency' => $multipriceEnabled ? null : $hashidKey['currency'],
+                    'multiprice' => $multipriceEnabled,
+                    'storageKeys' => [],
+                    'hashid' => false,
+                ];
+            }
+
+            $slots[$formKey]['storageKeys'][$hashidKey['id_currency']] = $hashidKey['key'];
+
+            if (empty($slots[$formKey]['hashid'])) {
+                $slots[$formKey]['hashid'] = \Configuration::get($hashidKey['key'], null, $shopGroupId, $shopId);
+                $slots[$formKey]['id_currency'] = $hashidKey['id_currency'];
+            }
+        }
+
+        return $slots;
+    }
+
+    /**
+     * Stores a hashid in every Configuration key of a Search Engine slot.
+     *
+     * @param array $slot Search Engine slot, as returned by self::getSearchEngineSlots()
+     * @param string $hashid
+     *
+     * @return void
+     */
+    public static function saveHashid($slot, $hashid)
+    {
+        foreach ($slot['storageKeys'] as $key) {
+            \Configuration::updateValue($key, $hashid);
+        }
+    }
+
+    /**
      * Update the hashid of the search engines of the store in the configuration
      *
      * @param int|null $idShopGroup
@@ -132,8 +200,7 @@ class SearchEngine
             return $existingHash;
         }
 
-        $multipriceEnabled = (bool) \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
-        $feedUrl = $multipriceEnabled
+        $feedUrl = DfTools::isMultipriceEnabled()
             ? UrlManager::getFeedUrl($shopId, $lang->iso_code)
             : UrlManager::getFeedUrl($shopId, $lang->iso_code, $currency->iso_code);
 

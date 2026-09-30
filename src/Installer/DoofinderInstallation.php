@@ -264,8 +264,6 @@ class DoofinderInstallation
         foreach ($shops as $shop) {
             $feedUrls = [];
             $client = new EasyREST();
-            $languages = \Language::getLanguages(true, $shop['id_shop']);
-            $currencies = \Currency::getCurrenciesByIdShop($shop['id_shop']);
             $shopId = $shop['id_shop'];
             $shopGroupId = $shop['id_shop_group'];
             $installationID = \Configuration::get('DF_INSTALLATION_ID', null, $shopGroupId, $shopId);
@@ -278,28 +276,13 @@ class DoofinderInstallation
 
             SearchEngine::setSearchEnginesByConfig($shopGroupId, $shopId);
 
-            $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, $shopGroupId, $shopId, true);
+            foreach (SearchEngine::getSearchEngineSlots($shopId) as $slot) {
+                $feedUrl = UrlManager::getFeedUrl($shopId, $slot['lang_iso'], $slot['feedCurrency']);
 
-            foreach ($languages as $lang) {
-                if ($lang['active'] == 0) {
-                    continue;
-                }
-                foreach ($currencies as $cur) {
-                    if ($cur['deleted'] == 1 || $cur['active'] == 0) {
-                        continue;
-                    }
-                    $ciso = $cur['iso_code'];
-                    $langFullIso = !empty($lang['language_code']) ? $lang['language_code'] : $lang['iso_code'];
+                foreach ($slot['storageKeys'] as $idCurrency => $hashidKey) {
+                    $hashid = SearchEngine::getHashId($slot['id_lang'], $idCurrency, $shopGroupId, $shopId);
 
-                    $currencyForUrl = $ciso;
-                    if ($multipriceEnabled) {
-                        $currencyForUrl = null;
-                    }
-                    $feedUrl = UrlManager::getFeedUrl($shopId, $lang['iso_code'], $currencyForUrl);
-
-                    $hashid = SearchEngine::getHashId($lang['id_lang'], $cur['id_currency'], $shopGroupId, $shopId);
-
-                    DoofinderConfig::debug("Hashid for lang $langFullIso and currency $ciso :  $hashid");
+                    DoofinderConfig::debug("Hashid for $hashidKey :  $hashid");
 
                     $feedUrls[$hashid] = $feedUrl;
                 }

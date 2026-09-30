@@ -11,6 +11,7 @@ namespace PrestaShop\Module\Doofinder\View;
 
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
 use PrestaShop\Module\Doofinder\Core\UpdateOnSave;
 use PrestaShop\Module\Doofinder\Feed\DfFieldConflicts;
 use PrestaShop\Module\Doofinder\Manager\FormManager;
@@ -709,7 +710,6 @@ class DoofinderAdminPanelView
     {
         $isAdvParamPresent = (bool) \Tools::getValue('adv', 0);
         $isManualInstallation = (bool) \Tools::getValue('skip', 0);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
         $inputs = [
             [
                 'type' => 'text',
@@ -750,22 +750,12 @@ class DoofinderAdminPanelView
             ];
         }
 
-        if ($multipriceEnabled) {
-            $hashidKeys = self::getMultipriceKeys();
-            $keyToUse = 'keyMultiprice';
-            $labelToUse = 'labelMultiprice';
-        } else {
-            $hashidKeys = DfTools::getHashidKeys();
-            $keyToUse = 'key';
-            $labelToUse = 'label';
-        }
-
-        foreach ($hashidKeys as $hashidKey) {
+        foreach (SearchEngine::getSearchEngineSlots() as $slot) {
             $inputs[] = [
                 'type' => 'html',
-                'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $hashidKey[$labelToUse],
-                'name' => $hashidKey[$keyToUse],
-                'html_content' => $this->hashidInputWithButtonHtml($hashidKey, $keyToUse),
+                'label' => $this->module->l('Hashid for Search Engine', 'doofinderadminpanelview') . ' ' . $slot['label'],
+                'name' => $slot['formKey'],
+                'html_content' => $this->hashidInputWithButtonHtml($slot),
             ];
         }
 
@@ -788,35 +778,6 @@ class DoofinderAdminPanelView
                 ],
             ],
         ];
-    }
-
-    /**
-     * Returns an array of multiprice keys indexed by key name.
-     *
-     * One entry is kept per language: whichever currency variant already has
-     * a value wins (mirrors DoofinderConfig::getConfigFormValuesStoreInfo(),
-     * which only ever writes the first non-empty value it finds and skips
-     * the rest). Without this, the last currency iterated would always win,
-     * even if it has no value while an earlier one does.
-     *
-     * @return array<string,array> multiprice key data
-     */
-    private static function getMultipriceKeys()
-    {
-        $hashidKeys = DfTools::getHashidKeys();
-        $arrayKeys = [];
-
-        foreach ($hashidKeys as $hashidKey) {
-            $multipriceKey = $hashidKey['keyMultiprice'];
-
-            if (isset($arrayKeys[$multipriceKey]) && \Configuration::get($arrayKeys[$multipriceKey]['key'])) {
-                continue;
-            }
-
-            $arrayKeys[$multipriceKey] = $hashidKey;
-        }
-
-        return $arrayKeys;
     }
 
     /**
@@ -851,28 +812,17 @@ class DoofinderAdminPanelView
     private function getFeedURLs()
     {
         $urls = [];
-        $context = \Context::getContext();
-        $languages = \Language::getLanguages(true, $context->shop->id);
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
+        $shopId = \Context::getContext()->shop->id;
 
-        foreach ($languages as $lang) {
-            $langIso = \Tools::strtoupper($lang['iso_code']);
-
-            if ($multipriceEnabled) {
-                $urls[] = [
-                    'url' => UrlManager::getFeedUrl($context->shop->id, $langIso),
-                    'lang' => $langIso,
-                ];
-            } else {
-                foreach (\Currency::getCurrencies() as $cur) {
-                    $currencyIso = \Tools::strtoupper($cur['iso_code']);
-                    $urls[] = [
-                        'url' => UrlManager::getFeedUrl($context->shop->id, $langIso, $currencyIso),
-                        'lang' => $langIso,
-                        'currency' => $currencyIso,
-                    ];
-                }
+        foreach (SearchEngine::getSearchEngineSlots() as $slot) {
+            $url = [
+                'url' => UrlManager::getFeedUrl($shopId, $slot['lang_iso'], $slot['feedCurrency']),
+                'lang' => $slot['lang_iso'],
+            ];
+            if ($slot['feedCurrency']) {
+                $url['currency'] = $slot['feedCurrency'];
             }
+            $urls[] = $url;
         }
 
         return $urls;
@@ -888,24 +838,19 @@ class DoofinderAdminPanelView
      * + 'suffix', since 'suffix' is hard-wired to an input-group-addon
      * wrapper in the core template.
      *
-     * @param array $hashidKey hashid key data, as returned by DfTools::getHashidKeys()/getMultipriceKeys()
-     * @param string $keyToUse which key of $hashidKey holds the actual Configuration name ('key' or 'keyMultiprice')
+     * @param array $slot Search Engine slot, as returned by SearchEngine::getSearchEngineSlots()
      *
      * @return string
      */
-    private function hashidInputWithButtonHtml($hashidKey, $keyToUse)
+    private function hashidInputWithButtonHtml($slot)
     {
-        $fieldName = $hashidKey[$keyToUse];
-        // The real value is always stored under the per-currency key ('key'),
-        // even in multiprice mode, where $fieldName is the bare (currency-less)
-        // key used for form submission — see DoofinderConfig::getConfigFormValuesStoreInfo().
-        $value = \Configuration::get($hashidKey['key']);
+        $value = $slot['hashid'];
         $hasHash = (bool) $value;
 
-        $field = htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8');
+        $field = htmlspecialchars($slot['formKey'], ENT_QUOTES, 'UTF-8');
         $valueAttr = htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-        $idLang = (int) $hashidKey['id_lang'];
-        $idCurrency = (int) $hashidKey['id_currency'];
+        $idLang = (int) $slot['id_lang'];
+        $idCurrency = (int) $slot['id_currency'];
         $label = htmlspecialchars($this->module->l('Create Search Engine', 'doofinderadminpanelview'), ENT_QUOTES, 'UTF-8');
         $ajaxUrl = htmlspecialchars(
             \Context::getContext()->link->getAdminLink('DoofinderAdmin', true) . '&ajax=1&action=CreateSearchEngine',
