@@ -236,18 +236,15 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 // cannot flood a single request.
 $rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations);
 
-$productIds = [];
-$variationIds = [];
-foreach ($rows as $row) {
-    $productIds[(int) $row['id_product']] = true;
-    if ((int) $row['id_product_attribute'] > 0) {
-        $variationIds[] = (int) $row['id_product_attribute'];
-    }
-}
+// A combination is built as its product plus its own fields, so the page needs the payload of
+// every product it mentions, whether or not that product's own row falls in this page.
+$productIds = array_unique(array_map('intval', array_column($rows, 'id_product')));
+// array_filter drops the zeros, which are the product rows.
+$variationIds = array_filter(array_map('intval', array_column($rows, 'id_product_attribute')));
 
 $products = empty($productIds)
     ? []
-    : DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, false, false, array_keys($productIds));
+    : DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, false, false, $productIds);
 $products = arrayMergeByIdProduct($products, $extraRows);
 
 // Batch fetch all related data upfront to avoid N+1 queries

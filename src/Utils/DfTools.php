@@ -1799,22 +1799,10 @@ class DfTools
      */
     public static function getAvailableRows($limit, $offset, $includeVariations)
     {
-        $shopIds = implode(', ', \Shop::getContextListShopID());
-        $eligible = 'ps.`active` = 1 AND ps.`visibility` IN (\'search\', \'both\')';
-
-        $sql = 'SELECT ps.`id_product`, 0 AS `id_product_attribute`
-            FROM ' . _DB_PREFIX_ . 'product_shop ps
-            WHERE ps.`id_shop` IN (' . $shopIds . ') AND ' . $eligible;
+        $sql = self::eligibleProductsQuery()->build();
 
         if ($includeVariations) {
-            $sql .= ' UNION ALL SELECT pa.`id_product`, pa.`id_product_attribute`
-                FROM ' . _DB_PREFIX_ . 'product_attribute pa
-                INNER JOIN ' . _DB_PREFIX_ . 'product_attribute_shop pas
-                    ON pas.`id_product_attribute` = pa.`id_product_attribute`
-                    AND pas.`id_shop` IN (' . $shopIds . ')
-                INNER JOIN ' . _DB_PREFIX_ . 'product_shop ps
-                    ON ps.`id_product` = pa.`id_product` AND ps.`id_shop` IN (' . $shopIds . ')
-                WHERE ' . $eligible;
+            $sql .= ' UNION ALL ' . self::eligibleVariationsQuery()->build();
         }
 
         // (id_product_attribute = 0) sorts the parent after its combinations, and the pair is
@@ -1828,14 +1816,69 @@ class DfTools
 
         try {
             $rows = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+            // Only fallback on actual failure (false), not on empty results
             if (false === $rows) {
                 $rows = \Db::getInstance()->executeS($sql);
             }
         } catch (\PrestaShopException $e) {
+            // Fallback to default DB instance on exception
             $rows = \Db::getInstance()->executeS($sql);
         }
 
         return $rows ?: [];
+    }
+
+    /**
+     * One row per indexable product, with the sentinel that marks it as the parent row.
+     *
+     * @return \DbQuery
+     */
+    private static function eligibleProductsQuery()
+    {
+        $query = new \DbQuery();
+        $query->select('product_shop.id_product, 0 AS id_product_attribute');
+        $query->from('product', 'p');
+        $query->join(\Shop::addSqlAssociation('product', 'p'));
+        self::whereProductIsIndexable($query);
+
+        return $query;
+    }
+
+    /**
+     * One row per combination of an indexable product.
+     *
+     * @return \DbQuery
+     */
+    private static function eligibleVariationsQuery()
+    {
+        $query = new \DbQuery();
+        $query->select('pa.id_product, pa.id_product_attribute');
+        $query->from('product_attribute', 'pa');
+        $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
+        $query->join(\Shop::addSqlAssociation('product', 'pa'));
+        self::whereProductIsIndexable($query);
+
+        return $query;
+    }
+
+    /**
+     * The conditions that decide whether a product reaches the feed, on its product_shop row.
+     *
+     * @param \DbQuery $query Query to restrict
+     */
+    private static function whereProductIsIndexable($query)
+    {
+        if (self::versionGte('1.5.1.0')) {
+            $query->where('product_shop.`active` = 1');
+            $query->where("product_shop.`visibility` IN ('search', 'both')");
+        } else {
+            $query->where('p.`active` = 1');
+            if (self::versionGte('1.5.0.9')) {
+                $query->where("p.`visibility` IN ('search', 'both')");
+            }
+        }
+
+        $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
     }
 
     /**
