@@ -141,18 +141,32 @@ class DfTools
     }
 
     /**
+     * Whether the store works with one Search Engine per language (multiprice)
+     * instead of one per language and currency.
+     *
+     * @param int|null $shopGroupId Shop group to read the value from (context one if null)
+     * @param int|null $shopId Shop to read the value from (context one if null)
+     *
+     * @return bool
+     */
+    public static function isMultipriceEnabled($shopGroupId = null, $shopId = null)
+    {
+        return (bool) \Configuration::get('DF_MULTIPRICE_ENABLED', null, $shopGroupId, $shopId, true);
+    }
+
+    /**
      * Generate all hash ID keys for each active language and currency.
      *
-     * Builds labels and keys for single-price and multiprice modes.
+     * @param int|null $shopId Shop to list languages and currencies from (context one if null)
      *
      * @return array Array of hash ID keys and labels
      */
-    public static function getHashidKeys()
+    public static function getHashidKeys($shopId = null)
     {
         $hashidKeys = [];
-        $context = \Context::getContext();
-        $currencies = \Currency::getCurrenciesByIdShop($context->shop->id);
-        $languages = \Language::getLanguages(true, $context->shop->id);
+        $shopId = isset($shopId) ? $shopId : \Context::getContext()->shop->id;
+        $currencies = \Currency::getCurrenciesByIdShop($shopId);
+        $languages = \Language::getLanguages(true, $shopId);
         foreach ($languages as $language) {
             if (0 === (int) $language['active']) {
                 continue;
@@ -166,10 +180,9 @@ class DfTools
                 $hashidKeys[] = [
                     'currency' => $currencyIso,
                     'language' => $langFullIso,
+                    'lang_iso' => strtoupper($language['iso_code']),
                     'label' => $currencyIso . ' - ' . $langFullIso,
-                    'labelMultiprice' => $langFullIso,
                     'key' => 'DF_HASHID_' . $currencyIso . '_' . $langFullIso,
-                    'keyMultiprice' => 'DF_HASHID_' . $langFullIso,
                     'id_lang' => (int) $language['id_lang'],
                     'id_currency' => (int) $currency['id_currency'],
                 ];

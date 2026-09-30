@@ -11,6 +11,7 @@ namespace PrestaShop\Module\Doofinder\Configuration;
 
 use PrestaShop\Module\Doofinder\Api\EasyREST;
 use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\SearchEngine;
 use PrestaShop\Module\Doofinder\Utils\DfTools;
 
 if (!defined('_PS_VERSION_')) {
@@ -194,7 +195,8 @@ class DoofinderConfig
     public static function getConfigFormValuesAdvanced($idShop)
     {
         /*
-        `DF_MULTIPRICE_ENABLED` is still using the `Configuration::get()` instead of the
+        `DF_MULTIPRICE_ENABLED` is still using the `Configuration::get()` (through
+        `DfTools::isMultipriceEnabled()`) instead of the
         new `DfTools::getConfigByShop()` one. The reason behind this is that the ones
         using the `Configuration::get()` have default global pre-configured values that
         must be taken into account too.
@@ -204,7 +206,7 @@ class DoofinderConfig
             'DF_DEBUG' => DfTools::getConfigByShop('DF_DEBUG', $idShop),
             'DF_DEBUG_CURL' => DfTools::getConfigByShop('DF_DEBUG_CURL', $idShop),
             'DF_ENABLED_V9' => DfTools::getConfigByShop('DF_ENABLED_V9', $idShop, true),
-            'DF_MULTIPRICE_ENABLED' => \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true),
+            'DF_MULTIPRICE_ENABLED' => DfTools::isMultipriceEnabled(),
             'DF_ATTRIBUTES_REPLACE[]' => explode(',', DfTools::getConfigByShop('DF_ATTRIBUTES_REPLACE', $idShop)),
             'DF_FEATURES_REPLACE[]' => explode(',', DfTools::getConfigByShop('DF_FEATURES_REPLACE', $idShop)),
         ];
@@ -227,18 +229,8 @@ class DoofinderConfig
             'DF_REGION' => \Configuration::get('DF_REGION'),
         ];
 
-        $hashidKeys = DfTools::getHashidKeys();
-        $multipriceEnabled = \Configuration::get('DF_MULTIPRICE_ENABLED', null, null, null, true);
-        $keyToUse = 'key';
-        if ($multipriceEnabled) {
-            $keyToUse = 'keyMultiprice';
-        }
-        foreach ($hashidKeys as $hashidKey) {
-            // To avoid overriding already defined values in multiprice cases
-            if (!empty($config[$hashidKey[$keyToUse]])) {
-                continue;
-            }
-            $config[$hashidKey[$keyToUse]] = \Configuration::get($hashidKey['key']);
+        foreach (SearchEngine::getSearchEngines() as $searchEngine) {
+            $config[$searchEngine['formKey']] = $searchEngine['hashid'];
         }
 
         return $config;
