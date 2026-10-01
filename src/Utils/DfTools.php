@@ -1824,6 +1824,104 @@ class DfTools
     }
 
     /**
+     * Get the rows of the feed page: one per product plus one per combination.
+     *
+     * Kept deliberately narrow, with no join that can return more than one row per pair: running
+     * the limit over the full product query makes MySQL build and sort the whole join before
+     * discarding it, which is what made deep offsets take minutes on large catalogs.
+     *
+     * A product's combinations precede its parent row. Nothing depends on that any more, but it
+     * is the order the feed has always had, and keeping it spares every store a diff.
+     *
+     * @param int|false $limit The maximum number of rows to return
+     * @param int|false $offset The offset for pagination
+     * @param bool $includeVariations Whether combinations get a row of their own
+     *
+     * @return array Rows as ['id_product' => int, 'id_product_attribute' => int]
+     */
+    public static function getAvailableRows($limit, $offset, $includeVariations)
+    {
+        $sql = self::eligibleProductsQuery()->build();
+
+        if ($includeVariations) {
+            $sql .= ' UNION ALL ' . self::eligibleVariationsQuery()->build();
+        }
+
+        // (id_product_attribute = 0) sorts the parent after its combinations, and the pair is
+        // unique across the union, so the order is total and the pages tile without gaps.
+        $sql = 'SELECT * FROM (' . $sql . ') feed_rows
+            ORDER BY `id_product`, (`id_product_attribute` = 0), `id_product_attribute`';
+
+        if ($limit) {
+            $sql .= ' LIMIT ' . (int) $offset . ', ' . (int) $limit;
+        }
+
+        try {
+            $rows = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+            if (false === $rows) {
+                $rows = \Db::getInstance()->executeS($sql);
+            }
+        } catch (\PrestaShopException $e) {
+            $rows = \Db::getInstance()->executeS($sql);
+        }
+
+        return $rows ?: [];
+    }
+
+    /**
+     * One row per indexable product, with the sentinel that marks it as the parent row.
+     *
+     * @return \DbQuery
+     */
+    private static function eligibleProductsQuery()
+    {
+        $query = new \DbQuery();
+        $query->select('product_shop.id_product, 0 AS id_product_attribute');
+        $query->from('product', 'p');
+        $query->join(\Shop::addSqlAssociation('product', 'p'));
+        self::whereProductIsIndexable($query);
+
+        return $query;
+    }
+
+    /**
+     * One row per combination of an indexable product.
+     *
+     * @return \DbQuery
+     */
+    private static function eligibleVariationsQuery()
+    {
+        $query = new \DbQuery();
+        $query->select('pa.id_product, pa.id_product_attribute');
+        $query->from('product_attribute', 'pa');
+        $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
+        $query->join(\Shop::addSqlAssociation('product', 'pa'));
+        self::whereProductIsIndexable($query);
+
+        return $query;
+    }
+
+    /**
+     * The conditions that decide whether a product reaches the feed, on its product_shop row.
+     *
+     * @param \DbQuery $query Query to restrict
+     */
+    private static function whereProductIsIndexable($query)
+    {
+        if (self::versionGte('1.5.1.0')) {
+            $query->where('product_shop.`active` = 1');
+            $query->where("product_shop.`visibility` IN ('search', 'both')");
+        } else {
+            $query->where('p.`active` = 1');
+            if (self::versionGte('1.5.0.9')) {
+                $query->where("p.`visibility` IN ('search', 'both')");
+            }
+        }
+
+        $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
+    }
+
+    /**
      * Get the ids of the available products.
      * When the catalog is large, this is much faster than get the products by offset and limit.
      *

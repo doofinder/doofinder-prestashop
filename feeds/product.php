@@ -232,13 +232,47 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
     DfTools::fputcsvRfc($csv, $header, DfTools::TXT_SEPARATOR);
 }
 
-$products = DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, $limit, $offset);
+$rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations);
+
+// A combination is built as its product plus its own fields, so the page needs the payload of
+// every product it mentions, whether or not that product's own row falls in this page.
+$productIds = [];
+$variationIds = [];
+$parentIds = [];
+
+foreach ($rows as $row) {
+    $productId = (int) $row['id_product'];
+    $variationId = (int) $row['id_product_attribute'];
+
+    $productIds[] = $productId;
+    if (0 === $variationId) {
+        $parentIds[] = $productId;
+    } else {
+        $variationIds[] = $variationId;
+    }
+}
+
+$productIds = array_unique($productIds);
+
+$products = empty($productIds)
+    ? []
+    : DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, false, false, $productIds);
 $products = arrayMergeByIdProduct($products, $extraRows);
 
 // Batch fetch all related data upfront to avoid N+1 queries
 $batchData = $dfProductBuild->batchFetchAll($products);
 
-$processedProducts = $dfProductBuild->processBatchProducts(
+if ($shouldShowProductVariations && !empty($variationIds)) {
+    $batchData = $dfProductBuild->withVariationsData(
+        $batchData,
+        $dfProductBuild->batchFetchVariationsByIds($variationIds)
+    );
+}
+
+$batchData = $dfProductBuild->withParentAggregates($batchData, $parentIds);
+
+$processedProducts = $dfProductBuild->processBatchRows(
+    $rows,
     $products,
     $batchData,
     $additionalAttributesHeaders,
