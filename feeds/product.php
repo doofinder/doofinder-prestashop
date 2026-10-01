@@ -236,13 +236,23 @@ $rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations)
 
 // A combination is built as its product plus its own fields, so the page needs the payload of
 // every product it mentions, whether or not that product's own row falls in this page.
-$productIds = array_unique(array_map('intval', array_column($rows, 'id_product')));
-$variationIds = array_filter(array_map('intval', array_column($rows, 'id_product_attribute')));
+$productIds = [];
+$variationIds = [];
+$parentIds = [];
 
-$parentRows = array_filter($rows, function ($row) {
-    return 0 === (int) $row['id_product_attribute'];
-});
-$parentIds = array_map('intval', array_column($parentRows, 'id_product'));
+foreach ($rows as $row) {
+    $productId = (int) $row['id_product'];
+    $variationId = (int) $row['id_product_attribute'];
+
+    $productIds[] = $productId;
+    if (0 === $variationId) {
+        $parentIds[] = $productId;
+    } else {
+        $variationIds[] = $variationId;
+    }
+}
+
+$productIds = array_unique($productIds);
 
 $products = empty($productIds)
     ? []
