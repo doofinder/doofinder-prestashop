@@ -190,8 +190,6 @@ class UpdateOnSave
         if ('update' === $action) {
             $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
-            // The queue names products, so each one is expanded to its own row and all of its
-            // combinations' before paging, which keeps a page bounded by rows and not by products.
             $rows = $builder->getProductsRows($products);
 
             foreach (array_chunk($rows, self::MAX_DOCUMENTS_PER_REQUEST) as $page) {
