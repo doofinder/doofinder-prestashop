@@ -49,11 +49,6 @@ class DfProductBuild
     private $currencies;
 
     /**
-     * @var array product IDs to process
-     */
-    private $products;
-
-    /**
      * @var bool whether product prices should be displayed
      */
     private $displayPrices;
@@ -235,74 +230,111 @@ class DfProductBuild
     }
 
     /**
-     * Set the products to be included in the payload
+     * Get the feed rows of some products: each product's own row plus one per combination.
      *
-     * @param array $arrayProducts Product ids
+     * Update on save is told which products changed, not which rows, so every combination of
+     * those products is included, and the rows can then be built in pages like the feed's.
+     *
+     * @param int[] $productIds Product IDs
+     *
+     * @return array Rows as returned by DfTools::getAvailableRows()
      */
-    public function setProducts($arrayProducts)
+    public function getProductsRows($productIds)
     {
-        $this->products = $arrayProducts;
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
+
+        return DfTools::getAvailableRows(false, false, $this->productVariations, $productIds);
     }
 
     /**
-     * Build the final documents (parents and variants) for the configured products.
+     * Build the documents of a page of rows, fetching everything the page needs.
      *
-     * @return array Final documents, one per parent product and per variant
+     * A combination is built as its product plus its own fields, so the page needs the payload of
+     * every product it mentions, whether or not that product's own row falls in this page.
+     *
+     * @param array $rows Rows as returned by DfTools::getAvailableRows()
+     * @param array $additionalAttributesHeader Additional attribute headers to process
+     * @param array $extraHeaders Additional product headers to include
+     * @param array $extraRows Additional product fields, merged into the product they name by id_product
+     *
+     * @return array Processed payloads, one per row
      */
-    public function buildProductsArray()
+    public function buildRowsArray($rows, $additionalAttributesHeader = [], $extraHeaders = [], $extraRows = [])
     {
-        \Shop::setContext(\Shop::CONTEXT_SHOP, $this->idShop);
-        $products = $this->getProductData();
+        $productIds = [];
+        $variationIds = [];
+        $parentIds = [];
+
+        foreach ($rows as $row) {
+            $productId = (int) $row['id_product'];
+            $variationId = (int) $row['id_product_attribute'];
+
+            $productIds[] = $productId;
+            if (0 === $variationId) {
+                $parentIds[] = $productId;
+            } else {
+                $variationIds[] = $variationId;
+            }
+        }
+
+        $productIds = array_unique($productIds);
+
+        $products = empty($productIds)
+            ? []
+            : DfTools::getAvailableProducts($this->idLang, $this->productVariations, false, false, $productIds);
 
         if (empty($products)) {
             return [];
         }
 
+        $products = self::mergeExtraRows($products, $extraRows);
+
         // Batch fetch all related data upfront to avoid N+1 queries
         $batchData = $this->batchFetchAll($products);
 
-        if ($this->productVariations) {
-            $productIds = array_map('intval', array_column($products, 'id_product'));
-            $batchData = $this->withVariationsData($batchData, $this->batchFetchProductVariations($productIds));
-            $batchData = $this->withParentAggregates($batchData, $productIds);
+        if ($this->productVariations && !empty($variationIds)) {
+            $batchData = $this->withVariationsData($batchData, $this->batchFetchVariationsByIds($variationIds));
         }
 
-        return $this->processBatchProducts($products, $batchData);
+        $batchData = $this->withParentAggregates($batchData, $parentIds);
+
+        return $this->processBatchRows($rows, $products, $batchData, $additionalAttributesHeader, $extraHeaders);
     }
 
     /**
-     * Process products with batch data and save the results in an array.
-     * This unified method eliminates code duplication between JSON and CSV exports.
+     * Merge into each product the extra fields given for it.
      *
-     * @param array $products Array of product data
-     * @param array $batchData Pre-fetched batch data
-     * @param array $additionalAttributesHeader Additional attribute headers to process
-     * @param array $extraHeaders Additional product headers to include
+     * @author camlafit <https://github.com/camlafit>
      *
-     * @return array Processed products
+     * @param array $products Products
+     * @param array $extraRows Extra fields, one row per product, keyed by id_product
+     *
+     * @return array The products, with their extra fields
      */
-    public function processBatchProducts($products, $batchData, $additionalAttributesHeader = [], $extraHeaders = [])
+    private static function mergeExtraRows($products, $extraRows)
     {
-        $processedProducts = [];
-
-        foreach ($products as $product) {
-            if ($this->productVariations && $product['variant_count'] > 0) {
-                $variations = $batchData['variations'][$product['id_product']];
-                foreach ($variations as $variation) {
-                    $processedProducts[] = $this->buildVariation($product, $variation, $batchData, $additionalAttributesHeader, $extraHeaders);
-                }
-            }
-            $processedProducts[] = $this->buildProduct($product, $batchData, $additionalAttributesHeader, $extraHeaders);
+        if (empty($extraRows)) {
+            return $products;
         }
 
-        return $processedProducts;
+        $result = [];
+        foreach ($products as $product) {
+            foreach ($extraRows as $extraRow) {
+                if ($product['id_product'] == $extraRow['id_product']) {
+                    $product = array_merge($product, $extraRow);
+                    break;
+                }
+            }
+            $result[] = $product;
+        }
+
+        return $result;
     }
 
     /**
      * Build the payload of a page of feed rows.
      *
-     * Unlike processBatchProducts(), which expands every product into all of its combinations,
-     * this emits exactly the rows the page asked for, in the order the page gives them. That is
+     * This emits exactly the rows the page asked for, in the order the page gives them. That is
      * what lets a product be split across pages.
      *
      * @param array $rows Rows as returned by DfTools::getAvailableRows()
@@ -1282,24 +1314,6 @@ class DfProductBuild
         }
 
         return $p;
-    }
-
-    /**
-     * Retrieve available products information for a specific language.
-     *
-     * @return array
-     */
-    private function getProductData()
-    {
-        $products = DfTools::getAvailableProducts(
-            $this->idLang,
-            $this->productVariations,
-            false,
-            false,
-            $this->products
-        );
-
-        return $products;
     }
 
     /**
