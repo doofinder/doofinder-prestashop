@@ -32,41 +32,6 @@ if (function_exists('set_time_limit')) {
 
 DfTools::validateSecurityToken(Tools::getValue('dfsec_hash'));
 
-/**
- *  @author camlafit <https://github.com/camlafit>
- *  Merge multidemensionnal array by value on each row
- *  https://stackoverflow.com/questions/7973915/php-merge-arrays-by-value
- */
-function arrayMergeByIdProduct($array1 = [], $array2 = [])
-{
-    $sub_key = 'id_product';
-    $result = [];
-    $result_row = [];
-    if (empty($array1)) {
-        return $array2;
-    }
-    if (empty($array2)) {
-        return $array1;
-    }
-    foreach ($array1 as $item1) {
-        $result_row = [];
-        // Merge data
-        foreach ($array2 as $item2) {
-            if ($item1[$sub_key] == $item2[$sub_key]) {
-                $result_row = array_merge($item1, $item2);
-                break;
-            }
-        }
-        // If no array merged
-        if (empty($result_row)) {
-            $result_row = $item1;
-        }
-        $result[] = $result_row;
-    }
-
-    return $result;
-}
-
 $context = Context::getContext();
 
 $shop = new Shop((int) $context->shop->id);
@@ -234,49 +199,11 @@ if (!$limit || (false !== $offset && 0 === (int) $offset)) {
 
 $rows = DfTools::getAvailableRows($limit, $offset, $shouldShowProductVariations);
 
-// A combination is built as its product plus its own fields, so the page needs the payload of
-// every product it mentions, whether or not that product's own row falls in this page.
-$productIds = [];
-$variationIds = [];
-$parentIds = [];
-
-foreach ($rows as $row) {
-    $productId = (int) $row['id_product'];
-    $variationId = (int) $row['id_product_attribute'];
-
-    $productIds[] = $productId;
-    if (0 === $variationId) {
-        $parentIds[] = $productId;
-    } else {
-        $variationIds[] = $variationId;
-    }
-}
-
-$productIds = array_unique($productIds);
-
-$products = empty($productIds)
-    ? []
-    : DfTools::getAvailableProducts($lang->id, $shouldShowProductVariations, false, false, $productIds);
-$products = arrayMergeByIdProduct($products, $extraRows);
-
-// Batch fetch all related data upfront to avoid N+1 queries
-$batchData = $dfProductBuild->batchFetchAll($products);
-
-if ($shouldShowProductVariations && !empty($variationIds)) {
-    $batchData = $dfProductBuild->withVariationsData(
-        $batchData,
-        $dfProductBuild->batchFetchVariationsByIds($variationIds)
-    );
-}
-
-$batchData = $dfProductBuild->withParentAggregates($batchData, $parentIds);
-
-$processedProducts = $dfProductBuild->processBatchRows(
+$processedProducts = $dfProductBuild->buildRowsArray(
     $rows,
-    $products,
-    $batchData,
     $additionalAttributesHeaders,
-    $extraHeader
+    $extraHeader,
+    $extraRows
 );
 
 foreach ($processedProducts as $item) {

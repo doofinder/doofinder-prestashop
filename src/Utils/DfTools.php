@@ -1836,15 +1836,23 @@ class DfTools
      * @param int|false $limit The maximum number of rows to return
      * @param int|false $offset The offset for pagination
      * @param bool $includeVariations Whether combinations get a row of their own
+     * @param int[]|null $productIds Restrict the rows to these products, all of their combinations included
      *
      * @return array Rows as ['id_product' => int, 'id_product_attribute' => int]
      */
-    public static function getAvailableRows($limit, $offset, $includeVariations)
+    public static function getAvailableRows($limit, $offset, $includeVariations, $productIds = null)
     {
-        $sql = self::eligibleProductsQuery()->build();
+        if (null !== $productIds) {
+            $productIds = array_map('intval', $productIds);
+            if (empty($productIds)) {
+                return [];
+            }
+        }
+
+        $sql = self::eligibleProductsQuery($productIds)->build();
 
         if ($includeVariations) {
-            $sql .= ' UNION ALL ' . self::eligibleVariationsQuery()->build();
+            $sql .= ' UNION ALL ' . self::eligibleVariationsQuery($productIds)->build();
         }
 
         // (id_product_attribute = 0) sorts the parent after its combinations, and the pair is
@@ -1871,15 +1879,17 @@ class DfTools
     /**
      * One row per indexable product, with the sentinel that marks it as the parent row.
      *
+     * @param int[]|null $productIds Restrict the rows to these products
+     *
      * @return \DbQuery
      */
-    private static function eligibleProductsQuery()
+    private static function eligibleProductsQuery($productIds = null)
     {
         $query = new \DbQuery();
         $query->select('product_shop.id_product, 0 AS id_product_attribute');
         $query->from('product', 'p');
         $query->join(\Shop::addSqlAssociation('product', 'p'));
-        self::whereProductIsIndexable($query);
+        self::whereProductIsIndexable($query, $productIds);
 
         return $query;
     }
@@ -1887,16 +1897,18 @@ class DfTools
     /**
      * One row per combination of an indexable product.
      *
+     * @param int[]|null $productIds Restrict the rows to the combinations of these products
+     *
      * @return \DbQuery
      */
-    private static function eligibleVariationsQuery()
+    private static function eligibleVariationsQuery($productIds = null)
     {
         $query = new \DbQuery();
         $query->select('pa.id_product, pa.id_product_attribute');
         $query->from('product_attribute', 'pa');
         $query->join(\Shop::addSqlAssociation('product_attribute', 'pa'));
         $query->join(\Shop::addSqlAssociation('product', 'pa'));
-        self::whereProductIsIndexable($query);
+        self::whereProductIsIndexable($query, $productIds);
 
         return $query;
     }
@@ -1905,8 +1917,9 @@ class DfTools
      * The conditions that decide whether a product reaches the feed, on its product_shop row.
      *
      * @param \DbQuery $query Query to restrict
+     * @param int[]|null $productIds Restrict the query to these products
      */
-    private static function whereProductIsIndexable($query)
+    private static function whereProductIsIndexable($query, $productIds = null)
     {
         if (self::versionGte('1.5.1.0')) {
             $query->where('product_shop.`active` = 1');
@@ -1919,6 +1932,10 @@ class DfTools
         }
 
         $query->where('product_shop.id_shop IN (' . implode(', ', \Shop::getContextListShopID()) . ')');
+
+        if (null !== $productIds) {
+            $query->where('product_shop.id_product IN (' . implode(', ', array_map('intval', $productIds)) . ')');
+        }
     }
 
     /**

@@ -29,8 +29,6 @@ use PrestaShop\Module\Doofinder\Manager\UrlManager;
  */
 class UpdateOnSave
 {
-    private const PRODUCTS_PER_BATCH = 100;
-
     private const MAX_DOCUMENTS_PER_REQUEST = 100;
 
     /**
@@ -190,26 +188,18 @@ class UpdateOnSave
         }
 
         if ('update' === $action) {
-            $productBatches = array_chunk($products, self::PRODUCTS_PER_BATCH);
             $builder = new DfProductBuild($shopId, $idLang, $idCurrency);
 
-            $documentsToSend = [];
-            foreach ($productBatches as $productBatch) {
-                $builder->setProducts($productBatch);
-                $documents = $builder->buildProductsArray();
+            // The queue names products, so each one is expanded to its own row and all of its
+            // combinations' before paging, which keeps a page bounded by rows and not by products.
+            $rows = $builder->getProductsRows($products);
 
-                foreach ($documents as $document) {
-                    $documentsToSend[] = $document;
+            foreach (array_chunk($rows, self::MAX_DOCUMENTS_PER_REQUEST) as $page) {
+                $documents = $builder->buildRowsArray($page);
 
-                    if (count($documentsToSend) >= self::MAX_DOCUMENTS_PER_REQUEST) {
-                        self::updateItemsApi($hashid, 'product', json_encode($documentsToSend));
-                        $documentsToSend = [];
-                    }
+                if (!empty($documents)) {
+                    self::updateItemsApi($hashid, 'product', json_encode($documents));
                 }
-            }
-
-            if (!empty($documentsToSend)) {
-                self::updateItemsApi($hashid, 'product', json_encode($documentsToSend));
             }
         } elseif ('delete' === $action) {
             self::deleteItemsApi($hashid, 'product', $products);
