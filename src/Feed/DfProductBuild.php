@@ -49,11 +49,6 @@ class DfProductBuild
     private $currencies;
 
     /**
-     * @var array product IDs to process
-     */
-    private $products;
-
-    /**
      * @var bool whether product prices should be displayed
      */
     private $displayPrices;
