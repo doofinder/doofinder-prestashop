@@ -1333,7 +1333,8 @@ class DfProductBuild
             $p['unit_price'] = $product['unit_price'];
             $p['purchase_price'] = \Tools::ps_round($product['wholesale_price'], $this->decimals);
 
-            $inheritsVariantPrice = is_array($minPriceVariant)
+            $inheritsVariantPrice = $product['show_price']
+                && is_array($minPriceVariant)
                 && !is_null($minPriceVariant['onsale_price'])
                 && !is_null($minPriceVariant['price'])
                 && (empty($p['sale_price']) || $minPriceVariant['onsale_price'] < $p['sale_price']);
@@ -1345,9 +1346,7 @@ class DfProductBuild
 
             if ($this->multipriceEnabled) {
                 // A parent that takes over the price of its cheapest variant takes over its
-                // multiprice too. It goes through DfTools::getMultiprice() and not through
-                // self::getMultiprice() on purpose: this route does not apply the show_price
-                // guard, exactly like DfTools::getVariantPrices() does not.
+                // multiprice too.
                 $p['df_multiprice'] = $inheritsVariantPrice
                     ? DfTools::getMultiprice(
                         $product['id_product'],
