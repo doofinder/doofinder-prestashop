@@ -116,6 +116,19 @@ class DfProductBuild
     private $decimals;
 
     /**
+     * @var int[] IDs of the categories without a front office page. Computed once in the
+     *            constructor because the category merchandising of every product is
+     *            resolved against it while building the feed.
+     */
+    private $nonBrowsableCategoryIds;
+
+    /**
+     * @var array|null parent category ID indexed by category ID, for the shop and language
+     *                 of this build. Loaded on first use.
+     */
+    private $categoryParents;
+
+    /**
      * Constructor.
      *
      * Initializes configuration settings for building product data.
@@ -143,6 +156,7 @@ class DfProductBuild
         $this->featuresKeys = DfTools::getFeatureKeysForShopAndLang($idShop, $idLang);
         $this->attributesReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_ATTRIBUTES_REPLACE', ''));
         $this->featuresReplace = self::configuredIds(DfTools::cfg($idShop, 'DF_FEATURES_REPLACE', ''));
+        $this->nonBrowsableCategoryIds = DfTools::getNonBrowsableCategoryIds($idLang);
     }
 
     /**
@@ -414,10 +428,7 @@ class DfProductBuild
         $allCategoryIds = [];
 
         foreach ($products as $product) {
-            if (!empty($product['category_ids'])) {
-                $categoryIds = explode(',', $product['category_ids']);
-                $allCategoryIds = array_merge($allCategoryIds, array_map('intval', $categoryIds));
-            }
+            $allCategoryIds = array_merge($allCategoryIds, $this->getMerchandisingCategoryIds($product));
         }
 
         if (!empty($allCategoryIds)) {
@@ -760,6 +771,89 @@ class DfProductBuild
     }
 
     /**
+     * Returns the IDs of the categories a product is merchandised in: the ones it is
+     * assigned to plus all of their ancestors.
+     *
+     * A category page lists the products of its whole subtree, not only the ones assigned
+     * to it (see `PS_LAYERED_FULL_TREE`, enabled when `ps_facetedsearch` is installed), so
+     * a product reachable from a parent category must be exported with it to be
+     * merchandisable there.
+     *
+     * @param array $product Product data, with the assigned category IDs in `category_ids`
+     *
+     * @return int[] Category IDs, ascending
+     */
+    private function getMerchandisingCategoryIds($product)
+    {
+        if (empty($product['category_ids'])) {
+            return [];
+        }
+
+        $parents = $this->getCategoryParents();
+        $categoryIds = [];
+        $visited = [];
+
+        foreach (explode(',', $product['category_ids']) as $assignedId) {
+            $categoryId = (int) $assignedId;
+
+            while ($categoryId > 0 && !isset($visited[$categoryId])) {
+                $visited[$categoryId] = true;
+
+                if (!in_array($categoryId, $this->nonBrowsableCategoryIds, true)) {
+                    $categoryIds[] = $categoryId;
+                }
+
+                $categoryId = isset($parents[$categoryId]) ? $parents[$categoryId] : 0;
+            }
+        }
+
+        sort($categoryIds);
+
+        return $categoryIds;
+    }
+
+    /**
+     * Returns the parent category ID of every category of the shop, indexed by category ID.
+     *
+     * Categories without a `category_lang` row for the shop and language of this build are
+     * left out, so walking up the tree stops before reaching them.
+     *
+     * @return array
+     */
+    private function getCategoryParents()
+    {
+        if (null !== $this->categoryParents) {
+            return $this->categoryParents;
+        }
+
+        $this->categoryParents = [];
+
+        $query = new \DbQuery();
+        $query->select('DISTINCT c.id_category, c.id_parent');
+        $query->from('category', 'c');
+        $query->innerJoin(
+            'category_lang',
+            'cl',
+            'cl.`id_category` = c.`id_category`
+            AND cl.`id_shop` IN (' . implode(', ', \Shop::getContextListShopID()) . ')
+            AND cl.`id_lang` = ' . (int) $this->idLang
+        );
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
+        if (!$result) {
+            $result = \Db::getInstance()->executeS($query);
+        }
+
+        if ($result) {
+            foreach ($result as $row) {
+                $this->categoryParents[(int) $row['id_category']] = (int) $row['id_parent'];
+            }
+        }
+
+        return $this->categoryParents;
+    }
+
+    /**
      * Batch fetch category links for multiple category IDs.
      *
      * @param array $categoryIds Array of category IDs
@@ -1042,14 +1136,9 @@ class DfProductBuild
         $key = $productId . '_' . $variationId;
 
         $product['categories'] = $batchData['categories'][$productId];
-        if (!empty($product['category_ids'])) {
-            $categoryIds = explode(',', $product['category_ids']);
-            $product['category_links'] = array_filter(array_map(function ($id) use ($batchData) {
-                return isset($batchData['category_links'][$id]) ? $batchData['category_links'][$id] : null;
-            }, $categoryIds));
-        } else {
-            $product['category_links'] = [];
-        }
+        $product['category_links'] = array_filter(array_map(function ($id) use ($batchData) {
+            return isset($batchData['category_links'][$id]) ? $batchData['category_links'][$id] : null;
+        }, $this->getMerchandisingCategoryIds($product)));
 
         $product['features'] = isset($batchData['features'][$productId]) ? $batchData['features'][$productId] : [];
         if ($this->productVariations) {
