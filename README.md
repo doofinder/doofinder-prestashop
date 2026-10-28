@@ -109,6 +109,7 @@ Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prest
 
 | PrestaShop | PHP                     |
 | ---------- | ----------------------- |
+| 9.2.0      | 8.5, 8.4, 8.3, 8.2, 8.1 |
 | 8.2.1      | 8.1, 8.0, 7.4, 7.3, 7.2 |
 | 8.1.7      | 8.1, 8.0, 7.4, 7.3, 7.2 |
 | 8.0.5      | 8.1, 8.0, 7.4, 7.3, 7.2 |
@@ -118,7 +119,10 @@ Example combinations from [PrestaShop Docker Hub](https://hub.docker.com/r/prest
 > [!NOTE]
 > PHP 7.0 and 5.x are no longer supported (the module uses `public const`, which requires PHP 7.1+). PrestaShop **1.5.x and 1.6.0.x are dropped** because they cap at PHP 5.x; the minimum is PrestaShop 1.6.1.0 running on PHP 7.1 or higher.
 
-Set `PRESTASHOP_DOCKER_TAG` in the `.env` file and (if needed) PHP version in your Docker build args when using these combinations.
+Set `PS_VERSION` and `PHP_VERSION` in `.env` (or `.env.local`): `PRESTASHOP_DOCKER_TAG` is built from them as `<PS_VERSION>-<PHP_VERSION>` (e.g. `9.2.0-8.5`). PrestaShop 9 tags have no `-apache` suffix.
+
+> [!NOTE]
+> PrestaShop 9 behind an HTTPS tunnel (ngrok, frp): the back office refuses to log in ("SSL is activated…") unless the proxy is trusted. Set `PS_TRUSTED_PROXIES=127.0.0.1,172.16.0.0/12` in `html/.env` and clear the cache.
 
 ---
 
