@@ -76,7 +76,6 @@ class DfFieldConflicts
         'supplier_reference',
         'tags',
         'title',
-        'unit_price',
         'upc',
         'variation_ean13',
         'variation_mpn',
