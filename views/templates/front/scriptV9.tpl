@@ -19,11 +19,13 @@
         return variationID.replace(/\D/g, "")
       }
 
+      const isVariant = String(event.detail.item_id) !== String(event.detail.grouping_id);
+
       doofinderManageCart({
         cartURL          : "{if isset($urls)}{$urls.pages.cart|escape:'htmlall':'UTF-8'}{/if}",  //required for prestashop 1.7, in previous versions it will be empty.
         cartToken        : "{$static_token|escape:'htmlall':'UTF-8'}",
-        productID        : event.detail.group_leader ? event.detail.grouping_id : event.detail.item_id,
-        customizationID  : event.detail.group_leader ? sanitizeVariationID(event.detail.item_id) : 0,   // If there are no combinations, the value will be 0
+        productID        : isVariant ? event.detail.grouping_id : event.detail.item_id,
+        customizationID  : isVariant ? sanitizeVariationID(event.detail.item_id) : 0,   // With 0, PrestaShop picks the default combination if the product has any
         quantity         : event.detail.amount,
         statusPromise    : event.detail.statusPromise,
         itemLink         : event.detail.link,

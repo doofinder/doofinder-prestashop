@@ -105,8 +105,9 @@ let dfAddToCart = (cartOptions) => {
                 /* Special case: the product cannot be added because is customizable.
                 I don't know if it's the best way to detect it, but at least it's better than
                 detecting it from the error message. In this case, the user should be redirected
-                to the product detail page */
-                if (0 === event.resp.quantity && 'undefined' === typeof event.reason.cart) {
+                to the product detail page.
+                PrestaShop < 1.7.8 returns a null quantity instead of 0 */
+                if ((0 === event.resp.quantity || null === event.resp.quantity) && 'undefined' === typeof event.reason.cart) {
                     window.location.href = cartOptions.itemLink;
                 }
             }
