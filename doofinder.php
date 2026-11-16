@@ -66,7 +66,7 @@ class Doofinder extends Module
     {
         $this->name = 'doofinder';
         $this->tab = 'search_filter';
-        $this->version = '8.6.2';
+        $this->version = '8.7.0';
         $this->author = 'Doofinder (http://www.doofinder.com)';
         $this->ps_versions_compliancy = ['min' => '1.6.1.0', 'max' => '9.2.0'];
         $this->module_key = 'd1504fe6432199c7f56829be4bd16347';
@@ -249,6 +249,35 @@ class Doofinder extends Module
         $this->context->controller->addJS(PrestaShop\Module\Doofinder\Core\DoofinderScript::getSingleScriptPath($this->_path));
 
         return $this->display(__FILE__, 'views/templates/front/scriptV9.tpl');
+    }
+
+    /**
+     * @hook actionCartSave CartCore
+     *
+     * Saves with the cart the Doofinder session the storefront keeps in a cookie, so the sale of
+     * its order gets it although the order is created without the shopper's cookie.
+     *
+     * @param array $params May contain key 'cart' (Cart)
+     *
+     * @return void
+     */
+    public function hookActionCartSave($params)
+    {
+        PrestaShop\Module\Doofinder\Core\SalesFromPlatform::saveCartSession(isset($params['cart']) ? $params['cart'] : $this->context->cart);
+    }
+
+    /**
+     * @hook actionOrderStatusPostUpdate OrderHistoryCore
+     *
+     * Sends to Doofinder the sale of the cart of an order that gets a valid or paid status.
+     *
+     * @param array $params Must contain keys 'id_order' (int) and 'newOrderStatus' (OrderState)
+     *
+     * @return void
+     */
+    public function hookActionOrderStatusPostUpdate($params)
+    {
+        PrestaShop\Module\Doofinder\Core\SalesFromPlatform::sendSale($params['id_order'], $params['newOrderStatus']);
     }
 
     /**

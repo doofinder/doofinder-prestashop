@@ -18,6 +18,7 @@ return array(
     'PrestaShop\\Module\\Doofinder\\Configuration\\DoofinderConfig' => $baseDir . '/src/Configuration/DoofinderConfig.php',
     'PrestaShop\\Module\\Doofinder\\Core\\DoofinderConstants' => $baseDir . '/src/Core/DoofinderConstants.php',
     'PrestaShop\\Module\\Doofinder\\Core\\DoofinderScript' => $baseDir . '/src/Core/DoofinderScript.php',
+    'PrestaShop\\Module\\Doofinder\\Core\\SalesFromPlatform' => $baseDir . '/src/Core/SalesFromPlatform.php',
     'PrestaShop\\Module\\Doofinder\\Core\\SearchEngine' => $baseDir . '/src/Core/SearchEngine.php',
     'PrestaShop\\Module\\Doofinder\\Core\\UpdateOnSave' => $baseDir . '/src/Core/UpdateOnSave.php',
     'PrestaShop\\Module\\Doofinder\\Exception\\DoofinderException' => $baseDir . '/src/Exception/DoofinderException.php',

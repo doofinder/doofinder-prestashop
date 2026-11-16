@@ -12,6 +12,7 @@ namespace PrestaShop\Module\Doofinder\Installer;
 use PrestaShop\Module\Doofinder\Api\EasyREST;
 use PrestaShop\Module\Doofinder\Configuration\DoofinderConfig;
 use PrestaShop\Module\Doofinder\Core\DoofinderConstants;
+use PrestaShop\Module\Doofinder\Core\SalesFromPlatform;
 use PrestaShop\Module\Doofinder\Core\SearchEngine;
 use PrestaShop\Module\Doofinder\Feed\DfFieldConflicts;
 use PrestaShop\Module\Doofinder\Manager\UrlManager;
@@ -96,7 +97,7 @@ class DoofinderInstallation
      */
     public static function installDb()
     {
-        return \Db::getInstance()->execute(
+        return SalesFromPlatform::installDb() && \Db::getInstance()->execute(
             '
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'doofinder_updates` (
                 `id_doofinder_update` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -170,6 +171,8 @@ class DoofinderInstallation
             'site_url' => $shopUrl,
             'search_engines' => [],
             'plugin_version' => DoofinderConstants::VERSION,
+            // The sales come from the module where the Doofinder script can read the carts.
+            'sales_from_platform' => SalesFromPlatform::isSupported(),
             'options' => [
                 'url' => preg_replace('#^https?://#', '', $shopUrl),
                 'shop_id' => (int) $shopId,
@@ -577,6 +580,7 @@ class DoofinderInstallation
      */
     public static function uninstallDb()
     {
-        return \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_updates`');
+        return SalesFromPlatform::uninstallDb()
+            && \Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'doofinder_updates`');
     }
 }

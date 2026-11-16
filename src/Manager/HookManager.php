@@ -59,7 +59,9 @@ class HookManager
             && $this->module->registerHook('actionObjectCategoryAddAfter')
             && $this->module->registerHook('actionObjectCategoryUpdateAfter')
             && $this->module->registerHook('actionObjectCategoryDeleteAfter')
-            && $this->module->registerHook('actionFrontControllerSetMedia');
+            && $this->module->registerHook('actionFrontControllerSetMedia')
+            && $this->module->registerHook('actionCartSave')
+            && $this->module->registerHook('actionOrderStatusPostUpdate');
 
         return $result;
     }
@@ -74,6 +76,8 @@ class HookManager
                 'dfPageType' => self::getPageType(),
                 'dfProductId' => self::getProductId(),
                 'dfCategoryName' => self::getCategoryName(),
+                // The cart lines are indexed with the id of their variation when the feed has them.
+                'dfShowProductVariations' => (bool) \Configuration::get('DF_SHOW_PRODUCT_VARIATIONS'),
             ]);
         }
     }

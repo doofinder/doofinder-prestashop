@@ -252,6 +252,35 @@ class Doofinder extends Module
     }
 
     /**
+     * @hook actionCartSave CartCore
+     *
+     * Saves with the cart the Doofinder session the storefront keeps in a cookie, so the sale of
+     * its order gets it although the order is created without the shopper's cookie.
+     *
+     * @param array $params May contain key 'cart' (Cart)
+     *
+     * @return void
+     */
+    public function hookActionCartSave($params)
+    {
+        PrestaShop\Module\Doofinder\Core\SalesFromPlatform::saveCartSession(isset($params['cart']) ? $params['cart'] : $this->context->cart);
+    }
+
+    /**
+     * @hook actionOrderStatusPostUpdate OrderHistoryCore
+     *
+     * Sends to Doofinder the sale of the cart of an order that gets a valid or paid status.
+     *
+     * @param array $params Must contain keys 'id_order' (int) and 'newOrderStatus' (OrderState)
+     *
+     * @return void
+     */
+    public function hookActionOrderStatusPostUpdate($params)
+    {
+        PrestaShop\Module\Doofinder\Core\SalesFromPlatform::sendSale($params['id_order'], $params['newOrderStatus']);
+    }
+
+    /**
      * @hook actionProductSave ProductCore
      *
      * Sends product changes to Doofinder when a product is saved.

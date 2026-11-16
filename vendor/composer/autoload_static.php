@@ -33,6 +33,7 @@ class ComposerStaticInitddb45daa7f46128bfeb9153853763869
         'PrestaShop\\Module\\Doofinder\\Configuration\\DoofinderConfig' => __DIR__ . '/../..' . '/src/Configuration/DoofinderConfig.php',
         'PrestaShop\\Module\\Doofinder\\Core\\DoofinderConstants' => __DIR__ . '/../..' . '/src/Core/DoofinderConstants.php',
         'PrestaShop\\Module\\Doofinder\\Core\\DoofinderScript' => __DIR__ . '/../..' . '/src/Core/DoofinderScript.php',
+        'PrestaShop\\Module\\Doofinder\\Core\\SalesFromPlatform' => __DIR__ . '/../..' . '/src/Core/SalesFromPlatform.php',
         'PrestaShop\\Module\\Doofinder\\Core\\SearchEngine' => __DIR__ . '/../..' . '/src/Core/SearchEngine.php',
         'PrestaShop\\Module\\Doofinder\\Core\\UpdateOnSave' => __DIR__ . '/../..' . '/src/Core/UpdateOnSave.php',
         'PrestaShop\\Module\\Doofinder\\Exception\\DoofinderException' => __DIR__ . '/../..' . '/src/Exception/DoofinderException.php',

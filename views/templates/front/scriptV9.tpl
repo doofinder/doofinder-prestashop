@@ -35,6 +35,32 @@
   </script>
   <!-- END OF DOOFINDER ADD TO CART SCRIPT -->
 
+  <!-- START OF DOOFINDER SALES SESSION -->
+  <script data-keepinline>
+    {literal}
+    // Copies the Doofinder session to a cookie the module saves with the cart, for the sales. It runs
+    // on load and again on every click and form submission, as the first page the loader runs in
+    // creates the session after this script.
+    (function () {
+      function writeSession() {
+        var session = JSON.parse(localStorage.getItem("df-session"));
+        var userId = JSON.parse(localStorage.getItem("df-random-userid"));
+        if (!session || !userId) return;
+
+        var config = window.Doofinder && window.Doofinder.getConfig ? window.Doofinder.getConfig() : {};
+        var value = JSON.stringify({ session_id: session.id, user_id: userId, hashid: config.hashid });
+        document.cookie = "doofinder_session=" + encodeURIComponent(value) +
+          "; path=/; max-age=86400; SameSite=Lax" + (location.protocol === "https:" ? "; Secure" : "");
+      }
+
+      writeSession();
+      document.addEventListener("click", writeSession, true);
+      document.addEventListener("submit", writeSession, true);
+    })();
+    {/literal}
+  </script>
+  <!-- END OF DOOFINDER SALES SESSION -->
+
   <!-- START OF DOOFINDER INTEGRATIONS SUPPORT -->
   <script data-keepinline>
     var dfKvCustomerEmail;
