@@ -184,7 +184,7 @@ class SalesFromPlatform
             ->setMethod('POST')
             ->setContentType('application/json')
             ->setHttpHeaders(['Authorization: Token ' . $apiKey])
-            ->setTimeout(self::TIMEOUT)
+            ->setTimeout(self::TIMEOUT_IN_SECONDS)
             ->execute()
             ->close();
 
