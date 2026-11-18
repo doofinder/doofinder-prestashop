@@ -44,13 +44,13 @@ class SalesFromPlatform
 
     /**
      * Whether the storefront exposes the cart the Doofinder script reads the carts from
-     * (`prestashop.cart`, from PrestaShop 1.7 on), so the sales can be taken from the module.
+     * (`prestashop.cart`, from PrestaShop 1.7.3 on), so the sales can be taken from the module.
      *
      * @return bool
      */
     public static function isSupported()
     {
-        return DfTools::versionGte('1.7.0.0');
+        return DfTools::versionGte('1.7.3.0');
     }
 
     /**
