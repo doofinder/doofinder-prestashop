@@ -46,7 +46,7 @@ class SalesFromPlatform
      * Seconds the order waits for Doofinder to take its sale, as it is sent while the order is
      * placed or its status changes.
      */
-    public const TIMEOUT = 3;
+    public const TIMEOUT_IN_SECONDS = 3;
 
     /**
      * Whether the storefront exposes the cart the Doofinder script reads the carts from
