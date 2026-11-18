@@ -266,7 +266,7 @@ class Doofinder extends Module
     {
         try {
             PrestaShop\Module\Doofinder\Core\SalesFromPlatform::saveCartSession(isset($params['cart']) ? $params['cart'] : $this->context->cart);
-        } catch (Throwable $exception) {
+        } catch (Exception $exception) {
             PrestaShop\Module\Doofinder\Configuration\DoofinderConfig::debug('Error saving the Doofinder session of the cart: ' . $exception->getMessage());
         }
     }
@@ -285,7 +285,7 @@ class Doofinder extends Module
     {
         try {
             PrestaShop\Module\Doofinder\Core\SalesFromPlatform::sendSale($params['id_order'], $params['newOrderStatus']);
-        } catch (Throwable $exception) {
+        } catch (Exception $exception) {
             PrestaShop\Module\Doofinder\Configuration\DoofinderConfig::debug('Error sending the sale of order ' . $params['id_order'] . ': ' . $exception->getMessage());
         }
     }
