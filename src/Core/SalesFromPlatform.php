@@ -43,6 +43,12 @@ class SalesFromPlatform
     public const SESSION_DAYS = 30;
 
     /**
+     * Seconds the order waits for Doofinder to take its sale, as it is sent while the order is
+     * placed or its status changes.
+     */
+    public const TIMEOUT = 3;
+
+    /**
      * Whether the storefront exposes the cart the Doofinder script reads the carts from
      * (`prestashop.cart`, from PrestaShop 1.7.3 on), so the sales can be taken from the module.
      *
@@ -173,16 +179,16 @@ class SalesFromPlatform
             'line_items' => self::lineItems($orderIds, $order->id_shop_group, $order->id_shop),
         ];
 
-        $response = EasyREST::post(
-            UrlManager::getSalesUrl(\Configuration::get('DF_REGION'), $hashid),
-            json_encode($sale),
-            null,
-            null,
-            'application/json',
-            ['Authorization: Token ' . $apiKey]
-        );
+        $response = EasyREST::createClient(UrlManager::getSalesUrl(\Configuration::get('DF_REGION'), $hashid))
+            ->setParameters(json_encode($sale))
+            ->setMethod('POST')
+            ->setContentType('application/json')
+            ->setHttpHeaders(['Authorization: Token ' . $apiKey])
+            ->setTimeout(self::TIMEOUT)
+            ->execute()
+            ->close();
 
-        if (200 !== (int) $response->getResponseCode()) {
+        if (200 !== $response->getResponseCode()) {
             DoofinderConfig::debug('Error sending the sale of cart ' . $order->id_cart . ': ' . $response->getResponseCode() . ' ' . $response->response);
         }
     }
