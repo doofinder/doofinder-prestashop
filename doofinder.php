@@ -255,7 +255,8 @@ class Doofinder extends Module
      * @hook actionCartSave CartCore
      *
      * Saves with the cart the Doofinder session the storefront keeps in a cookie, so the sale of
-     * its order gets it although the order is created without the shopper's cookie.
+     * its order gets it although the order is created without the shopper's cookie. An error is
+     * only logged, as the shopper is changing the cart.
      *
      * @param array $params May contain key 'cart' (Cart)
      *
@@ -263,13 +264,18 @@ class Doofinder extends Module
      */
     public function hookActionCartSave($params)
     {
-        PrestaShop\Module\Doofinder\Core\SalesFromPlatform::saveCartSession(isset($params['cart']) ? $params['cart'] : $this->context->cart);
+        try {
+            PrestaShop\Module\Doofinder\Core\SalesFromPlatform::saveCartSession(isset($params['cart']) ? $params['cart'] : $this->context->cart);
+        } catch (Throwable $exception) {
+            PrestaShop\Module\Doofinder\Configuration\DoofinderConfig::debug('Error saving the Doofinder session of the cart: ' . $exception->getMessage());
+        }
     }
 
     /**
      * @hook actionOrderStatusPostUpdate OrderHistoryCore
      *
-     * Sends to Doofinder the sale of the cart of an order that gets a valid or paid status.
+     * Sends to Doofinder the sale of the cart of an order that gets a valid or paid status. An
+     * error is only logged, as the order is being placed or its status changed.
      *
      * @param array $params Must contain keys 'id_order' (int) and 'newOrderStatus' (OrderState)
      *
@@ -277,7 +283,11 @@ class Doofinder extends Module
      */
     public function hookActionOrderStatusPostUpdate($params)
     {
-        PrestaShop\Module\Doofinder\Core\SalesFromPlatform::sendSale($params['id_order'], $params['newOrderStatus']);
+        try {
+            PrestaShop\Module\Doofinder\Core\SalesFromPlatform::sendSale($params['id_order'], $params['newOrderStatus']);
+        } catch (Throwable $exception) {
+            PrestaShop\Module\Doofinder\Configuration\DoofinderConfig::debug('Error sending the sale of order ' . $params['id_order'] . ': ' . $exception->getMessage());
+        }
     }
 
     /**
