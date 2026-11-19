@@ -154,18 +154,6 @@ class UrlManager
     }
 
     /**
-     * Get the endpoint URL that turns on the sales from the module of a store
-     *
-     * @param string $region
-     *
-     * @return string
-     */
-    public static function getSalesActivateUrl($region)
-    {
-        return self::getRegionalUrl(DoofinderConstants::DOOPLUGINS_REGION_URL, $region, '/prestashop/sales/activate');
-    }
-
-    /**
      * Gets an URL with its region filled in. You can also append a path (optional).
      * If the region is provided as '' it will return a regionless URL.
      *

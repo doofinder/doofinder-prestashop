@@ -171,8 +171,6 @@ class DoofinderInstallation
             'site_url' => $shopUrl,
             'search_engines' => [],
             'plugin_version' => DoofinderConstants::VERSION,
-            // The sales come from the module where the Doofinder script can read the carts.
-            'sales_from_platform' => SalesFromPlatform::isSupported(),
             'options' => [
                 'url' => preg_replace('#^https?://#', '', $shopUrl),
                 'shop_id' => (int) $shopId,

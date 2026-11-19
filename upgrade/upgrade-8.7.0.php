@@ -18,8 +18,8 @@ if (!defined('_PS_VERSION_')) {
  * Upgrades the Doofinder module to version 8.7.0.
  *
  * The sales are sent from the module: it saves the Doofinder session of each cart and sends the
- * sale when an order gets a valid or paid status. Doofinder is asked to take them from the module
- * from now on, in the shops whose storefront lets the Doofinder script read the carts.
+ * sale when an order gets a valid or paid status. Doofinder registers them only in the stores it
+ * has turned them on for.
  *
  * @param Doofinder $module the Doofinder module instance being upgraded
  *
@@ -35,8 +35,6 @@ function upgrade_module_8_7_0($module)
             || !$module->registerHook('actionOrderStatusPostUpdate')) {
             return false;
         }
-
-        SalesFromPlatform::activate();
     } catch (Exception $exception) {
         PrestaShopLogger::addLog($exception->getMessage(), 3, $exception->getCode(), 'Module', $module->id);
 

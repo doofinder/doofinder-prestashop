@@ -200,38 +200,6 @@ class SalesFromPlatform
     }
 
     /**
-     * Asks Doofinder to take the sales of every shop from the module, when the storefront lets the
-     * Doofinder script read the carts. Shops without an installation are skipped.
-     *
-     * @return void
-     */
-    public static function activate()
-    {
-        $apiKey = DfTools::getFormattedApiKey();
-        if (!self::isSupported() || empty($apiKey)) {
-            return;
-        }
-
-        foreach (\Shop::getShops() as $shop) {
-            $installationId = \Configuration::get('DF_INSTALLATION_ID', null, $shop['id_shop_group'], $shop['id_shop']);
-            if (empty($installationId)) {
-                continue;
-            }
-
-            $response = EasyREST::post(
-                UrlManager::getSalesActivateUrl(\Configuration::get('DF_REGION')),
-                json_encode(['installation_id' => $installationId]),
-                null,
-                null,
-                'application/json',
-                ['Authorization: Token ' . $apiKey]
-            );
-
-            DoofinderConfig::debug('Sales from platform activation of ' . $installationId . ': ' . $response->getResponseCode());
-        }
-    }
-
-    /**
      * PrestaShop saves the employee who creates an order in the back office in its first status.
      * While the order is being created that status isn't saved yet, but the employee is in the
      * context.
