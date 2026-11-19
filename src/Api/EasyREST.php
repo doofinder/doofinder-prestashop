@@ -194,7 +194,8 @@ class EasyREST
       */
     public function getResponseCode()
     {
-        return (int) $this->headers['code'];
+        // 0 when there was no response, e.g. on a timeout
+        return isset($this->headers['code']) ? (int) $this->headers['code'] : 0;
     }
 
     /*
@@ -213,6 +214,21 @@ class EasyREST
     public function getResponseContentType()
     {
         return $this->headers['content-type'];
+    }
+
+    /**
+     * Sets the seconds the request may take, the connection included
+     *
+     * @param int $seconds
+     *
+     * @return EasyREST
+     */
+    public function setTimeout($seconds)
+    {
+        curl_setopt($this->curl, CURLOPT_CONNECTTIMEOUT, $seconds);
+        curl_setopt($this->curl, CURLOPT_TIMEOUT, $seconds);
+
+        return $this;
     }
 
     /**
