@@ -90,7 +90,8 @@ class SalesFromPlatform
 
     /**
      * Saves with the cart the Doofinder session of the cookie, when it changes in the storefront.
-     * In the back office the cookie would be the employee's.
+     * In the back office the cookie would be the employee's. Older versions than isSupported()
+     * never send the sales, so they don't save it.
      *
      * @param \Cart $cart
      *
@@ -98,7 +99,8 @@ class SalesFromPlatform
      */
     public static function saveCartSession($cart)
     {
-        if (!(\Context::getContext()->controller instanceof \FrontController)
+        if (!self::isSupported()
+            || !(\Context::getContext()->controller instanceof \FrontController)
             || empty($_COOKIE[self::COOKIE])
             || !\Validate::isLoadedObject($cart)) {
             return;
@@ -137,6 +139,8 @@ class SalesFromPlatform
     /**
      * Sends the sale of the cart of an order that gets a valid or paid status, unless an order of
      * the cart had one before (the sale was sent then) or the order was created in the back office.
+     * Older versions than isSupported() never get their sales from the module, so they send nothing
+     * instead of making the order wait for a sale Doofinder would skip.
      *
      * Doofinder gets only what the sale needs: no customer data.
      *
@@ -147,7 +151,9 @@ class SalesFromPlatform
      */
     public static function sendSale($idOrder, $newStatus)
     {
-        if (!\Validate::isLoadedObject($newStatus) || !($newStatus->logable || $newStatus->paid)) {
+        if (!self::isSupported()
+            || !\Validate::isLoadedObject($newStatus)
+            || !($newStatus->logable || $newStatus->paid)) {
             return;
         }
 
