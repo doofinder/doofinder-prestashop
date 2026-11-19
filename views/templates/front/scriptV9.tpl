@@ -43,18 +43,14 @@
     // creates the session after this script.
     (function () {
       function writeSession() {
-        try {
-          var session = JSON.parse(localStorage.getItem("df-session"));
-          var userId = JSON.parse(localStorage.getItem("df-random-userid"));
-          if (!session || !userId) return;
+        var session = JSON.parse(localStorage.getItem("df-session"));
+        var userId = JSON.parse(localStorage.getItem("df-random-userid"));
+        if (!session || !userId) return;
 
-          var config = window.Doofinder && window.Doofinder.getConfig ? window.Doofinder.getConfig() : {};
-          var value = JSON.stringify({ session_id: session.id, user_id: userId, hashid: config.hashid });
-          document.cookie = "doofinder_session=" + encodeURIComponent(value) +
-            "; path=/; max-age=86400; SameSite=Lax" + (location.protocol === "https:" ? "; Secure" : "");
-        } catch (e) {
-          // Browsers that block the storage, or a session that isn't valid JSON.
-        }
+        var config = window.Doofinder && window.Doofinder.getConfig ? window.Doofinder.getConfig() : {};
+        var value = JSON.stringify({ session_id: session.id, user_id: userId, hashid: config.hashid });
+        document.cookie = "doofinder_session=" + encodeURIComponent(value) +
+          "; path=/; max-age=86400; SameSite=Lax" + (location.protocol === "https:" ? "; Secure" : "");
       }
 
       writeSession();
